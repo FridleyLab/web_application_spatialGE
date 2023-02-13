@@ -103,17 +103,21 @@
     </aside>
 </template>
 <script>
+// import '../../assets/js/plugins/perfect-scrollbar.min.js';
+// import '../../assets/js/plugins/smooth-scrollbar.min.js';
+// import '../../assets/js/scrollbar.js'
+// import '../../assets/js/material-dashboard.js?v=3.0.4';
 export default {
     name: "sideMenu",
 
-    mounted() {
-        var win = navigator.platform.indexOf('Win') > -1;
-        if (win && document.querySelector('#sidenav-scrollbar')) {
-            var options = {
-                damping: '0.5'
-            }
-            Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-        }
-    }
+    // mounted() {
+    //     var win = navigator.platform.indexOf('Win') > -1;
+    //     if (win && document.querySelector('#sidenav-scrollbar')) {
+    //         var options = {
+    //             damping: '0.5'
+    //         }
+    //         Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    //     }
+    // }
 }
 </script>

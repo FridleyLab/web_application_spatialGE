@@ -35,13 +35,22 @@
     <!-- CSS Files -->
     <link id="pagestyle" href="/assets/css/material-dashboard.css?v=3.0.4" rel="stylesheet" />
 
+    <!--   Core JS Files   -->
+
+
     @vite('resources/js/app.js')
+
+
 
 </head>
 
 <body class="g-sidenav-show  bg-gray-200">
 <section id="app">
+
+
 <side-menu></side-menu>
+
+
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="true">
@@ -234,7 +243,18 @@
             <!--        </div>-->
         </div>
 
+
+
+
+
+
         <graficos></graficos>
+
+
+
+
+
+
 
         <footer class="footer py-4  ">
             <div class="container-fluid">
@@ -324,25 +344,23 @@
     </div>
 </div>
 </section>
-<!--   Core JS Files   -->
-<script src="/assets/js/core/popper.min.js"></script>
-<script src="/assets/js/core/bootstrap.min.js"></script>
-{{--<script src="/assets/js/plugins/perfect-scrollbar.min.js"></script>--}}
-{{--<script src="/assets/js/plugins/smooth-scrollbar.min.js"></script>--}}
 
-<script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-        var options = {
-            damping: '0.5'
-        }
-        Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-</script>
+{{--@vite('resources/assets/js/core/popper.min.js')--}}
+{{--@vite('resources/assets/js/core/bootstrap.min.js')--}}
+{{--@vite('resources/assets/js/plugins/perfect-scrollbar.min.js')--}}
+{{--@vite('resources/assets/js/plugins/smooth-scrollbar.min.js')--}}
+{{--@vite('resources/assets/js/scrollbar.js')--}}
+
+
+
+
 <!-- Github buttons -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
-<!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
-<script src="/assets/js/material-dashboard.min.js?v=3.0.4"></script>
+
+
+
 </body>
+
+
 
 </html>
