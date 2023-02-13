@@ -1,5 +1,5 @@
 <template>
-    <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3   bg-gradient-dark" id="sidenav-main">
+    <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3   color-menu-lateral" id="sidenav-main">
         <div class="sidenav-header">
             <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
             <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/material-dashboard/pages/dashboard " target="_blank">
@@ -8,10 +8,10 @@
             </a>
         </div>
         <hr class="horizontal light mt-0 mb-2">
-        <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
+        <div class="collapse navbar-collapse  w-auto" id="sidenav-collapse-main">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link text-white active bg-gradient-primary" href="../pages/dashboard.html">
+                    <a class="nav-link text-white active bg-gradient-info" href="../pages/dashboard.html">
                         <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="material-icons opacity-10">dashboard</i>
                         </div>
@@ -103,21 +103,9 @@
     </aside>
 </template>
 <script>
-// import '../../assets/js/plugins/perfect-scrollbar.min.js';
-// import '../../assets/js/plugins/smooth-scrollbar.min.js';
-// import '../../assets/js/scrollbar.js'
-// import '../../assets/js/material-dashboard.js?v=3.0.4';
+
 export default {
     name: "sideMenu",
 
-    // mounted() {
-    //     var win = navigator.platform.indexOf('Win') > -1;
-    //     if (win && document.querySelector('#sidenav-scrollbar')) {
-    //         var options = {
-    //             damping: '0.5'
-    //         }
-    //         Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    //     }
-    // }
 }
 </script>
