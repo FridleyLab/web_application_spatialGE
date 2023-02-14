@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SecurityController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->group(function() {
 
     Route::get('/logout',[SecurityController::class, 'destroy'])->name('logout');
+    Route::get('/dashboard',[HomeController::class, 'dashboard'])->name('dashboard');
 
 });
 
