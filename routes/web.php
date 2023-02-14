@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SecurityController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+
+Route::middleware(['auth'])->group(function() {
+
+    Route::get('/logout',[SecurityController::class, 'destroy'])->name('logout');
+
+});
+
+Route::get('/login',[SecurityController::class, 'create'])->name('login')->middleware('guest');
+Route::get('/test-login',[SecurityController::class, 'testLogIn'])->name('test-login')->middleware('guest');
+
+
+
+//Homepage
+Route::name('home')->get('/', function () {
+    return view('home');
 });

@@ -63,7 +63,7 @@
     </div>
 </template>
 <script>
-import "../../assets/js/plugins/chartjs.min.js";
+import "../../../assets/js/plugins/chartjs.min.js";
 export default {
     name: "graficos",
 

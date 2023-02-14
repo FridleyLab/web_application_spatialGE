@@ -3,9 +3,9 @@ import '../css/app.css';
 
 
 //Modules
-import sideMenu from "./components/side-menu.vue";
-import navbar from "./components/navbar.vue";
-import graficos from "./components/graficos.vue";
+import sideMenu from "./components/ui/side-menu.vue";
+import navbar from "./components/ui/navbar.vue";
+import graficos from "./components/ui/graficos.vue";
 
 
 import {createApp} from "vue";
