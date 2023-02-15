@@ -15,7 +15,7 @@
             <div class="ms-md-auto pe-md-3 d-flex align-items-center">
                 @auth
                 <div class="input-group input-group-outline">
-                    <label class="form-label">Type here...++</label>
+                    <label class="form-label">Type here...</label>
                     <input type="text" class="form-control">
                 </div>
                 @endauth
@@ -26,6 +26,12 @@
                 <!--              <a class="btn btn-outline-primary btn-sm mb-0 me-3" target="_blank" href="https://www.creative-tim.com/builder/material?ref=navbar-dashboard">Online Builder</a>-->
                 <!--            </li>-->
                 @auth
+                <li class="nav-item d-flex align-items-center px-3">
+{{--                    <a href="{{ route('logout') }}" class="nav-link text-body font-weight-bold px-0">--}}
+                        <i class="fa fa-user me-sm-1"></i>
+                        <span class="d-sm-inline d-none">{{ auth()->user()->name }}</span>
+{{--                    </a>--}}
+                </li>
                 <li class="nav-item d-flex align-items-center">
                     <a href="{{ route('logout') }}" class="nav-link text-body font-weight-bold px-0">
                         <i class="fa fa-sign-out me-sm-1"></i>
@@ -37,11 +43,11 @@
                     <li class="nav-item d-flex align-items-center">
                         <a href="{{ route('login') }}" class="nav-link text-body font-weight-bold px-0">
                             <i class="fa fa-sign-in me-sm-1"></i>
-                            <span class="d-sm-inline d-none">Log In</span>
+                            <span class="d-sm-inline d-none">Sign In</span>
                         </a>
                     </li>
                     <li class="nav-item d-flex align-items-center ps-3">
-                        <a href="{{ route('login') }}" class="nav-link text-body font-weight-bold px-0">
+                        <a href="{{ route('signup') }}" class="nav-link text-body font-weight-bold px-0">
                             <i class="fa fa-user-plus me-sm-1"></i>
                             <span class="d-sm-inline d-none">Sign up</span>
                         </a>
@@ -57,12 +63,13 @@
                         </div>
                     </a>
                 </li>
-                <li class="nav-item px-3 d-flex align-items-center">
-                    <a href="javascript:;" class="nav-link text-body p-0">
-                        <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>
-                    </a>
-                </li>
-                <li class="nav-item dropdown pe-2 d-flex align-items-center">
+{{--                <li class="nav-item px-3 d-flex align-items-center">--}}
+{{--                    <a href="javascript:;" class="nav-link text-body p-0">--}}
+{{--                        <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer"></i>--}}
+{{--                    </a>--}}
+{{--                </li>--}}
+
+                <li class="nav-item dropdown px-3 pe-2 d-flex align-items-center">
                     <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa fa-bell cursor-pointer"></i>
                     </a>

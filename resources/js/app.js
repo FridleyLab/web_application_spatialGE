@@ -5,17 +5,31 @@ import '../css/app.css';
 //Modules
 import sideMenu from "./components/ui/side-menu.vue";
 import navbar from "./components/ui/navbar.vue";
-import graficos from "./components/ui/graficos.vue";
-
+import graphics from "./components/ui/graphics.vue";
+import signUp from "./components/ui/sign-up.vue";
+import signIn from "./components/ui/sign-in.vue";
+import errorMessage from "./components/common/error-message.vue";
+import wizard from "./components/wizard/wizard.vue";
 
 import {createApp} from "vue";
 
+
 const app = createApp({});
 
+//TODO: delete these two components
 app.component('side-menu', sideMenu);
 app.component('nav-bar', navbar);
-app.component('graficos', graficos);
 
+//TODO: check if it's going to be needed or else, delete it
+app.component('graficos', graphics);
+
+app.component('sign-up', signUp);
+app.component('sign-in', signIn);
+app.component('error-message', errorMessage);
+app.component('wizard', wizard)
+
+//Register the window as a global variable, so it can be accessed everywhere
+app.config.globalProperties.window = window;
 
 app.mount('#app');
 
@@ -36,3 +50,4 @@ scripts.forEach((_script) => {
     );
     document.getElementById('app').appendChild(code);
 });
+
