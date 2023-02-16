@@ -18,7 +18,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white " href="{{ route('home') }}">
+                <a class="nav-link text-white @if(url()->current() === route('how-to')) active bg-gradient-info @endif" href="{{ route('how-to') }}">
                     <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="material-icons opacity-10">view_in_ar</i>
                     </div>
