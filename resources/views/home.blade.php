@@ -9,7 +9,7 @@
                 <div class="card">
                     <div class="card-header p-3 pt-2">
                         <div class="icon icon-lg icon-shape bg-gradient-primary shadow-primary text-center border-radius-xl mt-n4 position-absolute">
-                            <i class="material-icons opacity-10">psychology</i>
+                            <i class="material-icons opacity-10">science</i>
                         </div>
                         <div class="text-end pt-1">
                             <h2 class="mb-0 text-info">spatial<span class="moffitt-text-blue">GE</span></h2>

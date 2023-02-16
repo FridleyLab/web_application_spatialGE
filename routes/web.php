@@ -39,6 +39,9 @@ Route::get('/test-login',[SecurityController::class, 'testLogIn'])->name('test-l
 Route::name('how-to')->get('/how-to-get-started', function () {
     return view('how-to-get-started');
 });
+Route::name('faq')->get('/faq', function () {
+    return view('faq');
+});
 Route::name('home')->get('/', function () {
     return view('home');
 });

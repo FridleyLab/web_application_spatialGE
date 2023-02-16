@@ -1,6 +1,10 @@
 <!-- Navbar -->
 <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="true">
     <div class="container-fluid py-1 px-3">
+
+        <img src="/images/moffitt-logo.svg" width="150" alt="main_logo">
+
+
 {{--        @auth--}}
 {{--        <nav aria-label="breadcrumb">--}}
 {{--            <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">--}}
@@ -14,7 +18,7 @@
 
             <div class="ms-md-auto pe-md-3 d-flex align-items-center">
                 @auth
-                <div class="input-group input-group-outline">
+                <div class="input-group input-group-outline d-none d-md-flex">
                     <label class="form-label">Type here...</label>
                     <input type="text" class="form-control">
                 </div>

@@ -50,7 +50,7 @@
 
     @vite('resources/js/app.js')
 
-
+    @yield('headers')
 
 </head>
 
