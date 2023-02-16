@@ -22,8 +22,10 @@ class SecurityController extends Controller
 
         if (auth()->attempt($credentials)) {
             // Authentication passed...
-            return redirect()->intended(route('home'));
+            return response("Pass", 200); //return redirect()->intended(route('home'));
         }
+
+        return response("Email and/or Password are incorrect!", 403);
 
     }
 

@@ -10,7 +10,7 @@
                                 <p class="mb-0">Enter your email and password to sign in</p>
                             </div>
                             <div class="card-body">
-                                <form role="form" :action="targetUrl" @submit="checkCredentials" method="POST">
+                                <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST">
 
                                     <input type="hidden" name="_token" :value="window._token">
 
@@ -22,7 +22,7 @@
                                         <label class="form-label">Password</label>
                                         <input required type="password" class="form-control" name="password" v-model="password">
                                     </div>
-                                    <error-message :message="errorMessage"></error-message>
+                                    <show-message :message="errorMessage" role="danger"></show-message>
                                     <div class="text-center">
                                         <button type="submit" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">Sign In</button>
                                     </div>
@@ -64,8 +64,16 @@
                 this.errorMessage = '';
                 if(!this.email.trim().length || !this.password.trim().length) {
                     this.errorMessage = "You must complete all the fields!";
-                    e.preventDefault();
                 }
+
+                axios.post(this.targetUrl , {'email' : this.email, 'password': this.password})
+                    .then((response) => {
+                        window.location.href = "/";
+                    })
+                    .catch((error) => {
+                        console.log(error.message);
+                        this.errorMessage = error.response.data;
+                    });
             }
         }
     }
