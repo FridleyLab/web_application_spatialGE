@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SecurityController;
+use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,6 +25,8 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/dashboard',[HomeController::class, 'dashboard'])->name('dashboard');
 
     Route::get('/wizard',[ProjectController::class, 'wizard'])->name('wizard');
+
+    Route::post('/file-upload', [FileController::class, 'create'])->name('file-upload');
 
 });
 

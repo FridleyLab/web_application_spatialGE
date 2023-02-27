@@ -12,8 +12,11 @@
                         </div>
                     </div>
                     <hr class="dark horizontal my-0">
-                    <div class="w-50 m-2">
-                        <button class="btn bg-gradient-info w-100 mb-0 toast-btn" type="button" data-target="successToast">Select files...</button>
+<!--                    <div class="w-50 m-2">-->
+<!--                        <button class="btn bg-gradient-info w-100 mb-0 toast-btn" type="button" data-target="successToast">Select files...</button>-->
+<!--                    </div>-->
+                    <div class="w-100">
+                        <file-upload></file-upload>
                     </div>
                 </div>
             </div>
