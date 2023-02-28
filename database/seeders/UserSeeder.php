@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
                 'name' => 'Roberto Manjarres',
                 'email' => 'roberto.manjarres-betancur@moffitt.org',
                 'password' => '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', //12345678
+                'email_verification_code' => 'verified'
             ]);
         }
     }

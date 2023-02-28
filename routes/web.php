@@ -34,7 +34,9 @@ Route::get('/login',[SecurityController::class, 'login'])->name('login')->middle
 Route::post('/login',[SecurityController::class, 'signin'])->middleware('guest');
 Route::get('/signup',[SecurityController::class, 'signup'])->name('signup')->middleware('guest');
 Route::post('/signup',[SecurityController::class, 'create'])->middleware('guest');
-Route::get('/test-login',[SecurityController::class, 'testLogIn'])->name('test-login')->middleware('guest');
+Route::get('/activate/{code}',[SecurityController::class, 'activate'])->middleware('guest')->name('account-activation');
+
+//Route::get('/test-login',[SecurityController::class, 'testLogIn'])->name('test-login')->middleware('guest');
 
 
 

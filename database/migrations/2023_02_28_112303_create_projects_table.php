@@ -16,11 +16,13 @@ return new class extends Migration
 
             $table->text('name');
             $table->text('description')->nullable();
+            $table->integer('current_step')->default(1);
 
             $table->unsignedBigInteger('project_status_id')->default(1);
             $table->foreign('project_status_id')->references('id')->on('project_status');
 
-            $table->integer('current_step')->default(1);
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
 
             $table->timestamps();
             $table->softDeletes();

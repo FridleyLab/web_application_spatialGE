@@ -14,15 +14,15 @@
 
                                     <input type="hidden" name="_token" :value="window._token">
 
-                                    <div class="input-group input-group-outline mb-3">
+                                    <div class="input-group input-group-outline mb-3" :class="name.length > 3 ? 'is-valid' : ''">
                                         <label class="form-label">Name</label>
                                         <input required type="text" class="form-control" name="name" v-model="name">
                                     </div>
-                                    <div class="input-group input-group-outline mb-3">
+                                    <div class="input-group input-group-outline mb-3" :class="validEmailAddress ? 'is-valid' : ''">
                                         <label class="form-label">Email</label>
                                         <input required type="email" class="form-control" name="email" v-model="email">
                                     </div>
-                                    <div class="input-group input-group-outline mb-3">
+                                    <div class="input-group input-group-outline mb-3" :class="password.length && !errorMessagePassword.length ? 'is-valid' : ''">
                                         <label class="form-label">Password</label>
                                         <input required type="password" class="form-control" name="password" v-model="password">
                                     </div>
@@ -40,14 +40,14 @@
                                     </div>
 
                                     <div class="text-center">
-                                        <button type="submit" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">Sign Up</button>
+                                        <button type="submit" class="btn btn-lg bg-gradient-info btn-lg w-100 mt-4 mb-0">Sign Up</button>
                                     </div>
                                 </form>
                             </div>
                             <div class="card-footer text-center pt-0 px-lg-2 px-1">
                                 <p class="mb-2 text-sm mx-auto">
                                     Already have an account?
-                                    <a :href="signInUrl" class="text-primary text-gradient font-weight-bold">Sign in</a>
+                                    <a :href="signInUrl" class="text-info text-gradient font-weight-bold">Sign in</a>
                                 </p>
                             </div>
                         </div>
@@ -69,9 +69,9 @@
 
         data() {
             return {
-                name: '',
-                email: '',
-                password: '',
+                name: 'Roberto Manjarres',
+                email: 'roberto.manjarres-betancur@moffitt.org',
+                password: '12345678',
                 errorMessage: '',
                 errorMessagePassword: ''
             }
@@ -79,10 +79,9 @@
 
         computed: {
             passwordStrength() {
+                this.errorMessagePassword = '';
 
                 if(!this.password.length) return true;
-
-                this.errorMessagePassword = '';
 
                 let strongPassword = new RegExp('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})');
                 //let mediumPassword = new RegExp('((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{6,}))|((?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9])(?=.{8,}))');
@@ -93,22 +92,25 @@
                         '<li>Contain special character(s) (+, -, *, etc.)</li></ul>';
                 }
                 return strongPassword.test(this.password);
+            },
+
+            validEmailAddress() {
+                return String(this.email)
+                    .toLowerCase()
+                    .match(
+                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                    );
             }
         },
 
         methods: {
-            checkCredentials: function(e) {
+            checkCredentials: (e) => {
                 this.errorMessage = '';
                 if(!this.name.trim().length || !this.email.trim().length || !this.password.trim().length) {
                     this.errorMessage = "You must complete all the fields!";
                     e.preventDefault();
                 }
             },
-
-            checkPasswordStrength: function(password) {
-
-
-            }
         }
     }
 </script>

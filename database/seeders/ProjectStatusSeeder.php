@@ -32,7 +32,7 @@ class ProjectStatusSeeder extends Seeder
 
         DB::table('project_status')->insert([
             'id' => 3,
-            'name' => 'Finished',
+            'name' => 'Archived',
 
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

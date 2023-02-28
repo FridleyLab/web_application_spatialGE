@@ -14,7 +14,7 @@
 
                                     <input type="hidden" name="_token" :value="window._token">
 
-                                    <div class="input-group input-group-outline mb-3">
+                                    <div class="input-group input-group-outline mb-3" :class="validEmailAddress ? 'is-valid' : ''">
                                         <label class="form-label">Email</label>
                                         <input required type="email" class="form-control" name="email" v-model="email">
                                     </div>
@@ -24,14 +24,14 @@
                                     </div>
                                     <show-message :message="errorMessage" role="danger"></show-message>
                                     <div class="text-center">
-                                        <button type="submit" class="btn btn-lg bg-gradient-primary btn-lg w-100 mt-4 mb-0">Sign In</button>
+                                        <button type="submit" class="btn btn-lg bg-gradient-info btn-lg w-100 mt-4 mb-0">Sign In</button>
                                     </div>
                                 </form>
                             </div>
                             <div class="card-footer text-center pt-0 px-lg-2 px-1">
                                 <p class="mb-2 text-sm mx-auto">
                                     Don't have an account?
-                                    <a :href="signUpUrl" class="text-primary text-gradient font-weight-bold">Sign up</a>
+                                    <a :href="signUpUrl" class="text-info text-gradient font-weight-bold">Sign up</a>
                                 </p>
                             </div>
                         </div>
@@ -56,6 +56,16 @@
                 email: 'roberto.manjarres-betancur@moffitt.org',
                 password: '12345678',
                 errorMessage: ''
+            }
+        },
+
+        computed: {
+            validEmailAddress() {
+                return String(this.email)
+                    .toLowerCase()
+                    .match(
+                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                    );
             }
         },
 

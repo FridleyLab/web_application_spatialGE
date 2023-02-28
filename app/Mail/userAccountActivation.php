@@ -2,59 +2,51 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class signUpVerification extends Mailable
+class userAccountActivation extends Mailable
 {
     use Queueable, SerializesModels;
 
+   //public User $user;
+
     /**
      * Create a new message instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(public User $user) { }
 
     /**
      * Get the message envelope.
-     *
-     * @return \Illuminate\Mail\Mailables\Envelope
      */
-    public function envelope()
+    public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('admin@example.com', 'Jeffrey Way'),
-            subject: 'Please verify your email address',
+            subject: 'SpatialGE - Please activate your account',
         );
     }
 
     /**
      * Get the message content definition.
-     *
-     * @return \Illuminate\Mail\Mailables\Content
      */
-    public function content()
+    public function content(): Content
     {
         return new Content(
-            view: 'mail.auth.email_address_verification',
+            view: 'mail.user_account_activation',
         );
     }
 
     /**
      * Get the attachments for the message.
      *
-     * @return array
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
-    public function attachments()
+    public function attachments(): array
     {
         return [];
     }
