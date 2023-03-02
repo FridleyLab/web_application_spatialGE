@@ -10,6 +10,13 @@ use Illuminate\View\View;
 class ProjectController extends Controller
 {
 
+    public function index() : View
+    {
+        $projects = Project::where('user_id', auth()->id())->orderByDesc('updated_at')->get();
+
+        return view('projects.index', compact(['projects']));
+    }
+
     public function create(): View
     {
 

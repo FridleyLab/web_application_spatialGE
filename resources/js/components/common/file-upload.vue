@@ -45,7 +45,6 @@ export default {
 
     computed: {
         checkFileType() {
-            this.$emit('validated', 'sdfdgfdsfhgfdhj');
             return (typeof this.file === 'object')
                 && (this.fileTypes.includes('*.*') || this.fileTypes.toLowerCase().includes(this.file.name.split('.').pop()));
         }
@@ -53,12 +52,9 @@ export default {
 
     methods: {
 
-        sayHello() {alert('Hello');},
-
         handleFileUpload( event ){
             this.file = event.target.files[0];
 
-            console.log(this.checkFileType);
             this.$emit('validated', this.checkFileType);
         },
 
@@ -89,11 +85,11 @@ export default {
                     }.bind(this)
                 }
                 ).then(() => {
-                    console.log('SUCCESS!!');
+                    console.log('FILE UPLOAD SUCCESS!!');
                     this.uploading = false;
                 })
                 .catch(() => {
-                    console.log('FAILURE!!');
+                    console.log('FILE UPLOAD FAILURE!!');
                     this.uploading = false;
                 });
         },

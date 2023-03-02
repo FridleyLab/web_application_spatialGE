@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('project_status', function (Blueprint $table) {
+        Schema::create('files', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name', 255);
+            $table->string('filename', 255);
 
             $table->timestamps();
             $table->softDeletes();
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('project_status');
+        Schema::dropIfExists('files');
     }
 };

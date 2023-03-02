@@ -17,14 +17,16 @@
                         <h5>Adding sample to the project: <span class="text-secondary">{{ project.name }}</span></h5>
                     </div>
 
+
+                    <h6 class="text-center">Please import your H5 and CSV files (.png image is optional)</h6>
                     <hr class="dark horizontal my-0">
                     <div>
-                        <file-upload ref="h5" info="Please select the .h5 file to be imported" file-types=".h5" :show-upload-button="false"></file-upload>
+                        <file-upload ref="h5" info="Select the .h5 file to be imported" file-types=".h5" :show-upload-button="false" @validated="statusH5"></file-upload>
                     </div>
 
                     <hr class="dark horizontal my-0">
                     <div>
-                        <file-upload ref="h5" info="Please select the .csv file to be imported" file-types=".csv" :show-upload-button="false" @validated="statusH5"></file-upload>
+                        <file-upload ref="csv" info="Select the .csv file to be imported" file-types=".csv" :show-upload-button="false" @validated="statusCsv"></file-upload>
                     </div>
 
                     <label class="text-center">
@@ -33,18 +35,21 @@
                     <div v-if="havePng">
                         <hr class="dark horizontal my-0">
                         <div>
-                            <file-upload ref="h5" info="Please select the .png file to be imported" file-types=".png" :show-upload-button="false" :is-required="false"></file-upload>
+                            <file-upload ref="png" info="Select the .png file to be imported" file-types=".png" :show-upload-button="false" :is-required="false" @validated="statusPng"></file-upload>
                         </div>
 
                         <hr class="dark horizontal my-0">
                         <div>
-                            <file-upload ref="h5" info="Please select the .json file to be imported" file-types=".json" :show-upload-button="false" :is-required="false"></file-upload>
+                            <file-upload ref="json" info="Select the .json file to be imported" file-types=".json" :show-upload-button="false" :is-required="false" @validated="statusJson"></file-upload>
                         </div>
                     </div>
 
-                    <button @click="$refs['h5'].sayHello()" class="btn bg-gradient-success w-25 mb-0 toast-btn">
-                        Upload
-                    </button>
+                    <div class="p-3 w-100 text-end">
+                        <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">
+                            Import sample
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -175,11 +180,26 @@
                 havePng: false,
                 validPng: false,
                 validJson: false,
+
             };
         },
 
+        computed: {
+            canStartImportProcess() {
+                return (this.validH5 && this.validCsv);
+            },
+        },
+
         methods: {
-            statusH5: function(isValid) { this.validH5 = isValid; console.log('message: ' + isValid); },
+            statusH5: function(isValid) { this.validH5 = isValid; console.log('H5: ' + isValid); },
+            statusCsv: function(isValid) { this.validCsv = isValid; console.log('CSV: ' + isValid); },
+            statusPng: function(isValid) { this.validPng = isValid; console.log('PNG: ' + isValid); },
+            statusJson: function(isValid) { this.validJson = isValid; console.log('JSON: ' + isValid); },
+
+            importSample: function() {
+                this.$refs['h5'].submitFile();
+                this.$refs['csv'].submitFile();
+            },
         }
 
     }

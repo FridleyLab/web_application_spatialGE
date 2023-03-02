@@ -9,7 +9,10 @@ import graphics from "./components/ui/graphics.vue";
 import signUp from "./components/ui/sign-up.vue";
 import signIn from "./components/ui/sign-in.vue";
 import showMessage from "./components/common/show-message.vue";
-import wizard from "./components/wizard/wizard.vue";
+import fileUpload from "./components/common/file-upload.vue";
+import importData from "./components/wizard/import-data.vue";
+import newProject from './views/projects/new.vue';
+import myProjects from './views/projects/index.vue';
 
 import {createApp} from "vue";
 
@@ -26,7 +29,10 @@ app.component('graficos', graphics);
 app.component('sign-up', signUp);
 app.component('sign-in', signIn);
 app.component('show-message', showMessage);
-app.component('wizard', wizard)
+app.component('file-upload', fileUpload);
+app.component('new-project', newProject);
+app.component('my-projects', myProjects);
+app.component('import-data', importData)
 
 //Register the window as a global variable, so it can be accessed everywhere
 app.config.globalProperties.window = window;

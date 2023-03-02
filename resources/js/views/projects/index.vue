@@ -1,0 +1,81 @@
+<template>
+    <div class="container-fluid py-4 col-xl-11 col-md-11 col-sm-12">
+        <div class="row justify-content-center">
+
+            <div class="col-xl-10 col-sm-10 mb-xl-0 mb-4 mt-4">
+                <div class="card">
+                    <div class="card-header p-3 pt-2">
+                        <div class="icon icon-lg icon-shape bg-gradient-info shadow-dark text-center border-radius-xl mt-n4 position-absolute">
+                            <i class="material-icons opacity-10">format_list_numbered</i>
+                        </div>
+                        <div class="text-end pt-1">
+                            <h6 class="mb-0 text-capitalize">My projects</h6>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div v-for="project in projects">
+                            <div class="m-3">
+                                <span class="text-bolder"><a :href="project.url">{{ project.name }}</a></span>
+                            </div>
+                            <hr class="dark horizontal my-0">
+                        </div>
+                        <div v-if="!projects.length">
+                            You haven't created any projects!
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</template>
+<script>
+export default {
+    name: 'myProjects',
+
+    props: {
+        projects: Object,
+    },
+
+    data() {
+        return {
+            name: '',
+            description: '',
+            errorMessage: ''
+        }
+    },
+
+    mounted() {
+        console.log(this.projects);
+    },
+
+    computed: {
+    },
+
+    methods: {
+        createProject() {
+
+            if(!this.validName)
+                this.errorMessage = 'Name has to be at least 4 characters long';
+            else
+            {
+                axios.post(this.targetUrl, {name: this.name, description: this.description})
+                    .then((response) => {
+                        console.log(response.data);
+                        location.href = response.data;
+                    })
+                    .catch((error) => {
+                        console.log(error.message);
+                        this.errorMessage = error.response.data;
+                    });
+            }
+
+
+        }
+    }
+}
+</script>
