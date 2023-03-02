@@ -24,7 +24,7 @@
 
                     <hr class="dark horizontal my-0">
                     <div>
-                        <file-upload ref="h5" info="Please select the .csv file to be imported" file-types=".csv" :show-upload-button="false"></file-upload>
+                        <file-upload ref="h5" info="Please select the .csv file to be imported" file-types=".csv" :show-upload-button="false" @validated="statusH5"></file-upload>
                     </div>
 
                     <label class="text-center">
@@ -170,9 +170,17 @@
 
         data() {
             return {
+                validH5: false,
+                validCsv: false,
                 havePng: false,
+                validPng: false,
+                validJson: false,
             };
         },
+
+        methods: {
+            statusH5: function(isValid) { this.validH5 = isValid; console.log('message: ' + isValid); },
+        }
 
     }
 </script>

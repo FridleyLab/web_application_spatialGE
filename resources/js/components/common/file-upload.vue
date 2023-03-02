@@ -45,6 +45,7 @@ export default {
 
     computed: {
         checkFileType() {
+            this.$emit('validated', 'sdfdgfdsfhgfdhj');
             return (typeof this.file === 'object')
                 && (this.fileTypes.includes('*.*') || this.fileTypes.toLowerCase().includes(this.file.name.split('.').pop()));
         }
@@ -56,6 +57,9 @@ export default {
 
         handleFileUpload( event ){
             this.file = event.target.files[0];
+
+            console.log(this.checkFileType);
+            this.$emit('validated', this.checkFileType);
         },
 
         submitFile(){
