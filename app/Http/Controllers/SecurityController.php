@@ -26,8 +26,10 @@ class SecurityController extends Controller
             // Authentication passed...
 
             //Check if account has been activated
-            if( is_null(auth()->user()->email_verified_at))
-                return response("You have not activated your aacount, please check your email!", 401);
+            if(is_null(auth()->user()->email_verified_at)) {
+                auth()->logout();
+                return response("<p>You have not activated your account yet</p><p>Please check your email</p>", 401);
+            }
 
             return response("Pass", 200); //return redirect()->intended(route('home'));
         }
@@ -89,7 +91,7 @@ class SecurityController extends Controller
             $user->save();
             Mail::to($email)->send(new userAccountActivation($user));
 
-            return response('Account created, please check your email to activate your account. <p>Please activate your account <a href="' . route('account-activation', ['code' => $user->email_verification_code]) . '">here</a></p>', 200);
+            return response('<p>Account created, please check your email to activate your account.</p><p>Please activate your account <a href="' . route('account-activation', ['code' => $user->email_verification_code]) . '">here</a></p>', 200);
         }
         catch(\Exception $e) {
             return response('Something went wrong!', 400);

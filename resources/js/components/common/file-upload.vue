@@ -2,7 +2,7 @@
     <div class="container m-2">
         <div class="text-center">
             <label class="btn bg-gradient-info w-50 mb-0 toast-btn">
-                <input type="file" v-on:change="handleFileUpload( $event )" style="display: none" />
+                <input type="file" v-on:change="handleFileUpload( $event )" style="display: none" :accept="fileTypes" />
                 Select file...
             </label>
             <div v-if="file">
@@ -24,7 +24,8 @@ export default {
     name: 'fileUpload',
 
     props: {
-        url: {type: String, default: '/file-upload'}
+        url: {type: String, default: '/file-upload'},
+        fileTypes: {type: String, default: '*.*'},
     },
 
     data(){
@@ -36,6 +37,9 @@ export default {
     },
 
     methods: {
+
+        sayHello() {alert('Hello');},
+
         handleFileUpload( event ){
             this.file = event.target.files[0];
         },

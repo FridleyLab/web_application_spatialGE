@@ -2,5 +2,5 @@
 
 
 @section('content')
-    <wizard></wizard>
+    <import-data></import-data>
 @endsection

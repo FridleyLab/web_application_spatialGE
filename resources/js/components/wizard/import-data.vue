@@ -1,9 +1,8 @@
 <template>
     <div class="container-fluid py-4 col-xl-11 col-md-11 col-sm-12">
-        <div class="row text">
+        <div class="row justify-content-center">
 
-
-            <div class="col-xl-6 col-sm-10 mb-xl-0 mb-4 mt-4">
+            <div class="col-xl-10 col-sm-10 mb-xl-0 mb-4 mt-4">
                 <div class="card">
                     <div class="card-header p-3 pt-2">
                         <div class="icon icon-lg icon-shape bg-gradient-dark shadow-dark text-center border-radius-xl mt-n4 position-absolute">
@@ -13,10 +12,19 @@
                             <h6 class="mb-0 text-capitalize">Importing data</h6>
                         </div>
                     </div>
-                    <hr class="dark horizontal my-0">
-                    <div class="w-100">
-                        <file-upload></file-upload>
+
+                    <div class="card-body">
+                        Content
                     </div>
+
+                    <hr class="dark horizontal my-0">
+                    <div class="w-50">
+                        <file-upload ref="fileRef" file-types=".h5"></file-upload>
+                    </div>
+
+                    <button @click="$refs['fileRef'].sayHello()" class="btn bg-gradient-success w-25 mb-0 toast-btn">
+                        Upload
+                    </button>
                 </div>
             </div>
 
@@ -134,6 +142,6 @@
 </template>
 <script>
     export default {
-        name: 'wizard',
+        name: 'importData',
     }
 </script>
