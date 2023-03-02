@@ -14,15 +14,35 @@
                     </div>
 
                     <div class="card-body">
-                        Content
+                        <h5>Adding sample to the project: <span class="text-secondary">{{ project.name }}</span></h5>
                     </div>
 
                     <hr class="dark horizontal my-0">
-                    <div class="w-50">
-                        <file-upload ref="fileRef" file-types=".h5"></file-upload>
+                    <div>
+                        <file-upload ref="h5" info="Please select the .h5 file to be imported" file-types=".h5" :show-upload-button="false"></file-upload>
                     </div>
 
-                    <button @click="$refs['fileRef'].sayHello()" class="btn bg-gradient-success w-25 mb-0 toast-btn">
+                    <hr class="dark horizontal my-0">
+                    <div>
+                        <file-upload ref="h5" info="Please select the .csv file to be imported" file-types=".csv" :show-upload-button="false"></file-upload>
+                    </div>
+
+                    <label class="text-center">
+                        <input type="checkbox" v-model="havePng">&nbsp;Do you have PNG and JSON files for this sample?
+                    </label>
+                    <div v-if="havePng">
+                        <hr class="dark horizontal my-0">
+                        <div>
+                            <file-upload ref="h5" info="Please select the .png file to be imported" file-types=".png" :show-upload-button="false" :is-required="false"></file-upload>
+                        </div>
+
+                        <hr class="dark horizontal my-0">
+                        <div>
+                            <file-upload ref="h5" info="Please select the .json file to be imported" file-types=".json" :show-upload-button="false" :is-required="false"></file-upload>
+                        </div>
+                    </div>
+
+                    <button @click="$refs['h5'].sayHello()" class="btn bg-gradient-success w-25 mb-0 toast-btn">
                         Upload
                     </button>
                 </div>
@@ -143,5 +163,16 @@
 <script>
     export default {
         name: 'importData',
+
+        props: {
+            project: Object,
+        },
+
+        data() {
+            return {
+                havePng: false,
+            };
+        },
+
     }
 </script>

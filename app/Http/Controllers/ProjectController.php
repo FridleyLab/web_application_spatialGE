@@ -36,10 +36,10 @@ class ProjectController extends Controller
     }
 
 
-    public function import_data(): View
+    public function import_data(Project $project): View
     {
 
-        return view('wizard.import-data');
+        return view('wizard.import-data')->with(compact('project'));
 
     }
 

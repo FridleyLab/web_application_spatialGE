@@ -29,7 +29,7 @@ Route::middleware(['auth'])->group(function() {
     //Project CRUD
     Route::post('/projects',[ProjectController::class, 'store'])->name('store-project');
     Route::get('/projects/new',[ProjectController::class, 'create'])->name('new-project');
-    Route::get('/projects/{project}/import_data',[ProjectController::class, 'import_data'])->name('import-data');
+    Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data');
     Route::post('/file-upload', [FileController::class, 'create'])->name('file-upload');
 
 });
