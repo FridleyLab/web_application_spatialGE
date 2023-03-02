@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\signUpVerification;
 use App\Mail\userAccountActivation;
 use App\Models\User;
 use Carbon\Carbon;

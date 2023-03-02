@@ -2,5 +2,5 @@
 
 
 @section('content')
-    <import-data :project="{{ json_encode($project) }}"></import-data>
+    <import-data :project="{{ json_encode($project) }}" :samples="{{ json_encode($samples) }}"></import-data>
 @endsection

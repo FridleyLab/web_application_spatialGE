@@ -14,6 +14,8 @@ class Sample extends Model
 
     protected $fillable = ['name'];
 
+    protected $appends = ['file_list'];
+
 
 
     //Relations
@@ -22,5 +24,13 @@ class Sample extends Model
         return $this->belongsToMany(Project::class);
     }
 
+    public function files(): BelongsToMany
+    {
+        return $this->belongsToMany(File::class);
+    }
+
+    public function getFileListAttribute() {
+        return $this->files;
+    }
 
 }

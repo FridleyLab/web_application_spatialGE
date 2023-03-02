@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SampleController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Route;
@@ -31,7 +32,10 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects',[ProjectController::class, 'store'])->name('store-project');
     Route::get('/projects/new',[ProjectController::class, 'create'])->name('new-project');
     Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data');
-    Route::post('/file-upload', [FileController::class, 'create'])->name('file-upload');
+
+    Route::post('/files', [FileController::class, 'store'])->name('file-upload');
+
+    Route::post('/samples', [SampleController::class, 'store'])->name('store-sample');
 
 });
 

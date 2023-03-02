@@ -28,7 +28,7 @@ export default {
     name: 'fileUpload',
 
     props: {
-        url: {type: String, default: '/file-upload'},
+        url: {type: String, default: '/files'},
         fileTypes: {type: String, default: '*.*'},
         info: {type: String, default: 'Please select a file to be uploaded'},
         showUploadButton: {type: Boolean, default: true},
@@ -37,6 +37,7 @@ export default {
 
     data(){
         return {
+            file_id: 0,
             file: '',
             uploading: false,
             uploadPercentage: 0
@@ -84,9 +85,12 @@ export default {
                         this.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
                     }.bind(this)
                 }
-                ).then(() => {
-                    console.log('FILE UPLOAD SUCCESS!!');
+                ).then((response) => {
+                    //console.log('FILE UPLOAD SUCCESS!! -->' + response.data);
+                    this.file_id = Number(response.data);
                     this.uploading = false;
+
+                    this.$emit('uploaded', this.file_id);
                 })
                 .catch(() => {
                     console.log('FILE UPLOAD FAILURE!!');

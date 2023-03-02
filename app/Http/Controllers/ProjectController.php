@@ -45,8 +45,9 @@ class ProjectController extends Controller
 
     public function import_data(Project $project): View
     {
+        $samples = $project->samples;
 
-        return view('wizard.import-data')->with(compact('project'));
+        return view('wizard.import-data')->with(compact('project', 'samples'));
 
     }
 

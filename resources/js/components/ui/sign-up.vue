@@ -76,9 +76,9 @@
 
         data() {
             return {
-                name: 'Roberto Manjarres',
-                email: 'roberto.manjarres-betancur@moffitt.org',
-                password: '12345678',
+                name: '', // 'Roberto Manjarres',
+                email: '', // 'roberto.manjarres-betancur@moffitt.org',
+                password: '', // '12345678',
                 passwordConfirmation: '',
                 errorMessage: '',
                 errorMessagePassword: ''

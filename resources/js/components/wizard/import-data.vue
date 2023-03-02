@@ -21,12 +21,12 @@
                     <h6 class="text-center">Please import your H5 and CSV files (.png image is optional)</h6>
                     <hr class="dark horizontal my-0">
                     <div>
-                        <file-upload ref="h5" info="Select the .h5 file to be imported" file-types=".h5" :show-upload-button="false" @validated="statusH5"></file-upload>
+                        <file-upload ref="h5" info="Select the .h5 file to be imported" file-types=".h5" :show-upload-button="false" @validated="statusH5" @uploaded="uploadedH5"></file-upload>
                     </div>
 
                     <hr class="dark horizontal my-0">
                     <div>
-                        <file-upload ref="csv" info="Select the .csv file to be imported" file-types=".csv" :show-upload-button="false" @validated="statusCsv"></file-upload>
+                        <file-upload ref="csv" info="Select the .csv file to be imported" file-types=".csv" :show-upload-button="false" @validated="statusCsv" @uploaded="uploadedCsv"></file-upload>
                     </div>
 
                     <label class="text-center">
@@ -35,12 +35,12 @@
                     <div v-if="havePng">
                         <hr class="dark horizontal my-0">
                         <div>
-                            <file-upload ref="png" info="Select the .png file to be imported" file-types=".png" :show-upload-button="false" :is-required="false" @validated="statusPng"></file-upload>
+                            <file-upload ref="png" info="Select the .png file to be imported" file-types=".png" :show-upload-button="false" :is-required="false" @validated="statusPng" @uploaded="uploadedPng"></file-upload>
                         </div>
 
                         <hr class="dark horizontal my-0">
                         <div>
-                            <file-upload ref="json" info="Select the .json file to be imported" file-types=".json" :show-upload-button="false" :is-required="false" @validated="statusJson"></file-upload>
+                            <file-upload ref="json" info="Select the .json file to be imported" file-types=".json" :show-upload-button="false" :is-required="false" @validated="statusJson" @uploaded="uploadedJson"></file-upload>
                         </div>
                     </div>
 
@@ -48,6 +48,22 @@
                         <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">
                             Import sample
                         </button>
+                    </div>
+
+                    <div class="p-3">
+                        <h5>Samples in this project</h5>
+                        <div v-for="sample in samples">
+                            <div class="">
+                                <span class="text-bolder">{{ sample.name ?? 'Sample ' + sample.id }}</span>
+                                <div v-for="file in sample.file_list" class="ps-2 pb-1">
+                                    <span class="text-info">{{ file.filename }}</span>
+                                </div>
+                            </div>
+                            <hr class="dark horizontal my-0">
+                        </div>
+                        <div v-if="!samples.length">
+                            You haven't uploaded any samples yet!
+                        </div>
                     </div>
 
                 </div>
@@ -171,6 +187,7 @@
 
         props: {
             project: Object,
+            samples: Object,
         },
 
         data() {
@@ -181,13 +198,23 @@
                 validPng: false,
                 validJson: false,
 
+                uploadedH5Id: 0,
+                uploadedCsvId: 0,
+                uploadedPngId: 0,
+                uploadedJsonId: 0,
+
             };
         },
 
         computed: {
             canStartImportProcess() {
-                return (this.validH5 && this.validCsv);
+                return (this.validH5 && this.validCsv) && (!this.havePng || (this.validPng && this.validJson));
             },
+
+            /*uploadProcessFinished() {
+                console.log((this.uploadedH5Id && this.uploadedCsvId) + 'uploadProcessFinished --H5id:' + this.uploadedH5Id + '--CSVid:' + this.uploadedCsvId + '--' );
+                return (this.uploadedH5Id && this.uploadedCsvId);
+            },*/
         },
 
         methods: {
@@ -196,9 +223,37 @@
             statusPng: function(isValid) { this.validPng = isValid; console.log('PNG: ' + isValid); },
             statusJson: function(isValid) { this.validJson = isValid; console.log('JSON: ' + isValid); },
 
+            uploadedH5: function(file_id) {this.uploadedH5Id = file_id; console.log('H5id: ' + this.uploadedH5Id); this.checkIfFinishedUploading(); },
+            uploadedCsv: function(file_id) {this.uploadedCsvId = file_id; console.log('CSVid: ' + this.uploadedCsvId); this.checkIfFinishedUploading();},
+            uploadedPng: function(file_id) {this.uploadedPngId = file_id; console.log('PNGid: ' + this.uploadedPngId); this.checkIfFinishedUploading();},
+            uploadedJson: function(file_id) {this.uploadedJsonId = file_id; console.log('JSONid: ' + this.uploadedJsonId); this.checkIfFinishedUploading();},
+
             importSample: function() {
                 this.$refs['h5'].submitFile();
                 this.$refs['csv'].submitFile();
+
+                if(this.havePng && (this.validPng && this.validJson))
+                {
+                    this.$refs['png'].submitFile();
+                    this.$refs['json'].submitFile();
+                }
+
+                console.log('call to importSample ended');
+            },
+
+            checkIfFinishedUploading: function() {
+                if(this.uploadedH5Id && this.uploadedCsvId && (!this.havePng || (this.validPng && this.validJson))) {
+                    console.log((this.uploadedH5Id && this.uploadedCsvId) + 'uploadProcessFinished --H5id:' + this.uploadedH5Id + '--CSVid:' + this.uploadedCsvId + '--');
+                    axios.post('/samples', {file_ids: [this.uploadedH5Id, this.uploadedCsvId, this.uploadedPngId, this.uploadedJsonId], project_id: this.project.id})
+                        .then((response) => {
+                            console.log(response.data);
+                            //this.samples.push(response.data);
+                            location.reload();
+                        })
+                        .catch((error) => {
+                            console.log('Error creating sample');
+                        });
+                }
             },
         }
 
