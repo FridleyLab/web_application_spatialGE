@@ -69,10 +69,11 @@ class SecurityController extends Controller
     public function create() {
 
         $email = request('email');
-        $name = request('name');
+        $first_name = request('first_name');
+        $last_name = request('last_name');
         $password = request('password');
 
-        if(!strlen(trim($email)) || !strlen(trim($name)) || !strlen(trim($password)))
+        if(!strlen(trim($email)) || !strlen(trim($first_name)) || !strlen(trim($last_name)) || !strlen(trim($password)))
             return response('You need to complete all the fields!', 400);
 
         if($this->checkUserExists($email))
@@ -84,7 +85,7 @@ class SecurityController extends Controller
         }
 
         try {
-            $user = User::create(['name' => $name, 'email' => $email, 'email_verification_code' => '', 'password' => Hash::make($password)]);
+            $user = User::create(['first_name' => $first_name, 'last_name' => $last_name, 'email' => $email, 'email_verification_code' => '', 'password' => Hash::make($password)]);
             //create hashed value based on the user's email to use as activation code
             $user->email_verification_code = $user->id . '__||__' . str_replace('/', '', Hash::make($user->email));
             $user->save();
@@ -93,7 +94,7 @@ class SecurityController extends Controller
             return response('<p>Account created, please check your email to activate your account.</p><p>Please activate your account <a href="' . route('account-activation', ['code' => $user->email_verification_code]) . '">here</a></p>', 200);
         }
         catch(\Exception $e) {
-            return response('Something went wrong!', 400);
+            return response('Something went wrong!. ' . $e->getMessage(), 400);
         }
 
 

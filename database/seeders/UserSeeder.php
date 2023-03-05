@@ -16,7 +16,8 @@ class UserSeeder extends Seeder
     {
         if(!app()->isProduction()) {
             DB::table('users')->insert([
-                'name' => 'Test user',
+                'first_name' => 'TestFirstName',
+                'last_name' => 'TestLastName',
                 'email' => 'test@moffitt.org',
                 'password' => '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', //12345678
                 'email_verification_code' => 'verified',

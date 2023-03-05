@@ -7,17 +7,22 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="font-weight-bolder">Sign Up</h4>
-                                <p class="mb-0">Enter your email and password to register</p>
+                                <p class="mb-0">Please complete the form to register</p>
                             </div>
                             <div class="card-body">
-                                <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST">
+                                <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST" autocomplete="off">
 
                                     <input type="hidden" name="_token" :value="window._token">
 
-                                    <div class="input-group input-group-outline mb-3" :class="name.length > 3 ? 'is-valid' : ''">
-                                        <label class="form-label">Name</label>
-                                        <input required type="text" class="form-control" name="name" v-model="name">
+                                    <div class="input-group input-group-outline mb-3" :class="first_name.length >= 1 ? 'is-valid' : ''">
+                                        <label class="form-label">First name</label>
+                                        <input required type="text" class="form-control" name="first_name" v-model="first_name">
                                     </div>
+                                    <div class="input-group input-group-outline mb-3" :class="last_name.length >= 1 ? 'is-valid' : ''">
+                                        <label class="form-label">Last name</label>
+                                        <input required type="text" class="form-control" name="last_name" v-model="last_name">
+                                    </div>
+
                                     <div class="input-group input-group-outline mb-3" :class="validEmailAddress ? 'is-valid' : ''">
                                         <label class="form-label">Email</label>
                                         <input required type="email" class="form-control" name="email" v-model="email">
@@ -27,16 +32,16 @@
                                         <input required type="password" class="form-control" name="password" v-model="password">
                                     </div>
                                     <div class="input-group input-group-outline mb-3" :class="passwordConfirmation.length && passwordConfirmed ? 'is-valid' : ''">
-                                        <label class="form-label">Password</label>
+                                        <label class="form-label">Password confirmation</label>
                                         <input required type="password" class="form-control" name="passwordConfirmation" v-model="passwordConfirmation">
                                     </div>
 
                                     <show-message :message="errorMessagePassword" role="danger"></show-message>
 
                                     <div class="form-check form-check-info text-start ps-0">
-                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked>
+                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="terms_and_conditions">
                                         <label class="form-check-label" for="flexCheckDefault">
-                                            I agree the <a href="javascript:;" class="text-dark font-weight-bolder">Terms and Conditions</a>
+                                            I agree the <a href="https://moffitt.org/legal-statements-and-policies/terms-conditions/" target="_blank" class="text-info font-weight-bolder">Terms and Conditions</a>
                                         </label>
                                     </div>
 
@@ -76,10 +81,12 @@
 
         data() {
             return {
-                name: '', // 'Roberto Manjarres',
-                email: '', // 'roberto.manjarres-betancur@moffitt.org',
-                password: '', // '12345678',
+                first_name: '',
+                last_name: '',
+                email: '',
+                password: '',
                 passwordConfirmation: '',
+                terms_and_conditions: false,
                 errorMessage: '',
                 errorMessagePassword: ''
             }
@@ -121,13 +128,13 @@
         methods: {
             checkCredentials: function(e) {
                 this.errorMessage = '';
-                if(!this.name.trim().length >=4 || !this.email.trim().length || !this.password.trim().length || !this.passwordStrength || !this.passwordConfirmed) {
+                if(!this.first_name.trim().length || !this.last_name.trim().length || !this.email.trim().length || !this.password.trim().length || !this.passwordStrength || !this.passwordConfirmed || !this.terms_and_conditions) {
                     this.errorMessage = "You must complete all the fields!";
                     //e.preventDefault();
                     return;
                 }
 
-                axios.post(this.targetUrl , {'name' : this.name, 'email' : this.email, 'password': this.password})
+                axios.post(this.targetUrl , {'first_name' : this.first_name, 'last_name' : this.last_name, 'email' : this.email, 'password': this.password})
                     .then((response) => {
                         this.errorMessage = response.data;
                         //window.location.href = "/";

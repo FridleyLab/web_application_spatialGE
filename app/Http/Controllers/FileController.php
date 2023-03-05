@@ -11,6 +11,13 @@ class FileController extends Controller
 
     public function store() : string
     {
+        if(request()->file('files')) {
+            $names = '';
+            foreach(request()->file('files') as $key => $file) {
+                $names .= $file->getClientOriginalName() . '\n';
+            }
+            return $names;
+        }
 
         if (request()->hasFile('file') && request()->file('file')->isValid()) {
             $_file = request()->file('file');

@@ -10,6 +10,7 @@ import signUp from "./components/ui/sign-up.vue";
 import signIn from "./components/ui/sign-in.vue";
 import showMessage from "./components/common/show-message.vue";
 import fileUpload from "./components/common/file-upload.vue";
+import fileUploadDragDrop from "./components/common/file-upload-drag-drop.vue";
 import importData from "./components/wizard/import-data.vue";
 import newProject from './views/projects/new.vue';
 import myProjects from './views/projects/index.vue';
@@ -30,6 +31,7 @@ app.component('sign-up', signUp);
 app.component('sign-in', signIn);
 app.component('show-message', showMessage);
 app.component('file-upload', fileUpload);
+app.component('file-upload-drag-drop', fileUploadDragDrop);
 app.component('new-project', newProject);
 app.component('my-projects', myProjects);
 app.component('import-data', importData)

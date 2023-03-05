@@ -66,6 +66,10 @@
                         </div>
                     </div>
 
+                    <div class="my-4">
+                        <file-upload-drag-drop></file-upload-drag-drop>
+                    </div>
+
                 </div>
             </div>
 

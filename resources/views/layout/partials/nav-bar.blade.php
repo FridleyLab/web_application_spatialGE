@@ -33,7 +33,7 @@
                 <li class="nav-item d-flex align-items-center px-3">
 {{--                    <a href="{{ route('logout') }}" class="nav-link text-body font-weight-bold px-0">--}}
                         <i class="fa fa-user me-sm-1"></i>
-                        <span class="d-sm-inline d-none">{{ auth()->user()->name }}</span>
+                        <span class="d-sm-inline d-none">{{ auth()->user()->first_name }}</span>
 {{--                    </a>--}}
                 </li>
                 <li class="nav-item d-flex align-items-center">

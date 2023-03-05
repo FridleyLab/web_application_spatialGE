@@ -10,13 +10,13 @@
                                 <p class="mb-0">Enter your email and password to sign in</p>
                             </div>
                             <div class="card-body">
-                                <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST">
+                                <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST" autocomplete="off">
 
                                     <input type="hidden" name="_token" :value="window._token">
 
                                     <div class="input-group input-group-outline mb-3" :class="validEmailAddress ? 'is-valid' : ''">
                                         <label class="form-label">Email</label>
-                                        <input required type="email" class="form-control" name="email" v-model="email">
+                                        <input required type="email" class="form-control" name="email" v-model="email" @dblclick="testUser">
                                     </div>
                                     <div class="input-group input-group-outline mb-3">
                                         <label class="form-label">Password</label>
@@ -84,6 +84,12 @@
                         console.log(error.message);
                         this.errorMessage = error.response.data;
                     });
+            },
+
+            //For developing purposes
+            testUser: function() {
+                this.email = 'test@moffitt.org';
+                this.password = '12345678';
             }
         }
     }
