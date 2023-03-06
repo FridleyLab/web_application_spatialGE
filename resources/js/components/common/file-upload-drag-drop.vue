@@ -35,7 +35,9 @@ export default {
             dragAndDropCapable: false,
             files: [],
             uploadPercentage: 0,
-            imgIdPrefix: 'drag-and-drop-preview-'
+            imgIdPrefix: 'drag-and-drop-preview-',
+
+            knownFileTypes: 'csv,zip,gz,h5,txt,jpg,jpeg,png,json',
         }
     },
 
@@ -122,7 +124,7 @@ export default {
                         to update the src on the file preview.
                     */
                     reader.addEventListener("load", function(){
-                        document.getElementById(imgIdPrefix+parseInt(i)).src = reader.result;
+                        document.getElementById(this.imgIdPrefix+parseInt(i)).src = reader.result;
                     }.bind(this), false);
 
                     /*
@@ -135,8 +137,12 @@ export default {
                     /*
                         We do the next tick so the reference is bound and we can access it.
                     */
+
+                    const fileExtension = this.files[i].name.split('.').pop();
+                    let img = '/images/icons/' + (this.knownFileTypes.toLowerCase().includes(fileExtension) ? fileExtension : 'other') + '.png';
+
                     this.$nextTick(function(){
-                        document.getElementById(imgIdPrefix+parseInt(i)).src = '/images/file.png';
+                        document.getElementById(this.imgIdPrefix+parseInt(i)).src = img;
                     });
                 }
             }
