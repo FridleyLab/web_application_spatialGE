@@ -2,5 +2,5 @@
 
 
 @section('content')
-    <my-projects :projects="{{ json_encode($projects) }}"></my-projects>
+    <my-projects :projects="{{ json_encode($projects) }}" new-project-url="{{ route('new-project') }}"></my-projects>
 @endsection

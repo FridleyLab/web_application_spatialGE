@@ -17,9 +17,13 @@
                         <h5>Adding sample to the project: <span class="text-secondary">{{ project.name }}</span></h5>
                     </div>
 
-
                     <h6 class="text-center">Please import your H5 and CSV files (.png image is optional)</h6>
                     <hr class="dark horizontal my-0">
+
+                    <div class="my-4">
+                        <file-upload-drag-drop></file-upload-drag-drop>
+                    </div>
+
                     <div>
                         <file-upload ref="h5" info="Select the .h5 file to be imported" file-types=".h5" :show-upload-button="false" @validated="statusH5" @uploaded="uploadedH5"></file-upload>
                     </div>
@@ -66,9 +70,7 @@
                         </div>
                     </div>
 
-                    <div class="my-4">
-                        <file-upload-drag-drop></file-upload-drag-drop>
-                    </div>
+
 
                 </div>
             </div>

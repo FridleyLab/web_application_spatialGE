@@ -17,6 +17,15 @@ class ProjectController extends Controller
         return view('projects.index', compact(['projects']));
     }
 
+    public function open(Project $project) {
+
+        setActiveProject($project);
+
+        return redirect($project->getCurrentStepUrl());
+
+        //return redirect()->route('import-data', ['project' => $project->id]);
+    }
+
     public function create(): View
     {
 
@@ -34,6 +43,8 @@ class ProjectController extends Controller
 
         try {
             $project = Project::create(['name' => $name, 'description' => $description, 'user_id' => auth()->id()]);
+
+            setActiveProject($project);
 
             return response(route('import-data',['project' => $project->id]));
         }

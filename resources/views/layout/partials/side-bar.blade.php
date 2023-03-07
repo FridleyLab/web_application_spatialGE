@@ -42,14 +42,41 @@
                         <span class="nav-link-text ms-1">My Projects</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white @if(url()->current() === route('new-project')) active bg-gradient-info @endif" href="{{ route('new-project') }}">
-                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-icons opacity-10">create_new_folder</i>
-                        </div>
-                        <span class="nav-link-text ms-1">New Project</span>
-                    </a>
-                </li>
+
+                <div>
+                    @if(session()->has('project_id'))
+                        <li class="nav-item ps-4 pt-2">
+                            <div class="ms-2 text-white me-2 d-flex align-items-center">
+                                <span class="btn btn-sm btn-tag btn-rounded bg-white">{{ getShortProjectName(getActiveProject()) }}</span>
+                            </div>
+                        </li>
+
+                        <li class="nav-item ps-4">
+                            <a class="nav-link text-white @if(url()->current() === route('import-data', ['project' => session('project_id')])) active bg-gradient-info @endif" href="{{ route('import-data', ['project' => session('project_id')]) }}">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10">filter_1</i>
+                                </div>
+                                <span class="nav-link-text ms-1">Import data</span>
+                            </a>
+                        </li>
+                    @endif
+                </div>
+
+
+
+
+
+
+
+
+{{--                <li class="nav-item">--}}
+{{--                    <a class="nav-link text-white @if(url()->current() === route('new-project')) active bg-gradient-info @endif" href="{{ route('new-project') }}">--}}
+{{--                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">--}}
+{{--                            <i class="material-icons opacity-10">create_new_folder</i>--}}
+{{--                        </div>--}}
+{{--                        <span class="nav-link-text ms-1">New Project</span>--}}
+{{--                    </a>--}}
+{{--                </li>--}}
 
 
 {{--                <li class="nav-item">--}}

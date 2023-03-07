@@ -16,17 +16,24 @@ class Project extends Model
 
     protected $appends = ['url'];
 
-
     //Relations
     public function samples(): BelongsToMany
     {
         return $this->belongsToMany(Sample::class);
     }
 
-
     //Attributes
     public function getUrlAttribute() {
-        return route('import-data', ['project' => $this->id]);
+        return route('open-project', ['project' => $this->id]);
+    }
+
+
+    public function getCurrentStepUrl() {
+        if($this->current_step === 1)
+            return route('import-data', ['project' => $this->id]);
+
+
+        return '/';
     }
 
 }

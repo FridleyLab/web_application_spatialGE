@@ -19,6 +19,8 @@ class SecurityController extends Controller
 
     public function signin() {
 
+        session()->invalidate();
+
         $credentials = request()->only('email', 'password');
 
         if (auth()->attempt($credentials)) {
@@ -122,6 +124,7 @@ class SecurityController extends Controller
 
     public function destroy(): \Illuminate\Http\RedirectResponse
     {
+        session()->invalidate();
 
         auth()->logout();
 

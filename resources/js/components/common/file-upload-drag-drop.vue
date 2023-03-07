@@ -1,7 +1,5 @@
 <template>
     <div id="file-drag-drop">
-        <h2>Drag And Drop</h2>
-        <hr/>
         <form id="drop-form" @drop="handleFileDrop( $event )">
             <label class="drop-files h-100 w-100">Drop your files here or click to select them!
             <input type="file" v-on:change="handleFileDrop( $event )" style="display: none" multiple  />
@@ -11,10 +9,17 @@
         <div v-for="(file, key) in files"
              v-bind:key="'file-'+key"
              class="file-listing">
-            <img class="preview" v-bind:id="imgIdPrefix+parseInt( key )"/>
-            {{ file.name }}
+            <img class="preview" v-bind:id="imgIdPrefix+parseInt( key )" :title="file.name" />
             <div class="remove-container">
                 <a class="remove" v-on:click="removeFile( key )">Remove</a>
+            </div>
+        </div>
+
+        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;" v-for="(file, key) in files" v-bind:key="'file-'+key">
+            <div class="card-header">{{ getFileExtension(file.name).toUpperCase() }}</div>
+            <div class="card-body">
+                <h5 class="card-title">Light card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
             </div>
         </div>
 
@@ -105,6 +110,10 @@ export default {
                 && 'FileReader' in window;
         },
 
+        getFileExtension(fileName) {
+            return fileName.split('.').pop();
+        },
+
         getImagePreviews(){
             /*
                 Iterate over all the files and generate an image preview for each one.
@@ -134,13 +143,12 @@ export default {
                     */
                     reader.readAsDataURL( this.files[i] );
                 }else{
+                    const fileExtension = this.getFileExtension(this.files[i].name);
+                    let img = '/images/icons/' + (this.knownFileTypes.toLowerCase().includes(fileExtension) ? fileExtension : 'other') + '.png';
+
                     /*
                         We do the next tick so the reference is bound and we can access it.
                     */
-
-                    const fileExtension = this.files[i].name.split('.').pop();
-                    let img = '/images/icons/' + (this.knownFileTypes.toLowerCase().includes(fileExtension) ? fileExtension : 'other') + '.png';
-
                     this.$nextTick(function(){
                         document.getElementById(this.imgIdPrefix+parseInt(i)).src = img;
                     });

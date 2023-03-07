@@ -25,6 +25,14 @@
                             You haven't created any projects!
                         </div>
 
+                        <div class="text-end mt-3">
+                            <a class=" btn text-white bg-gradient-info col-2" :href="newProjectUrl">
+                                <span class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10">create_new_folder</i>&nbsp;New Project
+                                </span>
+                            </a>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -39,6 +47,7 @@ export default {
 
     props: {
         projects: Object,
+        newProjectUrl: String,
     },
 
     data() {

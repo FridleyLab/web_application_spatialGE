@@ -31,7 +31,8 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects',[ProjectController::class, 'index'])->name('my-projects');
     Route::post('/projects',[ProjectController::class, 'store'])->name('store-project');
     Route::get('/projects/new',[ProjectController::class, 'create'])->name('new-project');
-    Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data');
+    Route::get('/projects/{project}',[ProjectController::class, 'open'])->name('open-project')->middleware('project');
+    Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data')->middleware('project');
 
     Route::post('/files', [FileController::class, 'store'])->name('file-upload');
 
