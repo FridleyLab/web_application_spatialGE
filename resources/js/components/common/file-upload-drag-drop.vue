@@ -1,31 +1,53 @@
 <template>
-    <div id="file-drag-drop">
-        <form id="drop-form" @drop="handleFileDrop( $event )">
-            <label class="drop-files h-100 w-100">Drop your files here or click to select them!
+    <div class="row text-center justify-content-center align-items-center w-100">
+
+
+        <form id="drop-form" class="col-6 text-center bg-gray-400 rounded" style="height: 150px" @drop="handleFileDrop( $event )">
+            <label class="pt-2 w-100 h-100 cursor-pointer text-info font-weight-bold">Drop your files here or <br /> click to select them!
             <input type="file" v-on:change="handleFileDrop( $event )" style="display: none" multiple  />
             </label>
         </form>
 
-        <div v-for="(file, key) in files"
-             v-bind:key="'file-'+key"
-             class="file-listing">
-            <img class="preview" v-bind:id="imgIdPrefix+parseInt( key )" :title="file.name" />
-            <div class="remove-container">
-                <a class="remove" v-on:click="removeFile( key )">Remove</a>
+<!--        <div v-for="(file, key) in files"-->
+<!--             v-bind:key="'file-'+key"-->
+<!--             class="file-listing">-->
+<!--            <img class="preview" v-bind:id="imgIdPrefix+parseInt( key )" :title="file.name" />-->
+<!--            <div class="remove-container">-->
+<!--                <a class="remove" v-on:click="removeFile( key )">Remove</a>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="d-flex mt-3 align-items-center justify-content-center">
+            <div v-for="(file, key) in files"
+                 v-bind:key="'file-'+key"
+                 class="col-2 mx-1">
+                <img class="img-thumbnail img-fluid" v-bind:id="imgIdPrefix+parseInt( key )" :title="file.name" />
+                <div class="text-center">
+                    <a class="btn btn-sm text-danger" v-on:click="removeFile( key )">Remove</a>
+                </div>
             </div>
         </div>
 
-        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;" v-for="(file, key) in files" v-bind:key="'file-'+key">
-            <div class="card-header">{{ getFileExtension(file.name).toUpperCase() }}</div>
-            <div class="card-body">
-                <h5 class="card-title">Light card title</h5>
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-            </div>
+
+        <div class="input-group input-group-outline w-30">
+            <label class="form-label">Sample name (optional)</label>
+            <input type="text" class="form-control" name="sample_name" v-model="sample_name">
         </div>
 
-        <progress max="100" :value.prop="uploadPercentage"></progress>
 
-        <a class="submit-button" v-on:click="submitFiles()" v-show="files.length > 0">Submit</a>
+        <progress v-show="uploading" max="100" :value.prop="uploadPercentage"></progress>
+
+        <div class="p-2 w-100 text-center">
+            <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">
+                Import sample
+            </button>
+        </div>
+
+
+
+
+
+<!--        <a class="submit-button" v-on:click="submitFiles()" v-show="files.length > 0">Submit</a>-->
     </div>
 </template>
 
@@ -35,6 +57,10 @@ export default {
 
     name: 'fileUploadDragDrop',
 
+    props: {
+        project: Object,
+    },
+
     data(){
         return {
             dragAndDropCapable: false,
@@ -42,7 +68,11 @@ export default {
             uploadPercentage: 0,
             imgIdPrefix: 'drag-and-drop-preview-',
 
-            knownFileTypes: 'csv,zip,gz,h5,txt,jpg,jpeg,png,json',
+            knownFileTypes: 'tsv,csv,zip,gz,h5,txt,jpg,jpeg,png,json',
+
+            uploading: false,
+
+            sample_name: '',
         }
     },
 
@@ -58,6 +88,12 @@ export default {
         if( this.dragAndDropCapable ){
             this.bindEvents();
         }
+    },
+
+    computed: {
+        canStartImportProcess() {
+            return this.hasFileType('h5') && this.hasFileType('csv');
+        },
     },
 
     methods: {
@@ -83,7 +119,8 @@ export default {
             let files = 'dataTransfer' in event ? event.dataTransfer.files : event.target.files;
 
             for( let i = 0; i < files.length; i++ ){
-                this.files.push( files[i] );
+                if(this.files.length < 4)
+                    this.files.push( files[i] );
             }
 
             this.getImagePreviews();
@@ -112,6 +149,10 @@ export default {
 
         getFileExtension(fileName) {
             return fileName.split('.').pop();
+        },
+
+        hasFileType(type) {
+            return this.files.filter(file => {return this.getFileExtension(file.name).toLowerCase() === type.toLowerCase()}).length;
         },
 
         getImagePreviews(){
@@ -161,7 +202,7 @@ export default {
             this.getImagePreviews();
         },
 
-        submitFiles(){
+        importSample(){
             /*
                 Initialize the form data
             */
@@ -177,10 +218,15 @@ export default {
                 formData.append('files[' + i + ']', file);
             }
 
+            formData.append('project_id', this.project.id);
+            formData.append('sample_name', this.sample_name.trim());
+
+            this.uploading = true;
+
             /*
                 Make the request to the POST /file-drag-drop URL
             */
-            axios.post( '/files',
+            axios.post( '/samples',
                 formData,
                 {
                     headers: {
@@ -193,9 +239,11 @@ export default {
             ).then((response) => {
                 console.log('SUCCESS!!');
                 console.log(response.data);
+                location.reload();
             })
             .catch((error) => {
                 console.log('FAILURE!!');
+                this.uploading = false;
             });
         }
     }
@@ -203,20 +251,10 @@ export default {
 </script>
 
 <style scoped>
-form{
-    display: block;
-    height: 200px;
-    width: 400px;
-    background: #ccc;
-    margin: auto;
-    margin-top: 40px;
-    text-align: center;
-    line-height: 200px;
-    border-radius: 4px;
-}
+
 
 div.file-listing{
-    width: 400px;
+    width: 50px;
     margin: auto;
     padding: 10px;
     border-bottom: 1px solid #ddd;

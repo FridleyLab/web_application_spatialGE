@@ -59,6 +59,15 @@
                                 <span class="nav-link-text ms-1">Import data</span>
                             </a>
                         </li>
+
+                        <li class="nav-item ps-4">
+                            <a class="nav-link text-white disabled">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10">filter_2</i>
+                                </div>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">QC & data transformation</span>
+                            </a>
+                        </li>
                     @endif
                 </div>
 

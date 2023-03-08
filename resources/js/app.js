@@ -14,6 +14,7 @@ import fileUploadDragDrop from "./components/common/file-upload-drag-drop.vue";
 import importData from "./components/wizard/import-data.vue";
 import newProject from './views/projects/new.vue';
 import myProjects from './views/projects/index.vue';
+import projectSamples from './views/projects/samples.vue';
 
 import {createApp} from "vue";
 
@@ -34,6 +35,7 @@ app.component('file-upload', fileUpload);
 app.component('file-upload-drag-drop', fileUploadDragDrop);
 app.component('new-project', newProject);
 app.component('my-projects', myProjects);
+app.component('project-samples', projectSamples);
 app.component('import-data', importData)
 
 //Register the window as a global variable, so it can be accessed everywhere
