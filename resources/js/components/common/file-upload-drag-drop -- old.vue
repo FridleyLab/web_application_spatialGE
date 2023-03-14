@@ -1,39 +1,49 @@
 <template>
-    <div class="text-center justify-content-center align-items-center w-100">
+    <div class="row text-center justify-content-center align-items-center w-100">
 
 
-        <div class="justify-content-center mb-3">
-            <form :id="'drop-form_' + code" class="text-center rounded" style="height: 150px" @drop="handleFileDrop( $event )">
-                <label v-if="!file" class="pt-2 w-100 h-100 rounded cursor-pointer text-info border border-info border-1"> {{ caption }} <br />
-                    <input type="file" v-on:change="handleFileDrop( $event )" style="display: none" />
-                    <div class="icon icon-lg icon-shape bg-gradient-info shadow-dark">
-                        <i class="material-icons opacity-10">add_circle_outline</i>
-                    </div>
-                    <div v-if="required" class="text-warning mt-1">Required</div>
-                </label>
-                <img v-if="file" class="img-thumbnail img-fluid h-100" ref="imgIcon" :title="file?.name" />
-                <div v-if="file" class="text-center">
-                    <a class="btn btn-sm text-danger" v-on:click="removeFile( key )">Remove</a>
-                </div>
-            </form>
-        </div>
+        <form id="drop-form" class="col-6 text-center bg-gray-400 rounded" style="height: 150px" @drop="handleFileDrop( $event )">
+            <label class="pt-2 w-100 h-100 cursor-pointer text-info font-weight-bold">Drop your files here or <br /> click to select them!
+            <input type="file" v-on:change="handleFileDrop( $event )" style="display: none" multiple  />
+            </label>
+        </form>
 
-
-<!--        <div class="w-30 mt-3" v-show="!uploading">-->
-<!--            <div class="input-group input-group-outline focused is-focused">-->
-<!--                <label class="form-label">Sample name (optional)</label>-->
-<!--                <input type="text" class="form-control" name="sample_name" v-model="sample_name">-->
+<!--        <div v-for="(file, key) in files"-->
+<!--             v-bind:key="'file-'+key"-->
+<!--             class="file-listing">-->
+<!--            <img class="preview" v-bind:id="imgIdPrefix+parseInt( key )" :title="file.name" />-->
+<!--            <div class="remove-container">-->
+<!--                <a class="remove" v-on:click="removeFile( key )">Remove</a>-->
 <!--            </div>-->
 <!--        </div>-->
 
+        <div class="d-flex mt-3 align-items-center justify-content-center">
+            <div v-for="(file, key) in files"
+                 v-bind:key="'file-'+key"
+                 class="col-2 mx-1">
+                <img class="img-thumbnail img-fluid" v-bind:id="imgIdPrefix+parseInt( key )" :title="file.name" />
+                <div class="text-center">
+                    <a class="btn btn-sm text-danger" v-on:click="removeFile( key )">Remove</a>
+                </div>
+            </div>
+        </div>
 
-<!--        <progress v-show="uploading" max="100" :value.prop="uploadPercentage"></progress>-->
 
-<!--        <div class="p-2 w-100 text-center">-->
-<!--            <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">-->
-<!--                Import sample-->
-<!--            </button>-->
-<!--        </div>-->
+        <div class="w-30" v-show="!uploading">
+            <div class="input-group input-group-outline focused is-focused">
+                <label class="form-label">Sample name (optional)</label>
+                <input type="text" class="form-control" name="sample_name" v-model="sample_name">
+            </div>
+        </div>
+
+
+        <progress v-show="uploading" max="100" :value.prop="uploadPercentage"></progress>
+
+        <div class="p-2 w-100 text-center">
+            <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">
+                Import sample
+            </button>
+        </div>
 
 
 
@@ -51,15 +61,12 @@ export default {
 
     props: {
         project: Object,
-        caption: {type: String, default: "select or drop file"},
-        required: {type: Boolean, default: false},
-        code: String,
     },
 
     data(){
         return {
             dragAndDropCapable: false,
-            file: null,
+            files: [],
             uploadPercentage: 0,
             imgIdPrefix: 'drag-and-drop-preview-',
 
@@ -103,7 +110,7 @@ export default {
                     (opening the file in the browser) and stop the propagation of the event (so
                     no other elements open the file in the browser)
                 */
-                document.getElementById('drop-form_' + this.code).addEventListener(evt, function(e){
+                document.getElementById('drop-form').addEventListener(evt, function(e){
                     e.preventDefault();
                     e.stopPropagation();
                 }.bind(this), false);
@@ -111,19 +118,14 @@ export default {
         },
 
         handleFileDrop( event ){
-            this.file = 'dataTransfer' in event ? event.dataTransfer.files[0] : event.target.files[0];
+            let files = 'dataTransfer' in event ? event.dataTransfer.files : event.target.files;
 
-            /*
             for( let i = 0; i < files.length; i++ ){
                 if(this.files.length < 4)
                     this.files.push( files[i] );
-            }*/
+            }
 
             this.getImagePreviews();
-
-
-            this.$emit('fileSelected', this.file);
-
         },
 
         determineDragAndDropCapable(){
@@ -152,19 +154,18 @@ export default {
         },
 
         hasFileType(type) {
-            //return this.files.filter(file => {return this.getFileExtension(file.name).toLowerCase() === type.toLowerCase()}).length;
-            return (this.file !== null) && (this.getFileExtension(this.file.name).toLowerCase() === type.toLowerCase());
+            return this.files.filter(file => {return this.getFileExtension(file.name).toLowerCase() === type.toLowerCase()}).length;
         },
 
         getImagePreviews(){
             /*
                 Iterate over all the files and generate an image preview for each one.
             */
-            //for( let i = 0; i < this.files.length; i++ ){
+            for( let i = 0; i < this.files.length; i++ ){
                 /*
                     Ensure the file is an image file
                 */
-                if ( /\.(jpe?g|png|gif)$/i.test( this.file.name ) ) {
+                if ( /\.(jpe?g|png|gif)$/i.test( this.files[i].name ) ) {
                     /*
                         Create a new FileReader object
                     */
@@ -175,8 +176,7 @@ export default {
                         to update the src on the file preview.
                     */
                     reader.addEventListener("load", function(){
-                        this.$refs.imgIcon.src = reader.result;
-                        //document.getElementById('imgIcon').src = reader.result;
+                        document.getElementById(this.imgIdPrefix+parseInt(i)).src = reader.result;
                     }.bind(this), false);
 
                     /*
@@ -184,27 +184,24 @@ export default {
                         been loaded, we listen to the event propagated and set the image
                         src to what was loaded from the reader.
                     */
-                    reader.readAsDataURL( this.file );
+                    reader.readAsDataURL( this.files[i] );
                 }else{
-                    const fileExtension = this.getFileExtension(this.file.name);
+                    const fileExtension = this.getFileExtension(this.files[i].name);
                     let img = '/images/icons/' + (this.knownFileTypes.toLowerCase().includes(fileExtension) ? fileExtension : 'other') + '.png';
 
                     /*
                         We do the next tick so the reference is bound and we can access it.
                     */
                     this.$nextTick(function(){
-                        this.$refs.imgIcon.src = img;
-                        //document.getElementById('imgIcon').src = img;
+                        document.getElementById(this.imgIdPrefix+parseInt(i)).src = img;
                     });
                 }
-            //}
+            }
         },
 
         removeFile( key ){
-            this.file = null;
-            //this.getImagePreviews();
-
-            this.$emit('fileRemoved', this.file);
+            this.files.splice( key, 1 );
+            this.getImagePreviews();
         },
 
         importSample(){

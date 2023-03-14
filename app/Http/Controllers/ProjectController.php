@@ -53,6 +53,27 @@ class ProjectController extends Controller
         }
     }
 
+    public function edit(Project $project) {
+
+        return view('wizard.edit-project', compact(['project']));
+
+    }
+
+    public function update(Project $project) {
+        $name = request('name');
+        $description = request('description');
+
+        if(strlen(trim($name)) < 4)
+            return response('Name has to be at least 4 characters long', 400);
+
+        $project->name = $name;
+        $project->description = $description;
+
+        $project->save();
+
+        return response(route('my-projects'));
+    }
+
 
     public function import_data(Project $project): View
     {
@@ -60,6 +81,27 @@ class ProjectController extends Controller
 
         return view('wizard.import-data')->with(compact('project', 'samples'));
 
+    }
+
+    public function qc_data_transformation(Project $project) {
+        return view('wizard.qc_data_transformation')->with(compact('project'));
+    }
+
+    public function destroy(Project $project) {
+
+        $project->delete();
+
+        return 'OK';
+    }
+
+    public function go_to_step(Project $project, $step) {
+        $project->current_step = $step;
+        $project->save();
+
+        return route('qc-data-transformation', ['project' => $project->id]);
+
+        if($step === 2)
+            return redirect()->route('qc-data-transformation', ['project' => $project->id]);
     }
 
 

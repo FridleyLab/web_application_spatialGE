@@ -9,30 +9,41 @@
                             <i class="material-icons opacity-10">filter_1</i>
                         </div>
                         <div class="text-end pt-1">
-                            <h6 class="mb-0 text-capitalize">Create new project</h6>
+                            <h6 class="mb-0 text-capitalize">{{ project ? 'Update' : 'Create new' }} project</h6>
                         </div>
                     </div>
 
                     <div class="card-body">
-                        <form role="form" :action="targetUrl" @submit.prevent="createProject" method="POST">
+                        <form role="form" :action="targetUrl" @submit.prevent="createProject" method="POST" autocomplete="off">
 
                             <input type="hidden" name="_token" :value="window._token">
 
-                            <div class="input-group input-group-outline mb-3" :class="validName ? 'is-valid' : ''">
+                            <div class="mb-3 w-100 w-lg-50">
+                                <div>What platform are you using for this project?</div>
+                                <select class="form-select bg-white border border-1" required>
+                                    <option value=""></option>
+                                    <option v-for="platform in platforms" :value="platform">{{ platform }}</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group input-group-outline mb-3" :class="(validName ? 'is-valid' : '') + (project ? ' focused is-focused' : '')">
                                 <label class="form-label">Project Name</label>
                                 <input required type="text" class="form-control" name="name" v-model="name">
                             </div>
 
-                            <div class="input-group input-group-outline mb-3">
+                            <div class="input-group input-group-outline mb-3" :class="(project ? 'focused is-focused' : '')">
                                 <label class="form-label">Description</label>
                                 <input type="text" class="form-control" name="description" v-model="description">
                             </div>
 
                             <show-message :message="errorMessage"></show-message>
 
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-lg bg-gradient-info btn-lg w-25 mt-4 mb-0">Create</button>
+
+                            <div class="row justify-content-center gap-2">
+                                <button type="submit" class="btn btn-sm bg-gradient-info col-4 col-md-2 mt-4 mb-0">{{ project ? 'Update' : 'Create'}}</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger col-4 col-md-2 mt-4 mb-0" @click="window.location.href = '/projects'">Cancel</button>
                             </div>
+
                         </form>
                     </div>
                     <div class="card-footer text-center pt-0 px-lg-2 px-1">
@@ -53,14 +64,21 @@
 
         props: {
             targetUrl: String,
+            project: {type: Object, default: null}
         },
 
         data() {
             return {
-                name: '',
-                description: '',
-                errorMessage: ''
+                name: this.project ? this.project.name : '',
+                description: this.project ? this.project.description : '',
+                errorMessage: '',
+
+                platforms: ['Visium', 'GeoMx', 'CosMx/SMI', 'MERFISH/MERSCOPE', 'Molecular Cartography', 'Slide-seq', 'STARmap', 'Spatial Transcriptomics (Pre-Visium)', 'Multiple platforms', 'Other'],
             }
+        },
+
+        mounted() {
+
         },
 
         computed: {
@@ -76,15 +94,29 @@
                     this.errorMessage = 'Name has to be at least 4 characters long';
                 else
                 {
-                    axios.post(this.targetUrl, {name: this.name, description: this.description})
-                        .then((response) => {
-                            console.log(response.data);
-                            location.href = response.data;
-                        })
-                        .catch((error) => {
-                            console.log(error.message);
-                            this.errorMessage = error.response.data;
-                        });
+                    if(this.project) {
+                        axios.patch(this.targetUrl, {name: this.name, description: this.description})
+                            .then((response) => {
+                                console.log(response.data);
+                                location.href = response.data;
+                            })
+                            .catch((error) => {
+                                console.log(error.message);
+                                this.errorMessage = error.response.data;
+                            });
+                    }
+                    else
+                    {
+                        axios.post(this.targetUrl, {name: this.name, description: this.description})
+                            .then((response) => {
+                                console.log(response.data);
+                                location.href = response.data;
+                            })
+                            .catch((error) => {
+                                console.log(error.message);
+                                this.errorMessage = error.response.data;
+                            });
+                    }
                 }
 
 

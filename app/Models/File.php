@@ -12,7 +12,7 @@ class File extends Model
 
     protected $table = 'files';
 
-    protected $fillable = ['filename'];
+    protected $fillable = ['filename', 'type'];
 
     //Relations
     public function samples(): BelongsToMany

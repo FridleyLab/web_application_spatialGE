@@ -15,6 +15,8 @@ import importData from "./components/wizard/import-data.vue";
 import newProject from './views/projects/new.vue';
 import myProjects from './views/projects/index.vue';
 import projectSamples from './views/projects/samples.vue';
+import qcDataTransformation from "./components/wizard/qc-data-transformation.vue";
+
 
 import {createApp} from "vue";
 
@@ -36,7 +38,8 @@ app.component('file-upload-drag-drop', fileUploadDragDrop);
 app.component('new-project', newProject);
 app.component('my-projects', myProjects);
 app.component('project-samples', projectSamples);
-app.component('import-data', importData)
+app.component('import-data', importData);
+app.component('qc-data-transformation', qcDataTransformation);
 
 //Register the window as a global variable, so it can be accessed everywhere
 app.config.globalProperties.window = window;

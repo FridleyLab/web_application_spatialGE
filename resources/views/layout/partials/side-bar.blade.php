@@ -7,7 +7,7 @@
         </a>
     </div>
     <hr class="horizontal light mt-0 mb-2">
-    <div class="collapse navbar-collapse  w-auto" id="sidenav-collapse-main">
+    <div class="collapse navbar-collapse  w-auto h-auto" id="sidenav-collapse-main">
         <ul class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link text-white @if(url()->current() === route('home')) active bg-gradient-info @endif" href="{{ route('home') }}">
@@ -61,13 +61,59 @@
                         </li>
 
                         <li class="nav-item ps-4">
-                            <a class="nav-link text-white disabled">
+                            <a class="nav-link text-white @if(url()->current() === route('qc-data-transformation', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 2) disabled @endif" style="@if(getActiveProject()->current_step < 2) background-color: transparent !important @endif" href="{{ route('qc-data-transformation', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i class="material-icons opacity-10">filter_2</i>
+                                    <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 2) text-secondary @endif">filter_2</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">QC & data transformation</span>
+                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 2) text-secondary @endif text-bold">QC & data transformation</span>
                             </a>
                         </li>
+
+                        <li class="nav-item ps-4">
+                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10 text-secondary">filter_3</i>
+                                </div>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">STplot - Visualization</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ps-4">
+                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10 text-secondary">filter_4</i>
+                                </div>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">SThet - Spatial heterogen.</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ps-4">
+                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10 text-secondary">filter_5</i>
+                                </div>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">STclust - Niche detection</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ps-4">
+                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10 text-secondary">filter_6</i>
+                                </div>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">STDE - Differential expr.</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ps-4">
+                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10 text-secondary">filter_7</i>
+                                </div>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">STenrich - Spatial gene set</span>
+                            </a>
+                        </li>
+
                     @endif
                 </div>
 

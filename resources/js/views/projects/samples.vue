@@ -1,13 +1,14 @@
 <template>
-    <div class="p-3">
-        <h5>Samples in this project</h5>
+    <div class="px-3 pb-3">
+<!--        <h5>Samples in this project</h5>-->
 
-        <div class="row text-bolder text-center">
+        <div v-if="samples.length" class="row text-bolder text-center">
             <div class="col-2 text-start">Sample</div>
             <div class="col-2">Expression</div>
             <div class="col-2">Coordinates</div>
             <div class="col-2">Scale factors</div>
             <div class="col-2">Tissue image</div>
+            <div class="col-2"></div>
         </div>
 
         <div v-for="sample in samples" class="row">
@@ -16,35 +17,32 @@
             </div>
 
             <div class="col-2 text-center">
-                <i v-if="hasExpression" class="material-icons opacity-10 text-success">check</i>
+                <i v-if="hasExpression(sample)" class="material-icons opacity-10 text-success">check</i>
             </div>
 
             <div class="col-2 text-center">
-                <i v-if="hasCoordinates" class="material-icons opacity-10 text-success">check</i>
+                <i v-if="hasCoordinates(sample)" class="material-icons opacity-10 text-success">check</i>
             </div>
 
             <div class="col-2 text-center">
-                <i v-if="hasScaleFactors" class="material-icons opacity-10 text-success">check</i>
+                <i v-if="hasScaleFactors(sample)" class="material-icons opacity-10 text-success">check</i>
             </div>
 
             <div class="col-2 text-center">
-                <i v-if="hasImage" class="material-icons opacity-10 text-success">check</i>
+                <i v-if="hasImage(sample)" class="material-icons opacity-10 text-success">check</i>
+            </div>
+
+            <div class="col-2 text-center">
+                <i v-if="!deleting" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deleting = sample.id">delete</i>
+
+                <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deleting = 0" title="Cancel deletion attempt" />
+                <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-danger text-xxs" value="Delete" title="Confirm deletion of this sample" @click="deleteSample(sample)" />
+
             </div>
 
             <hr class="dark horizontal my-0">
         </div>
 
-
-
-<!--        <div v-for="sample in samples">-->
-<!--            <div class="">-->
-<!--                <span class="text-bolder">{{ sample.name ?? 'Sample ' + sample.id }}</span>-->
-<!--                <div v-for="file in sample.file_list" class="ps-2 pb-1">-->
-<!--                    <span class="text-info">{{ file.filename }}</span>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <hr class="dark horizontal my-0">-->
-<!--        </div>-->
         <div v-if="!samples.length">
             You haven't uploaded any samples yet!
         </div>
@@ -59,29 +57,42 @@
             samples: Object,
         },
 
+        data() {
+            return {
+                deleting: 0
+            }
+        },
+
         methods: {
             getFileExtension(fileName) {
                 return fileName.split('.').pop();
             },
 
-            hasFileType(type) {
-                return this.files.filter(file => {return this.getFileExtension(file.name).toLowerCase() === type.toLowerCase()}).length;
+            hasFileType(sample, type) {
+                //return true;
+                return sample.file_list.filter(file => {return this.getFileExtension(file.filename).toLowerCase() === type.toLowerCase()}).length > 0;
             },
 
-            hasExpression() {
-                return this.hasFileType('h5');
+            hasExpression(sample) {
+                return this.hasFileType(sample,'h5');
             },
 
-            hasCoordinates() {
-                return this.hasFileType('csv') || this.hasFileType('tsv') || this.hasFileType('txt');
+            hasCoordinates(sample) {
+                return this.hasFileType(sample,'csv') || this.hasFileType(sample,'tsv') || this.hasFileType(sample,'txt');
             },
 
-            hasScaleFactors() {
-                return this.hasFileType('json');
+            hasScaleFactors(sample) {
+                return this.hasFileType(sample,'json');
             },
 
-            hasImage() {
-                return this.hasFileType('png') || this.hasFileType('jpg') || this.hasFileType('jpeg');
+            hasImage(sample) {
+                return this.hasFileType(sample,'png') || this.hasFileType(sample,'jpg') || this.hasFileType(sample,'jpeg');
+            },
+
+            deleteSample(sample) {
+                axios.delete('/samples/' + sample.id)
+                    .then((response) => {console.log(response.data); location.reload()})
+                    .catch((error) => {console.log(error.message)});
             },
 
         },

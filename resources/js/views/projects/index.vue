@@ -16,8 +16,16 @@
                     <div class="card-body">
 
                         <div v-for="project in projects">
-                            <div class="m-3">
-                                <span class="text-bolder"><a :href="project.url">{{ project.name }}</a></span>
+                            <div class="m-3 row">
+                                <div class="text-bolder col-5"><a :href="project.url">{{ project.name }}</a></div>
+                                <div class="text-bolder col-5">{{ project.description }}</div>
+                                <div class="text-end col-2">
+                                    <i v-if="!deleting" class="material-icons opacity-10 text-info cursor-pointer ms-2" title="Delete" @click="editProject(project)">edit</i>
+                                    <i v-if="!deleting" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deleting = project.id">delete</i>
+
+                                    <input v-if="deleting === project.id" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deleting = 0" title="Cancel deletion attempt" />
+                                    <input v-if="deleting === project.id" type="button" class="btn btn-sm btn-outline-danger text-xxs" value="Delete" title="Confirm deletion of this sample" @click="deleteProject(project)" />
+                                </div>
                             </div>
                             <hr class="dark horizontal my-0">
                         </div>
@@ -26,7 +34,7 @@
                         </div>
 
                         <div class="text-end mt-3">
-                            <a class=" btn text-white bg-gradient-info col-2" :href="newProjectUrl">
+                            <a class=" btn text-white bg-gradient-info col-3" :href="newProjectUrl">
                                 <span class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                                     <i class="material-icons opacity-10">create_new_folder</i>&nbsp;New Project
                                 </span>
@@ -54,7 +62,9 @@ export default {
         return {
             name: '',
             description: '',
-            errorMessage: ''
+            errorMessage: '',
+
+            deleting: 0,
         }
     },
 
@@ -84,6 +94,16 @@ export default {
             }
 
 
+        },
+
+        deleteProject(project) {
+            axios.delete('/projects/' + project.id)
+                .then((response) => {console.log(response.data); location.reload()})
+                .catch((error) => {console.log(error.message)});
+        },
+
+        editProject(project) {
+            location.href = '/projects/' + project.id + '/edit';
         }
     }
 }

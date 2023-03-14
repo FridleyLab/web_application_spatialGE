@@ -14,13 +14,13 @@
 
                                     <input type="hidden" name="_token" :value="window._token">
 
-                                    <div class="input-group input-group-outline mb-3" :class="validEmailAddress ? 'is-valid' : ''">
+                                    <div class="input-group input-group-outline mb-3" :class="(validEmailAddress ? 'is-valid' : '') + (this.overrideValidations ? 'focused is-focused is-valid' : '')">
                                         <label class="form-label">Email</label>
-                                        <input required type="email" class="form-control" name="email" v-model="email" @dblclick="testUser">
+                                        <input ref="email" required type="email" class="form-control" name="email" v-model="email" @dblclick="testUser">
                                     </div>
-                                    <div class="input-group input-group-outline mb-3">
+                                    <div class="input-group input-group-outline mb-3" :class="(this.overrideValidations ? 'focused is-focused' : '')">
                                         <label class="form-label">Password</label>
-                                        <input required type="password" class="form-control" name="password" v-model="password">
+                                        <input ref="password" required type="password" class="form-control" name="password" v-model="password">
                                     </div>
                                     <show-message :message="errorMessage" role="danger"></show-message>
                                     <div class="text-center">
@@ -55,7 +55,9 @@
             return {
                 email: '', //'roberto.manjarres-betancur@moffitt.org',
                 password: '', // '12345678',
-                errorMessage: ''
+                errorMessage: '',
+
+                overrideValidations: false,
             }
         },
 
@@ -78,7 +80,7 @@
 
                 axios.post(this.targetUrl , {'email' : this.email, 'password': this.password})
                     .then((response) => {
-                        window.location.href = "/";
+                        window.location.href = "/projects";
                     })
                     .catch((error) => {
                         console.log(error.message);
@@ -88,8 +90,12 @@
 
             //For developing purposes
             testUser: function() {
+
                 this.email = 'test@moffitt.org';
                 this.password = '12345678';
+
+                this.overrideValidations = true;
+
             }
         }
     }

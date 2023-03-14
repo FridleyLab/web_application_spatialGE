@@ -32,6 +32,9 @@ class Project extends Model
         if($this->current_step === 1)
             return route('import-data', ['project' => $this->id]);
 
+        if($this->current_step === 1)
+            return route('qc-data-transformation', ['project' => $this->id]);
+
 
         return '/';
     }

@@ -32,11 +32,18 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects',[ProjectController::class, 'store'])->name('store-project');
     Route::get('/projects/new',[ProjectController::class, 'create'])->name('new-project');
     Route::get('/projects/{project}',[ProjectController::class, 'open'])->name('open-project')->middleware('project');
+    Route::get('/projects/{project}/edit',[ProjectController::class, 'edit'])->name('edit-project')->middleware('project');
+    Route::get('/projects/{project}/go_to_step/{step}',[ProjectController::class, 'go_to_step'])->name('go-to-step')->middleware('project');
+    Route::patch('/projects/{project}',[ProjectController::class, 'update'])->name('update-project')->middleware('project');
     Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data')->middleware('project');
+    Route::get('/projects/{project}/qc-data-transformation',[ProjectController::class, 'qc_data_transformation'])->name('qc-data-transformation')->middleware('project');
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('destroy-project');
 
     Route::post('/files', [FileController::class, 'store'])->name('file-upload');
 
     Route::post('/samples', [SampleController::class, 'store'])->name('store-sample');
+    Route::delete('/samples/{sample}', [SampleController::class, 'destroy'])->name('destroy-sample');
+
 
 });
 

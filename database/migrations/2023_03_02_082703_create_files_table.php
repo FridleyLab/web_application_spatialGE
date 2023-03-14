@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('filename', 255);
+            $table->string('type', 255); //EXPR, COORDS, IMAGE, SCALE
 
             $table->timestamps();
             $table->softDeletes();
