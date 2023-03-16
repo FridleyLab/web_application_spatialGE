@@ -19,8 +19,8 @@
                             <input type="hidden" name="_token" :value="window._token">
 
                             <div class="mb-3 w-100 w-lg-50">
-                                <div>What platform are you using for this project?</div>
-                                <select class="form-select bg-white border border-1" required>
+                                <div>What spatial transcriptomics platform are you using for this project?</div>
+                                <select class="form-select bg-white border border-1 p-2" required>
                                     <option value=""></option>
                                     <option v-for="platform in platforms" :value="platform">{{ platform }}</option>
                                 </select>

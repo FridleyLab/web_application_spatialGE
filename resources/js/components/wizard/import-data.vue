@@ -21,19 +21,19 @@
                     </div>
 
                     <template v-if="!samples.length || showAddSample">
-                        <h6 class="text-center">Please select or drop your Expression and Coordinates files (image is optional)</h6>
+                        <h6 class="text-center">Please select or drop your gene expression and coordinates files (tissue image is optional)</h6>
                         <hr class="dark horizontal my-0">
 
                         <div class="container" style="max-width: 600px">
                             <div class="my-2 row">
                                 <div class="col-3">
-                                    <file-upload-drag-drop code="expression" :project="project" caption="Expression" :required="true" @fileSelected="expressionFileAdded" @fileRemoved="expressionFileRemoved"></file-upload-drag-drop>
+                                    <file-upload-drag-drop code="expression" :project="project" caption="Gene expression" :required="true" @fileSelected="expressionFileAdded" @fileRemoved="expressionFileRemoved"></file-upload-drag-drop>
                                 </div>
                                 <div class="col-3">
                                     <file-upload-drag-drop code="coordinates" :project="project" caption="Coordinates" :required="true" @fileSelected="coordinatesFileAdded" @fileRemoved="coordinatesFileRemoved"></file-upload-drag-drop>
                                 </div>
                                 <div class="col-3">
-                                    <file-upload-drag-drop code="image" :project="project" caption="Image" @fileSelected="imageFileAdded" @fileRemoved="imageFileRemoved"></file-upload-drag-drop>
+                                    <file-upload-drag-drop code="image" :project="project" caption="Tissue image" @fileSelected="imageFileAdded" @fileRemoved="imageFileRemoved"></file-upload-drag-drop>
                                 </div>
                                 <div class="col-3">
                                     <file-upload-drag-drop code="scale" :project="project" caption="Scale factor" @fileSelected="scaleFileAdded" @fileRemoved="scaleFileRemoved"></file-upload-drag-drop>

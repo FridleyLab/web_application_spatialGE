@@ -21,6 +21,11 @@ return new class extends Migration
             $table->string('email_verification_code', 255);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            $table->string('industry', 255);
+            $table->string('job', 255);
+            $table->string('interest', 255);
+
             $table->rememberToken();
             $table->timestamps();
         });

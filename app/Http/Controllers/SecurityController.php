@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Mail\userAccountActivation;
+use App\Models\ProfileIndustry;
+use App\Models\ProfileInterest;
+use App\Models\ProfileJob;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -41,7 +44,11 @@ class SecurityController extends Controller
 
     public function signup() {
 
-        return view('sign-up');
+        $industries = ProfileIndustry::all()->pluck('name');
+        $jobs = ProfileJob::all()->pluck('name');
+        $areas_of_interest = ProfileInterest::all()->pluck('name');
+
+        return view('sign-up')->with(compact('industries', 'jobs', 'areas_of_interest'));
 
     }
 
@@ -75,7 +82,11 @@ class SecurityController extends Controller
         $last_name = request('last_name');
         $password = request('password');
 
-        if(!strlen(trim($email)) || !strlen(trim($first_name)) || !strlen(trim($last_name)) || !strlen(trim($password)))
+        $interest = request('interest');
+        $job = request('job');
+        $industry = request('industry');
+
+        if(!strlen(trim($email)) || !strlen(trim($first_name)) || !strlen(trim($last_name)) || !strlen(trim($password)) || !strlen(trim($industry)) || !strlen(trim($job)) || !strlen(trim($interest)))
             return response('You need to complete all the fields!', 400);
 
         if($this->checkUserExists($email))
@@ -87,22 +98,26 @@ class SecurityController extends Controller
         }
 
         try {
-            $user = User::create(['first_name' => $first_name, 'last_name' => $last_name, 'email' => $email, 'email_verification_code' => '', 'password' => Hash::make($password)]);
+            $user = User::create(['first_name' => $first_name, 'last_name' => $last_name, 'email' => $email, 'email_verification_code' => '', 'password' => Hash::make($password), 'industry' => $industry, 'interest' => $interest, 'job' => $job]);
             //create hashed value based on the user's email to use as activation code
             $user->email_verification_code = $user->id . '__||__' . str_replace('/', '', Hash::make($user->email));
             $user->save();
             Mail::to($email)->send(new userAccountActivation($user));
 
-            return response('<p>Account created, please check your email to activate your account.</p><p>Please activate your account <a href="' . route('account-activation', ['code' => $user->email_verification_code]) . '">here</a></p>', 200);
+            //TODO: configure to only execute in a local environment
+            return response(route('account-activation-dev', ['user' => $user->id]), 200);
+            //return response('<p>Account created, please check your email to activate your account.</p><p>Please activate your account <a href="' . route('account-activation', ['code' => $user->email_verification_code]) . '">here</a></p>', 200);
         }
         catch(\Exception $e) {
             return response('Something went wrong!. ' . $e->getMessage(), 400);
         }
 
-
-
         //return redirect()->route('home');
 
+    }
+
+    public function activateDev(User $user) {
+        return view('mail.user_account_activation_dev')->with(['user' => $user]);
     }
 
     public function activate($code) {
@@ -129,6 +144,46 @@ class SecurityController extends Controller
         auth()->logout();
 
         return redirect()->route('home');
+    }
+
+    public function sendPasswordRecoveryEmail() {
+
+        $email = request('email');
+
+        try {
+            $user = User::where('email', $email)->firstOrFail();
+
+            //TODO: send email
+
+        }
+        catch (\Exception $e) {
+            return response('Email address nor found!', 400);
+        }
+    }
+
+    public function sendPasswordRecoveryEmailDev() {
+
+        $email = request('email');
+
+        try {
+            $user = User::where('email', $email)->firstOrFail();
+            return view('mail.user_account_password_reset_dev')->with(['user' => $user]);
+        }
+        catch(\Exception $e) {
+            return response('Something went wrong! ' . $email, 500);
+        }
+
+
+    }
+
+    public function resetPasswordForm($code) {
+        try {
+            $user = User::where('email_verification_code', $code)->firstOrFail();
+            return view('sign-in-password-reset')->with(['user' => $user]);
+        }
+        catch(\Exception $e) {
+            return response('Something went wrong!', 500);
+        }
     }
 
 }

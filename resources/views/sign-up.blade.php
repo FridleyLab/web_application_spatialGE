@@ -5,5 +5,5 @@
 @endsection
 
 @section('content')
-    <sign-up target-url="{{ route('signup') }}" sign-in-url="{{ route('login') }}"></sign-up>
+    <sign-up target-url="{{ route('signup') }}" sign-in-url="{{ route('login') }}" :jobs="{{ json_encode($jobs) }}" :industries="{{ json_encode($industries) }}" :areas_of_interest="{{ json_encode($areas_of_interest) }}"></sign-up>
 @endsection

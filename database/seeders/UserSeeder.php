@@ -21,7 +21,10 @@ class UserSeeder extends Seeder
                 'email' => 'test@moffitt.org',
                 'password' => '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', //12345678
                 'email_verification_code' => 'verified',
-                'email_verified_at' => Carbon::now()
+                'email_verified_at' => Carbon::now(),
+                'industry' => 'test',
+                'job' => 'test',
+                'interest' => 'test'
             ]);
         }
     }

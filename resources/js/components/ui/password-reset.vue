@@ -1,11 +1,12 @@
 <template>
+    <section>
         <div class="page-header min-vh-100">
             <div class="container">
                 <div class="row">
                     <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column ms-auto me-auto">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="font-weight-bolder">{{ recoveringPassword ? 'Reset your password' : 'Sign In' }}</h4>
+                                <h4 class="font-weight-bolder">Sign In</h4>
                                 <p class="mb-0">{{ currentHeader }}</p>
                             </div>
                             <div class="card-body">
@@ -29,8 +30,7 @@
                             </div>
                             <div class="card-footer text-center pt-0 px-lg-2 px-1">
                                 <p class="mb-2 text-sm mx-auto">
-                                    <a v-if="!recoveringPassword" @click="forgotPassword" class="text-info text-gradient font-weight-bold cursor-pointer">Forgot your password?</a>
-                                    <a v-if="recoveringPassword" @click="recoveringPassword = false" class="text-danger text-gradient font-weight-bold cursor-pointer">Cancel password recovery</a>
+                                    <a @click="forgotPassword" class="text-info text-gradient font-weight-bold cursor-pointer">Forgot your password?</a>
                                 </p>
                                 <p class="mb-2 text-sm mx-auto">
                                     Don't have an account?
@@ -42,6 +42,7 @@
                 </div>
             </div>
         </div>
+    </section>
 </template>
 <script>
 
@@ -51,7 +52,6 @@
         props: {
             targetUrl: String,
             signUpUrl: String,
-            resetPasswordUrl: String
         },
 
         data() {
@@ -96,9 +96,10 @@
 
                 if(this.recoveringPassword)
                 {
-                    axios.get(this.resetPasswordUrl, {params: {'email' : this.email}})
-                        .then((response) => { location.href = this.resetPasswordUrl + '?email=' + this.email })
-                        .catch((error) => { this.errorMessage = error.message});
+                    axios.get(this.passwordRecoveryUrl, {params: {'email' : this.email}})
+
+                    this.errorMessage = 'Email sent';
+
                     return;
                 }
 
@@ -108,7 +109,7 @@
                     })
                     .catch((error) => {
                         console.log(error.message);
-                        this.errorMessage = error.message;
+                        this.errorMessage = error.response.data;
                     });
             },
 

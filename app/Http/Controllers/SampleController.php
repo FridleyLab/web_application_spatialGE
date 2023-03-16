@@ -8,6 +8,7 @@ use App\Models\ProjectSample;
 use App\Models\Sample;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class SampleController extends Controller
@@ -15,16 +16,25 @@ class SampleController extends Controller
 
     public function store()
     {
+        Storage::createDirectory('users');
+        $userFolder = 'users/' . auth()->id() . '/';
+        Storage::createDirectory($userFolder);
+
 
         if(request()->file('files')) {
 
-            DB::transaction(function () {
+            DB::transaction(function () use($userFolder) {
                 $projectId = request('project_id');
                 $sample_name = request('sample_name');
                 $sample = Sample::create(['name' => $sample_name]);
                 $sample->save();
                 $sample->projects()->save(Project::findOrFail($projectId));
                 $fileType = null;
+
+                $sampleFolder = $userFolder . $sample->id . '/';
+                $sampleFolderSpatial = $sampleFolder . 'spatial/';
+                Storage::createDirectory($sampleFolder);
+                Storage::createDirectory($sampleFolderSpatial);
 
                 foreach(request()->file('files') as $key => $file) {
 
@@ -34,8 +44,18 @@ class SampleController extends Controller
                             $fileType = $type;
                     }
 
-                    $file = File::create(['filename' => $file->getClientOriginalName(), 'type' => $fileType]);
-                    $sample->files()->save($file);
+                    $fileModel = File::create(['filename' => $file->getClientOriginalName(), 'type' => $fileType]);
+                    $sample->files()->save($fileModel);
+
+                    if($fileType === 'expressionFile')
+                        $file->storeAs($sampleFolder, $file->getClientOriginalName());
+                    if($fileType === 'coordinatesFile')
+                        $file->storeAs($sampleFolderSpatial, $file->getClientOriginalName());
+                    if($fileType === 'scaleFile')
+                        $file->storeAs($sampleFolder, $file->getClientOriginalName());
+                    if($fileType === 'imageFile')
+                        $file->storeAs($sampleFolderSpatial, $file->getClientOriginalName());
+
                 }
             });
 

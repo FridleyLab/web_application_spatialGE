@@ -1,5 +1,5 @@
 <template>
-    <section>
+
         <div class="page-header">
             <div class="container">
                 <div class="row">
@@ -37,9 +37,9 @@
                                             </div>
                                         </div>
                                         <div class="w-50">
-                                            <div class="input-group input-group-outline mb-3" :class="validEmailAddress ? 'is-valid' : ''">
+                                            <div class="input-group input-group-outline mb-3" :class="(validEmailAddress && email === emailConfirmation) ? 'is-valid' : ''">
                                                 <label class="form-label">Email confirmation </label>
-                                                <input required type="email_confirmation" class="form-control" name="email" v-model="email">
+                                                <input required type="email_confirmation" class="form-control" name="emailConfirmation" v-model="emailConfirmation">
                                             </div>
                                         </div>
                                     </div>
@@ -52,7 +52,7 @@
                                             </div>
                                         </div>
                                         <div class="w-50">
-                                            <div class="input-group input-group-outline mb-3" :class="passwordConfirmation.length && passwordConfirmed ? 'is-valid' : ''">
+                                            <div class="input-group input-group-outline mb-3" :class="passwordConfirmation.length && !errorMessagePassword.length && passwordConfirmed ? 'is-valid' : ''">
                                                 <label class="form-label">Pwd confirmation</label>
                                                 <input required type="password" class="form-control" name="passwordConfirmation" v-model="passwordConfirmation">
                                             </div>
@@ -62,7 +62,7 @@
 
                                     <div class="mb-3">
                                         <div>Please select the main sector you work with</div>
-                                        <select class="form-select bg-white border border-1">
+                                        <select class="form-select bg-white border border-1 p-2" name="industry" v-model="industry">
                                             <option value=""></option>
                                             <option v-for="industry in industries" :value="industry">{{ industry }}</option>
                                         </select>
@@ -70,15 +70,15 @@
 
                                     <div class="mb-3">
                                         <div>Please select your position</div>
-                                        <select class="form-select bg-white border border-1">
+                                        <select class="form-select bg-white border border-1 p-2"  name="job" v-model="job">
                                             <option value=""></option>
                                             <option v-for="job in jobs" :value="job">{{ job }}</option>
                                         </select>
                                     </div>
 
                                     <div class="mb-3">
-                                        <div>What is your main area of interest?</div>
-                                        <select class="form-select bg-white border border-1">
+                                        <div>Please select your main area of interest</div>
+                                        <select class="form-select bg-white border border-1 p-2"  name="interest" v-model="interest">
                                             <option value=""></option>
                                             <option v-for="area in areas_of_interest" :value="area">{{ area }}</option>
                                         </select>
@@ -129,7 +129,7 @@
                 </div>
             </div>
         </div>
-    </section>
+
 </template>
 <script>
     export default {
@@ -138,6 +138,10 @@
         props: {
             targetUrl: String,
             signInUrl: String,
+
+            industries: Object,
+            jobs: Object,
+            areas_of_interest: Object,
         },
 
         data() {
@@ -145,15 +149,20 @@
                 first_name: '',
                 last_name: '',
                 email: '',
+                emailConfirmation: '',
                 password: '',
                 passwordConfirmation: '',
                 terms_and_conditions: false,
                 errorMessage: '',
                 errorMessagePassword: '',
 
-                industries: ['Biotech', 'Contract Research Organization', 'Government', 'Hospital/Medical Center', 'Institute', 'Pharma', 'Service', 'University', 'Vendor'],
-                jobs: ['Administrative', 'Bioinformatician', 'Biologist', 'Clinician', 'Data Analyst', 'Data Scientist', 'Field Application Scientist', 'Graduate Student', 'Intern', 'Lab Director', 'Lab Manager', 'Lab Technician', 'Non-scientific', 'Pathologist', 'Physician', 'Post-Doctoral', 'Principal Investigator', 'Professor', 'Researcher', 'Scientist', 'Senior Scientist', 'Statistician', 'Student', 'Undergraduate Student', 'Other'],
-                areas_of_interest: ['Agricultural Biotech', 'Biology', 'Cancer/Oncology', 'Cardiovascular', 'Development Biology', 'Diagnostics', 'Endocrine', 'Evolution', 'Gastroenterology', 'Genetics', 'Immunology', 'Infectious Disease', 'Metabolism', 'Microbiome', 'Molecular Biology', 'Multiple Interests', 'Neuroscience', 'Stem Cells', 'Synthetic Biology', 'Toxicology', 'Veterinary', 'Other'],
+                job: '',
+                interest: '',
+                industry: ''
+
+                //industries: ['Biotech', 'Contract Research Organization', 'Government', 'Hospital/Medical Center', 'Institute', 'Pharma', 'Service', 'University', 'Vendor'],
+                //jobs: ['Administrative', 'Bioinformatician', 'Biologist', 'Clinician', 'Data Analyst', 'Data Scientist', 'Field Application Scientist', 'Graduate Student', 'Intern', 'Lab Director', 'Lab Manager', 'Lab Technician', 'Non-scientific', 'Pathologist', 'Physician', 'Post-Doctoral', 'Principal Investigator', 'Professor', 'Researcher', 'Scientist', 'Senior Scientist', 'Statistician', 'Student', 'Undergraduate Student', 'Other'],
+                //areas_of_interest: ['Agricultural Biotech', 'Biology', 'Cancer/Oncology', 'Cardiovascular', 'Development Biology', 'Diagnostics', 'Endocrine', 'Evolution', 'Gastroenterology', 'Genetics', 'Immunology', 'Infectious Disease', 'Metabolism', 'Microbiome', 'Molecular Biology', 'Multiple Interests', 'Neuroscience', 'Stem Cells', 'Synthetic Biology', 'Toxicology', 'Veterinary', 'Other'],
 
                 // showTechnologies: false,
                 // technologies: ['one', 'two', 'three']
@@ -196,16 +205,16 @@
         methods: {
             checkCredentials: function(e) {
                 this.errorMessage = '';
-                if(!this.first_name.trim().length || !this.last_name.trim().length || !this.email.trim().length || !this.password.trim().length || !this.passwordStrength || !this.passwordConfirmed || !this.terms_and_conditions) {
+                if(!this.first_name.trim().length || !this.last_name.trim().length || !this.email.trim().length || (this.email !== this.emailConfirmation) || !this.password.trim().length || !this.passwordStrength || !this.passwordConfirmed || !this.terms_and_conditions || !this.job.trim().length || !this.industry.trim().length  || !this.interest.trim().length) {
                     this.errorMessage = "You must complete all the fields!";
                     //e.preventDefault();
                     return;
                 }
 
-                axios.post(this.targetUrl , {'first_name' : this.first_name, 'last_name' : this.last_name, 'email' : this.email, 'password': this.password})
+                axios.post(this.targetUrl , {'first_name' : this.first_name, 'last_name' : this.last_name, 'email' : this.email, 'password': this.password, 'job': this.job, 'interest': this.interest, 'industry': this.industry})
                     .then((response) => {
-                        this.errorMessage = response.data;
-                        //window.location.href = "/";
+                        //this.errorMessage = response.data;
+                        window.location.href = response.data;
                     })
                     .catch((error) => {
                         console.log(error.message);

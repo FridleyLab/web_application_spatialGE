@@ -8,6 +8,7 @@ import navbar from "./components/ui/navbar.vue";
 import graphics from "./components/ui/graphics.vue";
 import signUp from "./components/ui/sign-up.vue";
 import signIn from "./components/ui/sign-in.vue";
+import signInPasswordReset from "./components/ui/sign-in-password-reset.vue";
 import showMessage from "./components/common/show-message.vue";
 import fileUpload from "./components/common/file-upload.vue";
 import fileUploadDragDrop from "./components/common/file-upload-drag-drop.vue";
@@ -32,6 +33,7 @@ app.component('graficos', graphics);
 
 app.component('sign-up', signUp);
 app.component('sign-in', signIn);
+app.component('sign-in-password-reset', signInPasswordReset);
 app.component('show-message', showMessage);
 app.component('file-upload', fileUpload);
 app.component('file-upload-drag-drop', fileUploadDragDrop);

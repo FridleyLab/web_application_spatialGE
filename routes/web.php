@@ -33,7 +33,7 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/new',[ProjectController::class, 'create'])->name('new-project');
     Route::get('/projects/{project}',[ProjectController::class, 'open'])->name('open-project')->middleware('project');
     Route::get('/projects/{project}/edit',[ProjectController::class, 'edit'])->name('edit-project')->middleware('project');
-    Route::get('/projects/{project}/go_to_step/{step}',[ProjectController::class, 'go_to_step'])->name('go-to-step')->middleware('project');
+    Route::get('/projects/{project}/go-to-step/{step}',[ProjectController::class, 'go_to_step'])->name('go-to-step')->middleware('project');
     Route::patch('/projects/{project}',[ProjectController::class, 'update'])->name('update-project')->middleware('project');
     Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data')->middleware('project');
     Route::get('/projects/{project}/qc-data-transformation',[ProjectController::class, 'qc_data_transformation'])->name('qc-data-transformation')->middleware('project');
@@ -52,6 +52,10 @@ Route::post('/login',[SecurityController::class, 'signin'])->middleware('guest')
 Route::get('/signup',[SecurityController::class, 'signup'])->name('signup')->middleware('guest');
 Route::post('/signup',[SecurityController::class, 'create'])->middleware('guest');
 Route::get('/activate/{code}',[SecurityController::class, 'activate'])->middleware('guest')->name('account-activation');
+Route::get('/activate/{user}/dev',[SecurityController::class, 'activateDev'])->middleware('guest')->name('account-activation-dev');
+Route::get('/recover-password-email',[SecurityController::class, 'sendPasswordRecoveryEmail'])->middleware('guest')->name('send-password-recovery-email');
+Route::get('/recover-password-email/dev',[SecurityController::class, 'sendPasswordRecoveryEmailDev'])->middleware('guest')->name('send-password-recovery-email-dev');
+Route::get('/recover-password/{code}',[SecurityController::class, 'resetPasswordForm'])->middleware('guest')->name('password-recovery-form');
 
 //Route::get('/test-login',[SecurityController::class, 'testLogIn'])->name('test-login')->middleware('guest');
 
