@@ -15,14 +15,12 @@
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Filter</button>
+                                <button class="nav-link active" id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter" type="button" role="tab" aria-controls="filter" aria-selected="true">Filter data</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Transform</button>
+                                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Normalize data</button>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Samples</button>
-                            </li>
+
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">PCA</button>
                             </li>
@@ -34,7 +32,9 @@
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active min-vh-50" id="home" role="tabpanel" aria-labelledby="home-tab"></div>
+                            <div class="tab-pane fade show active min-vh-50" id="filter" role="tabpanel" aria-labelledby="filter-tab">
+                                <qc-dt-filter :samples="samples" :filter-url="filterUrl"></qc-dt-filter>
+                            </div>
                             <div class="tab-pane fade" id="profile min-vh-50" role="tabpanel" aria-labelledby="profile-tab"></div>
                             <div class="tab-pane fade" id="contact min-vh-50" role="tabpanel" aria-labelledby="contact-tab"></div>
                         </div>
@@ -53,5 +53,11 @@
 <script>
     export default {
         name: 'qcDataTransformation',
+
+        props: {
+            samples: Object,
+            filterUrl: String,
+        }
+
     }
 </script>

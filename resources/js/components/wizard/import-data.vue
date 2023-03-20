@@ -63,10 +63,10 @@
                     <project-samples v-if="!showAddSample" :samples="samples"></project-samples>
 
                     <div v-if="samples.length" class="p-3 text-end">
-                        <input v-if="!changingStep" type="button" class="btn btn-outline-success" @click="changingStep = true" value="Next step: QC & data transformation" />
+                        <input v-if="!changingStep" type="button" class="btn btn-outline-success" :class="nextStepCssClasses" @click="nextStep" :value="nextStepLabel" />
 
-                        <input v-if="changingStep" type="button" class="btn btn-outline-warning me-2" @click="nextStep" value="Finished importing data, proceed" />
-                        <input v-if="changingStep" type="button" class="btn btn-outline-danger" @click="changingStep = false" value="Cancel" />
+<!--                        <input v-if="changingStep" type="button" class="btn btn-outline-warning me-2" @click="nextStep" value="Finished importing data, proceed" />-->
+<!--                        <input v-if="changingStep" type="button" class="btn btn-outline-danger" @click="changingStep = false" value="Cancel" />-->
 
                     </div>
 
@@ -100,6 +100,9 @@
                 sample_name: '',
                 uploading: false,
                 uploadPercentage: 0,
+
+                nextStepLabel: 'Next step: QC & data transformation',
+                nextStepCssClasses: '',
 
             };
         },
@@ -219,9 +222,15 @@
 
             nextStep() {
 
+                this.nextStepLabel = 'Processing samples... please wait!';
+                this.nextStepCssClasses = 'disabled';
+
+                //return;
+
                 axios.get(this.nexturl)
                     .then((response) => {
-                        location.href = response.data;
+                        console.log(response);
+                        //location.href = response.data;
                     })
 
             }

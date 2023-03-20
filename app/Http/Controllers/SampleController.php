@@ -27,11 +27,19 @@ class SampleController extends Controller
                 $projectId = request('project_id');
                 $sample_name = request('sample_name');
                 $sample = Sample::create(['name' => $sample_name]);
+                if(!strlen(trim($sample->name))) { //if no name was provided for the sample
+                    $count = Project::findOrFail($projectId)->samples->count();
+                    $sample->name = 'Sample ' . ($count > 9 ? $count : '0' . $count);
+                }
                 $sample->save();
+
                 $sample->projects()->save(Project::findOrFail($projectId));
                 $fileType = null;
 
-                $sampleFolder = $userFolder . $sample->id . '/';
+
+                $projectFolder = $userFolder . $projectId . '/';
+                Storage::createDirectory($projectFolder);
+                $sampleFolder = $projectFolder . $sample->id . '/';
                 $sampleFolderSpatial = $sampleFolder . 'spatial/';
                 Storage::createDirectory($sampleFolder);
                 Storage::createDirectory($sampleFolderSpatial);

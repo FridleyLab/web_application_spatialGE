@@ -5,6 +5,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\SpatialGeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,6 +39,9 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data')->middleware('project');
     Route::get('/projects/{project}/qc-data-transformation',[ProjectController::class, 'qc_data_transformation'])->name('qc-data-transformation')->middleware('project');
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('destroy-project');
+
+    Route::get('/projects/{project}/init-stlist', [ProjectController::class, 'createStList'])->name('create-stlist');
+    Route::post('/projects/{project}/qc/filter', [SpatialGeController::class, 'createScript'])->name('qc-dt-filter');
 
     Route::post('/files', [FileController::class, 'store'])->name('file-upload');
 

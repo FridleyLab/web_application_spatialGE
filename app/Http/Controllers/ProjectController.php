@@ -84,7 +84,8 @@ class ProjectController extends Controller
     }
 
     public function qc_data_transformation(Project $project) {
-        return view('wizard.qc_data_transformation')->with(compact('project'));
+        $samples = $project->samples;
+        return view('wizard.qc_data_transformation')->with(compact('project', 'samples'));
     }
 
     public function destroy(Project $project) {
@@ -102,6 +103,15 @@ class ProjectController extends Controller
 
         if($step === 2)
             return redirect()->route('qc-data-transformation', ['project' => $project->id]);
+    }
+
+
+
+
+    public function createStList(Project $project) {
+
+        $project->createStList();
+
     }
 
 

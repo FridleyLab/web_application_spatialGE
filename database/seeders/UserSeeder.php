@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UserSeeder extends Seeder
 {
@@ -14,18 +15,6 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        if(!app()->isProduction()) {
-            DB::table('users')->insert([
-                'first_name' => 'TestFirstName',
-                'last_name' => 'TestLastName',
-                'email' => 'test@moffitt.org',
-                'password' => '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', //12345678
-                'email_verification_code' => 'verified',
-                'email_verified_at' => Carbon::now(),
-                'industry' => 'test',
-                'job' => 'test',
-                'interest' => 'test'
-            ]);
-        }
+
     }
 }
