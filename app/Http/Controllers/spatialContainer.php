@@ -76,6 +76,8 @@ class spatialContainer {
         try {
             $output = $this->execute('R --version');
 
+            //dd($output);
+
             $checks = ['R version', 'Statistical', 'Copyright', 'Foundation'];
             foreach ($checks as $check)
                 if (str_contains($output, $check))
@@ -92,9 +94,10 @@ class spatialContainer {
     public function execute($command) {
         try {
 
-            //dd('docker exec ' . $this->project->container_id . ' ' . $command);
+            $exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
+            $process = Process::run("$exe exec " . $this->project->container_id . ' ' . $command);
 
-            $process = Process::run('docker exec ' . $this->project->container_id . ' ' . $command);
+            //dd($process->output());
 
             return $process->output();
         }

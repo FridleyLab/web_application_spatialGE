@@ -12,34 +12,18 @@
                     <div v-if="required" class="text-warning mt-1">Required</div>
                 </label>
                 <img v-if="file" class="img-thumbnail img-fluid h-100" ref="imgIcon" :title="file?.name" />
+                <div v-if="file" class="text-center text-xs">
+                    {{ file.name }}
+                </div>
                 <div v-if="file" class="text-center">
                     <a class="btn btn-sm text-danger" v-on:click="removeFile( key )">Remove</a>
+                </div>
+                <div v-if="errorMessage.length" class="text-center text-danger text-xs">
+                    {{ errorMessage }}
                 </div>
             </form>
         </div>
 
-
-<!--        <div class="w-30 mt-3" v-show="!uploading">-->
-<!--            <div class="input-group input-group-outline focused is-focused">-->
-<!--                <label class="form-label">Sample name (optional)</label>-->
-<!--                <input type="text" class="form-control" name="sample_name" v-model="sample_name">-->
-<!--            </div>-->
-<!--        </div>-->
-
-
-<!--        <progress v-show="uploading" max="100" :value.prop="uploadPercentage"></progress>-->
-
-<!--        <div class="p-2 w-100 text-center">-->
-<!--            <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">-->
-<!--                Import sample-->
-<!--            </button>-->
-<!--        </div>-->
-
-
-
-
-
-<!--        <a class="submit-button" v-on:click="submitFiles()" v-show="files.length > 0">Submit</a>-->
     </div>
 </template>
 
@@ -68,6 +52,8 @@ export default {
             uploading: false,
 
             sample_name: '',
+
+            errorMessage: ''
         }
     },
 
@@ -86,44 +72,108 @@ export default {
     },
 
     computed: {
-        canStartImportProcess() {
-            return this.hasFileType('h5') && this.hasFileType('csv');
+
+        fileExtension() {
+            return this.file ?  this.file.name.split('.').pop() : '';
         },
+
     },
 
     methods: {
-        bindEvents(){
-            /*
-                Listen to all the drag events and bind an event listener to each
-                for the fileform.
-            */
-            ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach( function( evt ) {
-                /*
-                    For each event add an event listener that prevents the default action
-                    (opening the file in the browser) and stop the propagation of the event (so
-                    no other elements open the file in the browser)
-                */
-                document.getElementById('drop-form_' + this.code).addEventListener(evt, function(e){
-                    e.preventDefault();
-                    e.stopPropagation();
-                }.bind(this), false);
-            }.bind(this));
-        },
 
         handleFileDrop( event ){
             this.file = 'dataTransfer' in event ? event.dataTransfer.files[0] : event.target.files[0];
 
-            /*
-            for( let i = 0; i < files.length; i++ ){
-                if(this.files.length < 4)
-                    this.files.push( files[i] );
-            }*/
+            this.errorMessage = '';
+            if(this.code === 'expression' && !(/\.(h5|hdf5)$/i.test(this.file.name))) {
+                this.errorMessage = 'File must be of type h5 or hdf5';
+                this.file = null;
+                return;
+            }
+            else if(this.code === 'coordinates') {
+                if(!(/\.(csv|tsv)$/i.test( this.file.name ))) {
+                    this.errorMessage = 'File type must be csv or tsv';
+                    this.file = null;
+                    return;
+                }
+
+                let reader = new FileReader();
+                reader.addEventListener("load", (() => {
+                    let contents = reader.result;
+                    if(!this.checkCoordinatesData(contents) || this.errorMessage.length) {
+                        this.file = null;
+                        return;
+                    }
+                }).bind(this), false);
+                reader.readAsText(this.file);
+
+            }
+            else if (this.code === 'image' && !(/\.(jpe?g|png|gif|tiff)$/i.test(this.file.name))) {
+                this.errorMessage = 'File type must be jpeg, png, gif, or tiff';
+                this.file = null;
+                return;
+            }
+            else if (this.code === 'scale' && !(/\.json$/i.test(this.file.name))) {
+                this.errorMessage = 'File type must be json';
+                this.file = null;
+                return;
+            }
 
             this.getImagePreviews();
 
-
             this.$emit('fileSelected', this.file);
 
+        },
+
+
+        getImagePreviews(){
+
+            if ( /\.(jpe?g|png|gif|tiff)$/i.test( this.file.name ) ) {
+                /*
+                    Create a new FileReader object
+                */
+                let reader = new FileReader();
+
+                /*
+                    Add an event listener for when the file has been loaded
+                    to update the src on the file preview.
+                */
+                reader.addEventListener("load", function(){
+                    this.$refs.imgIcon.src = reader.result;
+                    //document.getElementById('imgIcon').src = reader.result;
+                }.bind(this), false);
+
+                /*
+                    Read the data for the file in through the reader. When it has
+                    been loaded, we listen to the event propagated and set the image
+                    src to what was loaded from the reader.
+                */
+                reader.readAsDataURL( this.file );
+            }else{
+                //const fileExtension = this.getFileExtension(this.file.name);
+                let img = '/images/icons/' + (this.knownFileTypes.toLowerCase().includes(this.fileExtension) ? this.fileExtension : 'other') + '.png';
+
+                /*
+                    We do the next tick so the reference is bound and we can access it.
+                */
+                this.$nextTick(function(){
+                    this.$refs.imgIcon.src = img;
+                    //document.getElementById('imgIcon').src = img;
+                });
+
+
+                // if ( /\.(json|csv|tsv)$/i.test( this.file.name ) ) {
+                //
+                // }
+
+            }
+        },
+
+        removeFile( key ){
+            this.file = null;
+            //this.getImagePreviews();
+
+            this.$emit('fileRemoved', this.file);
         },
 
         determineDragAndDropCapable(){
@@ -147,110 +197,48 @@ export default {
                 && 'FileReader' in window;
         },
 
-        getFileExtension(fileName) {
-            return fileName.split('.').pop();
-        },
-
-        hasFileType(type) {
-            //return this.files.filter(file => {return this.getFileExtension(file.name).toLowerCase() === type.toLowerCase()}).length;
-            return (this.file !== null) && (this.getFileExtension(this.file.name).toLowerCase() === type.toLowerCase());
-        },
-
-        getImagePreviews(){
+        bindEvents() {
             /*
-                Iterate over all the files and generate an image preview for each one.
+                Listen to all the drag events and bind an event listener to each
+                for the fileform.
             */
-            //for( let i = 0; i < this.files.length; i++ ){
+            ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach( function( evt ) {
                 /*
-                    Ensure the file is an image file
+                    For each event add an event listener that prevents the default action
+                    (opening the file in the browser) and stop the propagation of the event (so
+                    no other elements open the file in the browser)
                 */
-                if ( /\.(jpe?g|png|gif)$/i.test( this.file.name ) ) {
-                    /*
-                        Create a new FileReader object
-                    */
-                    let reader = new FileReader();
-
-                    /*
-                        Add an event listener for when the file has been loaded
-                        to update the src on the file preview.
-                    */
-                    reader.addEventListener("load", function(){
-                        this.$refs.imgIcon.src = reader.result;
-                        //document.getElementById('imgIcon').src = reader.result;
-                    }.bind(this), false);
-
-                    /*
-                        Read the data for the file in through the reader. When it has
-                        been loaded, we listen to the event propagated and set the image
-                        src to what was loaded from the reader.
-                    */
-                    reader.readAsDataURL( this.file );
-                }else{
-                    const fileExtension = this.getFileExtension(this.file.name);
-                    let img = '/images/icons/' + (this.knownFileTypes.toLowerCase().includes(fileExtension) ? fileExtension : 'other') + '.png';
-
-                    /*
-                        We do the next tick so the reference is bound and we can access it.
-                    */
-                    this.$nextTick(function(){
-                        this.$refs.imgIcon.src = img;
-                        //document.getElementById('imgIcon').src = img;
-                    });
-                }
-            //}
+                document.getElementById('drop-form_' + this.code).addEventListener(evt, function(e){
+                    e.preventDefault();
+                    e.stopPropagation();
+                }.bind(this), false);
+            }.bind(this));
         },
 
-        removeFile( key ){
-            this.file = null;
-            //this.getImagePreviews();
+        checkCoordinatesData(data) {
 
-            this.$emit('fileRemoved', this.file);
-        },
+            const columnCount = 6;
 
-        importSample(){
-            /*
-                Initialize the form data
-            */
-            let formData = new FormData();
-
-            /*
-                Iterate over any file sent over appending the files
-                to the form data.
-            */
-            for( let i = 0; i < this.files.length; i++ ){
-                let file = this.files[i];
-
-                formData.append('files[' + i + ']', file);
+            let lines = data.split(/\r?\n|\r|\n/g);
+            if((!lines.length || !lines[0].length || lines[0].split(/\t|,/g).length !== 6)) {
+               this.errorMessage = 'File must have 6 columns';
+               return false;
             }
 
-            formData.append('project_id', this.project.id);
-            formData.append('sample_name', this.sample_name.trim());
-
-            this.uploading = true;
-
-            /*
-                Make the request to the POST /file-drag-drop URL
-            */
-            axios.post( '/samples',
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    onUploadProgress: function( progressEvent ) {
-                        this.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
-                    }.bind(this)
+            let i = 1;
+            lines.forEach((line) => {
+                let values = line.split(/\t|,/g);
+                if((values.length !== 6 || Number(values[4]) < 1000 || Number(values[5]) < 1000) && (i < lines.length) && !this.errorMessage.length ) {
+                    this.errorMessage = 'Line ' + i + ' has errors';
+                    return false;
                 }
-            ).then((response) => {
-                console.log('SUCCESS!!');
-                console.log(response.data);
-                location.reload();
-            })
-            .catch((error) => {
-                console.log('FAILURE!!');
-                this.uploading = false;
+                i++;
             });
-        }
+
+            return true;
+
+        },
+
     }
 }
 </script>

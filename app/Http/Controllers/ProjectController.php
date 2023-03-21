@@ -112,6 +112,11 @@ class ProjectController extends Controller
 
         $project->createStList();
 
+        $project->current_step = 2;
+        $project->save();
+
+        return route('qc-data-transformation', ['project' => $project->id]);
+
     }
 
 

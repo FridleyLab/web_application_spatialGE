@@ -1,7 +1,7 @@
 <template>
     <div class="container-fluid py-4 col-xl-11 col-md-11 col-sm-12">
         <div class="row justify-content-center">
-            <div class="col-xl-10 col-sm-10 mb-xl-0 mb-4 mt-4">
+            <div class="col-xl-10 col-lg-10 col-12 mb-xl-0 mb-4 mt-4">
                 <div class="card">
                     <div class="card-header p-3 pt-2">
                         <div class="icon icon-lg icon-shape bg-gradient-info shadow-dark text-center border-radius-xl mt-n4 position-absolute">

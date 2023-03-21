@@ -82,7 +82,7 @@ class Project extends Model
         $sampleDirs = $this->samples()->pluck('samples.id')->join("/','");
         $sampleDirs = "'" . $sampleDirs . "/'";
 
-        $sampleNames = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
+        $sampleNames = "'" . $this->samples()->pluck('samples.id')->join("','") . "'";
 
         $script = "
 setwd('/spatialGE')

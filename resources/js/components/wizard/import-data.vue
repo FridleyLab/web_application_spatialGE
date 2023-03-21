@@ -42,10 +42,10 @@
                         </div>
 
                         <div class="row justify-content-center">
-                        <div class="w-30 mt-1" v-show="!uploading">
+                        <div class="w-30" :class="fileSelected ? 'mt-6' : 'mt-4'" v-show="!uploading">
                             <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">Sample name (optional)</label>
-                                <input type="text" class="form-control" name="sample_name" v-model="sample_name">
+                                <label class="form-label">Sample name</label>
+                                <input type="text" class="form-control" name="sample_name" :placeholder="suggestedSampleName" v-model="sample_name">
                             </div>
                         </div>
                         </div>
@@ -113,11 +113,19 @@
                 return this.expressionFile && this.coordinatesFile;
             },
 
+            fileSelected() {
+                return this.expressionFile || this.coordinatesFile || this.imageFile || this.scaleFile;
+            },
+
+            suggestedSampleName() {
+                return 'Sample' + (this.samples.length < 10 ? '0' : '') + (this.samples.length+1)
+            }
+
         },
 
         methods: {
 
-            importSample(){
+            importSample() {
                 /*
                     Initialize the form data
                 */
@@ -180,6 +188,24 @@
                     });
             },
 
+
+            nextStep() {
+
+                this.nextStepLabel = 'Processing samples... please wait!';
+                this.nextStepCssClasses = 'disabled';
+
+                //return;
+
+                axios.get(this.nexturl)
+                    .then((response) => {
+                        //console.log(response);
+                        this.nextStepLabel = 'Done - Redirecting';
+                        setTimeout(() => location.href = response.data, 1000);
+                        //location.href = response.data;
+                    })
+
+            },
+
             expressionFileAdded(file) {
                 this.expressionFile = file;
                 console.log(file.name);
@@ -220,20 +246,7 @@
                 console.log('Removed Expr');
             },
 
-            nextStep() {
 
-                this.nextStepLabel = 'Processing samples... please wait!';
-                this.nextStepCssClasses = 'disabled';
-
-                //return;
-
-                axios.get(this.nexturl)
-                    .then((response) => {
-                        console.log(response);
-                        //location.href = response.data;
-                    })
-
-            }
         }
 
     }
