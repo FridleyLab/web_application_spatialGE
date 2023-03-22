@@ -221,7 +221,7 @@ export default {
 
             let lines = data.split(/\r?\n|\r|\n/g);
             if((!lines.length || !lines[0].length || lines[0].split(/\t|,/g).length !== 6)) {
-               this.errorMessage = 'File must have 6 columns';
+               this.errorMessage = 'File must have 6 columns. Input should be "tissue_positions.csv" from space ranger';
                return false;
             }
 

@@ -36,7 +36,7 @@ class Project extends Model
         if($this->current_step === 1)
             return route('import-data', ['project' => $this->id]);
 
-        if($this->current_step === 1)
+        if($this->current_step === 2)
             return route('qc-data-transformation', ['project' => $this->id]);
 
 
@@ -100,6 +100,49 @@ initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)
 
 #Save the STList to disk
 save(initial_stlist, file='initial_stlist.RData')
+";
+
+        return $script;
+
+    }
+
+
+    public function applyFilter() {
+
+        $workingDir = '/users/' . (auth()->id() ?? '9999') . '/' . $this->id . '/';
+        $workingDir = str_replace('\\', '/', $workingDir);
+
+        $script = $workingDir . 'Filter.R';
+
+
+
+        Storage::put($script, $this->getFilterDataScript());
+
+        //dd($script);
+
+        $this->spatialExecute('Rscript Filter.R');
+
+    }
+
+
+    public function getFilterDataScript() : string {
+
+        $sampleDirs = $this->samples()->pluck('samples.id')->join("/','");
+        $sampleDirs = "'" . $sampleDirs . "/'";
+
+        $sampleNames = "'" . $this->samples()->pluck('samples.id')->join("','") . "'";
+
+        $script = "
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load STList from disk
+load(file='initial_stlist.RData')
+
+# Apply defined filter to the initial STList
+filtered_stlist = filter_data(initial_stlist, spot_minreads=1000, spot_maxreads=20000)
+save(filtered_stlist, file='filtered_stlist.RData')
 ";
 
         return $script;

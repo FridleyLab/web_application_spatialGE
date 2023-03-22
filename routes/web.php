@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function() {
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('destroy-project');
 
     Route::get('/projects/{project}/init-stlist', [ProjectController::class, 'createStList'])->name('create-stlist');
-    Route::post('/projects/{project}/qc/filter', [SpatialGeController::class, 'createScript'])->name('qc-dt-filter');
+    Route::post('/projects/{project}/qc/filter', [ProjectController::class, 'applyFilter'])->name('qc-dt-filter');
 
     Route::post('/files', [FileController::class, 'store'])->name('file-upload');
 

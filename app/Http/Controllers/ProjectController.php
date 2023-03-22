@@ -119,6 +119,14 @@ class ProjectController extends Controller
 
     }
 
+    public function applyFilter(Project $project) {
+
+        $project->applyFilter();
+
+        return 'Done';
+
+    }
+
 
 
 

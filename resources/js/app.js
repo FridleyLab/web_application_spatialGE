@@ -17,13 +17,26 @@ import newProject from './views/projects/new.vue';
 import myProjects from './views/projects/index.vue';
 import projectSamples from './views/projects/samples.vue';
 import qcDataTransformation from "./components/wizard/qc-data-transformation.vue";
-import qcDtFilter from "./components/wizard/components/filter.vue";
+import qcDtFilter from "./components/wizard/components/qc-dt-filter.vue";
+import numericSlider from "./components/common/numeric-slider.vue";
+import numericRange from "./components/common/numeric-range.vue";
+
+
+// Vuetify
+/*import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+const vuetify = createVuetify({
+    components,
+    directives,
+})*/
 
 
 import {createApp} from "vue";
 
 
-const app = createApp({});
+const app = createApp({})/*.use(vuetify)*/;
 
 //TODO: delete these two components
 app.component('side-menu', sideMenu);
@@ -36,6 +49,8 @@ app.component('sign-up', signUp);
 app.component('sign-in', signIn);
 app.component('sign-in-password-reset', signInPasswordReset);
 app.component('show-message', showMessage);
+app.component('numeric-slider', numericSlider);
+app.component('numeric-range', numericRange);
 app.component('file-upload', fileUpload);
 app.component('file-upload-drag-drop', fileUploadDragDrop);
 app.component('new-project', newProject);

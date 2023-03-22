@@ -28,7 +28,7 @@ class SampleController extends Controller
                 $sample_name = request('sample_name');
                 $sample = Sample::create(['name' => $sample_name]);
                 if(!strlen(trim($sample->name))) { //if no name was provided for the sample
-                    $count = Project::findOrFail($projectId)->samples->count();
+                    $count = Project::findOrFail($projectId)->samples->count() + 1;
                     $sample->name = 'Sample' . ($count > 9 ? $count : '0' . $count);
                 }
                 $sample->save();
