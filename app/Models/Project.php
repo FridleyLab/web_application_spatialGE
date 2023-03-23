@@ -51,14 +51,9 @@ class Project extends Model
 
         $script = $workingDir . 'STList.R';
 
-
-
         Storage::put($script, $this->getStListScript());
 
-        //dd($script);
-
         $this->spatialExecute('Rscript STList.R');
-
     }
 
     public function spatialExecute($command) {
@@ -100,6 +95,11 @@ initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)
 
 #Save the STList to disk
 save(initial_stlist, file='initial_stlist.RData')
+
+#Obtain gene names in samples and save it in a text file
+gene_names = unique(unlist(lapply(initial_stlist@counts, function(i){ genes_tmp = rownames(i) })))
+write.table(gene_names, 'genes.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+
 ";
 
         return $script;

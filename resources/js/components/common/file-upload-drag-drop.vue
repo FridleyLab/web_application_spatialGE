@@ -2,7 +2,7 @@
     <div class="text-center justify-content-center align-items-center w-100">
 
 
-        <div class="justify-content-center mb-3">
+        <div class="justify-content-center mb-3" :title="tooltip">
             <form :id="'drop-form_' + code" class="text-center rounded" style="height: 150px" @drop="handleFileDrop( $event )">
                 <label v-if="!file" class="pt-2 w-100 h-100 rounded cursor-pointer text-info border border-info border-1"> {{ caption }} <br />
                     <input type="file" v-on:change="handleFileDrop( $event )" style="display: none" />
@@ -35,9 +35,10 @@ export default {
 
     props: {
         project: Object,
-        caption: {type: String, default: "select or drop file"},
+        caption: {type: String, default: 'select or drop file'},
         required: {type: Boolean, default: false},
         code: String,
+        tooltip: {type: String, default: ''},
     },
 
     data(){

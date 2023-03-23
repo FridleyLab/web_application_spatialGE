@@ -18,7 +18,6 @@
 </template>
 <script>
 
-    import NumericSlider from "./numeric-slider.vue";
 
     export default {
         name: 'numericRange',
@@ -53,14 +52,14 @@
             minValue(newValue, oldValue) {
                 this.minValue = newValue = Number(newValue);
                 if(newValue > this.maxValue)
-                    this.minValue = (this.maxValue - 500) > 0 ? this.maxValue - 500 : 0;
+                    this.minValue = (this.maxValue - this.startStep) > 0 ? this.maxValue - this.startStep : 0;
 
                 this.$emit('updated', this.minValue, this.maxValue);
             },
             maxValue(newValue, oldValue) {
                 this.maxValue = newValue = Number(newValue);
                 if(newValue < this.minValue)
-                    this.maxValue = this.minValue + 500;
+                    this.maxValue = this.minValue + this.endStep;
 
                 this.$emit('updated', this.minValue, this.maxValue);
             }

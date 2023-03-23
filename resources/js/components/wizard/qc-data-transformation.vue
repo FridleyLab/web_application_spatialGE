@@ -18,11 +18,11 @@
                                 <button class="nav-link active" id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter" type="button" role="tab" aria-controls="filter" aria-selected="true">Filter data</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Normalize data</button>
+                                <button class="nav-link" id="normalize-tab" data-bs-toggle="tab" data-bs-target="#normalize" type="button" role="tab" aria-controls="normalize" aria-selected="false">Normalize data</button>
                             </li>
 
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">PCA</button>
+                                <button class="nav-link" id="pca-tab" data-bs-toggle="tab" data-bs-target="#pca" type="button" role="tab" aria-controls="pca" aria-selected="false">PCA</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Spatial</button>
@@ -35,16 +35,16 @@
                             <div class="tab-pane fade show active min-vh-50" id="filter" role="tabpanel" aria-labelledby="filter-tab">
                                 <qc-dt-filter :samples="samples" :filter-url="filterUrl"></qc-dt-filter>
                             </div>
-                            <div class="tab-pane fade" id="profile min-vh-50" role="tabpanel" aria-labelledby="profile-tab"></div>
-                            <div class="tab-pane fade" id="contact min-vh-50" role="tabpanel" aria-labelledby="contact-tab"></div>
+                            <div class="tab-pane fade min-vh-50" id="normalize" role="tabpanel" aria-labelledby="normalize-tab">
+                                <qc-dt-normalize :samples="samples" :filter-url="filterUrl"></qc-dt-normalize>
+                            </div>
+                            <div class="tab-pane fade min-vh-50" id="pca" role="tabpanel" aria-labelledby="pca-tab">
+                                <qc-dt-pca :samples="samples" :filter-url="filterUrl"></qc-dt-pca>
+                            </div>
                         </div>
                     </div>
 
-            </div>
-
-
-
-
+                </div>
             </div>
         </div>
     </div>
