@@ -20,17 +20,18 @@
                         <input type="button" class="btn" :class="showAddSample ? 'btn-outline-info' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Hide sample form' : 'Add sample'" />
                     </div>
 
-                    <div class="row justify-content-center">
-<!--                        <div class="w-30" :class="fileSelected ? 'mt-6' : 'mt-4'" v-show="!uploading">-->
-                        <div class="w-30 mb-3" v-show="!uploading">
-                            <div class="input-group input-group-outline focused is-focused">
-                                <label class="form-label">Sample name</label>
-                                <input type="text" class="form-control" name="sample_name" :placeholder="suggestedSampleName" v-model="sample_name">
-                            </div>
-                        </div>
-                    </div>
+
 
                     <template v-if="!samples.length || showAddSample">
+                        <div class="row justify-content-center">
+                            <!--                        <div class="w-30" :class="fileSelected ? 'mt-6' : 'mt-4'" v-show="!uploading">-->
+                            <div class="w-30 mb-3" v-show="!uploading">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label class="form-label">Sample name</label>
+                                    <input type="text" class="form-control" name="sample_name" :placeholder="suggestedSampleName" v-model="sample_name">
+                                </div>
+                            </div>
+                        </div>
                         <h6 class="text-center">Please select or drop your gene expression and coordinates files (tissue image is optional)</h6>
                         <hr class="dark horizontal my-0">
 
@@ -53,7 +54,7 @@
 
 
 
-                        <div class="w-100 mt-4" v-show="uploading">
+                        <div class="w-100 mt-6" v-show="uploading">
                             <progress max="100" :value.prop="uploadPercentage" class="w-100"></progress>
                         </div>
 

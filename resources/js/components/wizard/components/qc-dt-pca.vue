@@ -9,7 +9,10 @@
             The following PCA plot has been created by calculating the average expression of genes within each sample. This PCA does not incorporate any spatial component of the data.
         </div>
 
-
+        <div class="mt-4">
+            <label class="form-label">Genes:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="n_genes">
+            <input type="range" min="0" max="40000" step="500" class="form-range" v-model="n_genes">
+        </div>
 
         <div class="mt-4">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
@@ -69,6 +72,8 @@
 
         data() {
             return {
+
+                n_genes: 0,
 
                 processing: false,
 

@@ -222,17 +222,24 @@ export default {
 
             let lines = data.split(/\r?\n|\r|\n/g);
             if((!lines.length || !lines[0].length || lines[0].split(/\t|,/g).length !== 6)) {
-               this.errorMessage = 'File must have 6 columns. Input should be "tissue_positions.csv" from space ranger';
+               this.errorMessage = 'File should be "tissue_positions.csv" from space ranger and have 6 columns';
                return false;
             }
 
             let i = 1;
             lines.forEach((line) => {
                 let values = line.split(/\t|,/g);
-                if((values.length !== 6 || Number(values[4]) < 1000 || Number(values[5]) < 1000) && (i < lines.length) && !this.errorMessage.length ) {
-                    this.errorMessage = 'Line ' + i + ' has errors';
+
+                if(values.length !== 6 && (i < lines.length) && !this.errorMessage.length ) {
+                    this.errorMessage = 'Line ' + i + ': number of columns is not 6';
                     return false;
                 }
+
+                if((Number(values[4]) < 1000 || Number(values[5]) < 1000) && (i < lines.length) && !this.errorMessage.length ) {
+                    this.errorMessage = 'Line ' + i + ': coordinates too small';
+                    return false;
+                }
+
                 i++;
             });
 
