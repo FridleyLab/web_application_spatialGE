@@ -1,46 +1,43 @@
 <template>
     <div>
-        <div v-if="title.length" class="d-flex">
-            <span class="text-bolder">{{ title }}</span>
-            <div v-if="false" class="form-check form-switch ms-2 mt-1">
-                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" v-model="enabled" @click="toggle" />
+        <div v-if="title.length" class="d-flex mb-4">
+            {{ title }}
+        </div>
+        <div class="d-flex">
+            <div class="w-10">
+                <input class="w-100 text-end border border-1 rounded px-1" type="text" v-model="value[0]">
             </div>
-        </div>
-        <div v-if="enabled" class="mt-2">
-            <label class="form-label">{{ startLabel }}:</label> <input type="number" v-model="minValue" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15">
-            <input type="range" :min="startMin" :max="startMax" :step="startStep" class="form-range" v-model="minValue">
-        </div>
-        <div v-if="enabled" class="mt-2">
-            <label class="form-label">{{ endLabel }}:</label> <input type="number" v-model="maxValue" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15">
-            <input type="range" :min="endMin" :max="endMax" :step="endStep" class="form-range" v-model="maxValue">
+            <div class="w-80 ps-3 pe-4 pt-3">
+                <Slider :min="min" :max="max" :step="step" v-model="value" />
+            </div>
+            <div class="w-10">
+                <input class="w-100 text-end border border-1 rounded px-1" type="text" v-model="value[1]">
+            </div>
         </div>
     </div>
 </template>
+
 <script>
-
-
+import Slider from '@vueform/slider'
     export default {
+        components: {
+            Slider,
+        },
         name: 'numericRange',
         emits: ['updated'],
 
         props: {
-            title: {type: String, default: 'Range'},
-
-            startMin: {type: Number, default: 0},
-            startMax: {type: Number, default: 100},
-            startStep: {type: Number, default: 1},
-            startDefault: {type: Number, default: 0},
-            startLabel: {type: String, default: 'min'},
-
-            endMin: {type: Number, default: 0},
-            endMax: {type: Number, default: 100},
-            endStep: {type: Number, default: 1},
-            endDefault: {type: Number, default: 0},
-            endLabel: {type: String, default: 'max'},
+            title: {type: String, default: ''},
+            min: {type: Number, default: 0},
+            max: {type: Number, default: 100},
+            step: {type: Number, default: 1},
         },
 
         data() {
             return {
+
+                value: [this.min, this.max],
+
                 minValue: Number(this.startDefault),
                 maxValue: Number(this.endDefault),
 
@@ -49,28 +46,13 @@
         },
 
         watch: {
-            minValue(newValue, oldValue) {
-                this.minValue = newValue = Number(newValue);
-                if(newValue > this.maxValue)
-                    this.minValue = (this.maxValue - this.startStep) > 0 ? this.maxValue - this.startStep : 0;
-
-                this.$emit('updated', this.minValue, this.maxValue);
+            value(newValue, oldValue) {
+                this.$emit('updated', this.value[0], this.value[1]);
             },
-            maxValue(newValue, oldValue) {
-                this.maxValue = newValue = Number(newValue);
-                if(newValue < this.minValue)
-                    this.maxValue = this.minValue + this.endStep;
-
-                this.$emit('updated', this.minValue, this.maxValue);
-            }
         },
-
-        methods: {
-            toggle(e) {
-                console.log('chk', e.target.checked);
-            }
-        }
 
     }
 
 </script>
+
+<style src="@vueform/slider/themes/default.css"></style>

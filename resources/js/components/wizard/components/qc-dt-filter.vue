@@ -72,10 +72,13 @@
                         <div class="m-4 gap-1">
                             <div class="row row-cols-2">
                                 <div class="col border border-2 border-start-0 border-top-0 border-bottom-0">
-                                    <numeric-range title="Keep genes with counts between:" :start-min="0" :start-max="10000" :start-step="500" :start-default="params.gene_minreads" start-label="min" :end-min="0" :end-max="10000" :end-step="500" :end-default="params.gene_maxreads" end-label="max" @updated="(min,max) => {params.gene_minreads = min; params.gene_maxreads = max}"></numeric-range>
+                                    <div class="text-start text-bold">Keep genes with counts between:</div>
+                                    <numeric-range title="" :min="0" :max="300000" :step="500" @updated="(min,max) => {params.gene_minreads = min; params.gene_maxreads = max}"></numeric-range>
                                 </div>
                                 <div class="col">
-                                    <numeric-range title="Keep genes expressed in this number of spots:" :start-min="0" :start-max="6000" :start-step="100" :start-default="params.gene_minspots" start-label="min" :end-min="0" :end-max="6000" :end-step="100" :end-default="params.gene_maxspots" end-label="max" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
+                                    <div class="text-start text-bold">Keep genes expressed in:</div>
+                                    <numeric-range title="Number of spots:" :min="0" :max="6000" :step="100" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
+                                    <numeric-range title="Percentage ofspots" :min="0" :max="100" :step="1" @updated="(min,max) => {params.gene_minpct = min; params.gene_maxpct = max}"></numeric-range>
                                 </div>
                             </div>
                         </div>
@@ -111,13 +114,29 @@
                 <div id="collapseSpotCell" class="accordion-collapse collapse" aria-labelledby="headingSpotCell" data-bs-parent="#accordionFilterTab">
 
                     <div class="m-4 gap-1">
+
                         <div class="row row-cols-2">
                             <div class="col border border-2 border-start-0 border-top-0 border-bottom-0">
-                                <numeric-range title="Remove spot or cells with less than ...Counts" :start-min="0" :start-max="10000" :start-step="200" :start-default="params.spot_minreads" start-label="min" :end-min="0" :end-max="10000" :end-step="200" :end-default="params.spot_maxreads" end-label="max" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
+                                <numeric-range title="Remove spot or cells with less than ...Counts:" :min="0" :max="10000" :step="500" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
                             </div>
                             <div class="col">
-                                <numeric-range title="Genes" :start-min="0" :start-max="40000" :start-step="500" :start-default="params.spot_mingenes" start-label="min" :end-min="0" :end-max="40000" :end-step="500" :end-default="params.spot_maxgenes" end-label="max" @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
+                                <numeric-range title="Genes" :min="0" :max="40000" :step="500" @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
                             </div>
+                        </div>
+                        <div class="my-6">
+                            <div class="my-4">
+                                <label>
+                                    <input type="checkbox">Remove mitochondrial genes (^MT-)
+                                </label>
+
+                                <label>
+                                    <input type="checkbox">Remove ribosomal genes (^RP[L|S])
+                                </label>
+                            </div>
+                            <div class="mb-5">
+                                Filter spots/cells by percentage of gene <input type="text" placeholder="^MT- ****Accordion for advanced users***">
+                            </div>
+                            <numeric-range title="" :min="0" :max="100" :step="1" @updated="(min,max) => {params.spot_minpct = min; params.spot_maxpct = max}"></numeric-range>
                         </div>
                     </div>
 
@@ -146,34 +165,34 @@
 <!--                </div>-->
 <!--            </div>-->
 
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingGenePct">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGenePct" aria-expanded="false" aria-controls="collapseGenePct">
-                        Spot/Cell and Genes by percentage
-                    </button>
-                </h2>
-                <div id="collapseGenePct" class="accordion-collapse collapse" aria-labelledby="headingGenePct" data-bs-parent="#accordionFilterTab">
+<!--            <div class="accordion-item">-->
+<!--                <h2 class="accordion-header" id="headingGenePct">-->
+<!--                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGenePct" aria-expanded="false" aria-controls="collapseGenePct">-->
+<!--                        Spot/Cell and Genes by percentage-->
+<!--                    </button>-->
+<!--                </h2>-->
+<!--                <div id="collapseGenePct" class="accordion-collapse collapse" aria-labelledby="headingGenePct" data-bs-parent="#accordionFilterTab">-->
 
-                    <div class="m-4 gap-1">
-                        <div class="row row-cols-2">
+<!--                    <div class="m-4 gap-1">-->
+<!--                        <div class="row row-cols-2">-->
 
-                            <div class="col border border-2 border-start-0 border-top-0 border-bottom-0">
-                                <div>
-                                    Filter spots/cells by percentage of gene <input type="text" placeholder="^MT-">
-                                </div>
-                                <numeric-range title="" :start-min="0" :start-max="100" :start-step="1" :start-default="params.spot_minpct" start-label="min" :end-min="0" :end-max="100" :end-step="1" :end-default="params.spot_maxpct" end-label="max" @updated="(min,max) => {params.spot_minpct = min; params.spot_maxpct = max}"></numeric-range>
-                            </div>
-                            <div class="col">
-                                <numeric-range title="Filter genes by percentage of zero spots" :start-min="0" :start-max="100" :start-step="1" :start-default="params.gene_minpct" start-label="min" :end-min="0" :end-max="100" :end-step="1" :end-default="params.gene_maxpct" end-label="max" @updated="(min,max) => {params.gene_minpct = min; params.gene_maxpct = max}"></numeric-range>
-                            </div>
-                            <div class="col">
+<!--                            <div class="col border border-2 border-start-0 border-top-0 border-bottom-0">-->
+<!--                                <div>-->
+<!--                                    Filter spots/cells by percentage of gene <input type="text" placeholder="^MT-">-->
+<!--                                </div>-->
+<!--                                <numeric-range title="" :min="0" :max="100" :step="1" @updated="(min,max) => {params.spot_minpct = min; params.spot_maxpct = max}"></numeric-range>-->
+<!--                            </div>-->
+<!--                            <div class="col">-->
+<!--&lt;!&ndash;                                <numeric-range title="Filter genes by percentage of zero spots" :min="0" :max="100" :step="1" @updated="(min,max) => {params.gene_minpct = min; params.gene_maxpct = max}"></numeric-range>&ndash;&gt;-->
+<!--                            </div>-->
+<!--                            <div class="col">-->
 
-                            </div>
-                        </div>
-                    </div>
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
 
-                </div>
-            </div>
+<!--                </div>-->
+<!--            </div>-->
 
         </div>
 
@@ -219,9 +238,9 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="histograms-tab" data-bs-toggle="tab" data-bs-target="#histograms" type="button" role="tab" aria-controls="histograms" aria-selected="false">Histograms</button>
-                </li>
+<!--                <li class="nav-item" role="presentation">-->
+<!--                    <button class="nav-link" id="histograms-tab" data-bs-toggle="tab" data-bs-target="#histograms" type="button" role="tab" aria-controls="histograms" aria-selected="false">Histograms</button>-->
+<!--                </li>-->
 
             </ul>
             <div class="tab-content" id="filterDiagramsContent">
@@ -275,31 +294,31 @@
                         </pre>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="histograms" role="tabpanel" aria-labelledby="histograms-tab">
-                    <div class="m-4">
-                        Color palette:
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Blue-Red
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Yellow-Orange
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Rainbow
-                        </label>
-                    </div>
-                    <div class="text-center">
-                        <pre>
+<!--                <div class="tab-pane fade" id="histograms" role="tabpanel" aria-labelledby="histograms-tab">-->
+<!--                    <div class="m-4">-->
+<!--                        Color palette:-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Blue-Red-->
+<!--                        </label>-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Yellow-Orange-->
+<!--                        </label>-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Rainbow-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <div class="text-center">-->
+<!--                        <pre>-->
 
 
 
-                        Under development (spatialGE library)
+<!--                        Under development (spatialGE library)-->
 
 
 
-                        </pre>
-                    </div>
-                </div>
+<!--                        </pre>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
         </div>
 
