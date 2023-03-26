@@ -8,17 +8,17 @@
         <div class="accordion" id="accordionExample">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingOne">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
                         Log-normal
                     </button>
                 </h2>
-                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div id="collapseOne" class="accordion-collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
                         <div>
                             <strong>The Log-normal method</strong> uses... <code>features</code>, etc.
                         </div>
                         <div class="my-3">
-                            <label class="form-label">Scaling factor:</label> <input type="number" class="text-end text-sm border border-1 rounded w-10">
+                            <label class="form-label">Scaling factor:</label> <input type="number" value="10000" class="text-end text-sm border border-1 rounded w-10">
                         </div>
                         <div class="mt-3">
                             <a href="#" class="btn btn-sm btn-outline-info">Use this method</a>
@@ -29,11 +29,11 @@
             </div>
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingTwo">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                         SCT
                     </button>
                 </h2>
-                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div id="collapseTwo" class="accordion-collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
                         <div>
                             <strong>The SCT method</strong> is... <code>attributes</code>, etc.
@@ -46,11 +46,11 @@
             </div>
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingThree">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                         Quantile
                     </button>
                 </h2>
-                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                <div id="collapseThree" class="accordion-collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
                         <div>
                             <strong>The Quantile method</strong> creates... <code>variables</code>, etc.
@@ -72,12 +72,12 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="nd-violinplot-tab" data-bs-toggle="tab" data-bs-target="#nd-violinplot" type="button" role="tab" aria-controls="nd-violinplot" aria-selected="false">Violin plots</button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="nd-histograms-tab" data-bs-toggle="tab" data-bs-target="#nd-histograms" type="button" role="tab" aria-controls="nd-histograms" aria-selected="false">Histograms</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="nd-densityplot-tab" data-bs-toggle="tab" data-bs-target="#nd-densityplot" type="button" role="tab" aria-controls="nd-densityplot" aria-selected="false">Density plots</button>
-                </li>
+<!--                <li class="nav-item" role="presentation">-->
+<!--                    <button class="nav-link" id="nd-histograms-tab" data-bs-toggle="tab" data-bs-target="#nd-histograms" type="button" role="tab" aria-controls="nd-histograms" aria-selected="false">Histograms</button>-->
+<!--                </li>-->
+<!--                <li class="nav-item" role="presentation">-->
+<!--                    <button class="nav-link" id="nd-densityplot-tab" data-bs-toggle="tab" data-bs-target="#nd-densityplot" type="button" role="tab" aria-controls="nd-densityplot" aria-selected="false">Density plots</button>-->
+<!--                </li>-->
 
             </ul>
             <div class="tab-content" id="filterDiagramsContent">
@@ -131,56 +131,56 @@
                         </pre>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="nd-histograms" role="tabpanel" aria-labelledby="nd-histograms-tab">
-                    <div class="m-4">
-                        Color palette:
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Blue-Red
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Yellow-Orange
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Rainbow
-                        </label>
-                    </div>
-                    <div class="text-center">
-                        <pre>
+<!--                <div class="tab-pane fade" id="nd-histograms" role="tabpanel" aria-labelledby="nd-histograms-tab">-->
+<!--                    <div class="m-4">-->
+<!--                        Color palette:-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Blue-Red-->
+<!--                        </label>-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Yellow-Orange-->
+<!--                        </label>-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Rainbow-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <div class="text-center">-->
+<!--                        <pre>-->
 
 
 
-                        Under development (spatialGE library)
+<!--                        Under development (spatialGE library)-->
 
 
 
-                        </pre>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="nd-densityplot" role="tabpanel" aria-labelledby="nd-densityplot-tab">
-                    <div class="m-4">
-                        Color palette:
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Blue-Red
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Yellow-Orange
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Rainbow
-                        </label>
-                    </div>
-                    <div class="text-center">
-                        <pre>
+<!--                        </pre>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="tab-pane fade" id="nd-densityplot" role="tabpanel" aria-labelledby="nd-densityplot-tab">-->
+<!--                    <div class="m-4">-->
+<!--                        Color palette:-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Blue-Red-->
+<!--                        </label>-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Yellow-Orange-->
+<!--                        </label>-->
+<!--                        <label class="m-2">-->
+<!--                            <input type="radio" class="" name="xyz"> Rainbow-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <div class="text-center">-->
+<!--                        <pre>-->
 
 
 
-                        Under development (spatialGE library)
+<!--                        Under development (spatialGE library)-->
 
 
 
-                        </pre>
-                    </div>
-                </div>
+<!--                        </pre>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
         </div>
 

@@ -10,7 +10,7 @@
         </div>
 
         <div class="mt-4">
-            <label class="form-label">Genes:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="n_genes">
+            <label class="form-label">Genes to calculate PCA:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="n_genes">
             <input type="range" min="0" max="40000" step="500" class="form-range" v-model="n_genes">
         </div>
 
@@ -73,7 +73,7 @@
         data() {
             return {
 
-                n_genes: 0,
+                n_genes: 3000,
 
                 processing: false,
 

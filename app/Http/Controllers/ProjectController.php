@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\ProjectGene;
 use App\Models\User;
 use Database\Seeders\ProjectStatusSeeder;
 use Illuminate\View\View;
@@ -118,6 +119,12 @@ class ProjectController extends Controller
         return route('qc-data-transformation', ['project' => $project->id]);
 
     }
+
+
+    public function searchGenes($query) {
+        return ProjectGene::where('gene', 'LIKE', '%' . $query . '%')->limit(100)->pluck(['gene']);
+    }
+
 
     public function applyFilter(Project $project) {
 

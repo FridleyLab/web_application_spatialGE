@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="title.length" class="d-flex mb-4">
+        <div v-if="title.length" class="d-flex mb-4" :class="titleClass">
             {{ title }}
         </div>
         <div class="d-flex">
@@ -28,6 +28,7 @@ import Slider from '@vueform/slider'
 
         props: {
             title: {type: String, default: ''},
+            titleClass: {type: String, default: ''},
             min: {type: Number, default: 0},
             max: {type: Number, default: 100},
             step: {type: Number, default: 1},

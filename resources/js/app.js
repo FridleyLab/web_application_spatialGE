@@ -22,6 +22,7 @@ import qcDtNormalize from "./components/wizard/components/qc-dt-normalize.vue";
 import qcDtPca from "./components/wizard/components/qc-dt-pca.vue";
 // import numericSlider from "./components/common/numeric-slider.vue";
 import numericRange from "./components/common/numeric-range.vue";
+import multiselect from "./components/common/multiselect.vue";
 
 
 // Vuetify
@@ -53,6 +54,7 @@ app.component('sign-in-password-reset', signInPasswordReset);
 app.component('show-message', showMessage);
 // app.component('numeric-slider', numericSlider);
 app.component('numeric-range', numericRange);
+app.component('multiselect', multiselect);
 app.component('file-upload', fileUpload);
 app.component('file-upload-drag-drop', fileUploadDragDrop);
 app.component('new-project', newProject);

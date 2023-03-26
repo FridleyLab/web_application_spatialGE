@@ -22,18 +22,15 @@
                             </li>
 
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="pca-tab" data-bs-toggle="tab" data-bs-target="#pca" type="button" role="tab" aria-controls="pca" aria-selected="false">PCA</button>
+                                <button class="nav-link" id="pca-tab" data-bs-toggle="tab" data-bs-target="#pca" type="button" role="tab" aria-controls="pca" aria-selected="false">Pseudo-bulk PCA</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Spatial</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Gene expression</button>
+                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Quilt plot</button>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="filter" role="tabpanel" aria-labelledby="filter-tab">
-                                <qc-dt-filter :samples="samples" :filter-url="filterUrl"></qc-dt-filter>
+                                <qc-dt-filter :project="project" :samples="samples" :filter-url="filterUrl"></qc-dt-filter>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="normalize" role="tabpanel" aria-labelledby="normalize-tab">
                                 <qc-dt-normalize :samples="samples" :filter-url="filterUrl"></qc-dt-normalize>
@@ -55,8 +52,13 @@
         name: 'qcDataTransformation',
 
         props: {
+            project: Object,
             samples: Object,
             filterUrl: String,
+        },
+
+        mounted() {
+            console.log(this.project);
         }
 
     }
