@@ -121,14 +121,29 @@ class ProjectController extends Controller
     }
 
 
-    public function searchGenes($query) {
-        return ProjectGene::where('gene', 'LIKE', '%' . $query . '%')->limit(100)->pluck(['gene']);
+    public function searchGenes() {
+        $query = request('query');
+        if(strlen($query))
+            return ProjectGene::where('gene', 'LIKE', $query . '%')->orderBy('gene')->limit(100)->pluck('gene');
+
+        return [];
+    }
+
+    public function searchGenesRegexp() {
+        $query = request('query');
+        if(strlen($query))
+            return ProjectGene::where('gene', 'REGEXP', $query)->orderBy('gene')->limit(100)->pluck('gene');
+
+        return [];
     }
 
 
     public function applyFilter(Project $project) {
 
-        $project->applyFilter();
+        //return request()->all();
+
+
+        $project->applyFilter(request('parameters'));
 
         return 'Done';
 

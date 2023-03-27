@@ -67,21 +67,15 @@
         <div class="mt-4">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="nd-boxplot-tab" data-bs-toggle="tab" data-bs-target="#nd-bloxplot" type="button" role="tab" aria-controls="nd-bloxplot" aria-selected="true">Boxplot</button>
+                    <button class="nav-link active" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="nd-violinplot-tab" data-bs-toggle="tab" data-bs-target="#nd-violinplot" type="button" role="tab" aria-controls="nd-violinplot" aria-selected="false">Violin plots</button>
+                    <button class="nav-link" id="boxplot-tab" data-bs-toggle="tab" data-bs-target="#boxplot" type="button" role="tab" aria-controls="boxplot" aria-selected="true">Boxplots</button>
                 </li>
-<!--                <li class="nav-item" role="presentation">-->
-<!--                    <button class="nav-link" id="nd-histograms-tab" data-bs-toggle="tab" data-bs-target="#nd-histograms" type="button" role="tab" aria-controls="nd-histograms" aria-selected="false">Histograms</button>-->
-<!--                </li>-->
-<!--                <li class="nav-item" role="presentation">-->
-<!--                    <button class="nav-link" id="nd-densityplot-tab" data-bs-toggle="tab" data-bs-target="#nd-densityplot" type="button" role="tab" aria-controls="nd-densityplot" aria-selected="false">Density plots</button>-->
-<!--                </li>-->
-
             </ul>
             <div class="tab-content" id="filterDiagramsContent">
-                <div class="tab-pane fade show active" id="nd-bloxplot" role="tabpanel" aria-labelledby="nd-bloxplot-tab">
+
+                <div class="tab-pane fade show active" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
                     <div class="m-4">
                         Color palette:
                         <label class="m-2">
@@ -106,7 +100,8 @@
                         </pre>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="nd-violinplot" role="tabpanel" aria-labelledby="nd-violinplot-tab">
+
+                <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
                     <div class="m-4">
                         Color palette:
                         <label class="m-2">
@@ -131,56 +126,7 @@
                         </pre>
                     </div>
                 </div>
-<!--                <div class="tab-pane fade" id="nd-histograms" role="tabpanel" aria-labelledby="nd-histograms-tab">-->
-<!--                    <div class="m-4">-->
-<!--                        Color palette:-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Blue-Red-->
-<!--                        </label>-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Yellow-Orange-->
-<!--                        </label>-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Rainbow-->
-<!--                        </label>-->
-<!--                    </div>-->
-<!--                    <div class="text-center">-->
-<!--                        <pre>-->
 
-
-
-<!--                        Under development (spatialGE library)-->
-
-
-
-<!--                        </pre>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div class="tab-pane fade" id="nd-densityplot" role="tabpanel" aria-labelledby="nd-densityplot-tab">-->
-<!--                    <div class="m-4">-->
-<!--                        Color palette:-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Blue-Red-->
-<!--                        </label>-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Yellow-Orange-->
-<!--                        </label>-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Rainbow-->
-<!--                        </label>-->
-<!--                    </div>-->
-<!--                    <div class="text-center">-->
-<!--                        <pre>-->
-
-
-
-<!--                        Under development (spatialGE library)-->
-
-
-
-<!--                        </pre>-->
-<!--                    </div>-->
-<!--                </div>-->
             </div>
         </div>
 

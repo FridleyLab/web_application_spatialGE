@@ -11,13 +11,14 @@
 
         <div class="mt-4">
             <label class="form-label">Genes to calculate PCA:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="n_genes">
+<!--            TODO: recalculate max gene count on the filtered stlist  -->
             <input type="range" min="0" max="40000" step="500" class="form-range" v-model="n_genes">
         </div>
 
         <div class="mt-4">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="nd-boxplot-tab" data-bs-toggle="tab" data-bs-target="#nd-bloxplot" type="button" role="tab" aria-controls="nd-bloxplot" aria-selected="true">Boxplot</button>
+                    <button class="nav-link active" id="nd-boxplot-tab" data-bs-toggle="tab" data-bs-target="#nd-bloxplot" type="button" role="tab" aria-controls="nd-bloxplot" aria-selected="true">PCA plot</button>
                 </li>
             </ul>
             <div class="tab-content" id="filterDiagramsContent">

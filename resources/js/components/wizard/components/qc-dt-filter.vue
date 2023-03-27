@@ -45,14 +45,15 @@
                     <div class="row justify-content-center text-center m-3">
                         <div class="w-100 w-md-80 w-lg-70 w-xxl-40 row row-cols-2">
                             <div class="col">
-                                <input type="text" class="form-control form-control-plaintext border border-1 py-1 px-2 text-sm" placeholder="Search genes here...">
-                                <select ref="geneFilter" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="removeSample" title="Click to remove sample">
-                                    <!--                        <option v-for="sample in samples" :value="sample.id">{{ sample.name }}</option>-->
+                                <input type="text" class="form-control form-control-plaintext border border-1 py-1 px-2 text-sm" placeholder="Search genes here..." @input="searchGenes">
+                                <select ref="geneFilter" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="addFilterGene" title="Click to remove sample">
+                                    <option v-for="gene in filter_genes" :value="gene">{{ gene }}</option>
                                 </select>
                             </div>
                             <div class="col align">
                                 <label for="genesExcluded" class="form-label">Excluded genes:</label>
-                                <select ref="genesExcluded" id="genesExcluded" multiple class="p-2 form-select w-100 border border-1" @click="addSample" title="Click to add sample">
+                                <select ref="genesExcluded" id="genesExcluded" multiple class="p-2 form-select w-100 border border-1" @click="removeFilterGene" title="Click to add sample">
+                                    <option v-for="gene in filter_genes_selected" :value="gene">{{ gene }}</option>
                                 </select>
                             </div>
                         </div>
@@ -86,7 +87,13 @@
                                     <div class="row justify-content-center text-center m-3">
                                         <div class="row justify-content-center text-center m-3">
                                             <div class="w-100 w-md-80 w-lg-70 w-xxl-60">
-                                                <input type="text" class="form-control form-control-plaintext border border-1 px-2 text-sm w-100" placeholder="RegEx here... e.g. ^MT-">
+                                                <input type="text" class="form-control form-control-plaintext border border-1 px-2 text-sm w-100" placeholder="RegEx here... e.g. ^MT-" v-model="params.rm_genes_expr" @input="filterGenesRegexp">
+                                            </div>
+                                            <div class="mt-3" v-if="filter_genes_regexp.length">
+                                                <label for="filter_genes_regexp" class="form-label">Matched genes (preview):</label>
+                                                <select ref="filter_genes_regexp" id="filter_genes_regexp" multiple class="p-2 form-select w-100 border border-1" @click="removeFilterGene" title="Click to add sample">
+                                                    <option v-for="gene in filter_genes_regexp" :value="gene">{{ gene }}</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -103,6 +110,7 @@
                                 <div class="mt-4">
                                     <div class="text-start text-bold">Keep genes expressed in:</div>
                                     <div class="mt-2">
+<!--                                        TODO: script maximum number of spots  -->
                                         <numeric-range title="Number of spots:" :min="0" :max="6000" :step="100" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
                                     </div>
                                     <div class="mt-4">
@@ -131,7 +139,7 @@
                             <div class="row">
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep spots/cells with this number of counts:" title-class="text-bold" :min="0" :max="10000" :step="500" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
+                                    <numeric-range title="Keep spots/cells with this number of counts:" title-class="text-bold" :min="0" :max="project.project_parameters.max_spots_counts" :step="500" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
                                 </div>
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
@@ -202,16 +210,16 @@
         </div>
 
 
-        <div class="row">
-            <div class="w-100 my-3">
-                <label>
-                    Name this filter: <input type="text" class="border border-1 rounded p-1">
-                </label>
-                <div>
-                <input type="button" class="btn btn-sm btn-outline-info" value="Save filter">
-                </div>
-            </div>
-        </div>
+<!--        <div class="row">-->
+<!--            <div class="w-100 my-3">-->
+<!--                <label>-->
+<!--                    Name this filter: <input type="text" class="border border-1 rounded p-1">-->
+<!--                </label>-->
+<!--                <div>-->
+<!--                <input type="button" class="btn btn-sm btn-outline-info" value="Save filter">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
 
 
@@ -230,7 +238,7 @@
         <div class="row">
             <div class="w-100">
                 <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
-                    <button type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Apply Filters' }}</button>
+                    <button type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Run Filter' }}</button>
                 </div>
             </div>
         </div>
@@ -238,18 +246,15 @@
         <div class="mt-4">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="boxplot-tab" data-bs-toggle="tab" data-bs-target="#boxplot" type="button" role="tab" aria-controls="boxplot" aria-selected="true">Boxplot</button>
+                    <button class="nav-link active" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
+                    <button class="nav-link" id="boxplot-tab" data-bs-toggle="tab" data-bs-target="#boxplot" type="button" role="tab" aria-controls="boxplot" aria-selected="true">Boxplots</button>
                 </li>
-<!--                <li class="nav-item" role="presentation">-->
-<!--                    <button class="nav-link" id="histograms-tab" data-bs-toggle="tab" data-bs-target="#histograms" type="button" role="tab" aria-controls="histograms" aria-selected="false">Histograms</button>-->
-<!--                </li>-->
-
             </ul>
             <div class="tab-content" id="filterDiagramsContent">
-                <div class="tab-pane fade show active" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
+
+                <div class="tab-pane fade show active" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
                     <div class="m-4">
                         Color palette:
                         <label class="m-2">
@@ -274,7 +279,8 @@
                         </pre>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
+
+                <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
                     <div class="m-4">
                         Color palette:
                         <label class="m-2">
@@ -299,31 +305,7 @@
                         </pre>
                     </div>
                 </div>
-<!--                <div class="tab-pane fade" id="histograms" role="tabpanel" aria-labelledby="histograms-tab">-->
-<!--                    <div class="m-4">-->
-<!--                        Color palette:-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Blue-Red-->
-<!--                        </label>-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Yellow-Orange-->
-<!--                        </label>-->
-<!--                        <label class="m-2">-->
-<!--                            <input type="radio" class="" name="xyz"> Rainbow-->
-<!--                        </label>-->
-<!--                    </div>-->
-<!--                    <div class="text-center">-->
-<!--                        <pre>-->
 
-
-
-<!--                        Under development (spatialGE library)-->
-
-
-
-<!--                        </pre>-->
-<!--                    </div>-->
-<!--                </div>-->
             </div>
         </div>
 
@@ -343,17 +325,19 @@
         data() {
             return {
 
-                range: [-1,5],
+                filter_genes_regexp: [],
+                filter_genes: [],
+                filter_genes_selected: [],
 
                 params: {
                     spot_minreads: 0,
-                    spot_maxreads: 10000,
+                    spot_maxreads: this.project.project_parameters.max_spots_counts, //TODO: arreglar
 
                     spot_mingenes: 0,
-                    spot_maxgenes: 40000,
+                    spot_maxgenes: this.project.project_parameters.total_genes,
 
                     gene_minreads: 0,
-                    gene_maxreads: 10000,
+                    gene_maxreads: this.project.project_parameters.max_gene_counts,
 
                     gene_minspots: 0,
                     gene_maxspots: 6000,
@@ -364,13 +348,18 @@
 
                     gene_minpct: 0,
                     gene_maxpct: 100,
+
+                    rm_genes: [],
+                    rm_genes_expr: '',
+
+                    samples: [],
                 },
 
                 processing: false,
 
                 //samplesToProcess: [],
 
-                textOutput: ''
+                textOutput: '',
             }
         },
 
@@ -397,6 +386,19 @@
                 this.$refs.selectedSamples.selectedIndex = -1;
             },
 
+            addFilterGene(e) {
+                if(e.target.index<0) return;
+                console.log(e.target.text);
+                if(!this.filter_genes_selected.includes(e.target.text))
+                    this.filter_genes_selected.push(e.target.text);
+            },
+
+            removeFilterGene(e) {
+                if(e.target.index<0) return;
+                const index = this.filter_genes_selected.indexOf(e.target.text);
+                this.filter_genes_selected.splice(index, 1);
+            },
+
             selectedSamples(e) {
 
                 /*this.samplesToProcess = Array.from(e.target.selectedOptions);
@@ -408,26 +410,47 @@
                 });*/
             },
 
+            searchGenes: _.debounce(function(e) {
+                console.log(e.target.value);
+
+                axios.get('/projects/' + this.project.id + '/search-genes', {params: {'query': e.target.value}})
+                    .then((response) => this.filter_genes = response.data /*console.log(response.data)*/)
+                    .catch((error) => console.log(error));
+
+            }, 700),
+
+            filterGenesRegexp: _.debounce(function(e) {
+                console.log(e.target.value);
+
+                axios.get('/projects/' + this.project.id + '/search-genes-regexp', {params: {'query': e.target.value}})
+                    .then((response) => this.filter_genes_regexp = response.data /*console.log(response.data)*/)
+                    .catch((error) => console.log(error));
+
+            }, 700),
+
             startProcess() {
 
                 this.processing = true;
 
+                if(this.$refs.availableSamples.options.length && this.$refs.selectedSamples.options.length)
+                    for(let i = 0; i< this.$refs.selectedSamples.options.length; i++)
+                        this.params.samples.push(Number(this.$refs.selectedSamples.options[i].value));
+                if(this.params.samples.length) {
+                    this.params.samples = this.params.samples.join("','");
+                    this.params.samples = "c('" + this.params.samples + "')";
+                }
+                else
+                    this.params.samples = '';
 
-                /*let _params = ['spot_minreads', 'spot_maxreads'];
-                _params.forEach(
-                    (param) => {
-                        console.log(this[param]);
-                    }
-                );*/
 
+                if(this.filter_genes_selected.length) {
+                    this.params.rm_genes = this.filter_genes_selected.join("','");
+                    this.params.rm_genes = "c('" + this.params.rm_genes + "')";
+                }
+                else
+                    this.params.rm_genes = '';
 
-
-                // let data = {
-                //     'sample_id': this.samplesToProcess.length  ? this.samplesToProcess[0].value : '',
-                //
-                // };
-
-                axios.post(this.filterUrl)
+                axios.post(this.filterUrl, {parameters: this.params})
                     .then((response) => {
                         //document.getElementById("imgResult").src = 'data:image/png;base64,' + response.data.image;
 

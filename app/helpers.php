@@ -25,5 +25,5 @@ function getShortProjectName($project)
 }
 
 function userCanAccessProject($project) : bool {
-    return is_object($project) ? $project->user_id === auth()->id() : getProjectById($project)->user_id === auth()->id;
+    return is_object($project) ? $project->user_id === auth()->id() : getProjectById($project)->user_id === auth()->id();
 }
