@@ -151,10 +151,10 @@ class Project extends Model
 
     public function getStListScript() : string {
 
-        $sampleDirs = $this->samples()->pluck('samples.id')->join("/','");
+        $sampleDirs = $this->samples()->pluck('samples.name')->join("/','");
         $sampleDirs = "'" . $sampleDirs . "/'";
 
-        $sampleNames = "'" . $this->samples()->pluck('samples.id')->join("','") . "'";
+        $sampleNames = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
 
         $script = "
 setwd('/spatialGE')
@@ -205,6 +205,8 @@ write.table(max_spots_number, 'max_spots_number.csv',sep=',', row.names = FALSE,
 
         $this->spatialExecute('Rscript Filter.R');
 
+        $result = [];
+
         $file = $workingDir . 'filter_meta_options.csv';
         if(Storage::fileExists($file)) {
             $data = Storage::read($file);
@@ -213,7 +215,9 @@ write.table(max_spots_number, 'max_spots_number.csv',sep=',', row.names = FALSE,
             foreach ($options as $option)
                 if(strlen($option))
                     $_options[] = ['label' => $option, 'value' => $option];
-            ProjectParameter::updateOrCreate(['parameter' => 'filter_meta_options', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($_options)]);
+            $json = json_encode($_options);
+            ProjectParameter::updateOrCreate(['parameter' => 'filter_meta_options', 'project_id' => $this->id], ['type' => 'json', 'value' => $json]);
+            $result['filter_meta_options'] = $json;
         }
 
 
@@ -225,8 +229,11 @@ write.table(max_spots_number, 'max_spots_number.csv',sep=',', row.names = FALSE,
             if (Storage::fileExists($file)) {
                 Storage::copy($file, $file_public);
                 ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
+                $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
             }
         }
+
+        return $result;
 
     }
 
@@ -262,9 +269,9 @@ filter_meta_options = unique(unlist(lapply(filtered_stlist@spatial_meta, functio
 write.table(filter_meta_options, 'filter_meta_options.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 #### Violin plot
-library('magrittr')
-source('violin_plots.R')
-source('utils.R')
+#library('magrittr')
+#source('violin_plots.R')
+#source('utils.R')
 vp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='okabeito')
 ggpubr::ggexport(filename = 'filter_violin.png', vp)
 
@@ -333,6 +340,93 @@ bp = violin_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_pale
 ggpubr::ggexport(filename = 'filter_boxplot.png', bp)
 
 ";
+
+        return $script;
+
+    }
+
+
+    public function applyNormalization($parameters) {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'Normalization.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getNormalizationScript($parameters));
+
+        $this->spatialExecute('Rscript ' . $scriptName);
+
+//        $file = $workingDir . 'filter_meta_options.csv';
+//        if(Storage::fileExists($file)) {
+//            $data = Storage::read($file);
+//            $options = explode("\n", $data);
+//            $_options = [];
+//            foreach ($options as $option)
+//                if(strlen($option))
+//                    $_options[] = ['label' => $option, 'value' => $option];
+//            ProjectParameter::updateOrCreate(['parameter' => 'filter_meta_options', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($_options)]);
+//        }
+
+
+        $result = [];
+
+        $parameterNames = ['normalized_violin', 'normalized_boxplot'];
+        foreach($parameterNames as $parameterName) {
+            $fileName = $parameterName . '.png';
+            $file = $workingDir . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if (Storage::fileExists($file)) {
+                Storage::copy($file, $file_public);
+                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
+                $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
+            }
+        }
+
+        return $result;
+
+    }
+
+
+    public function getNormalizationScript($parameters) : string {
+
+        $str_params = '';
+        foreach ($parameters as $key => $value) {
+            if(strlen($value)) {
+                $str_params .= strlen($str_params) ? ', ' : '';
+                $quote = in_array($key, ['method']) ? "'" : '';
+                $str_params .= $key . '=' . $quote . $value . $quote;
+            }
+        }
+
+        //dd($str_params);
+
+        $script = "
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load filtered STList from disk
+load(file='filtered_stlist.RData')
+
+normalized_stlist = transform_data(filtered_stlist, $str_params)
+save(normalized_stlist, file='normalized_stlist.RData')
+
+#### Violin plot
+library('magrittr')
+source('violin_plots.R')
+source('utils.R')
+vp = violin_plots(normalized_stlist, color_pal='okabeito', data_type='tr', genes='TP53')
+ggpubr::ggexport(filename = 'normalized_violin.png', vp)
+
+#### Box plot
+bp = violin_plots(normalized_stlist, color_pal='okabeito', plot_type='box', data_type='tr', genes='TP53')
+ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
+
+";
+
+        //dd($script);
 
         return $script;
 

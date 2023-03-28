@@ -47,7 +47,7 @@ class spatialContainer {
             $workingDir = '/' . $workingDir;
 
             $exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
-            $command = "$exe container run -it -v $workingDir:/spatialGE --rm --name $container_id -d spatialge";
+            $command = "$exe container run -it -v $workingDir:/spatialGE --rm --name $container_id -d testing";
             $process = Process::run($command);
 
             $ok = true;

@@ -18,10 +18,13 @@
                             <strong>The Log-normal method</strong> uses... <code>features</code>, etc.
                         </div>
                         <div class="my-3">
-                            <label class="form-label">Scaling factor:</label> <input type="number" value="10000" class="text-end text-sm border border-1 rounded w-10">
+                            <label class="form-label">Scaling factor:</label> <input type="number" class="text-end text-sm border border-1 rounded w-10" v-model="params.scale_f">
                         </div>
                         <div class="mt-3">
-                            <a href="#" class="btn btn-sm btn-outline-info">Use this method</a>
+                            <label>
+                                <input type="radio" name="method" value="log" @click="params.method = 'log'"> Use Log-normal
+                            </label>
+<!--                            <a href="#" class="btn btn-sm btn-outline-info">Use this method</a>-->
                         </div>
                     </div>
 
@@ -39,94 +42,85 @@
                             <strong>The SCT method</strong> is... <code>attributes</code>, etc.
                         </div>
                         <div class="mt-3">
-                            <a href="#" class="btn btn-sm btn-outline-info">Use this method</a>
+                            <label>
+                                <input type="radio" name="method" value="log" @click="params.method = 'sct'"> Use SCT
+                            </label>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingThree">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                        Quantile
-                    </button>
-                </h2>
-                <div id="collapseThree" class="accordion-collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-                        <div>
-                            <strong>The Quantile method</strong> creates... <code>variables</code>, etc.
-                        </div>
-                        <div class="mt-3">
-                            <a href="#" class="btn btn-sm btn-outline-info">Use this method</a>
-                        </div>
-                    </div>
+<!--            <div class="accordion-item">-->
+<!--                <h2 class="accordion-header" id="headingThree">-->
+<!--                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">-->
+<!--                        Quantile-->
+<!--                    </button>-->
+<!--                </h2>-->
+<!--                <div id="collapseThree" class="accordion-collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">-->
+<!--                    <div class="accordion-body">-->
+<!--                        <div>-->
+<!--                            <strong>The Quantile method</strong> creates... <code>variables</code>, etc.-->
+<!--                        </div>-->
+<!--                        <div class="mt-3">-->
+<!--                            <label>-->
+<!--                                <input type="radio" name="method" value="log" @click="params.method = 'quantile'"> Use Quantile-->
+<!--                            </label>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+        </div>
+
+
+        <div class="row">
+            <div class="w-100">
+                <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
+                    <button type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Normalize' }}</button>
                 </div>
             </div>
         </div>
 
+        <div v-if="'normalized_violin' in project.project_parameters">
 
-        <div class="mt-4">
-            <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="boxplot-tab" data-bs-toggle="tab" data-bs-target="#boxplot" type="button" role="tab" aria-controls="boxplot" aria-selected="true">Boxplots</button>
-                </li>
-            </ul>
-            <div class="tab-content" id="filterDiagramsContent">
-
-                <div class="tab-pane fade show active" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
-                    <div class="m-4">
-                        Color palette:
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Blue-Red
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Yellow-Orange
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Rainbow
-                        </label>
-                    </div>
-                    <div class="text-center">
-                        <pre>
-
-
-
-                        Under development (spatialGE library)
-
-
-
-                        </pre>
-                    </div>
+            <div class="row mt-5 row-cols-2">
+                <div class="col">
+                    <div>Color palette</div>
+                    <div><multiselect :options="colorPalettes" @change="(value, select) => filter_color_palette = value"></multiselect></div>
                 </div>
-
-                <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
-                    <div class="m-4">
-                        Color palette:
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Blue-Red
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Yellow-Orange
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Rainbow
-                        </label>
-                    </div>
-                    <div class="text-center">
-                        <pre>
-
-
-
-                        Under development (spatialGE library)
-
-
-
-                        </pre>
-                    </div>
+                <div class="col">
+                    <div>Variable</div>
+                    <div><multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" @change="(value, select) => filter_variable = value"></multiselect></div>
                 </div>
+            </div>
+            <div class="row mt-3">
+                <div class="float-end">
+                    <input type="button" class="btn btn-outline-info float-end" value="Generate plots" @click="normalizedPlots">
+                </div>
+            </div>
 
+            <div class="mt-4" v-if="!generating_plots">
+                <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="true">Boxplots</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="normalizedDiagramsContent">
+
+                    <div class="tab-pane fade show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
+                        <div class="text-center m-4">
+                            <img :src="project.project_parameters.normalized_violin + '?' + Date.now()">
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
+                        <div class="text-center m-4">
+                            <img :src="project.project_parameters.normalized_boxplot + '?' + Date.now()">
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
 
@@ -140,41 +134,24 @@
         name: 'qcDtNormalize',
 
         props: {
+            project: Object,
             samples: Object,
-            filterUrl: String
+            colorPalettes: Object,
+            normalizeUrl: String,
+            normalizeUrlPlots: String,
         },
 
         data() {
             return {
 
-                range: [-1,5],
-
                 params: {
-                    spot_minreads: 0,
-                    spot_maxreads: 10000,
-
-                    spot_mingenes: 0,
-                    spot_maxgenes: 40000,
-
-                    gene_minreads: 0,
-                    gene_maxreads: 10000,
-
-                    gene_minspots: 0,
-                    gene_maxspots: 6000,
-
-                    spot_minpct: 0,
-                    spot_maxpct: 100,
-                    spot_pct_expr: '',
-
-                    gene_minpct: 0,
-                    gene_maxpct: 100,
+                    method: 'sct',
+                    scale_f: 10000
                 },
 
                 processing: false,
 
-                //samplesToProcess: [],
-
-                textOutput: ''
+                generating_plots: false,
             }
         },
 
@@ -186,15 +163,16 @@
 
                 this.processing = true;
 
-                axios.post(this.filterUrl)
+                console.log(this.params);
+
+                axios.post(this.normalizeUrl, {parameters: this.params})
                     .then((response) => {
-                        //document.getElementById("imgResult").src = 'data:image/png;base64,' + response.data.image;
-
-                        //this.textOutput = response.data.output;
-
                         console.log(response.data);
-
                         this.processing = false;
+
+                        for(let property in response.data)
+                            this.project.project_parameters[property] = response.data[property];
+
                     })
                     .catch((error) => {
                         console.log(error.message)
@@ -203,6 +181,17 @@
 
 
             },
+
+            normalizedPlots() {
+                this.generating_plots = true;
+                axios.post(this.normalizeUrlPlots, {color_palette: this.filter_color_palette, variable: this.filter_variable})
+                    .then((response) => {
+                        this.generating_plots = false;
+                    })
+                    .catch((error) => {
+                        console.log(error.message)
+                    })
+            }
         },
 
     }

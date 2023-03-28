@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -56,4 +57,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getNameAttribute() {
         return $this->first_name . ' ' . $this->last_name;
     }
+
+    public function getUserFolder() : string {
+
+        Storage::createDirectory('users');
+        $userFolder = 'users/' . $this->id . '/';
+        Storage::createDirectory($userFolder);
+
+        return $userFolder;
+
+    }
+
 }

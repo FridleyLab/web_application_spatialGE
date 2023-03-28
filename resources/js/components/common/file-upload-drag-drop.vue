@@ -86,14 +86,14 @@ export default {
             this.file = 'dataTransfer' in event ? event.dataTransfer.files[0] : event.target.files[0];
 
             this.errorMessage = '';
-            if(this.code === 'expression' && !(/\.(h5|hdf5)$/i.test(this.file.name))) {
-                this.errorMessage = 'File must be of type h5 or hdf5';
+            if(this.code === 'expression' && !(/\.(h5|csv)$/i.test(this.file.name))) {
+                this.errorMessage = 'File must be of type h5 or csv';
                 this.file = null;
                 return;
             }
             else if(this.code === 'coordinates') {
-                if(!(/\.(csv|tsv)$/i.test( this.file.name ))) {
-                    this.errorMessage = 'File type must be csv or tsv';
+                if(!(/\.(csv|tsv|txt)$/i.test( this.file.name ))) {
+                    this.errorMessage = 'File type must be csv, tsv or txt';
                     this.file = null;
                     return;
                 }

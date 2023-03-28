@@ -45,6 +45,9 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects/{project}/qc/filter', [ProjectController::class, 'applyFilter'])->name('qc-dt-filter');
     Route::post('/projects/{project}/qc/filter-plots', [ProjectController::class, 'generateFilterPlots'])->name('qc-dt-filter-plots');
 
+    Route::post('/projects/{project}/qc/normalize', [ProjectController::class, 'applyNormalization'])->name('qc-dt-normalize');
+    Route::post('/projects/{project}/qc/normalize-plots', [ProjectController::class, 'generateNormalizationPlots'])->name('qc-dt-normalize-plots');
+
     Route::get('/projects/{project}/search-genes',[ProjectController::class, 'searchGenes'])->name('search-genes')->middleware('project');
     Route::get('/projects/{project}/search-genes-regexp',[ProjectController::class, 'searchGenesRegexp'])->name('search-genes-regexp')->middleware('project');
 

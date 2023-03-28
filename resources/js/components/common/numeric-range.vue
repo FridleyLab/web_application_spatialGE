@@ -57,3 +57,10 @@ import Slider from '@vueform/slider'
 </script>
 
 <style src="@vueform/slider/themes/default.css"></style>
+<style>
+:root {
+    --slider-connect-bg: #3B82F6;
+    --slider-tooltip-bg: #3B82F6;
+    --slider-handle-ring-color: #3B82F630;
+}
+</style>

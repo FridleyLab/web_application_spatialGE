@@ -71,7 +71,7 @@
 
     </main>
 
-    @include('layout.partials.ui-settings')
+{{--    @include('layout.partials.ui-settings')--}}
 
 </section>
 

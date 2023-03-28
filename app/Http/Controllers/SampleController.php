@@ -16,9 +16,8 @@ class SampleController extends Controller
 
     public function store()
     {
-        Storage::createDirectory('users');
-        $userFolder = 'users/' . auth()->id() . '/';
-        Storage::createDirectory($userFolder);
+
+        $userFolder = auth()->user()->getuserFolder();
 
 
         if(request()->file('files')) {
@@ -39,7 +38,7 @@ class SampleController extends Controller
 
                 $projectFolder = $userFolder . $projectId . '/';
                 Storage::createDirectory($projectFolder);
-                $sampleFolder = $projectFolder . $sample->id . '/';
+                $sampleFolder = $projectFolder . $sample->name . '/';
                 $sampleFolderSpatial = $sampleFolder . 'spatial/';
                 Storage::createDirectory($sampleFolder);
                 Storage::createDirectory($sampleFolderSpatial);

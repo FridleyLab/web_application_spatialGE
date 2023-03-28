@@ -86,8 +86,9 @@
 
                                     <div class="row justify-content-center text-center m-3">
                                         <div class="row justify-content-center text-center m-3">
-                                            <div class="w-100 w-md-80 w-lg-70 w-xxl-60">
+                                            <div class="w-100 w-md-80 w-lg-70 w-xxl-60 d-flex">
                                                 <input type="text" class="form-control form-control-plaintext border border-1 px-2 text-sm w-100" placeholder="RegEx here... e.g. ^MT-" v-model="params.rm_genes_expr" @input="filterGenesRegexp">
+                                                <a class="ms-3 link-info text-lg float-end" href="https://towardsdatascience.com/regular-expressions-clearly-explained-with-examples-822d76b037b4" target="_blank">?</a>
                                             </div>
                                             <div class="mt-3" v-if="filter_genes_regexp.length">
                                                 <label for="filter_genes_regexp" class="form-label">Matched genes (preview):</label>
@@ -157,14 +158,14 @@
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="chkFilterSpotRemoveMT" v-model="filter_spots_regexp_remove_mt">
                                                 <label class="form-check-label" for="chkFilterSpotRemoveMT">
-                                                    Remove mitochondrial genes (^MT-)
+                                                    Remove spots... mitochondrial genes (^MT-)
                                                 </label>
                                             </div>
 
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" value="" id="chkFilterSpotRemoveRP" v-model="filter_spots_regexp_remove_rp">
                                                 <label class="form-check-label" for="chkFilterSpotRemoveRP">
-                                                    Remove ribosomal genes (^RP[L|S])
+                                                    Remove spots ...ribosomal genes (^RP[L|S])
                                                 </label>
                                             </div>
                                         </div>
@@ -180,8 +181,9 @@
 
                                                     <div class="row justify-content-center text-center m-3">
                                                         <div class="row justify-content-center text-center m-3">
-                                                            <div class="w-100 w-md-80 w-lg-70 w-xxl-60">
+                                                            <div class="w-100 w-md-80 w-lg-70 w-xxl-60 d-flex">
                                                                 <input type="text" class="form-control form-control-plaintext border border-1 px-2 text-sm w-100" placeholder="RegEx here... e.g. ^MT-" v-model="params.spot_pct_expr" @input="filterSpotsGenesRegexp">
+                                                                <a class="ms-3 link-info text-lg float-end" href="https://towardsdatascience.com/regular-expressions-clearly-explained-with-examples-822d76b037b4" target="_blank">?</a>
                                                             </div>
                                                             <div class="mt-3" v-if="filter_spots_genes_regexp.length">
                                                                 <label for="filter_genes_regexp" class="form-label">Matched genes (preview):</label>
@@ -238,7 +240,7 @@
             </div>
         </div>
 
-        <div v-if="project.project_parameters.filter_violin?.length">
+        <div v-if="'filter_violin' in project.project_parameters">
 
             <div class="row mt-5 row-cols-2">
                 <div class="col">
@@ -252,7 +254,7 @@
             </div>
             <div class="row mt-3">
                 <div class="float-end">
-                    <input type="button" class="btn btn-outline-info float-end" value="Generate plots" @click="filterPlots">
+                    <input type="button" class="btn btn-outline-info float-end" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="filterPlots">
                 </div>
             </div>
 
@@ -270,6 +272,7 @@
                     <div class="tab-pane fade show active" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
                         <div class="text-center m-4">
                             <img :src="project.project_parameters.filter_violin + '?' + Date.now()">
+<!--                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()">-->
                         </div>
                     </div>
 
@@ -347,9 +350,6 @@
 
                 processing: false,
 
-                //samplesToProcess: [],
-
-                textOutput: '',
             }
         },
 
@@ -463,13 +463,16 @@
 
                 axios.post(this.filterUrl, {parameters: this.params})
                     .then((response) => {
-                        //document.getElementById("imgResult").src = 'data:image/png;base64,' + response.data.image;
-
-                        //this.textOutput = response.data.output;
-
                         console.log(response.data);
-
                         this.processing = false;
+                        //this.plots_data = response.data;
+
+                        for(let property in response.data)
+                            this.project.project_parameters[property] = response.data[property];
+
+                        /*this.project.project_parameters.filter_meta_options = response.data.filter_meta_options;
+                        this.project.project_parameters.filter_violin = response.data.filter_violin;
+                        this.project.project_parameters.filter_boxplot = response.data.filter_boxplot;*/
                     })
                     .catch((error) => {
                         console.log(error.message)

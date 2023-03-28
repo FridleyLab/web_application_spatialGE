@@ -142,15 +142,26 @@ class ProjectController extends Controller
 
     public function applyFilter(Project $project) {
 
-        $project->applyFilter(request('parameters'));
-
-        return 'Done';
+        return $project->applyFilter(request('parameters'));
 
     }
 
     public function generateFilterPlots(Project $project) {
 
         $project->generateFilterPlots(request('color_palette'), request('variable'));
+
+        return response('OK');
+    }
+
+    public function applyNormalization(Project $project) {
+
+        return $project->applyNormalization(request('parameters'));
+
+    }
+
+    public function generateNormalizationPlots(Project $project) {
+
+        $project->generateNormalizationPlots(request('color_palette'), request('variable'));
 
         return response('OK');
     }
