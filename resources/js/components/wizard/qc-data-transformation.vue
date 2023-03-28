@@ -30,7 +30,7 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="filter" role="tabpanel" aria-labelledby="filter-tab">
-                                <qc-dt-filter :project="project" :samples="samples" :filter-url="filterUrl"></qc-dt-filter>
+                                <qc-dt-filter :project="project" :samples="samples" :filter-url="filterUrl" :filter-url-plots="filterUrlPlots" :color-palettes="colorPalettes"></qc-dt-filter>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="normalize" role="tabpanel" aria-labelledby="normalize-tab">
                                 <qc-dt-normalize :samples="samples" :filter-url="filterUrl"></qc-dt-normalize>
@@ -54,7 +54,9 @@
         props: {
             project: Object,
             samples: Object,
+            colorPalettes: Object,
             filterUrl: String,
+            filterUrlPlots: String,
         },
 
         mounted() {

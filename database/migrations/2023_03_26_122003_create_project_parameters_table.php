@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('project_parameters', function (Blueprint $table) {
             $table->id();
 
-            $table->string('parameter', 255)->index();
-            $table->string('type', 255)->index();
-            $table->string('value', 255)->index();
+            $table->string('parameter', 255);
+            $table->string('type', 255);
+            $table->string('value', 255);
 
             $table->unsignedBigInteger('project_id');
             $table->foreign('project_id')->references('id')->on('projects');

@@ -3,8 +3,8 @@
         <Multiselect
             v-model="value"
             :options="options"
-            mode="tags"
             :searchable="true"
+            @change="(value, select) => $emit('change',value,select)"
         />
     </div>
 </template>
@@ -17,17 +17,14 @@ export default {
     components: {
         Multiselect,
     },
+    emits: ['change'],
+    props: {
+        options: Object,
+        label: {type: String, default: ''},
+    },
     data() {
         return {
             value: null,
-            options: [
-                'Batman',
-                'Robin',
-                'Joker',
-                'Batman 2',
-                'Robin 2',
-                'Joker 2',
-            ]
         }
     }
 }

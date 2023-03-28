@@ -16,7 +16,7 @@
                 <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
 
                     <div class="row justify-content-center text-center m-3">
-                        <div class="w-100 w-md-80 w-lg-70  w-xxl-40 row row-cols-2">
+                        <div class="w-100 w-md-80 w-lg-70  w-xxl-55 row row-cols-2">
                             <div class="col">
                                 <label for="sampleList2" class="form-label text-lg">Selected samples:</label>
                                 <select ref="selectedSamples" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="removeSample" title="Click to remove sample">
@@ -61,14 +61,14 @@
 
                         <div class="my-4 d-flex justify-content-center">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="chkFilterGeneRemoveMT">
+                                <input class="form-check-input" type="checkbox" id="chkFilterGeneRemoveMT" v-model="filter_genes_regexp_remove_mt">
                                 <label class="form-check-label" for="chkFilterGeneRemoveMT">
                                     Remove mitochondrial genes (^MT-)
                                 </label>
                             </div>
 
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="chkFilterGeneRemoveRP">
+                                <input class="form-check-input" type="checkbox" value="" id="chkFilterGeneRemoveRP" v-model="filter_genes_regexp_remove_rp">
                                 <label class="form-check-label" for="chkFilterGeneRemoveRP">
                                     Remove ribosomal genes (^RP[L|S])
                                 </label>
@@ -111,7 +111,7 @@
                                     <div class="text-start text-bold">Keep genes expressed in:</div>
                                     <div class="mt-2">
 <!--                                        TODO: script maximum number of spots  -->
-                                        <numeric-range title="Number of spots:" :min="0" :max="6000" :step="100" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
+                                        <numeric-range title="Number of spots:" :min="0" :max="project.project_parameters.max_spots_number" :step="50" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
                                     </div>
                                     <div class="mt-4">
                                         <numeric-range title="Percentage of spots" :min="0" :max="100" :step="1" @updated="(min,max) => {params.gene_minpct = min; params.gene_maxpct = max}"></numeric-range>
@@ -139,7 +139,7 @@
                             <div class="row">
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep spots/cells with this number of counts:" title-class="text-bold" :min="0" :max="project.project_parameters.max_spots_counts" :step="500" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
+                                    <numeric-range title="Keep spots/cells with this number of counts:" title-class="text-bold" :min="0" :max="project.project_parameters.max_spot_counts" :step="500" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
                                 </div>
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
@@ -155,14 +155,14 @@
                                     <div class="mt-4 justify-content-center row row-cols-2">
                                         <div class=" col my-4 justify-content-center">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" id="chkFilterSpotRemoveMT">
+                                                <input class="form-check-input" type="checkbox" id="chkFilterSpotRemoveMT" v-model="filter_spots_regexp_remove_mt">
                                                 <label class="form-check-label" for="chkFilterSpotRemoveMT">
                                                     Remove mitochondrial genes (^MT-)
                                                 </label>
                                             </div>
 
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" id="chkFilterSpotRemoveRP">
+                                                <input class="form-check-input" type="checkbox" value="" id="chkFilterSpotRemoveRP" v-model="filter_spots_regexp_remove_rp">
                                                 <label class="form-check-label" for="chkFilterSpotRemoveRP">
                                                     Remove ribosomal genes (^RP[L|S])
                                                 </label>
@@ -181,7 +181,13 @@
                                                     <div class="row justify-content-center text-center m-3">
                                                         <div class="row justify-content-center text-center m-3">
                                                             <div class="w-100 w-md-80 w-lg-70 w-xxl-60">
-                                                                <input type="text" class="form-control form-control-plaintext border border-1 px-2 text-sm w-100" placeholder="RegEx here... e.g. ^MT-">
+                                                                <input type="text" class="form-control form-control-plaintext border border-1 px-2 text-sm w-100" placeholder="RegEx here... e.g. ^MT-" v-model="params.spot_pct_expr" @input="filterSpotsGenesRegexp">
+                                                            </div>
+                                                            <div class="mt-3" v-if="filter_spots_genes_regexp.length">
+                                                                <label for="filter_genes_regexp" class="form-label">Matched genes (preview):</label>
+                                                                <select ref="filter_genes_regexp" id="filter_genes_regexp" multiple class="p-2 form-select w-100 border border-1" title="Click to add sample">
+                                                                    <option v-for="gene in filter_spots_genes_regexp" :value="gene">{{ gene }}</option>
+                                                                </select>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -224,17 +230,6 @@
 
 
 
-<!--        <img id="imgResult">-->
-
-<!--        <div>-->
-<!--            <pre>-->
-<!--            {{ textOutput }}-->
-<!--            </pre>-->
-<!--        </div>-->
-
-
-
-
         <div class="row">
             <div class="w-100">
                 <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
@@ -243,95 +238,90 @@
             </div>
         </div>
 
-        <div class="mt-4">
-            <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="boxplot-tab" data-bs-toggle="tab" data-bs-target="#boxplot" type="button" role="tab" aria-controls="boxplot" aria-selected="true">Boxplots</button>
-                </li>
-            </ul>
-            <div class="tab-content" id="filterDiagramsContent">
+        <div v-if="project.project_parameters.filter_violin?.length">
 
-                <div class="tab-pane fade show active" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
-                    <div class="m-4">
-                        Color palette:
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Blue-Red
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Yellow-Orange
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Rainbow
-                        </label>
-                    </div>
-                    <div class="text-center">
-                        <pre>
-
-
-
-                        Under development (spatialGE library)
-
-
-
-                        </pre>
-                    </div>
+            <div class="row mt-5 row-cols-2">
+                <div class="col">
+                    <div>Color palette</div>
+                    <div><multiselect :options="colorPalettes" @change="(value, select) => filter_color_palette = value"></multiselect></div>
                 </div>
-
-                <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
-                    <div class="m-4">
-                        Color palette:
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Blue-Red
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Yellow-Orange
-                        </label>
-                        <label class="m-2">
-                            <input type="radio" class="" name="xyz"> Rainbow
-                        </label>
-                    </div>
-                    <div class="text-center">
-                        <pre>
-
-
-
-                        Under development (spatialGE library)
-
-
-
-                        </pre>
-                    </div>
+                <div class="col">
+                    <div>Variable</div>
+                    <div><multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" @change="(value, select) => filter_variable = value"></multiselect></div>
                 </div>
+            </div>
+            <div class="row mt-3">
+                <div class="float-end">
+                    <input type="button" class="btn btn-outline-info float-end" value="Generate plots" @click="filterPlots">
+                </div>
+            </div>
 
+            <div class="mt-4" v-if="!generating_plots">
+                <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="boxplot-tab" data-bs-toggle="tab" data-bs-target="#boxplot" type="button" role="tab" aria-controls="boxplot" aria-selected="true">Boxplots</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="filterDiagramsContent">
+
+                    <div class="tab-pane fade show active" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
+                        <div class="text-center m-4">
+                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()">
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
+                        <div class="text-center m-4">
+                            <img :src="project.project_parameters.filter_boxplot + '?' + Date.now()">
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
+
 
     </form>
 </div>
 </template>
 <script>
+    import {toJSON} from "lodash/seq";
+
     export default {
         name: 'qcDtFilter',
 
         props: {
             project: Object,
             samples: Object,
-            filterUrl: String
+            colorPalettes: Object,
+            filterUrl: String,
+            filterUrlPlots: String
         },
 
         data() {
             return {
 
                 filter_genes_regexp: [],
+                filter_spots_genes_regexp: [],
                 filter_genes: [],
                 filter_genes_selected: [],
+                filter_genes_regexp_remove_mt: false,
+                filter_genes_regexp_remove_rp: false,
+
+                filter_spots_regexp_remove_mt: false,
+                filter_spots_regexp_remove_rp: false,
+
+                filter_color_palette: 'okabeito',
+                filter_variable: 'total_counts',
+
+                generating_plots: false,
 
                 params: {
                     spot_minreads: 0,
-                    spot_maxreads: this.project.project_parameters.max_spots_counts, //TODO: arreglar
+                    spot_maxreads: this.project.project_parameters.max_spot_counts, //TODO: arreglar
 
                     spot_mingenes: 0,
                     spot_maxgenes: this.project.project_parameters.total_genes,
@@ -340,7 +330,7 @@
                     gene_maxreads: this.project.project_parameters.max_gene_counts,
 
                     gene_minspots: 0,
-                    gene_maxspots: 6000,
+                    gene_maxspots: this.project.project_parameters.max_spots_number,
 
                     spot_minpct: 0,
                     spot_maxpct: 100,
@@ -371,6 +361,7 @@
 
 
         methods: {
+            toJSON,
 
             removeSample(e) {
                 console.log(e);
@@ -420,10 +411,15 @@
             }, 700),
 
             filterGenesRegexp: _.debounce(function(e) {
-                console.log(e.target.value);
-
                 axios.get('/projects/' + this.project.id + '/search-genes-regexp', {params: {'query': e.target.value}})
                     .then((response) => this.filter_genes_regexp = response.data /*console.log(response.data)*/)
+                    .catch((error) => console.log(error));
+
+            }, 700),
+
+            filterSpotsGenesRegexp: _.debounce(function(e) {
+                axios.get('/projects/' + this.project.id + '/search-genes-regexp', {params: {'query': e.target.value}})
+                    .then((response) => this.filter_spots_genes_regexp = response.data /*console.log(response.data)*/)
                     .catch((error) => console.log(error));
 
             }, 700),
@@ -432,6 +428,7 @@
 
                 this.processing = true;
 
+                //Check if specific samples were selected and form the list
                 if(this.$refs.availableSamples.options.length && this.$refs.selectedSamples.options.length)
                     for(let i = 0; i< this.$refs.selectedSamples.options.length; i++)
                         this.params.samples.push(Number(this.$refs.selectedSamples.options[i].value));
@@ -442,13 +439,27 @@
                 else
                     this.params.samples = '';
 
-
+                //Check if specific genes are to be removed
                 if(this.filter_genes_selected.length) {
                     this.params.rm_genes = this.filter_genes_selected.join("','");
                     this.params.rm_genes = "c('" + this.params.rm_genes + "')";
                 }
                 else
                     this.params.rm_genes = '';
+
+                //Check if Regexp for MT or RP genes removing are set
+                if(this.filter_genes_regexp_remove_mt)
+                    this.params.rm_genes_expr += (this.params.rm_genes_expr.length ? '|' : '') + '^MT-';
+                if(this.filter_genes_regexp_remove_rp)
+                    this.params.rm_genes_expr += (this.params.rm_genes_expr.length ? '|' : '') + '^RP[L|S]';
+
+                //Check if Regexp for MT or RP SPOT genes PCT are set
+                if(this.filter_spots_regexp_remove_mt)
+                    this.params.spot_pct_expr += (this.params.spot_pct_expr.length ? '|' : '') + '^MT-';
+                if(this.filter_spots_regexp_remove_rp)
+                    this.params.spot_pct_expr += (this.params.spot_pct_expr.length ? '|' : '') + '^RP[L|S]';
+
+
 
                 axios.post(this.filterUrl, {parameters: this.params})
                     .then((response) => {
@@ -467,6 +478,17 @@
 
 
             },
+
+            filterPlots() {
+                this.generating_plots = true;
+                axios.post(this.filterUrlPlots, {color_palette: this.filter_color_palette, variable: this.filter_variable})
+                    .then((response) => {
+                        this.generating_plots = false;
+                    })
+                    .catch((error) => {
+                        console.log(error.message)
+                    })
+            }
         },
 
     }

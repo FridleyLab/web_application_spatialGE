@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ColorPalette;
 use App\Models\Project;
 use App\Models\ProjectGene;
 use App\Models\User;
@@ -86,7 +87,8 @@ class ProjectController extends Controller
 
     public function qc_data_transformation(Project $project) {
         $samples = $project->samples;
-        return view('wizard.qc_data_transformation')->with(compact('project', 'samples'));
+        $color_palettes = ColorPalette::orderBy('label')->get();
+        return view('wizard.qc_data_transformation')->with(compact('project', 'samples', 'color_palettes'));
     }
 
     public function destroy(Project $project) {
@@ -140,16 +142,18 @@ class ProjectController extends Controller
 
     public function applyFilter(Project $project) {
 
-        //return request()->all();
-
-
         $project->applyFilter(request('parameters'));
 
         return 'Done';
 
     }
 
+    public function generateFilterPlots(Project $project) {
 
+        $project->generateFilterPlots(request('color_palette'), request('variable'));
+
+        return response('OK');
+    }
 
 
 }

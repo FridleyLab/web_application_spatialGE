@@ -37,7 +37,7 @@ class spatialContainer {
 
     private function createContainer() : void {
 
-        $container_id = 'spatial_' . $this->project->id;
+        $container_id = 'march-spatial_' . $this->project->id;
 
         try {
 
@@ -97,7 +97,7 @@ class spatialContainer {
             $exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
             $process = Process::run("$exe exec " . $this->project->container_id . ' ' . $command);
 
-            //dd($process->output());
+            //dd($process->errorOutput());
 
             return $process->output();
         }
