@@ -4,14 +4,16 @@
             {{ title }}
         </div>
         <div class="d-flex">
-            <div class="w-10">
-                <input class="w-100 text-end border border-1 rounded px-1" type="text" v-model="value[0]">
+            <div :class="showPercentages ? 'w-15' : 'w-10'">
+                <input class="text-end border border-info border-2 rounded px-1" :class="showPercentages ? 'w-65' : 'w-100'" type="text" v-model="value[0]">
+                <span v-if="showPercentages" class="text-info ms-2 w-35">{{ Math.round(value[0]/max*100) }}%</span>
             </div>
-            <div class="w-80 ps-3 pe-4 pt-3">
-                <Slider :min="min" :max="max" :step="step" v-model="value" />
+            <div class="ps-3 pe-3 pt-3" :class="showPercentages ? 'w-70' : 'w-80'">
+                <Slider :min="min" :max="max" :step="step" v-model="value" showTooltip="drag" />
             </div>
-            <div class="w-10">
-                <input class="w-100 text-end border border-1 rounded px-1" type="text" v-model="value[1]">
+            <div :class="showPercentages ? 'w-15' : 'w-10'">
+                <span v-if="showPercentages" class="text-info me-2 w-35">{{ Math.round(value[1]/max*100) }}%</span>
+                <input class="text-end border border-info border-2 rounded px-1" :class="showPercentages ? 'w-65' : 'w-100'" type="text" v-model="value[1]">
             </div>
         </div>
     </div>
@@ -32,6 +34,7 @@ import Slider from '@vueform/slider'
             min: {type: Number, default: 0},
             max: {type: Number, default: 100},
             step: {type: Number, default: 1},
+            showPercentages: {type: Boolean, default: false},
         },
 
         data() {
@@ -39,8 +42,8 @@ import Slider from '@vueform/slider'
 
                 value: [this.min, this.max],
 
-                minValue: Number(this.startDefault),
-                maxValue: Number(this.endDefault),
+                // minValue: Number(this.startDefault),
+                // maxValue: Number(this.endDefault),
 
                 enabled: true,
             }

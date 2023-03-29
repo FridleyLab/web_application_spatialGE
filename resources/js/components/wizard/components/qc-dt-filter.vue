@@ -20,7 +20,7 @@
                             <div class="col">
                                 <label for="sampleList2" class="form-label text-lg">Selected samples:</label>
                                 <select ref="selectedSamples" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="removeSample" title="Click to remove sample">
-                                    <option v-for="sample in samples" :value="sample.id">{{ sample.name }}</option>
+                                    <option v-for="sample in samples" :value="sample.name">{{ sample.name }}</option>
                                 </select>
                             </div>
                             <div class="col">
@@ -112,11 +112,11 @@
                                     <div class="text-start text-bold">Keep genes expressed in:</div>
                                     <div class="mt-2">
 <!--                                        TODO: script maximum number of spots  -->
-                                        <numeric-range title="Number of spots:" :min="0" :max="project.project_parameters.max_spots_number" :step="50" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
+                                        <numeric-range title="Number of spots:" :show-percentages="true" :min="0" :max="project.project_parameters.max_spots_number" :step="50" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
                                     </div>
-                                    <div class="mt-4">
-                                        <numeric-range title="Percentage of spots" :min="0" :max="100" :step="1" @updated="(min,max) => {params.gene_minpct = min; params.gene_maxpct = max}"></numeric-range>
-                                    </div>
+<!--                                    <div class="mt-4">-->
+<!--                                        <numeric-range title="Percentage of spots" :min="0" :max="100" :step="1" @updated="(min,max) => {gene_minpct = min; gene_maxpct = max}"></numeric-range>-->
+<!--                                    </div>-->
                                 </div>
                             </div>
                         </div>
@@ -322,6 +322,9 @@
 
                 generating_plots: false,
 
+                gene_minpct: 0,
+                gene_maxpct: 100,
+
                 params: {
                     spot_minreads: 0,
                     spot_maxreads: this.project.project_parameters.max_spot_counts, //TODO: arreglar
@@ -339,8 +342,8 @@
                     spot_maxpct: 100,
                     spot_pct_expr: '',
 
-                    gene_minpct: 0,
-                    gene_maxpct: 100,
+                    //gene_minpct: 0,
+                    //gene_maxpct: 100,
 
                     rm_genes: [],
                     rm_genes_expr: '',
@@ -358,6 +361,14 @@
                 console.log(this.$refs.selectedSamples.options)
             },
         },*/
+
+        watch: {
+            'gene_minpct': function(newValue, oldValue) {
+                console.log(newValue);
+                this.params.gene_minspots = Math.round(Number(this.project.project_parameters.max_spots_number) * newValue/100);
+                console.log(this.params.gene_minspots);
+            }
+        },
 
 
         methods: {
@@ -428,40 +439,42 @@
 
                 this.processing = true;
 
+                let _params = JSON.parse(JSON.stringify(this.params));
+
                 //Check if specific samples were selected and form the list
                 if(this.$refs.availableSamples.options.length && this.$refs.selectedSamples.options.length)
                     for(let i = 0; i< this.$refs.selectedSamples.options.length; i++)
-                        this.params.samples.push(Number(this.$refs.selectedSamples.options[i].value));
-                if(this.params.samples.length) {
-                    this.params.samples = this.params.samples.join("','");
-                    this.params.samples = "c('" + this.params.samples + "')";
+                        _params.samples.push(this.$refs.selectedSamples.options[i].value);
+                if(_params.samples.length) {
+                    _params.samples = _params.samples.join("','");
+                    _params.samples = "c('" + _params.samples + "')";
                 }
                 else
-                    this.params.samples = '';
+                    _params.samples = '';
 
                 //Check if specific genes are to be removed
                 if(this.filter_genes_selected.length) {
-                    this.params.rm_genes = this.filter_genes_selected.join("','");
-                    this.params.rm_genes = "c('" + this.params.rm_genes + "')";
+                    _params.rm_genes = this.filter_genes_selected.join("','");
+                    _params.rm_genes = "c('" + _params.rm_genes + "')";
                 }
                 else
-                    this.params.rm_genes = '';
+                    _params.rm_genes = '';
 
                 //Check if Regexp for MT or RP genes removing are set
                 if(this.filter_genes_regexp_remove_mt)
-                    this.params.rm_genes_expr += (this.params.rm_genes_expr.length ? '|' : '') + '^MT-';
+                    _params.rm_genes_expr += (_params.rm_genes_expr.length ? '|' : '') + '^MT-';
                 if(this.filter_genes_regexp_remove_rp)
-                    this.params.rm_genes_expr += (this.params.rm_genes_expr.length ? '|' : '') + '^RP[L|S]';
+                    _params.rm_genes_expr += (_params.rm_genes_expr.length ? '|' : '') + '^RP[L|S]';
 
                 //Check if Regexp for MT or RP SPOT genes PCT are set
                 if(this.filter_spots_regexp_remove_mt)
-                    this.params.spot_pct_expr += (this.params.spot_pct_expr.length ? '|' : '') + '^MT-';
+                    _params.spot_pct_expr += (_params.spot_pct_expr.length ? '|' : '') + '^MT-';
                 if(this.filter_spots_regexp_remove_rp)
-                    this.params.spot_pct_expr += (this.params.spot_pct_expr.length ? '|' : '') + '^RP[L|S]';
+                    _params.spot_pct_expr += (_params.spot_pct_expr.length ? '|' : '') + '^RP[L|S]';
 
 
 
-                axios.post(this.filterUrl, {parameters: this.params})
+                axios.post(this.filterUrl, {parameters: _params})
                     .then((response) => {
                         console.log(response.data);
                         this.processing = false;

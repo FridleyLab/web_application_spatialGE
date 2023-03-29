@@ -188,6 +188,11 @@ write.table(max_gene_counts, 'max_gene_counts.csv',sep=',', row.names = FALSE, c
 # Maximum number of spots
 max_spots_number = max(unlist(lapply(initial_stlist@counts, function(i){ max_tmp = max(ncol(i)) })))
 write.table(max_spots_number, 'max_spots_number.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+
+source('summary.R')
+df_summary = summarize_STlist(initial_stlist)
+write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE)
+
 ";
 
         return $script;
@@ -268,6 +273,11 @@ save(filtered_stlist, file='filtered_stlist.RData')
 filter_meta_options = unique(unlist(lapply(filtered_stlist@spatial_meta, function(i){ max_tmp = grep(paste0(c('libname', 'xpos', 'ypos'), collapse='|'), colnames(i), value=T, invert=T) })))
 write.table(filter_meta_options, 'filter_meta_options.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
+
+source('summary.R')
+df_summary = summarize_STlist(filtered_stlist)
+write.csv(df_summary, 'filtered_stlist_summary.csv', row.names=FALSE, quote=FALSE)
+
 #### Violin plot
 #library('magrittr')
 #source('violin_plots.R')
@@ -329,9 +339,9 @@ library('spatialGE')
 load(file='filtered_stlist.RData')
 
 #### Violin plot
-library('magrittr')
-source('violin_plots.R')
-source('utils.R')
+#library('magrittr')
+#source('violin_plots.R')
+#source('utils.R')
 vp = violin_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette')
 ggpubr::ggexport(filename = 'filter_violin.png', vp)
 
@@ -414,9 +424,9 @@ normalized_stlist = transform_data(filtered_stlist, $str_params)
 save(normalized_stlist, file='normalized_stlist.RData')
 
 #### Violin plot
-library('magrittr')
-source('violin_plots.R')
-source('utils.R')
+#library('magrittr')
+#source('violin_plots.R')
+#source('utils.R')
 vp = violin_plots(normalized_stlist, color_pal='okabeito', data_type='tr', genes='TP53')
 ggpubr::ggexport(filename = 'normalized_violin.png', vp)
 
