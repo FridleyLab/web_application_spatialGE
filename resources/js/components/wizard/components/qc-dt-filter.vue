@@ -245,11 +245,11 @@
             <div class="row mt-5 row-cols-2">
                 <div class="col">
                     <div>Color palette</div>
-                    <div><multiselect :options="colorPalettes" @change="(value, select) => filter_color_palette = value"></multiselect></div>
+                    <div><Multiselect :options="colorPalettes" v-model="filter_color_palette"></Multiselect></div>
                 </div>
                 <div class="col">
                     <div>Variable</div>
-                    <div><multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" @change="(value, select) => filter_variable = value"></multiselect></div>
+                    <div><Multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" v-model="filter_variable"></Multiselect></div>
                 </div>
             </div>
             <div class="row mt-3">
@@ -292,9 +292,14 @@
 </template>
 <script>
     import {toJSON} from "lodash/seq";
+    import Multiselect from '@vueform/multiselect';
 
     export default {
         name: 'qcDtFilter',
+
+        components: {
+            Multiselect,
+        },
 
         props: {
             project: Object,
@@ -509,3 +514,22 @@
 
     }
 </script>
+
+<style src="@vueform/multiselect/themes/default.css"></style>
+<style>
+
+:root {
+    --ms-placeholder-color: #3B82F6;
+    --ms-border-color-active: #3B82F6;
+    --ms-ring-color: #3B82F630;
+    --ms-spinner-color: #3B82F6;
+    //--ms-dropdown-border-color: #3B82F6;
+    --ms-tag-bg: #3B82F6;
+    --ms-tag-color: #3B82F6;
+    --ms-tag-radius: 9999px;
+    --ms-tag-font-weight: 400;
+
+    --ms-option-bg-selected: #3B82F6;
+    --ms-option-bg-selected-pointed: #3B82F6;
+}
+</style>

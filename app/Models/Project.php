@@ -129,6 +129,11 @@ class Project extends Model
             $data = trim(Storage::read($file));
             ProjectParameter::insert(['parameter' => 'max_spots_number', 'type' => 'number', 'value' => $data, 'project_id' => $this->id]);
         }
+        $file = $workingDir . 'initial_stlist_summary.csv';
+        if(Storage::fileExists($file)) {
+            $data = trim(Storage::read($file));
+            ProjectParameter::insert(['parameter' => 'initial_stlist_summary', 'type' => 'string', 'value' => $data, 'project_id' => $this->id]);
+        }
 
 
     }

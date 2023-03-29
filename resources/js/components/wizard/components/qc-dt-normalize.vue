@@ -84,11 +84,11 @@
             <div class="row mt-5 row-cols-2">
                 <div class="col">
                     <div>Color palette</div>
-                    <div><multiselect :options="colorPalettes" @change="(value, select) => filter_color_palette = value"></multiselect></div>
+                    <div><Multiselect :options="colorPalettes" @change="(value, select) => filter_color_palette = value"></Multiselect></div>
                 </div>
                 <div class="col">
                     <div>Variable</div>
-                    <div><multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" @change="(value, select) => filter_variable = value"></multiselect></div>
+                    <div><Multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" @change="(value, select) => filter_variable = value"></Multiselect></div>
                 </div>
             </div>
             <div class="row mt-3">
@@ -130,8 +130,14 @@
 </div>
 </template>
 <script>
+
+import Multiselect from '@vueform/multiselect';
     export default {
         name: 'qcDtNormalize',
+
+        components: {
+            Multiselect,
+        },
 
         props: {
             project: Object,
@@ -196,3 +202,13 @@
 
     }
 </script>
+
+<style src="@vueform/multiselect/themes/default.css"></style>
+<style>
+:root {
+    --ms-tag-bg: #059669;
+    --ms-tag-color: #D1FAE5;
+    --ms-tag-radius: 9999px;
+    --ms-tag-font-weight: 400;
+}
+</style>

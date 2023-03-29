@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->string('parameter', 255);
             $table->string('type', 255);
-            $table->string('value', 255);
+            $table->mediumText('value');
 
             $table->unsignedBigInteger('project_id');
             $table->foreign('project_id')->references('id')->on('projects');

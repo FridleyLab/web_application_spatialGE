@@ -15,7 +15,10 @@
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter" type="button" role="tab" aria-controls="filter" aria-selected="true">Filter data</button>
+                                <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="true">Data Summary</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter" type="button" role="tab" aria-controls="filter" aria-selected="false">Filter data</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="normalize-tab" data-bs-toggle="tab" data-bs-target="#normalize" type="button" role="tab" aria-controls="normalize" aria-selected="false">Normalize data</button>
@@ -29,7 +32,10 @@
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active min-vh-50" id="filter" role="tabpanel" aria-labelledby="filter-tab">
+                            <div class="tab-pane fade show active min-vh-50" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                                <project-summary-table :data="project.project_parameters.initial_stlist_summary"></project-summary-table>
+                            </div>
+                            <div class="tab-pane fade min-vh-50" id="filter" role="tabpanel" aria-labelledby="filter-tab">
                                 <qc-dt-filter :project="project" :samples="samples" :color-palettes="colorPalettes" :filter-url="filterUrl" :filter-url-plots="filterUrlPlots"></qc-dt-filter>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="normalize" role="tabpanel" aria-labelledby="normalize-tab">
