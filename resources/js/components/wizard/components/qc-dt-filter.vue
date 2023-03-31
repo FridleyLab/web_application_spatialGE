@@ -144,7 +144,7 @@
                                 </div>
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep spots/cells with this number of expressed genes:" title-class="text-bold" :min="0" :max="project.project_parameters.total_genes" :step="500" @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
+                                    <numeric-range title="Keep spots/cells with this number of expressed genes:" :show-percentages="true" title-class="text-bold" :min="0" :max="project.project_parameters.total_genes" :step="500" @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
                                 </div>
 
                                 <div class="mt-4">
@@ -152,20 +152,20 @@
 
 
 
-                                    <div class="text-start text-bold mt-4">Keep spots/cells by percentage of specific genes:</div>
-                                    <div class="mt-4 justify-content-center row row-cols-2">
-                                        <div class=" col my-4 justify-content-center">
+                                    <div class="text-start text-bold mt-2">Keep spots/cells by percentage of counts:</div>
+                                    <div class="mt-2 justify-content-center row row-cols-2">
+                                        <div class=" col my-2 justify-content-center">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="chkFilterSpotRemoveMT" v-model="filter_spots_regexp_remove_mt">
                                                 <label class="form-check-label" for="chkFilterSpotRemoveMT">
-                                                    Remove spots... mitochondrial genes (^MT-)
+                                                    Mitochondrial genes (^MT-)
                                                 </label>
                                             </div>
 
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" value="" id="chkFilterSpotRemoveRP" v-model="filter_spots_regexp_remove_rp">
                                                 <label class="form-check-label" for="chkFilterSpotRemoveRP">
-                                                    Remove spots ...ribosomal genes (^RP[L|S])
+                                                    Ribosomal genes (^RP[L|S])
                                                 </label>
                                             </div>
                                         </div>
@@ -254,22 +254,31 @@
             </div>
             <div class="row mt-3">
                 <div class="float-end">
-                    <input type="button" class="btn btn-outline-info float-end" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="filterPlots">
+                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="filterPlots">
                 </div>
             </div>
 
             <div class="mt-4" v-if="!generating_plots">
                 <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
+                        <button class="nav-link active" id="filtered-summary-tab" data-bs-toggle="tab" data-bs-target="#filtered-summary" type="button" role="tab" aria-controls="filtered-summary" aria-selected="true">Summary</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="boxplot-tab" data-bs-toggle="tab" data-bs-target="#boxplot" type="button" role="tab" aria-controls="boxplot" aria-selected="true">Boxplots</button>
+                        <button class="nav-link" id="violinplot-tab" data-bs-toggle="tab" data-bs-target="#violinplot" type="button" role="tab" aria-controls="violinplot" aria-selected="false">Violin plots</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="boxplot-tab" data-bs-toggle="tab" data-bs-target="#boxplot" type="button" role="tab" aria-controls="boxplot" aria-selected="false">Boxplots</button>
                     </li>
                 </ul>
                 <div class="tab-content" id="filterDiagramsContent">
 
-                    <div class="tab-pane fade show active" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
+                    <div class="tab-pane fade show active" id="filtered-summary" role="tabpanel" aria-labelledby="filtered-summary-tab">
+                        <div class="text-center m-4">
+                            <project-summary-table :data="project.project_parameters.filtered_stlist_summary" :reference="project.project_parameters.initial_stlist_summary"></project-summary-table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
                         <div class="text-center m-4">
                             <img :src="project.project_parameters.filter_violin + '?' + Date.now()">
 <!--                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()">-->
@@ -443,6 +452,7 @@
             startProcess() {
 
                 this.processing = true;
+                this.generating_plots = true;
 
                 let _params = JSON.parse(JSON.stringify(this.params));
 
@@ -482,12 +492,15 @@
                 axios.post(this.filterUrl, {parameters: _params})
                     .then((response) => {
                         console.log(response.data);
-                        this.processing = false;
+
                         //this.plots_data = response.data;
 
                         for(let property in response.data)
                             this.project.project_parameters[property] = response.data[property];
 
+
+                        this.processing = false;
+                        this.generating_plots = false;
                         /*this.project.project_parameters.filter_meta_options = response.data.filter_meta_options;
                         this.project.project_parameters.filter_violin = response.data.filter_violin;
                         this.project.project_parameters.filter_boxplot = response.data.filter_boxplot;*/
@@ -495,6 +508,7 @@
                     .catch((error) => {
                         console.log(error.message)
                         this.processing = false;
+                        this.generating_plots = false;
                     })
 
 

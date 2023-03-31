@@ -161,7 +161,7 @@ class ProjectController extends Controller
 
     public function generateNormalizationPlots(Project $project) {
 
-        $project->generateNormalizationPlots(request('color_palette'), request('variable'));
+        $project->generateNormalizationPlots(request('color_palette'), request('gene'));
 
         return response('OK');
     }

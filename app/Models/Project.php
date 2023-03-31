@@ -243,6 +243,15 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
             }
         }
 
+        $parameterName = 'filtered_stlist_summary';
+        $file = $workingDir . $parameterName .'.csv';
+        if(Storage::fileExists($file)) {
+            $data = trim(Storage::read($file));
+            ProjectParameter::insert(['parameter' => $parameterName, 'type' => 'string', 'value' => $data, 'project_id' => $this->id]);
+            $result[$parameterName] = $data;
+
+        }
+
         return $result;
 
     }
@@ -270,7 +279,10 @@ library('spatialGE')
 load(file='initial_stlist.RData')
 
 # Apply defined filter to the initial STList
+#library('magrittr')
+#source('filter_data2.R')
 filtered_stlist = filter_data(initial_stlist, $str_params)
+#filtered_stlist = filter_data2(initial_stlist, $str_params)
 save(filtered_stlist, file='filtered_stlist.RData')
 
 #### Plots Filter Data
@@ -387,7 +399,7 @@ ggpubr::ggexport(filename = 'filter_boxplot.png', bp)
 
         $result = [];
 
-        $parameterNames = ['normalized_violin', 'normalized_boxplot'];
+        $parameterNames = ['normalized_violin', 'normalized_boxplot', 'boxplot', 'violinplot', 'densityplot'];
         foreach($parameterNames as $parameterName) {
             $fileName = $parameterName . '.png';
             $file = $workingDir . $fileName;
@@ -439,9 +451,80 @@ ggpubr::ggexport(filename = 'normalized_violin.png', vp)
 bp = violin_plots(normalized_stlist, color_pal='okabeito', plot_type='box', data_type='tr', genes='TP53')
 ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
 
+
+
+library('magrittr')
+source('count_distribution.R')
+source('utils.R')
+den_raw = count_distribution(normalized_stlist, distrib_subset=0.01, data_type='raw', plot_type=c('density', 'violin', 'box'))
+#save(den_raw, './raw_distrib_plots.RData')
+png('./pre_densityplot.png'); print(den_raw\$density); dev.off()
+png('./pre_violinplot.png'); print(den_raw\$violin); dev.off()
+png('./pre_boxplot.png'); print(den_raw\$boxplot); dev.off()
+den_tr = count_distribution(normalized_stlist, distrib_subset=0.05, plot_type=c('density', 'violin', 'box'))
+load('./raw_distrib_plots.RData')
+png('./densityplot.png'); print(ggpubr::ggarrange(den_raw\$density, den_tr\$density, ncol=1)); dev.off()
+png('./violinplot.png'); print(ggpubr::ggarrange(den_raw\$violin, den_tr\$violin, ncol=1)); dev.off()
+png('./boxplot.png'); print(ggpubr::ggarrange(den_raw\$boxplot, den_tr\$boxplot, ncol=1)); dev.off()
+
+
 ";
 
         //dd($script);
+
+        return $script;
+
+    }
+
+
+    public function generateNormalizationPlots($color_palette, $gene) {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'generateNormalizedPlots.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getNormalizedPlotsScript($color_palette, $gene));
+
+        $this->spatialExecute('Rscript ' . $scriptName);
+
+        $parameterNames = ['normalized_violin', 'normalized_boxplot'];
+        foreach($parameterNames as $parameterName) {
+            $fileName = $parameterName . '.png';
+            $file = $workingDir . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if (Storage::fileExists($file)) {
+                Storage::delete($file_public);
+                Storage::copy($file, $file_public);
+                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
+            }
+        }
+
+    }
+
+
+    public function getNormalizedPlotsScript($color_palette, $gene) : string {
+
+        $script = "
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList from disk
+load(file='normalized_stlist.RData')
+
+#### Violin plot
+#library('magrittr')
+#source('violin_plots.R')
+#source('utils.R')
+vp = violin_plots(normalized_stlist, color_pal='$color_palette', data_type='tr', genes='$gene')
+ggpubr::ggexport(filename = 'normalized_violin.png', vp)
+
+#### Box plot
+bp = violin_plots(normalized_stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene')
+ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
+";
 
         return $script;
 

@@ -1,18 +1,21 @@
 <template>
-    <div class="table-responsive">
+    <div class="table-responsive mt-3">
         <table class="table">
             <thead>
             <tr>
                 <th></th>
-                <th colspan="6" class="text-center text-xs">per spot/cell</th>
+                <th colspan="6" class="text-center">per spot/cell metrics</th>
             </tr>
             <tr>
-                <th v-for="header in headers" scope="col">{{ header.replace('_per_spotcell', '').replace('_', ' ') }}</th>
+                <th v-for="header in main_data.headers" scope="col">{{ header.replace('_per_spotcell', '').replace('_', ' ') }}</th>
             </tr>
             </thead>
             <tbody>
-            <tr v-for="row in rows">
-                <td v-for="attr in headers" class="text-center">{{ isNaN(row[attr]) ? row[attr] : parseInt(row[attr])  }}</td>
+            <tr v-for="(row, row_index) in main_data.rows">
+                <td v-for="(attr, col_index) in main_data.headers" class="text-center">
+                    <div v-if="showReference" class="text-xs text-secondary">{{ (attr !== 'sample_name') ? formatValue(reference_data.rows[row_index][attr]) : 'original value' }}</div>
+                    <div>{{ formatValue(row[attr]) }}</div>
+                </td>
             </tr>
 
             </tbody>
@@ -31,25 +34,28 @@
 
         data() {
             return {
-                headers: [],
-                rows: [],
+                main_data: {headers: [], rows: []},
+                reference_data: {headers: [], rows: []},
+            }
+        },
 
+        computed: {
+            showReference() {
+                return this.reference.length;
             }
         },
 
         created() {
-            this.csvToJSON(this.data);
-            console.log(this.headers);
-            console.log(this.rows);
+            this.main_data = this.csvToJSON(this.data);
+            this.reference_data = this.reference.length ? this.csvToJSON(this.reference) : {};
         },
 
         methods: {
             csvToJSON: function(csv) {
                 let lines = csv.split("\n");
-                let result = [];
+                let rows = [];
                 let headers;
                 headers = lines[0].split(",");
-                this.headers = headers;
 
                 for (let i = 1; i < lines.length; i++) {
                     let obj = {};
@@ -63,10 +69,19 @@
                         obj[headers[j].trim()] = words[j];
                     }
 
-                    result.push(obj);
+                    rows.push(obj);
                 }
-                this.rows = result;
+                return {headers: headers, rows: rows};
             },
+
+            formatValue: function(value) {
+                return isNaN(value) ? value : this.numberFormat(parseInt(value));
+                // return isNaN(row[attr]) ? row[attr] : numberFormat(parseInt(row[attr]))
+            },
+
+            numberFormat: function (x) {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
         }
     }
 </script>
