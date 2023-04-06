@@ -8,7 +8,7 @@ use function PHPUnit\Framework\throwException;
 
 class spatialContainer {
 
-    private string $container_id;
+    private string $exe;
     private Project $project;
 
     /**
@@ -19,10 +19,12 @@ class spatialContainer {
     {
 
 
-        set_include_path(env('DOCKER_EXECUTABLE'));
-        putenv(env('DOCKER_EXECUTABLE'));
+        //set_include_path(env('DOCKER_EXECUTABLE'));
+        //putenv(env('DOCKER_EXECUTABLE'));
 
         //dd(env('DOCKER_EXECUTABLE'));
+
+        $this->exe = '"' . env('DOCKER_EXECUTABLE') . '"';
 
         $this->project = $project;
 
@@ -37,7 +39,10 @@ class spatialContainer {
 
     private function createContainer() : void {
 
-        $container_id = 'march-spatial_' . $this->project->id;
+        $image_name = 'spatialge-april-redis';
+
+        $container_id = 'spatial_' . $this->project->id;
+
 
         try {
 
@@ -46,8 +51,9 @@ class spatialContainer {
             $workingDir = str_replace('\\', '/', $workingDir);
             $workingDir = '/' . $workingDir;
 
-            $exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
-            $command = "$exe container run -it -v $workingDir:/spatialGE --rm --name $container_id -d testing";
+            //$exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
+            $exe = $this->exe;
+            $command = "$exe container run -it -v $workingDir:/spatialGE --rm --name $container_id -d $image_name";
             $process = Process::run($command);
 
             $ok = true;
@@ -94,7 +100,8 @@ class spatialContainer {
     public function execute($command) {
         try {
 
-            $exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
+            //$exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
+            $exe = $this->exe;
             $process = Process::run("$exe exec " . $this->project->container_id . ' ' . $command);
 
             //dd($process->errorOutput());

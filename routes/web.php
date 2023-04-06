@@ -38,15 +38,17 @@ Route::middleware(['auth'])->group(function() {
     Route::patch('/projects/{project}',[ProjectController::class, 'update'])->name('update-project')->middleware('project');
     Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data')->middleware('project');
     Route::get('/projects/{project}/qc-data-transformation',[ProjectController::class, 'qc_data_transformation'])->name('qc-data-transformation')->middleware('project');
-    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('destroy-project');
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('destroy-project')->middleware('project');
 
-    Route::get('/projects/{project}/init-stlist', [ProjectController::class, 'createStList'])->name('create-stlist');
+    Route::get('/projects/{project}/init-stlist', [ProjectController::class, 'createStList'])->name('create-stlist')->middleware('project');
 
-    Route::post('/projects/{project}/qc/filter', [ProjectController::class, 'applyFilter'])->name('qc-dt-filter');
-    Route::post('/projects/{project}/qc/filter-plots', [ProjectController::class, 'generateFilterPlots'])->name('qc-dt-filter-plots');
+    Route::post('/projects/{project}/qc/filter', [ProjectController::class, 'applyFilter'])->name('qc-dt-filter')->middleware('project');
+    Route::post('/projects/{project}/qc/filter-plots', [ProjectController::class, 'generateFilterPlots'])->name('qc-dt-filter-plots')->middleware('project');
 
-    Route::post('/projects/{project}/qc/normalize', [ProjectController::class, 'applyNormalization'])->name('qc-dt-normalize');
-    Route::post('/projects/{project}/qc/normalize-plots', [ProjectController::class, 'generateNormalizationPlots'])->name('qc-dt-normalize-plots');
+    Route::post('/projects/{project}/qc/normalize', [ProjectController::class, 'applyNormalization'])->name('qc-dt-normalize')->middleware('project');
+    Route::post('/projects/{project}/qc/normalize-plots', [ProjectController::class, 'generateNormalizationPlots'])->name('qc-dt-normalize-plots')->middleware('project');
+
+    Route::post('/projects/{project}/qc/pca', [ProjectController::class, 'applyPca'])->name('qc-dt-pca')->middleware('project');
 
     Route::get('/projects/{project}/search-genes',[ProjectController::class, 'searchGenes'])->name('search-genes')->middleware('project');
     Route::get('/projects/{project}/search-genes-regexp',[ProjectController::class, 'searchGenesRegexp'])->name('search-genes-regexp')->middleware('project');

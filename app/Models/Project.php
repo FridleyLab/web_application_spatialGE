@@ -176,7 +176,9 @@ samplenames = c($sampleNames)
 initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)
 
 #Save the STList to disk
-save(initial_stlist, file='initial_stlist.RData')
+#save(initial_stlist, file='initial_stlist.RData')
+r <- redux::hiredis()
+r\$SET('initial_stlist', redux::object_to_bin(initial_stlist))
 
 #Obtain gene names in samples and save it in a text file
 gene_names = unique(unlist(lapply(initial_stlist@counts, function(i){ genes_tmp = rownames(i) })))
@@ -276,14 +278,14 @@ setwd('/spatialGE')
 library('spatialGE')
 
 # Load STList from disk
-load(file='initial_stlist.RData')
+#load(file='initial_stlist.RData')
+r <- redux::hiredis()
+initial_stlist = redux::bin_to_object(r\$GET('initial_stlist'))
 
 # Apply defined filter to the initial STList
-#library('magrittr')
-#source('filter_data2.R')
 filtered_stlist = filter_data(initial_stlist, $str_params)
-#filtered_stlist = filter_data2(initial_stlist, $str_params)
 save(filtered_stlist, file='filtered_stlist.RData')
+r\$SET('filtered_stlist', redux::object_to_bin(filtered_stlist))
 
 #### Plots Filter Data
 # Options for plot
@@ -353,7 +355,9 @@ setwd('/spatialGE')
 library('spatialGE')
 
 # Load filtered STList from disk
-load(file='filtered_stlist.RData')
+#load(file='filtered_stlist.RData')
+r <- redux::hiredis()
+filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
 
 #### Violin plot
 #library('magrittr')
@@ -435,10 +439,12 @@ setwd('/spatialGE')
 library('spatialGE')
 
 # Load filtered STList from disk
-load(file='filtered_stlist.RData')
+#load(file='filtered_stlist.RData')
+r <- redux::hiredis()
+filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
 
 normalized_stlist = transform_data(filtered_stlist, $str_params)
-save(normalized_stlist, file='normalized_stlist.RData')
+#save(normalized_stlist, file='normalized_stlist.RData')
 
 #### Violin plot
 #library('magrittr')
@@ -453,16 +459,16 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
 
 
 
-library('magrittr')
-source('count_distribution.R')
-source('utils.R')
+#library('magrittr')
+#source('count_distribution.R')
+#source('utils.R')
 den_raw = count_distribution(normalized_stlist, distrib_subset=0.01, data_type='raw', plot_type=c('density', 'violin', 'box'))
 #save(den_raw, './raw_distrib_plots.RData')
 png('./pre_densityplot.png'); print(den_raw\$density); dev.off()
 png('./pre_violinplot.png'); print(den_raw\$violin); dev.off()
 png('./pre_boxplot.png'); print(den_raw\$boxplot); dev.off()
 den_tr = count_distribution(normalized_stlist, distrib_subset=0.05, plot_type=c('density', 'violin', 'box'))
-load('./raw_distrib_plots.RData')
+#load('./raw_distrib_plots.RData')
 png('./densityplot.png'); print(ggpubr::ggarrange(den_raw\$density, den_tr\$density, ncol=1)); dev.off()
 png('./violinplot.png'); print(ggpubr::ggarrange(den_raw\$violin, den_tr\$violin, ncol=1)); dev.off()
 png('./boxplot.png'); print(ggpubr::ggarrange(den_raw\$boxplot, den_tr\$boxplot, ncol=1)); dev.off()

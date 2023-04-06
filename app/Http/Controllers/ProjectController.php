@@ -166,5 +166,11 @@ class ProjectController extends Controller
         return response('OK');
     }
 
+    public function applyPca(Project $project) {
+
+        return $project->applyPca(request('parameters'));
+
+    }
+
 
 }

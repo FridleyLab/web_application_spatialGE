@@ -67,65 +67,6 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `email_verificati
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 
-insert into color_palettes(label, value) values('Vik','vik');
-insert into color_palettes(label, value) values('Berlin','berlin');
-insert into color_palettes(label, value) values('Roma','roma');
-insert into color_palettes(label, value) values('Bam','bam');
-insert into color_palettes(label, value) values('Vanimo','vanimo');
-insert into color_palettes(label, value) values('La Jolla','lajolla');
-insert into color_palettes(label, value) values('Bamako','bamako');
-insert into color_palettes(label, value) values('Nuuk','nuuk');
-insert into color_palettes(label, value) values('GrayC','grayC');
-insert into color_palettes(label, value) values('Hawaii','hawaii');
-insert into color_palettes(label, value) values('Tokyo','tokyo');
-insert into color_palettes(label, value) values('Buda','buda');
-insert into color_palettes(label, value) values('Acton','acton');
-insert into color_palettes(label, value) values('Imola','imola');
-insert into color_palettes(label, value) values('Batlow','batlow');
-insert into color_palettes(label, value) values('Cork','corkO');
-insert into color_palettes(label, value) values('Sunset','sunset');
-insert into color_palettes(label, value) values('Discrete Rainbow','discreterainbow');
-insert into color_palettes(label, value) values('Smooth Rainbow','smoothrainbow');
-insert into color_palettes(label, value) values('Okabe Ito','okabeito');
-insert into color_palettes(label, value) values('Soil','soil');
-insert into color_palettes(label, value) values('BrownGreen','BrBG');
-insert into color_palettes(label, value) values('Pink-Green','PiYG');
-insert into color_palettes(label, value) values('Purple-Green','PRGn');
-insert into color_palettes(label, value) values('Purple-Orange','PuOr');
-insert into color_palettes(label, value) values('Red-Blue','RdBu');
-insert into color_palettes(label, value) values('Red-Gray','RdGy');
-insert into color_palettes(label, value) values('Red-Yellow-Blue','RdYlBu');
-insert into color_palettes(label, value) values('Red-Yellow-Green','RdYlGn');
-insert into color_palettes(label, value) values('Spectral','Spectral');
-insert into color_palettes(label, value) values('Accent','Accent');
-insert into color_palettes(label, value) values('Dark2','Dark2');
-insert into color_palettes(label, value) values('Paired','Paired');
-insert into color_palettes(label, value) values('Pastel1','Pastel1');
-insert into color_palettes(label, value) values('Pastel2','Pastel2');
-insert into color_palettes(label, value) values('Set1','Set1');
-insert into color_palettes(label, value) values('Set2','Set2');
-insert into color_palettes(label, value) values('Set3','Set3');
-insert into color_palettes(label, value) values('Blues','Blues');
-insert into color_palettes(label, value) values('Blue-Green','BuGn');
-insert into color_palettes(label, value) values('Blue-Purple','BuPu');
-insert into color_palettes(label, value) values('Green-Blue','GnBu');
-insert into color_palettes(label, value) values('Greens','Greens');
-insert into color_palettes(label, value) values('Greys','Greys');
-insert into color_palettes(label, value) values('Oranges','Oranges');
-insert into color_palettes(label, value) values('Orange-Red','OrRd');
-insert into color_palettes(label, value) values('Purple-Blue','PuBu');
-insert into color_palettes(label, value) values('Purple-Blue-Green','PuBuGn');
-insert into color_palettes(label, value) values('Purple-Red','PuRd');
-insert into color_palettes(label, value) values('Purples','Purples');
-insert into color_palettes(label, value) values('Red-Purple','RdPu');
-insert into color_palettes(label, value) values('Reds','Reds');
-insert into color_palettes(label, value) values('Yellow-Green','YlGn');
-insert into color_palettes(label, value) values('Yellow-Green-Blue','YlGnBu');
-insert into color_palettes(label, value) values('Yellow-Orange-Brown','YlOrBr');
-insert into color_palettes(label, value) values('Yellow-Orange-Red','YlOrRd');
-
-
-
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

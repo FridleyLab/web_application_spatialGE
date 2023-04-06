@@ -1,0 +1,25 @@
+FROM r-base:4.1.2
+
+#COPY certs/* /usr/share/ca-certificates/
+#RUN update-ca-certificates --fresh
+
+RUN apt-get -y update && apt-get -y install libhdf5-dev libudunits2-dev libv8-dev libgdal-dev cmake libfftw3-dev libfontconfig1-dev
+
+RUN mkdir /spatialGE
+WORKDIR /spatialGE
+
+COPY init1.R init1.R
+RUN Rscript init1.R
+
+RUN apt-get -y install libcurl4-openssl-dev
+
+COPY init2.R init2.R
+RUN Rscript init2.R
+
+RUN apt -y install libhiredis-dev
+
+RUN Rscript -e "install.packages('redux')"
+
+RUN apt -y update && apt -y install redis
+
+CMD ["redis-server"]

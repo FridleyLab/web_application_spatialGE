@@ -5,6 +5,8 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Storage;
 
 class DatabaseSeeder extends Seeder
 {
@@ -31,9 +33,18 @@ class DatabaseSeeder extends Seeder
             ProfileInterestSeeder::class
         ]);
 
+        //Insert initial parameters into the DB
+        DB::unprepared(file_get_contents(dirname(__FILE__) . '/init.sql'));
 
         if(!app()->isProduction()) {
+
+            //Create test user with project, samples, etc.
             DB::unprepared(file_get_contents(dirname(__FILE__) . '/dev.sql'));
+
+            //Copy sample files and R scripts
+            $src_folder = dirname(__FILE__) . '/dev/';
+            $dest_folder = Storage::path('');
+            $process = Process::run("cp -r $src_folder $dest_folder");
 
             /*DB::table('users')->insert([
                 'id' => '9999',
