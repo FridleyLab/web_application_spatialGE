@@ -10,9 +10,9 @@
         </div>
 
         <div class="mt-4">
-            <label class="form-label">Variable genes to calculate PCA:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="n_genes">
+            <label class="form-label">Variable genes to calculate PCA:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes">
 <!--            TODO: recalculate max gene count on the filtered stlist  -->
-            <input type="range" min="0" max="40000" step="500" class="form-range" v-model="n_genes">
+            <input type="range" min="0" max="40000" step="500" class="form-range" v-model="params.n_genes">
         </div>
 
 
@@ -29,6 +29,12 @@
 
         </div>
 
+        <div class="row mt-3">
+            <div class="float-end">
+                <input type="button" class="btn btn-outline-info float-end" :class="generating_pca || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating_pca ? 'Please wait...' : 'Generate plots'" @click="applyPca">
+            </div>
+        </div>
+
 
         <div class="mt-4">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
@@ -39,17 +45,10 @@
             <div class="tab-content" id="filterDiagramsContent">
                 <div class="tab-pane fade show active" id="nd-bloxplot" role="tabpanel" aria-labelledby="nd-bloxplot-tab">
 
-                    <div class="text-center">
-                        <pre>
-
-
-
-                        Under development (spatialGE library)
-
-
-
-                        </pre>
+                    <div class="text-center m-4">
+                        <img :src="project.project_parameters.pseudo_bulk_pca + '?' + Date.now()">
                     </div>
+
                 </div>
             </div>
         </div>
@@ -71,15 +70,16 @@ import Multiselect from '@vueform/multiselect';
         },
 
         props: {
+            project: Object,
             samples: Object,
-            filterUrl: String,
+            pcaUrl: String,
             colorPalettes: Object,
         },
 
         data() {
             return {
 
-                n_genes: 3000,
+
 
                 processing: false,
 
@@ -88,9 +88,12 @@ import Multiselect from '@vueform/multiselect';
                 params: {
                     color_pal: '',
                     plot_meta: '',
+                    n_genes: 3000,
                 },
 
-                plot_meta_options: ['Therapy']
+                plot_meta_options: ['race', 'therapy'],
+
+                generating_pca: false,
             }
         },
 
@@ -98,26 +101,18 @@ import Multiselect from '@vueform/multiselect';
 
         methods: {
 
-            startProcess() {
-
-                this.processing = true;
-
-                axios.post(this.filterUrl)
+            applyPca() {
+                this.generating_pca = true;
+                axios.post(this.pcaUrl, this.params)
                     .then((response) => {
-                        //document.getElementById("imgResult").src = 'data:image/png;base64,' + response.data.image;
-
-                        //this.textOutput = response.data.output;
-
-                        console.log(response.data);
-
-                        this.processing = false;
+                        for(let property in response.data)
+                            this.project.project_parameters[property] = response.data[property];
+                        this.generating_pca = false;
                     })
                     .catch((error) => {
+                        this.generating_pca = false;
                         console.log(error.message)
-                        this.processing = false;
                     })
-
-
             },
         },
 

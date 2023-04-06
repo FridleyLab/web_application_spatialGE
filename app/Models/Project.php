@@ -170,7 +170,8 @@ library('spatialGE')
 count_files = c($sampleDirs)
 
 # Specify sample names
-samplenames = c($sampleNames)
+#samplenames = c($sampleNames)
+samplenames = 'clinical_data.csv'
 
 # Create STlist
 initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)
@@ -284,7 +285,7 @@ initial_stlist = redux::bin_to_object(r\$GET('initial_stlist'))
 
 # Apply defined filter to the initial STList
 filtered_stlist = filter_data(initial_stlist, $str_params)
-save(filtered_stlist, file='filtered_stlist.RData')
+#save(filtered_stlist, file='filtered_stlist.RData')
 r\$SET('filtered_stlist', redux::object_to_bin(filtered_stlist))
 
 #### Plots Filter Data
@@ -444,17 +445,18 @@ r <- redux::hiredis()
 filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
 
 normalized_stlist = transform_data(filtered_stlist, $str_params)
+r\$SET('normalized_stlist', redux::object_to_bin(normalized_stlist))
 #save(normalized_stlist, file='normalized_stlist.RData')
 
 #### Violin plot
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = violin_plots(normalized_stlist, color_pal='okabeito', data_type='tr', genes='TP53')
+vp = violin_plots(normalized_stlist, color_pal='okabeito', data_type='tr', genes='RPL22')
 ggpubr::ggexport(filename = 'normalized_violin.png', vp)
 
 #### Box plot
-bp = violin_plots(normalized_stlist, color_pal='okabeito', plot_type='box', data_type='tr', genes='TP53')
+bp = violin_plots(normalized_stlist, color_pal='okabeito', plot_type='box', data_type='tr', genes='RPL22')
 ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
 
 
@@ -464,10 +466,10 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
 #source('utils.R')
 den_raw = count_distribution(normalized_stlist, distrib_subset=0.01, data_type='raw', plot_type=c('density', 'violin', 'box'))
 #save(den_raw, './raw_distrib_plots.RData')
-png('./pre_densityplot.png'); print(den_raw\$density); dev.off()
-png('./pre_violinplot.png'); print(den_raw\$violin); dev.off()
-png('./pre_boxplot.png'); print(den_raw\$boxplot); dev.off()
-den_tr = count_distribution(normalized_stlist, distrib_subset=0.05, plot_type=c('density', 'violin', 'box'))
+#png('./pre_densityplot.png'); print(den_raw\$density); dev.off()
+#png('./pre_violinplot.png'); print(den_raw\$violin); dev.off()
+#png('./pre_boxplot.png'); print(den_raw\$boxplot); dev.off()
+den_tr = count_distribution(normalized_stlist, distrib_subset=0.01, plot_type=c('density', 'violin', 'box'))
 #load('./raw_distrib_plots.RData')
 png('./densityplot.png'); print(ggpubr::ggarrange(den_raw\$density, den_tr\$density, ncol=1)); dev.off()
 png('./violinplot.png'); print(ggpubr::ggarrange(den_raw\$violin, den_tr\$violin, ncol=1)); dev.off()
@@ -518,7 +520,9 @@ setwd('/spatialGE')
 library('spatialGE')
 
 # Load normalized STList from disk
-load(file='normalized_stlist.RData')
+#load(file='normalized_stlist.RData')
+r <- redux::hiredis()
+normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 
 #### Violin plot
 #library('magrittr')
@@ -535,6 +539,65 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
         return $script;
 
     }
+
+
+    public function applyPca($plot_meta, $color_pal, $n_genes) {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'generatePca.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getPcaScript($plot_meta, $color_pal, $n_genes));
+
+        $this->spatialExecute('Rscript ' . $scriptName);
+
+        $result = [];
+
+        $parameterNames = ['pseudo_bulk_pca'];
+        foreach($parameterNames as $parameterName) {
+            $fileName = $parameterName . '.png';
+            $file = $workingDir . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if (Storage::fileExists($file)) {
+                Storage::delete($file_public);
+                Storage::copy($file, $file_public);
+                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
+                $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
+            }
+        }
+
+        return $result;
+
+    }
+
+
+
+    public function getPcaScript($plot_meta, $color_pal, $n_genes) : string {
+
+        $script = "
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList from disk
+#load(file='normalized_stlist.RData')
+r <- redux::hiredis()
+normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+
+
+#### Box plot
+pca = pseudobulk_pca(normalized_stlist, plot_meta='$plot_meta', n_genes=$n_genes, color_pal='$color_pal', ptsize=5)
+ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', pca)
+";
+
+        return $script;
+
+    }
+
+
+
 
 
 

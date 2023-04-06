@@ -42,7 +42,7 @@
                                 <qc-dt-normalize :samples="samples" :project="project" :color-palettes="colorPalettes" :normalize-url="normalizeUrl" :normalize-url-plots="normalizeUrlPlots"></qc-dt-normalize>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="pca" role="tabpanel" aria-labelledby="pca-tab">
-                                <qc-dt-pca :samples="samples" :pca-url="pcaUrl" :color-palettes="colorPalettes"></qc-dt-pca>
+                                <qc-dt-pca :samples="samples" :project="project" :pca-url="pcaUrl" :color-palettes="colorPalettes"></qc-dt-pca>
                             </div>
                         </div>
                     </div>

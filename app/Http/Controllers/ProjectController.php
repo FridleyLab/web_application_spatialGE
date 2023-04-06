@@ -168,7 +168,7 @@ class ProjectController extends Controller
 
     public function applyPca(Project $project) {
 
-        return $project->applyPca(request('parameters'));
+        return $project->applyPca(request('plot_meta'), request('color_pal'), request('n_genes'));
 
     }
 
