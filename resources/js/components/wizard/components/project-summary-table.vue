@@ -14,7 +14,7 @@
             <tr v-for="(row, row_index) in main_data.rows">
                 <td v-for="(attr, col_index) in main_data.headers" class="text-center">
                     <div v-if="showReference" class="text-xs text-secondary">{{ (attr !== 'sample_name') ? formatValue(reference_data.rows[row_index][attr]) : 'original value' }}</div>
-                    <div>{{ formatValue(row[attr]) }}</div>
+                    <div :class="showReference ? 'text-info' : ''">{{ formatValue(row[attr]) }}</div>
                 </td>
             </tr>
 

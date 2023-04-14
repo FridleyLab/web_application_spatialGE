@@ -50,9 +50,12 @@ import Slider from '@vueform/slider'
         },
 
         watch: {
-            value(newValue, oldValue) {
-                this.$emit('updated', this.value[0], this.value[1]);
-            },
+            value: {
+                handler(newValue, oldValue) {
+                    this.$emit('updated', this.value[0], this.value[1]);
+                },
+                deep: true
+            }
         },
 
     }

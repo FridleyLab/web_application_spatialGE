@@ -86,7 +86,8 @@ export default {
             this.file = 'dataTransfer' in event ? event.dataTransfer.files[0] : event.target.files[0];
 
             this.errorMessage = '';
-            if(this.code === 'expression' && !(/\.(h5|csv)$/i.test(this.file.name))) {
+            //TODO: after the first sample, all samples must match in format
+            if(this.code === 'expression' && !(/\.(h5|csv|tsv|txt)$/i.test(this.file.name))) {
                 this.errorMessage = 'File must be of type h5 or csv';
                 this.file = null;
                 return;

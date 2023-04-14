@@ -36,7 +36,7 @@
         </div>
 
 
-        <div class="mt-4">
+        <div class="mt-4" v-if="'pseudo_bulk_pca' in project.project_parameters">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="nd-boxplot-tab" data-bs-toggle="tab" data-bs-target="#nd-bloxplot" type="button" role="tab" aria-controls="nd-bloxplot" aria-selected="true">PCA plot</button>
@@ -46,7 +46,7 @@
                 <div class="tab-pane fade show active" id="nd-bloxplot" role="tabpanel" aria-labelledby="nd-bloxplot-tab">
 
                     <div class="text-center m-4">
-                        <img :src="project.project_parameters.pseudo_bulk_pca + '?' + Date.now()">
+                        <img :src="project.project_parameters.pseudo_bulk_pca + '?' + Date.now()" class="img-fluid">
                     </div>
 
                 </div>

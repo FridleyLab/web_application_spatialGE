@@ -172,5 +172,11 @@ class ProjectController extends Controller
 
     }
 
+    public function quiltPlot(Project $project) {
+
+        return $project->quiltPlot(request('plot_meta'), request('color_pal'), request('sample1'), request('sample2'));
+
+    }
+
 
 }

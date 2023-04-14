@@ -175,6 +175,7 @@ samplenames = 'clinical_data.csv'
 
 # Create STlist
 initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)
+#initial_stlist <- STlist(rnacounts=count_files, samples=samplenames, spotcoords='segundo archivo csv')
 
 #Save the STList to disk
 #save(initial_stlist, file='initial_stlist.RData')
@@ -404,12 +405,13 @@ ggpubr::ggexport(filename = 'filter_boxplot.png', bp)
 
         $result = [];
 
-        $parameterNames = ['normalized_violin', 'normalized_boxplot', 'boxplot', 'violinplot', 'densityplot'];
+        $parameterNames = ['normalized_violin', 'normalized_boxplot', 'normalized_boxplot_1', 'normalized_boxplot_2', 'normalized_violin_1', 'normalized_violin_2', 'normalized_density_1', 'normalized_density_2'];
         foreach($parameterNames as $parameterName) {
             $fileName = $parameterName . '.png';
             $file = $workingDir . $fileName;
             $file_public = $this->workingDirPublic() . $fileName;
             if (Storage::fileExists($file)) {
+                Storage::delete($file_public);
                 Storage::copy($file, $file_public);
                 ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
                 $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
@@ -453,11 +455,11 @@ r\$SET('normalized_stlist', redux::object_to_bin(normalized_stlist))
 #source('violin_plots.R')
 #source('utils.R')
 vp = violin_plots(normalized_stlist, color_pal='okabeito', data_type='tr', genes='RPL22')
-ggpubr::ggexport(filename = 'normalized_violin.png', vp)
+ggpubr::ggexport(filename = 'normalized_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
 bp = violin_plots(normalized_stlist, color_pal='okabeito', plot_type='box', data_type='tr', genes='RPL22')
-ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
+ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 800)
 
 
 
@@ -471,10 +473,20 @@ den_raw = count_distribution(normalized_stlist, distrib_subset=0.01, data_type='
 #png('./pre_boxplot.png'); print(den_raw\$boxplot); dev.off()
 den_tr = count_distribution(normalized_stlist, distrib_subset=0.01, plot_type=c('density', 'violin', 'box'))
 #load('./raw_distrib_plots.RData')
-png('./densityplot.png'); print(ggpubr::ggarrange(den_raw\$density, den_tr\$density, ncol=1)); dev.off()
-png('./violinplot.png'); print(ggpubr::ggarrange(den_raw\$violin, den_tr\$violin, ncol=1)); dev.off()
-png('./boxplot.png'); print(ggpubr::ggarrange(den_raw\$boxplot, den_tr\$boxplot, ncol=1)); dev.off()
 
+#png('./densityplot.png'); print(ggpubr::ggarrange(den_raw\$density, den_tr\$density, ncol=1)); dev.off()
+#png('./violinplot.png'); print(ggpubr::ggarrange(den_raw\$violin, den_tr\$violin, ncol=1)); dev.off()
+#png('./boxplot.png'); print(ggpubr::ggarrange(den_raw\$boxplot, den_tr\$boxplot, ncol=1)); dev.off()
+#ggpubr::ggexport(filename = 'boxplot.png', ggpubr::ggarrange(den_raw\$boxplot, den_tr\$boxplot, ncol=1), width = 800, height = 800)
+
+ggpubr::ggexport(filename = 'normalized_boxplot_1.png', den_raw\$boxplot, width = 800, height = 800)
+ggpubr::ggexport(filename = 'normalized_boxplot_2.png', den_tr\$boxplot, width = 800, height = 800)
+
+ggpubr::ggexport(filename = 'normalized_density_1.png', den_raw\$density, width = 800, height = 800)
+ggpubr::ggexport(filename = 'normalized_density_2.png', den_tr\$density, width = 800, height = 800)
+
+ggpubr::ggexport(filename = 'normalized_violin_1.png', den_raw\$violin, width = 800, height = 800)
+ggpubr::ggexport(filename = 'normalized_violin_2.png', den_tr\$violin, width = 800, height = 800)
 
 ";
 
@@ -529,11 +541,11 @@ normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 #source('violin_plots.R')
 #source('utils.R')
 vp = violin_plots(normalized_stlist, color_pal='$color_palette', data_type='tr', genes='$gene')
-ggpubr::ggexport(filename = 'normalized_violin.png', vp)
+ggpubr::ggexport(filename = 'normalized_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
 bp = violin_plots(normalized_stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene')
-ggpubr::ggexport(filename = 'normalized_boxplot.png', bp)
+ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 800)
 ";
 
         return $script;
@@ -588,8 +600,70 @@ normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 
 
 #### Box plot
-pca = pseudobulk_pca(normalized_stlist, plot_meta='$plot_meta', n_genes=$n_genes, color_pal='$color_pal', ptsize=5)
-ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', pca)
+pca = pseudobulk_pca(normalized_stlist, plot_meta='$plot_meta', n_genes=$n_genes, color_pal='$color_pal', ptsize=7)
+
+#plist = pseudobulk_plots = function(x=NULL, plot_meta=NULL, max_var_genes=5000, hm_display_genes=30, color_pal='muted', ptsize=5) #hm_display_genes --> text o slider
+#plot1 -> plist\$pca
+#plot1 -> plist\$heatmap
+
+ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', pca, width = 800, height = 800)
+";
+
+        return $script;
+
+    }
+
+
+    public function quiltPlot($plot_meta, $color_pal, $sample1, $sample2) {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'quiltPlot.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getQuiltPlotScript($plot_meta, $color_pal, $sample1, $sample2));
+
+        $this->spatialExecute('Rscript ' . $scriptName);
+
+        $result = [];
+
+        $parameterNames = ['quilt_plot_1', 'quilt_plot_2'];
+        foreach($parameterNames as $parameterName) {
+            $fileName = $parameterName . '.png';
+            $file = $workingDir . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if (Storage::fileExists($file)) {
+                Storage::delete($file_public);
+                Storage::copy($file, $file_public);
+                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
+                $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
+            }
+        }
+
+        return $result;
+
+    }
+
+
+
+    public function getQuiltPlotScript($plot_meta, $color_pal, $sample1, $sample2) : string {
+
+        $script = "
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList from disk
+#load(file='normalized_stlist.RData')
+r <- redux::hiredis()
+normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+
+#### Plot
+plist1 = STplot(normalized_stlist, samples=c('$sample1'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
+plist2 = STplot(normalized_stlist, samples=c('$sample2'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
+ggpubr::ggexport(filename = 'quilt_plot_1.png', plist1[[1]], width = 800, height = 800)
+ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height = 800)
 ";
 
         return $script;
@@ -598,7 +672,6 @@ ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', pca)
 
 
 
-
-
-
 }
+
+

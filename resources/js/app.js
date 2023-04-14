@@ -20,6 +20,7 @@ import qcDataTransformation from "./components/wizard/qc-data-transformation.vue
 import qcDtFilter from "./components/wizard/components/qc-dt-filter.vue";
 import qcDtNormalize from "./components/wizard/components/qc-dt-normalize.vue";
 import qcDtPca from "./components/wizard/components/qc-dt-pca.vue";
+import qcDtQuilt from "./components/wizard/components/qc-dt-quilt.vue";
 import projectSummaryTable from "./components/wizard/components/project-summary-table.vue";
 // import numericSlider from "./components/common/numeric-slider.vue";
 import numericRange from "./components/common/numeric-range.vue";
@@ -66,6 +67,7 @@ app.component('qc-data-transformation', qcDataTransformation);
 app.component('qc-dt-filter', qcDtFilter);
 app.component('qc-dt-normalize', qcDtNormalize);
 app.component('qc-dt-pca', qcDtPca);
+app.component('qc-dt-quilt', qcDtQuilt);
 app.component('project-summary-table', projectSummaryTable);
 
 //Register the window as a global variable, so it can be accessed everywhere

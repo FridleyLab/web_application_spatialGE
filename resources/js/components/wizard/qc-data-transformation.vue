@@ -28,7 +28,7 @@
                                 <button class="nav-link" id="pca-tab" data-bs-toggle="tab" data-bs-target="#pca" type="button" role="tab" aria-controls="pca" aria-selected="false">Pseudo-bulk PCA</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Quilt plot</button>
+                                <button class="nav-link" id="quilt-tab" data-bs-toggle="tab" data-bs-target="#quilt" type="button" role="tab" aria-controls="quilt" aria-selected="false">Quilt plot</button>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
@@ -43,6 +43,9 @@
                             </div>
                             <div class="tab-pane fade min-vh-50" id="pca" role="tabpanel" aria-labelledby="pca-tab">
                                 <qc-dt-pca :samples="samples" :project="project" :pca-url="pcaUrl" :color-palettes="colorPalettes"></qc-dt-pca>
+                            </div>
+                            <div class="tab-pane fade min-vh-50" id="quilt" role="tabpanel" aria-labelledby="quilt-tab">
+                                <qc-dt-quilt :samples="samples" :project="project" :quilt-url="quiltUrl" :color-palettes="colorPalettes"></qc-dt-quilt>
                             </div>
                         </div>
                     </div>
@@ -66,6 +69,7 @@
             normalizeUrl: String,
             normalizeUrlPlots: String,
             pcaUrl: String,
+            quiltUrl: String,
         },
 
         mounted() {

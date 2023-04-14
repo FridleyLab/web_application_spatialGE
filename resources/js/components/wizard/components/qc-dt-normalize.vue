@@ -27,6 +27,125 @@
                             </label>
 <!--                            <a href="#" class="btn btn-sm btn-outline-info">Use this method</a>-->
                         </div>
+
+
+                        <h5 class="mt-4">Count distribution by sample</h5>
+
+                        <div class="mt-4" v-if="!generating_plots && ('normalized_boxplot_1' in project.project_parameters)">
+                            <ul class="nav nav-tabs" id="logNormalizedDiagrams" role="tablist">
+
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="log-normalized-density-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-density" type="button" role="tab" aria-controls="log-normalized-density" aria-selected="false">Density plots</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="log-normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-violinplot" type="button" role="tab" aria-controls="log-normalized-violinplot" aria-selected="false">Violin plots</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="log-normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-boxplot" type="button" role="tab" aria-controls="log-normalized-boxplot" aria-selected="false">Boxplots</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="logNormalizedDiagramsContent">
+
+                                <div class="tab-pane show active" id="log-normalized-density" role="tabpanel" aria-labelledby="log-normalized-density-tab">
+                                    <div class="d-xxl-flex">
+                                        <div class="text-center m-4 w-xxl-50">
+                                            <img :src="project.project_parameters.normalized_density_1 + '?' + Date.now()" class="img-fluid">
+                                        </div>
+
+                                        <div class="text-center m-4 w-xxl-50">
+                                            <img :src="project.project_parameters.normalized_density_2 + '?' + Date.now()" class="img-fluid">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane show" id="log-normalized-violinplot" role="tabpanel" aria-labelledby="log-normalized-violinplot-tab">
+                                    <div class="d-xxl-flex">
+                                        <div class="text-center m-4 w-xxl-50">
+                                            <img :src="project.project_parameters.normalized_violin_1 + '?' + Date.now()" class="img-fluid">
+                                        </div>
+
+                                        <div class="text-center m-4 w-xxl-50">
+                                            <img :src="project.project_parameters.normalized_violin_2 + '?' + Date.now()" class="img-fluid">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane show" id="log-normalized-boxplot" role="tabpanel" aria-labelledby="log-normalized-boxplot-tab">
+                                    <div class="d-xxl-flex">
+                                        <div class="text-center m-4 w-xxl-50">
+                                            <img :src="project.project_parameters.normalized_boxplot_1 + '?' + Date.now()" class="img-fluid">
+                                        </div>
+
+                                        <div class="text-center m-4 w-xxl-50">
+                                            <img :src="project.project_parameters.normalized_boxplot_2 + '?' + Date.now()" class="img-fluid">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4">Count distribution by gene</h5>
+
+                        <div v-if="'normalized_violin' in project.project_parameters">
+
+                            <div class="row mt-5 row-cols-2">
+                                <div class="col">
+                                    <div>Color palette</div>
+                                    <div><Multiselect :options="colorPalettes" v-model="filter_color_palette"></Multiselect></div>
+                                </div>
+                                <div class="col">
+                                    <div>Gene</div>
+                                    <div>
+                                        <Multiselect
+
+                                            v-model="selected_gene"
+                                            placeholder="Select options"
+                                            :close-on-select="true"
+                                            :searchable="true"
+                                            :resolve-on-load="false"
+                                            :delay="0"
+                                            :min-chars="1"
+                                            :options="async (query) => { return await searchGenes(query) }"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="float-end">
+                                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots || !filter_color_palette.length || !selected_gene.length ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="normalizedPlots">
+                                </div>
+                            </div>
+
+                            <div class="mt-4" v-if="!generating_plots">
+                                <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="false">Boxplots</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="normalizedDiagramsContent">
+
+                                    <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
+                                        <div class="text-center m-4">
+                                            <img :src="project.project_parameters.normalized_violin + '?' + Date.now()" class="img-fluid">
+                                        </div>
+                                    </div>
+
+                                    <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
+                                        <div class="text-center m-4">
+                                            <img :src="project.project_parameters.normalized_boxplot + '?' + Date.now()" class="img-fluid">
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
@@ -80,85 +199,7 @@
             </div>
         </div>
 
-        <div v-if="'normalized_violin' in project.project_parameters">
 
-            <div class="row mt-5 row-cols-2">
-                <div class="col">
-                    <div>Color palette</div>
-                    <div><Multiselect :options="colorPalettes" v-model="filter_color_palette"></Multiselect></div>
-                </div>
-                <div class="col">
-                    <div>Gene</div>
-                    <div>
-                        <Multiselect
-
-                            v-model="selected_gene"
-                            placeholder="Select options"
-                            :close-on-select="true"
-                            :searchable="true"
-                            :resolve-on-load="false"
-                            :delay="0"
-                            :min-chars="1"
-                            :options="async (query) => { return await searchGenes(query) }"
-                        />
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <div class="float-end">
-                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots || !filter_color_palette.length || !selected_gene.length ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="normalizedPlots">
-                </div>
-            </div>
-
-            <div class="mt-4" v-if="!generating_plots">
-                <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
-<!--                    <li class="nav-item" role="presentation">-->
-<!--                        <button class="nav-link active" id="normalized-summary-tab" data-bs-toggle="tab" data-bs-target="#normalized-summary" type="button" role="tab" aria-controls="normalized-summary" aria-selected="true">Summary</button>-->
-<!--                    </li>-->
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="normalized-density-tab" data-bs-toggle="tab" data-bs-target="#normalized-density" type="button" role="tab" aria-controls="normalized-density" aria-selected="true">Count distributions</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link " id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="false">Boxplots</button>
-                    </li>
-
-                </ul>
-                <div class="tab-content" id="normalizedDiagramsContent">
-
-<!--                    <div class="tab-pane fade show active" id="normalized-summary" role="tabpanel" aria-labelledby="normalized-summary-tab">-->
-<!--                        <div class="text-center m-4">-->
-<!--                            <project-summary-table :data="project.project_parameters.normalized_stlist_summary" :reference="project.project_parameters.initial_stlist_summary"></project-summary-table>-->
-<!--                        </div>-->
-<!--                    </div>-->
-
-                    <div class="tab-pane fade show active" id="normalized-density" role="tabpanel" aria-labelledby="normalized-density-tab">
-                        <div class="text-center m-4">
-                            <!--                            <img src="/storage/users/9999/1/densityplot.png">-->
-                            <!--                            <img src="/storage/users/9999/1/violinplot.png">-->
-                            <img src="/storage/users/9999/1/boxplot.png">
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
-                        <div class="text-center m-4">
-                            <img :src="project.project_parameters.normalized_violin + '?' + Date.now()">
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
-                        <div class="text-center m-4">
-                            <img :src="project.project_parameters.normalized_boxplot + '?' + Date.now()">
-                        </div>
-                    </div>
-
-
-
-                </div>
-            </div>
-        </div>
 
 
 

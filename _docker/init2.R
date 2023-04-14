@@ -1,6 +1,6 @@
 install.packages('BiocManager')
 
-BiocManager::install('edgeR', update = TRUE, ask = FALSE)
+#BiocManager::install('edgeR', update = TRUE, ask = FALSE)
 BiocManager::install('EBImage', update = TRUE, ask = FALSE)
 
 # Install spatialGE

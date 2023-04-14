@@ -38,7 +38,7 @@
                         <div class="container" style="max-width: 600px">
                             <div class="my-2 row">
                                 <div class="col-3">
-                                    <file-upload-drag-drop code="expression" :project="project" caption="Gene expression" :required="true" @fileSelected="expressionFileAdded" @fileRemoved="expressionFileRemoved" tooltip="A file containing the gene counts. Accepted file formats include .h5 or MEX (from space ranger), or a gene x spot .csv or .txt table"></file-upload-drag-drop>
+                                    <file-upload-drag-drop code="expression" :project="project" caption="Gene expression" :required="true" @fileSelected="expressionFileAdded" @fileRemoved="expressionFileRemoved" tooltip="A file containing the gene counts. Accepted file formats include .h5 or MEX (from space ranger), or a gene x spot .csv, .tsv, or .txt table"></file-upload-drag-drop>
                                 </div>
                                 <div class="col-3">
                                     <file-upload-drag-drop code="coordinates" :project="project" caption="Coordinates" :required="true" @fileSelected="coordinatesFileAdded" @fileRemoved="coordinatesFileRemoved" tooltip="A .csv file containing the spot x and y coordinates. Accepted formats include the “tissue_positions” file from space ranger or a three-column file with spot names in the first column and y, x coordinates in the second and third columns"></file-upload-drag-drop>

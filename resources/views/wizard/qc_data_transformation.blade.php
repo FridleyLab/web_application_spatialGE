@@ -10,6 +10,7 @@
         normalize-url="{{ route('qc-dt-normalize', ['project' => $project->id]) }}"
         normalize-url-plots="{{ route('qc-dt-normalize-plots', ['project' => $project->id]) }}"
         pca-url="{{ route('qc-dt-pca', ['project' => $project->id]) }}"
+        quilt-url="{{ route('qc-dt-quilt', ['project' => $project->id]) }}"
         :color-palettes="{{ json_encode($color_palettes) }}"
     >
     </qc-data-transformation>
