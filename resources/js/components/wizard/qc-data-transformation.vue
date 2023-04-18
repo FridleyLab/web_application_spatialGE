@@ -25,7 +25,7 @@
                             </li>
 
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="pca-tab" data-bs-toggle="tab" data-bs-target="#pca" type="button" role="tab" aria-controls="pca" aria-selected="false">Pseudo-bulk PCA</button>
+                                <button class="nav-link" id="pca-tab" data-bs-toggle="tab" data-bs-target="#pca" type="button" role="tab" aria-controls="pca" aria-selected="false">Pseudo-bulk analysis</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="quilt-tab" data-bs-toggle="tab" data-bs-target="#quilt" type="button" role="tab" aria-controls="quilt" aria-selected="false">Quilt plot</button>

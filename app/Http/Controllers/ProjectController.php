@@ -188,14 +188,14 @@ class ProjectController extends Controller
     }
 
     public function stplot_quilt(Project $project) {
-        //$genes = "c('" . join("','", request('genes')) . "')";
-        //$ptsize = request('ptsize');
 
+        //$genes = ['TP53', 'MYC'];
+        //$ptsize = 2;
 
-        $genes = ['TP53', 'MYC'];
-        $ptsize = 2;
+        $genes = request('genes');
+        $ptsize = request('ptsize');
 
-        $project->STplotQuilt($genes, $ptsize);
+        return $project->STplotQuilt($genes, $ptsize);
 
 
 

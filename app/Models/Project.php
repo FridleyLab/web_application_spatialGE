@@ -582,7 +582,7 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
 
         $parameterNames = ['pseudo_bulk_pca', 'pseudo_bulk_heatmap'];
         foreach($parameterNames as $parameterName) {
-            $fileName = $parameterName . '.png';
+            $fileName = $parameterName . '.svg';
             $file = $workingDir . $fileName;
             $file_public = $this->workingDirPublic() . $fileName;
             if (Storage::fileExists($file)) {
@@ -601,9 +601,15 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
 
     public function getPcaScript($plot_meta, $color_pal, $n_genes, $hm_display_genes) : string {
 
+        $export_svgs = '';
+        $export_svgs .= "svglite('pseudo_bulk_pca.svg', width = 8, height = 8)\n";
+        $export_svgs .= "print(plist\$pca)\n";
+        $export_svgs .= "dev.off()\n\n";
+
         $script = "
 setwd('/spatialGE')
 # Load the package
+library('svglite')
 library('spatialGE')
 
 # Load normalized STList from disk
@@ -620,6 +626,9 @@ plist = pseudobulk_plots(normalized_stlist, plot_meta='$plot_meta', max_var_gene
 
 ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', plist\$pca, width = 800, height = 800)
 ggpubr::ggexport(filename = 'pseudo_bulk_heatmap.png', plist\$heatmap, width = 800, height = 800)
+
+$export_svgs
+
 ";
 
         return $script;
@@ -697,22 +706,24 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
         $this->spatialExecute('Rscript ' . $scriptName);
 
         $result = [];
-        foreach($genes as $gene)
-            foreach($this->samples as $sample){
-                $parameterName = 'stplot-quilt-' . $gene . '-' . $sample;
-                $fileName = $parameterName . '.png';
+        foreach($genes as $gene) {
+            $result[$gene] = [];
+            foreach ($this->samples as $sample) {
+                $parameterName = 'stplot-quilt-' . $gene . '-' . $sample->name;
+                $fileName = $parameterName . '.svg';
                 $file = $workingDir . $fileName;
                 $file_public = $this->workingDirPublic() . $fileName;
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::copy($file, $file_public);
-                    $result[$gene][$sample] = $this->workingDirPublicURL() . $fileName;
+                    $result[$gene][$sample->name] = $this->workingDirPublicURL() . $fileName;
                 }
             }
+        }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'stplot_quilt', 'project_id' => $this->id], ['type' => 'string', 'value' => json_encode($result)]);
+        ProjectParameter::updateOrCreate(['parameter' => 'stplot_quilt', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
 
-        return $result;
+        return ['stplot_quilt' => $result];
     }
 
     public function getSTplotQuiltScript($genes, $ptsize) : string {
@@ -720,15 +731,29 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
         $_genes = "c('" . join("','", $genes) . "')";
 
         $export_images = '';
+        $export_svgs = '';
+
+        $export_expr_svgs = '';
         foreach ($genes as $gene)
-            foreach ($this->samples as $sample)
-                $export_images .= "ggpubr::ggexport(filename = 'stplot-quilt-$gene-" . $sample->name . ".png', qp\$" . $gene . "_" . $sample->name . ", width = 800, height = 800)\n";
+            foreach ($this->samples as $sample) {
+                $export_images .= "ggpubr::ggexport(filename = 'stplot-quilt-$gene-" . $sample->name . ".pdf', qp\$" . $gene . "_" . $sample->name . ", width = 8, height = 8)\n";
+
+                $export_svgs .= "svglite('stplot-quilt-$gene-" . $sample->name . ".svg', width = 8, height = 8)\n";
+                $export_svgs .= "print(qp\$" . $gene . "_" . $sample->name . ")\n";
+                $export_svgs .= "dev.off()\n\n";
+
+                $export_expr_svgs .= "svglite('EXPR_stplot-quilt-$gene-" . $sample->name . ".svg', width = 8, height = 8)\n";
+                $export_expr_svgs .= "print(krp\$" . $gene . "_" . $sample->name . ")\n";
+                $export_expr_svgs .= "dev.off()\n\n";
+
+            }
 
         $script = "
 
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
+library('svglite')
 
 # Load normalized STList from disk
 #load(file='normalized_stlist.RData')
@@ -736,7 +761,16 @@ r <- redux::hiredis()
 normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 
 qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize)
+
 $export_images
+
+$export_svgs
+
+stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
+krp = STplot_interpolation(stlist_expression_surface, genes=$_genes)
+
+
+$export_expr_svgs
 
 ";
 
