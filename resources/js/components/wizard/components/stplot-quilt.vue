@@ -11,7 +11,7 @@
 
 
 
-        <div v-if="'filter_meta_options' in project.project_parameters">
+
 
         <div class="row justify-content-center text-center m-3">
             <div class="w-100 w-md-80 w-lg-70  w-xxl-55 row row-cols-2">
@@ -77,7 +77,6 @@
                 </div>
             </div>
         </div>
-        </div>
 
 
     </form>
@@ -88,7 +87,7 @@
 import Multiselect from '@vueform/multiselect';
 
     export default {
-        name: 'qcDtQuilt',
+        name: 'stplotQuilt',
 
         components: {
             Multiselect,
@@ -97,7 +96,7 @@ import Multiselect from '@vueform/multiselect';
         props: {
             project: Object,
             samples: Object,
-            quiltUrl: String,
+            stplotQuiltUrl: String,
             colorPalettes: Object,
         },
 
@@ -129,7 +128,7 @@ import Multiselect from '@vueform/multiselect';
 
             quiltPlot() {
                 this.generating_quilt = true;
-                axios.post(this.quiltUrl, this.params)
+                axios.post(this.stplotQuiltUrl, this.params)
                     .then((response) => {
                         for(let property in response.data)
                             this.project.project_parameters[property] = response.data[property];

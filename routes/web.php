@@ -60,6 +60,11 @@ Route::middleware(['auth'])->group(function() {
     Route::delete('/samples/{sample}', [SampleController::class, 'destroy'])->name('destroy-sample');
 
 
+
+    Route::get('/projects/{project}/stplot-visualization',[ProjectController::class, 'stplot_visualization'])->name('stplot-visualization')->middleware('project');
+    Route::post('/projects/{project}/stplot/quilt', [ProjectController::class, 'stplot_quilt'])->name('stplot-quilt')->middleware('project');
+
+
 });
 
 Route::get('/login',[SecurityController::class, 'login'])->name('login')->middleware('guest');

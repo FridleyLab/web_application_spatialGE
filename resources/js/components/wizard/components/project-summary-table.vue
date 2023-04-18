@@ -1,6 +1,6 @@
 <template>
     <div class="table-responsive mt-3">
-        <table class="table">
+        <table class="table table-striped">
             <thead>
             <tr>
                 <th></th>

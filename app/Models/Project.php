@@ -181,6 +181,7 @@ initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)
 #save(initial_stlist, file='initial_stlist.RData')
 r <- redux::hiredis()
 r\$SET('initial_stlist', redux::object_to_bin(initial_stlist))
+#r\$HSET('spatialGE', 'initial_stlist', serialize(initial_stlist, NULL))
 
 #Obtain gene names in samples and save it in a text file
 gene_names = unique(unlist(lapply(initial_stlist@counts, function(i){ genes_tmp = rownames(i) })))
@@ -304,11 +305,11 @@ write.csv(df_summary, 'filtered_stlist_summary.csv', row.names=FALSE, quote=FALS
 #source('violin_plots.R')
 #source('utils.R')
 vp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='okabeito')
-ggpubr::ggexport(filename = 'filter_violin.png', vp)
+ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
 bp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='okabeito', plot_type='box')
-ggpubr::ggexport(filename = 'filter_boxplot.png', bp)
+ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 ";
 
@@ -366,11 +367,11 @@ filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
 #source('violin_plots.R')
 #source('utils.R')
 vp = violin_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette')
-ggpubr::ggexport(filename = 'filter_violin.png', vp)
+ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
 bp = violin_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette', plot_type='box')
-ggpubr::ggexport(filename = 'filter_boxplot.png', bp)
+ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 ";
 
@@ -418,6 +419,14 @@ ggpubr::ggexport(filename = 'filter_boxplot.png', bp)
             }
         }
 
+        $file = $workingDir . 'pca_max_var_genes.csv';
+        if(Storage::fileExists($file)) {
+            $data = trim(Storage::read($file));
+            ProjectParameter::updateOrCreate(['parameter' => 'pca_max_var_genes', 'project_id' => $this->id], ['type' => 'number', 'value' => $data]);
+            $result['pca_max_var_genes'] = intval($data);
+        }
+
+
         return $result;
 
     }
@@ -449,6 +458,10 @@ filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
 normalized_stlist = transform_data(filtered_stlist, $str_params)
 r\$SET('normalized_stlist', redux::object_to_bin(normalized_stlist))
 #save(normalized_stlist, file='normalized_stlist.RData')
+
+#max_var_genes PCA
+pca_max_var_genes = min(unlist(lapply(normalized_stlist@counts, nrow)))
+write.table(pca_max_var_genes, 'pca_max_var_genes.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 #### Violin plot
 #library('magrittr')
@@ -553,7 +566,7 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
     }
 
 
-    public function applyPca($plot_meta, $color_pal, $n_genes) {
+    public function applyPca($plot_meta, $color_pal, $n_genes, $hm_display_genes) {
 
         $workingDir = $this->workingDir();
 
@@ -561,13 +574,13 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getPcaScript($plot_meta, $color_pal, $n_genes));
+        Storage::put($script, $this->getPcaScript($plot_meta, $color_pal, $n_genes, $hm_display_genes));
 
         $this->spatialExecute('Rscript ' . $scriptName);
 
         $result = [];
 
-        $parameterNames = ['pseudo_bulk_pca'];
+        $parameterNames = ['pseudo_bulk_pca', 'pseudo_bulk_heatmap'];
         foreach($parameterNames as $parameterName) {
             $fileName = $parameterName . '.png';
             $file = $workingDir . $fileName;
@@ -586,7 +599,7 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
 
 
 
-    public function getPcaScript($plot_meta, $color_pal, $n_genes) : string {
+    public function getPcaScript($plot_meta, $color_pal, $n_genes, $hm_display_genes) : string {
 
         $script = "
 setwd('/spatialGE')
@@ -600,13 +613,13 @@ normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 
 
 #### Box plot
-pca = pseudobulk_pca(normalized_stlist, plot_meta='$plot_meta', n_genes=$n_genes, color_pal='$color_pal', ptsize=7)
+#pca = pseudobulk_pca(normalized_stlist, plot_meta='$plot_meta', n_genes=$n_genes, color_pal='$color_pal', ptsize=7)
 
-#plist = pseudobulk_plots = function(x=NULL, plot_meta=NULL, max_var_genes=5000, hm_display_genes=30, color_pal='muted', ptsize=5) #hm_display_genes --> text o slider
-#plot1 -> plist\$pca
-#plot1 -> plist\$heatmap
+plist = pseudobulk_plots(normalized_stlist, plot_meta='$plot_meta', max_var_genes=$n_genes, hm_display_genes=$hm_display_genes, color_pal='$color_pal', ptsize=5)
+#hm_display_genes --> text or slider
 
-ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', pca, width = 800, height = 800)
+ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', plist\$pca, width = 800, height = 800)
+ggpubr::ggexport(filename = 'pseudo_bulk_heatmap.png', plist\$heatmap, width = 800, height = 800)
 ";
 
         return $script;
@@ -664,6 +677,67 @@ plist1 = STplot(normalized_stlist, samples=c('$sample1'), plot_meta='$plot_meta'
 plist2 = STplot(normalized_stlist, samples=c('$sample2'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
 ggpubr::ggexport(filename = 'quilt_plot_1.png', plist1[[1]], width = 800, height = 800)
 ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height = 800)
+";
+
+        return $script;
+
+    }
+
+
+
+    public function STplotQuilt($genes, $ptsize) {
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'STplot-quiltPlot.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSTplotQuiltScript($genes, $ptsize));
+
+        $this->spatialExecute('Rscript ' . $scriptName);
+
+        $result = [];
+        foreach($genes as $gene)
+            foreach($this->samples as $sample){
+                $parameterName = 'stplot-quilt-' . $gene . '-' . $sample;
+                $fileName = $parameterName . '.png';
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::copy($file, $file_public);
+                    $result[$gene][$sample] = $this->workingDirPublicURL() . $fileName;
+                }
+            }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stplot_quilt', 'project_id' => $this->id], ['type' => 'string', 'value' => json_encode($result)]);
+
+        return $result;
+    }
+
+    public function getSTplotQuiltScript($genes, $ptsize) : string {
+
+        $_genes = "c('" . join("','", $genes) . "')";
+
+        $export_images = '';
+        foreach ($genes as $gene)
+            foreach ($this->samples as $sample)
+                $export_images .= "ggpubr::ggexport(filename = 'stplot-quilt-$gene-" . $sample->name . ".png', qp\$" . $gene . "_" . $sample->name . ", width = 800, height = 800)\n";
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList from disk
+#load(file='normalized_stlist.RData')
+r <- redux::hiredis()
+normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+
+qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize)
+$export_images
+
 ";
 
         return $script;

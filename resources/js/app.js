@@ -26,6 +26,9 @@ import projectSummaryTable from "./components/wizard/components/project-summary-
 import numericRange from "./components/common/numeric-range.vue";
 // import multiselect from "./components/common/multiselect.vue";
 
+import stplotVisualization from "./components/wizard/stplot-visualization.vue";
+import stplotQuilt from "./components/wizard/components/stplot-quilt.vue";
+
 
 // Vuetify
 /*import 'vuetify/styles'
@@ -69,6 +72,9 @@ app.component('qc-dt-normalize', qcDtNormalize);
 app.component('qc-dt-pca', qcDtPca);
 app.component('qc-dt-quilt', qcDtQuilt);
 app.component('project-summary-table', projectSummaryTable);
+
+app.component('stplot-visualization', stplotVisualization);
+app.component('stplot-quilt', stplotQuilt);
 
 //Register the window as a global variable, so it can be accessed everywhere
 app.config.globalProperties.window = window;

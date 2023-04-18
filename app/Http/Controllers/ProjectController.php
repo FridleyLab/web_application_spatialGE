@@ -155,6 +155,8 @@ class ProjectController extends Controller
 
     public function applyNormalization(Project $project) {
 
+        $project->current_step = 3;
+        $project->save();
         return $project->applyNormalization(request('parameters'));
 
     }
@@ -168,13 +170,34 @@ class ProjectController extends Controller
 
     public function applyPca(Project $project) {
 
-        return $project->applyPca(request('plot_meta'), request('color_pal'), request('n_genes'));
+        return $project->applyPca(request('plot_meta'), request('color_pal'), request('n_genes'), request('hm_display_genes'));
 
     }
 
     public function quiltPlot(Project $project) {
 
         return $project->quiltPlot(request('plot_meta'), request('color_pal'), request('sample1'), request('sample2'));
+
+    }
+
+
+    public function stplot_visualization(Project $project) {
+        $samples = $project->samples;
+        $color_palettes = ColorPalette::orderBy('label')->get();
+        return view('wizard.stplot-visualization')->with(compact('project', 'samples', 'color_palettes'));
+    }
+
+    public function stplot_quilt(Project $project) {
+        //$genes = "c('" . join("','", request('genes')) . "')";
+        //$ptsize = request('ptsize');
+
+
+        $genes = ['TP53', 'MYC'];
+        $ptsize = 2;
+
+        $project->STplotQuilt($genes, $ptsize);
+
+
 
     }
 

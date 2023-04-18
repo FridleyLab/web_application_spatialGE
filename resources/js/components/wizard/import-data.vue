@@ -69,6 +69,7 @@
 
                     <div v-if="samples.length" class="p-3 text-end">
                         <input v-if="!changingStep" type="button" class="btn btn-outline-success" :class="nextStepCssClasses" @click="nextStep" :value="nextStepLabel" />
+                        <img v-if="changingStep" src="/images/loading-circular.gif" class="me-6" style="width:100px" />
 
 <!--                        <input v-if="changingStep" type="button" class="btn btn-outline-warning me-2" @click="nextStep" value="Finished importing data, proceed" />-->
 <!--                        <input v-if="changingStep" type="button" class="btn btn-outline-danger" @click="changingStep = false" value="Cancel" />-->
@@ -196,6 +197,8 @@
 
             nextStep() {
 
+                this.changingStep = true;
+
                 this.nextStepLabel = 'Processing samples... please wait!';
                 this.nextStepCssClasses = 'disabled';
 
@@ -203,6 +206,7 @@
 
                 axios.get(this.nexturl)
                     .then((response) => {
+                        this.changingStep = false;
                         //console.log(response);
                         this.nextStepLabel = 'Done - Redirecting';
                         setTimeout(() => location.href = response.data, 1000);

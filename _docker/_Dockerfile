@@ -22,4 +22,6 @@ RUN Rscript -e "install.packages('redux')"
 
 RUN apt -y update && apt -y install redis
 
+RUN Rscript -e "install.packages('ComplexHeatmap')"
+
 CMD ["redis-server"]

@@ -11,8 +11,12 @@
 
         <div class="mt-4">
             <label class="form-label">Variable genes to calculate PCA:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes">
-<!--            TODO: recalculate max gene count on the filtered stlist  -->
-            <input type="range" min="0" max="40000" step="500" class="form-range" v-model="params.n_genes">
+            <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="form-range" v-model="params.n_genes">
+        </div>
+
+        <div class="mt-4">
+            <label class="form-label">hm_display_genes:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.hm_display_genes">
+<!--            <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="10" class="form-range" v-model="params.hm_display_genes">-->
         </div>
 
 
@@ -31,7 +35,8 @@
 
         <div class="row mt-3">
             <div class="float-end">
-                <input type="button" class="btn btn-outline-info float-end" :class="generating_pca || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating_pca ? 'Please wait...' : 'Generate plots'" @click="applyPca">
+                <input v-if="!generating_pca" type="button" class="btn btn-outline-info float-end" :class="generating_pca || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating_pca ? 'Please wait...' : 'Generate plots'" @click="applyPca">
+                <img v-if="generating_pca" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />
             </div>
         </div>
 
@@ -39,14 +44,24 @@
         <div class="mt-4" v-if="'pseudo_bulk_pca' in project.project_parameters">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="nd-boxplot-tab" data-bs-toggle="tab" data-bs-target="#nd-bloxplot" type="button" role="tab" aria-controls="nd-bloxplot" aria-selected="true">PCA plot</button>
+                    <button class="nav-link active" id="pcaplot-tab" data-bs-toggle="tab" data-bs-target="#pcaplot" type="button" role="tab" aria-controls="pcaplot" aria-selected="true">PCA plot</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="heatmap-tab" data-bs-toggle="tab" data-bs-target="#heatmap" type="button" role="tab" aria-controls="heatmap" aria-selected="true">Heatmap</button>
                 </li>
             </ul>
             <div class="tab-content" id="filterDiagramsContent">
-                <div class="tab-pane fade show active" id="nd-bloxplot" role="tabpanel" aria-labelledby="nd-bloxplot-tab">
+                <div class="tab-pane fade show active" id="pcaplot" role="tabpanel" aria-labelledby="pcaplot-tab">
 
                     <div class="text-center m-4">
                         <img :src="project.project_parameters.pseudo_bulk_pca + '?' + Date.now()" class="img-fluid">
+                    </div>
+
+                </div>
+                <div class="tab-pane fade" id="heatmap" role="tabpanel" aria-labelledby="heatmap-tab">
+
+                    <div class="text-center m-4">
+                        <img :src="project.project_parameters.pseudo_bulk_heatmap + '?' + Date.now()" class="img-fluid">
                     </div>
 
                 </div>
@@ -79,21 +94,34 @@ import Multiselect from '@vueform/multiselect';
         data() {
             return {
 
-
-
-                processing: false,
-
                 textOutput: '',
 
                 params: {
                     color_pal: '',
                     plot_meta: '',
                     n_genes: 3000,
+                    hm_display_genes: 30
                 },
 
                 plot_meta_options: ['race', 'therapy'],
 
                 generating_pca: false,
+            }
+        },
+
+        watch: {
+            'params.n_genes'(newValue) {
+                if(this.params.n_genes > this.project.project_parameters.pca_max_var_genes)
+                    this.params.n_genes = this.project.project_parameters.pca_max_var_genes;
+                if(this.params.n_genes < 0)
+                    this.params.n_genes = 0;
+            },
+
+            'params.hm_display_genes'(newValue) {
+                if(this.params.hm_display_genes > this.params.n_genes)
+                    this.params.hm_display_genes = this.params.n_genes;
+                if(this.params.hm_display_genes < 0)
+                    this.params.hm_display_genes = 0;
             }
         },
 

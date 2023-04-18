@@ -235,7 +235,8 @@
         <div class="row">
             <div class="w-100">
                 <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
-                    <button type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Run Filter' }}</button>
+                    <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Run Filter' }}</button>
+                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />
                 </div>
             </div>
         </div>
@@ -280,14 +281,14 @@
 
                     <div class="tab-pane fade" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
                         <div class="text-center m-4">
-                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()">
+                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()" class="img-fluid">
 <!--                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()">-->
                         </div>
                     </div>
 
                     <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
                         <div class="text-center m-4">
-                            <img :src="project.project_parameters.filter_boxplot + '?' + Date.now()">
+                            <img :src="project.project_parameters.filter_boxplot + '?' + Date.now()" class="img-fluid">
                         </div>
                     </div>
 

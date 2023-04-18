@@ -194,7 +194,8 @@
         <div class="row">
             <div class="w-100">
                 <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
-                    <button type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Normalize' }}</button>
+                    <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Normalize' }}</button>
+                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />
                 </div>
             </div>
         </div>
