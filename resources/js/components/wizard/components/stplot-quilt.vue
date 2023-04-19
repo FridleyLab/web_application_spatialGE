@@ -47,6 +47,13 @@
             </div>
         </div>
 
+        <div class="row justify-content-center text-center m-4">
+            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                <div>Color palette</div>
+                <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
+            </div>
+        </div>
+
         <div class="row mt-3">
             <div class="float-end">
                 <input v-if="!generating_quilt" type="button" class="btn btn-outline-info float-end" :class="generating_quilt || !params.genes.length  ? 'disabled' : ''" :value="generating_quilt ? 'Please wait...' : 'Generate plots'" @click="quiltPlot">
@@ -85,7 +92,7 @@
                                     <div class="d-xxl-flex">
                                         <template v-for="(image, sample, index) in samples">
                                             <div v-if="plots_visible[gene][sample]" class="text-center m-4 w-xxl-50">
-                                                <img :src="image + '?' + Date.now()" class="img-fluid">
+                                                <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                                                 <button @click="hide_plot(gene, sample)" class="btn btn-sm btn-outline-secondary">Hide</button>
                                             </div>
                                         </template>
@@ -96,7 +103,8 @@
                                     <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'quilt-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + sample + '-tab'">
                                         <div>
                                             <div class="text-center m-4">
-                                                <img :src="image + '?' + Date.now()" class="img-fluid">
+                                                <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+<!--                                                <img :src="image + '?' + Date.now()" class="img-fluid">-->
                                             </div>
                                         </div>
                                     </div>
@@ -142,7 +150,8 @@ import Multiselect from '@vueform/multiselect';
 
                 params: {
                     genes: [],
-                    ptsize: 2
+                    ptsize: 2,
+                    col_pal: '',
                 },
 
                 filter_variable: '',
@@ -182,6 +191,7 @@ import Multiselect from '@vueform/multiselect';
                         for(let property in response.data) {
                             console.log(response.data[property]);
                             this.project.project_parameters[property] = response.data[property];
+                            location.reload();
                         }
                         this.generating_quilt = false;
                     })

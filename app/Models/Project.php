@@ -694,14 +694,14 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
 
 
 
-    public function STplotQuilt($genes, $ptsize) {
+    public function STplotQuilt($genes, $ptsize, $col_pal) {
         $workingDir = $this->workingDir();
 
         $scriptName = 'STplot-quiltPlot.R';
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTplotQuiltScript($genes, $ptsize));
+        Storage::put($script, $this->getSTplotQuiltScript($genes, $ptsize, $col_pal));
 
         $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -710,14 +710,20 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
             $result[$gene] = [];
             foreach ($this->samples as $sample) {
                 $parameterName = 'stplot-quilt-' . $gene . '-' . $sample->name;
-                $fileName = $parameterName . '.svg';
-                $file = $workingDir . $fileName;
-                $file_public = $this->workingDirPublic() . $fileName;
-                if (Storage::fileExists($file)) {
-                    Storage::delete($file_public);
-                    Storage::copy($file, $file_public);
-                    $result[$gene][$sample->name] = $this->workingDirPublicURL() . $fileName;
+
+                $file_extensions = ['svg', 'pdf', 'png'];
+
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $parameterName . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                        $result[$gene][$sample->name] = $this->workingDirPublicURL() . $parameterName; // $fileName;
+                    }
                 }
+
             }
         }
 
@@ -726,17 +732,21 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
         return ['stplot_quilt' => $result];
     }
 
-    public function getSTplotQuiltScript($genes, $ptsize) : string {
+    public function getSTplotQuiltScript($genes, $ptsize, $col_pal) : string {
 
         $_genes = "c('" . join("','", $genes) . "')";
 
-        $export_images = '';
+        /*$export_images = '';
         $export_svgs = '';
 
-        $export_expr_svgs = '';
+        $export_expr_svgs = '';*/
+
+        $export_files = '';
         foreach ($genes as $gene)
             foreach ($this->samples as $sample) {
-                $export_images .= "ggpubr::ggexport(filename = 'stplot-quilt-$gene-" . $sample->name . ".pdf', qp\$" . $gene . "_" . $sample->name . ", width = 8, height = 8)\n";
+                $export_files .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name, "qp\$" . $gene . "_" . $sample->name);
+
+                /*$export_images .= "ggpubr::ggexport(filename = 'stplot-quilt-$gene-" . $sample->name . ".pdf', qp\$" . $gene . "_" . $sample->name . ", width = 8, height = 8)\n";
 
                 $export_svgs .= "svglite('stplot-quilt-$gene-" . $sample->name . ".svg', width = 8, height = 8)\n";
                 $export_svgs .= "print(qp\$" . $gene . "_" . $sample->name . ")\n";
@@ -744,7 +754,7 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
 
                 $export_expr_svgs .= "svglite('EXPR_stplot-quilt-$gene-" . $sample->name . ".svg', width = 8, height = 8)\n";
                 $export_expr_svgs .= "print(krp\$" . $gene . "_" . $sample->name . ")\n";
-                $export_expr_svgs .= "dev.off()\n\n";
+                $export_expr_svgs .= "dev.off()\n\n";*/
 
             }
 
@@ -760,22 +770,40 @@ library('svglite')
 r <- redux::hiredis()
 normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 
-qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize)
+qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pal')
 
-$export_images
+$export_files
 
-$export_svgs
+#/* TODO: *******///
+#stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
+#krp = STplot_interpolation(stlist_expression_surface, genes=$_genes)
 
-stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
-krp = STplot_interpolation(stlist_expression_surface, genes=$_genes)
-
-
-$export_expr_svgs
 
 ";
 
         return $script;
 
+    }
+
+
+    private function getExportFilesCommands($file, $plot) : string {
+
+        $str = "if(!is.null($plot)){\n";
+
+        //PNG
+        $str .= "ggpubr::ggexport(filename = '$file.png', $plot, width = 800, height = 800)\n";
+
+        //PDF
+        $str .= "ggpubr::ggexport(filename = '$file.pdf', $plot, width = 8, height = 8)\n";
+
+        //SVG
+        $str .= "svglite('$file.svg', width = 8, height = 8)\n";
+        $str .= "print($plot)\n";
+        $str .= "dev.off()\n";
+
+        $str .= "}\n\n";
+
+        return $str;
     }
 
 

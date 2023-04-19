@@ -194,8 +194,9 @@ class ProjectController extends Controller
 
         $genes = request('genes');
         $ptsize = request('ptsize');
+        $col_pal = request('col_pal');
 
-        return $project->STplotQuilt($genes, $ptsize);
+        return $project->STplotQuilt($genes, $ptsize, $col_pal);
 
 
 
