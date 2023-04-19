@@ -694,14 +694,14 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
 
 
 
-    public function STplotQuilt($genes, $ptsize, $col_pal) {
+    public function STplotQuilt($genes, $ptsize, $col_pal, $data_type) {
         $workingDir = $this->workingDir();
 
         $scriptName = 'STplot-quiltPlot.R';
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTplotQuiltScript($genes, $ptsize, $col_pal));
+        Storage::put($script, $this->getSTplotQuiltScript($genes, $ptsize, $col_pal, $data_type));
 
         $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -729,34 +729,17 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_quilt', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
 
-        return ['stplot_quilt' => $result];
+        return json_encode($result);
     }
 
-    public function getSTplotQuiltScript($genes, $ptsize, $col_pal) : string {
+    public function getSTplotQuiltScript($genes, $ptsize, $col_pal, $data_type) : string {
 
         $_genes = "c('" . join("','", $genes) . "')";
 
-        /*$export_images = '';
-        $export_svgs = '';
-
-        $export_expr_svgs = '';*/
-
         $export_files = '';
         foreach ($genes as $gene)
-            foreach ($this->samples as $sample) {
+            foreach ($this->samples as $sample)
                 $export_files .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name, "qp\$" . $gene . "_" . $sample->name);
-
-                /*$export_images .= "ggpubr::ggexport(filename = 'stplot-quilt-$gene-" . $sample->name . ".pdf', qp\$" . $gene . "_" . $sample->name . ", width = 8, height = 8)\n";
-
-                $export_svgs .= "svglite('stplot-quilt-$gene-" . $sample->name . ".svg', width = 8, height = 8)\n";
-                $export_svgs .= "print(qp\$" . $gene . "_" . $sample->name . ")\n";
-                $export_svgs .= "dev.off()\n\n";
-
-                $export_expr_svgs .= "svglite('EXPR_stplot-quilt-$gene-" . $sample->name . ".svg', width = 8, height = 8)\n";
-                $export_expr_svgs .= "print(krp\$" . $gene . "_" . $sample->name . ")\n";
-                $export_expr_svgs .= "dev.off()\n\n";*/
-
-            }
 
         $script = "
 
@@ -770,7 +753,7 @@ library('svglite')
 r <- redux::hiredis()
 normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 
-qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pal')
+qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pal', data_type='$data_type')
 
 $export_files
 
@@ -784,6 +767,83 @@ $export_files
         return $script;
 
     }
+
+
+
+
+    public function STplotExpressionSurface($genes, $ptsize, $col_pal, $data_type) {
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'STplot-ExpressionSurface.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSTplotExpressionSurfaceScript($genes, $ptsize, $col_pal, $data_type));
+
+        $this->spatialExecute('Rscript ' . $scriptName);
+
+        $result = [];
+        foreach($genes as $gene) {
+            $result[$gene] = [];
+            foreach ($this->samples as $sample) {
+                $parameterName = 'stplot-expression-surface-' . $gene . '-' . $sample->name;
+
+                $file_extensions = ['svg', 'pdf', 'png'];
+
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $parameterName . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                        $result[$gene][$sample->name] = $this->workingDirPublicURL() . $parameterName; // $fileName;
+                    }
+                }
+
+            }
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stplot_expression_surface', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
+
+        return json_encode($result);
+    }
+
+    public function getSTplotExpressionSurfaceScript($genes, $ptsize, $col_pal, $data_type) : string {
+
+        $_genes = "c('" . join("','", $genes) . "')";
+
+        $export_files = '';
+        foreach ($genes as $gene)
+            foreach ($this->samples as $sample)
+                $export_files .= $this->getExportFilesCommands("stplot-expression-surface-$gene-" . $sample->name, "krp\$" . $gene . "_" . $sample->name);
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+library('svglite')
+
+# Load normalized STList from disk
+#load(file='normalized_stlist.RData')
+r <- redux::hiredis()
+normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+save(normalized_stlist, file='normalized_stlist.RData')
+
+stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
+krp = STplot_interpolation(stlist_expression_surface, genes=$_genes, color_pal='$col_pal')
+
+$export_files
+
+";
+
+        return $script;
+
+    }
+
+
+
 
 
     private function getExportFilesCommands($file, $plot) : string {
@@ -805,6 +865,9 @@ $export_files
 
         return $str;
     }
+
+
+
 
 
 

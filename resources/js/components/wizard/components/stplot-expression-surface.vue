@@ -42,29 +42,8 @@
 
         <div class="row justify-content-center text-center m-4">
             <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div class="me-3">Point size: <span class="text-lg text-bold text-primary">{{ params.ptsize }}</span></div>
-                <input type="range" min="0" max="5" step="0.1" class="w-100" v-model="params.ptsize">
-            </div>
-        </div>
-
-        <div class="row justify-content-center text-center m-4">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                 <div>Color palette</div>
                 <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
-            </div>
-        </div>
-
-        <div class="row justify-content-center text-center m-4">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Data type</div>
-                <div>
-                    <label class="me-3">
-                        <input type="radio" value="tr" v-model="params.data_type"> Normalized expression
-                    </label>
-                    <label>
-                        <input type="radio" value="raw" v-model="params.data_type"> Raw counts
-                    </label>
-                </div>
             </div>
         </div>
 
@@ -79,25 +58,25 @@
         <div class="mt-4" v-if="!generating_quilt && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
             <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
                 <li v-for="(samples, gene, index) in plots" class="nav-item" role="presentation">
-                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'quilt-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene" type="button" role="tab" :aria-controls="'quilt-' + gene" aria-selected="true">{{ gene }}</button>
+                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene" type="button" role="tab" :aria-controls="'expression-surface-' + gene" aria-selected="true">{{ gene }}</button>
                 </li>
             </ul>
             <div class="tab-content" id="stplotQuiltContent">
                 <template v-for="(samples, gene, index) in plots">
-                    <div class="tab-pane fade" :class="index === 0 ? 'show active' : ''" :id="'quilt-' + gene" role="tabpanel" :aria-labelledby="'quilt-' + gene + '-tab'">
+                    <div class="tab-pane fade" :class="index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '-tab'">
 
                         <div class="mt-4">
                             <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
                                 <li v-if="Object.keys(samples).length > 1" class="nav-item" role="presentation">
-                                    <button class="nav-link active" :id="'quilt-' + gene + '_' + 'all_samples' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene + '_' + 'all_samples'" type="button" role="tab" :aria-controls="'quilt-' + gene + '_' + 'all_samples'" aria-selected="true">All samples</button>
+                                    <button class="nav-link active" :id="'expression-surface-' + gene + '_' + 'all_samples' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene + '_' + 'all_samples'" type="button" role="tab" :aria-controls="'expression-surface-' + gene + '_' + 'all_samples'" aria-selected="true">All samples</button>
                                 </li>
                                 <li v-for="(image, sample, index) in samples" class="nav-item" role="presentation">
-                                    <button class="nav-link" :class="Object.keys(samples).length === 1 && index === 0 ? 'active' : ''" :id="'quilt-' + gene + '_' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene + '_' + sample" type="button" role="tab" :aria-controls="'quilt-' + gene + '_' + sample" aria-selected="true">{{ sample }}</button>
+                                    <button class="nav-link" :class="Object.keys(samples).length === 1 && index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '_' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene + '_' + sample" type="button" role="tab" :aria-controls="'expression-surface-' + gene + '_' + sample" aria-selected="true">{{ sample }}</button>
                                 </li>
                             </ul>
                             <div class="tab-content" id="stplotQuiltContent">
 
-                                <div v-if="Object.keys(samples).length > 1" class="tab-pane fade show active" :id="'quilt-' + gene + '_' + 'all_samples'" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + 'all_samples' + '-tab'">
+                                <div v-if="Object.keys(samples).length > 1" class="tab-pane fade show active" :id="'expression-surface-' + gene + '_' + 'all_samples'" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + 'all_samples' + '-tab'">
 
                                     <div v-if="show_reset(gene)" class="m-4">
                                         <button class="btn btn-outline-info" @click="reset_plots(gene)">Reset</button>
@@ -114,7 +93,7 @@
                                 </div>
 
                                 <template v-for="(image, sample, index) in samples">
-                                    <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'quilt-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + sample + '-tab'">
+                                    <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + sample + '-tab'">
                                         <div>
                                             <div class="text-center m-4">
                                                 <div>
@@ -147,7 +126,7 @@
 import Multiselect from '@vueform/multiselect';
 
     export default {
-        name: 'stplotQuilt',
+        name: 'stplotExpressionSurface',
 
         components: {
             Multiselect,
@@ -156,14 +135,14 @@ import Multiselect from '@vueform/multiselect';
         props: {
             project: Object,
             samples: Object,
-            stplotQuiltUrl: String,
+            stplotExpressionSurfaceUrl: String,
             colorPalettes: Object,
         },
 
         data() {
             return {
 
-                plots: ('stplot_quilt' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_quilt) : {},
+                plots: ('stplot_expression_surface' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_expression_surface) : {},
 
                 processing: false,
 
@@ -202,7 +181,7 @@ import Multiselect from '@vueform/multiselect';
 
             quiltPlot() {
                 this.generating_quilt = true;
-                axios.post(this.stplotQuiltUrl, this.params)
+                axios.post(this.stplotExpressionSurfaceUrl, this.params)
                     .then((response) => {
                         this.plots = response.data;
                         this.generating_quilt = false;

@@ -28,6 +28,7 @@ import numericRange from "./components/common/numeric-range.vue";
 
 import stplotVisualization from "./components/wizard/stplot-visualization.vue";
 import stplotQuilt from "./components/wizard/components/stplot-quilt.vue";
+import stplotExpressionSurface from "./components/wizard/components/stplot-expression-surface.vue";
 
 
 // Vuetify
@@ -75,6 +76,7 @@ app.component('project-summary-table', projectSummaryTable);
 
 app.component('stplot-visualization', stplotVisualization);
 app.component('stplot-quilt', stplotQuilt);
+app.component('stplot-expression-surface', stplotExpressionSurface);
 
 //Register the window as a global variable, so it can be accessed everywhere
 app.config.globalProperties.window = window;

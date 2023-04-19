@@ -26,7 +26,7 @@
                                 <stplot-quilt :project="project" :samples="samples" :stplot-quilt-url="stplotQuiltUrl" :color-palettes="colorPalettes"></stplot-quilt>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="stplot-expr-surface" role="tabpanel" aria-labelledby="stplot-expr-surface-tab">
-<!--                                <qc-dt-filter :project="project" :samples="samples" :color-palettes="colorPalettes" :filter-url="filterUrl" :filter-url-plots="filterUrlPlots"></qc-dt-filter>-->
+                                <stplot-expression-surface :project="project" :samples="samples" :stplot-expression-surface-url="stplotExpressionSurfaceUrl" :color-palettes="colorPalettes"></stplot-expression-surface>
                             </div>
                         </div>
                     </div>
@@ -46,6 +46,7 @@
             samples: Object,
             colorPalettes: Object,
             stplotQuiltUrl: String,
+            stplotExpressionSurfaceUrl: String
         },
 
         mounted() {

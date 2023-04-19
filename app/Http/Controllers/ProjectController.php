@@ -189,16 +189,23 @@ class ProjectController extends Controller
 
     public function stplot_quilt(Project $project) {
 
-        //$genes = ['TP53', 'MYC'];
-        //$ptsize = 2;
+        $genes = request('genes');
+        $ptsize = request('ptsize');
+        $col_pal = request('col_pal');
+        $data_type = request('data_type');
+
+        return $project->STplotQuilt($genes, $ptsize, $col_pal, $data_type);
+
+    }
+
+    public function stplot_expression_surface(Project $project) {
 
         $genes = request('genes');
         $ptsize = request('ptsize');
         $col_pal = request('col_pal');
+        $data_type = request('data_type');
 
-        return $project->STplotQuilt($genes, $ptsize, $col_pal);
-
-
+        return $project->STplotExpressionSurface($genes, $ptsize, $col_pal, $data_type);
 
     }
 

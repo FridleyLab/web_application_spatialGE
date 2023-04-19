@@ -63,6 +63,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('/projects/{project}/stplot-visualization',[ProjectController::class, 'stplot_visualization'])->name('stplot-visualization')->middleware('project');
     Route::post('/projects/{project}/stplot/quilt', [ProjectController::class, 'stplot_quilt'])->name('stplot-quilt')->middleware('project');
+    Route::post('/projects/{project}/stplot/expression-surface', [ProjectController::class, 'stplot_expression_surface'])->name('stplot-expression-surface')->middleware('project');
 
 
 });
