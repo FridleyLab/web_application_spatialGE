@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->string('context', 255);
 
-            $table->unique(['gene', 'project_id', ['context']]);
+            $table->unique(['gene', 'project_id', 'context']);
 
             $table->timestamps();
             $table->softDeletes();

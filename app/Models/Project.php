@@ -105,10 +105,14 @@ class Project extends Model
             $_genes = [];
             foreach ($genes as $gene)
                 if(strlen($gene))
-                    $_genes[] = ['gene' => $gene, 'project_id' => $this->id];
+                    $_genes[] = ['gene' => $gene, 'project_id' => $this->id, 'context' => 'initial'];
                 //ProjectGene::create(['gene' => $gene, 'project_id' => $this->id]);
-            DB::delete('delete from project_genes where project_id=' . $this->id);
-            ProjectGene::insert($_genes);
+            DB::delete("delete from project_genes where context='initial' and project_id=" . $this->id);
+            foreach (array_chunk($_genes,1000) as $chunk)
+            {
+                //DB::table('table_name')->insert($t);
+                ProjectGene::insert($chunk);
+            }
         }
 
         //Delete previously generated parameters, if any
@@ -236,6 +240,28 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
         }
 
 
+        //Load genes present in the filtered STlist into the DB
+        $genes_file = $workingDir . 'genesFiltered.csv';
+        if(Storage::fileExists($genes_file)) {
+            $data = Storage::read($genes_file);
+            $genes = explode("\n", $data);
+            $_genes = [];
+            foreach ($genes as $gene)
+                if(strlen($gene))
+                    $_genes[] = ['gene' => $gene, 'project_id' => $this->id, 'context' => 'filtered'];
+            //ProjectGene::create(['gene' => $gene, 'project_id' => $this->id]);
+            DB::delete("delete from project_genes where context='filtered' and project_id=" . $this->id);
+
+            foreach (array_chunk($_genes,1000) as $chunk)
+            {
+                //DB::table('table_name')->insert($t);
+                ProjectGene::insert($chunk);
+            }
+
+
+        }
+
+
         $parameterNames = ['filter_violin', 'filter_boxplot'];
         foreach($parameterNames as $parameterName) {
 
@@ -302,6 +328,9 @@ r\$SET('filtered_stlist', redux::object_to_bin(filtered_stlist))
 filter_meta_options = unique(unlist(lapply(filtered_stlist@spatial_meta, function(i){ max_tmp = grep(paste0(c('libname', 'xpos', 'ypos'), collapse='|'), colnames(i), value=T, invert=T) })))
 write.table(filter_meta_options, 'filter_meta_options.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
+
+gene_names = unique(unlist(lapply(filtered_stlist@counts, function(i){ genes_tmp = rownames(i) })))
+write.table(gene_names, 'genesFiltered.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 source('summary.R')
 df_summary = summarize_STlist(filtered_stlist)

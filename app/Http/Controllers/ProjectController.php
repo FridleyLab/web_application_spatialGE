@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\ProjectGene;
 use App\Models\User;
 use Database\Seeders\ProjectStatusSeeder;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProjectController extends Controller
@@ -123,18 +124,38 @@ class ProjectController extends Controller
     }
 
 
-    public function searchGenes() {
+    public function searchGenes(Project $project) {
         $query = request('query');
-        if(strlen($query))
-            return ProjectGene::where('gene', 'LIKE', $query . '%')->orderBy('gene')->limit(100)->pluck('gene');
+
+        $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'initial';
+
+        if(strlen($query)) {
+
+            $genes = ProjectGene::where('project_id', $project->id)->where('context', $context)->where('gene', 'LIKE', $query . '%')->orderBy('gene')->limit(100);
+
+            //$sql_with_bindings = Str::replaceArray('?', $genes->getBindings(), $genes->toSql());
+            //dd($sql_with_bindings);
+
+            return $genes->pluck('gene');
+
+        }
 
         return [];
     }
 
-    public function searchGenesRegexp() {
+    public function searchGenesRegexp(Project $project) {
         $query = request('query');
-        if(strlen($query))
-            return ProjectGene::where('gene', 'REGEXP', $query)->orderBy('gene')->limit(100)->pluck('gene');
+
+        $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'initial';
+
+        if(strlen($query)) {
+            $genes = ProjectGene::where('context', $context)->where('gene', 'REGEXP', $query)->orderBy('gene')->limit(100);
+
+            //$sql_with_bindings = Str::replaceArray('?', $genes->getBindings(), $genes->toSql());
+            //dd($sql_with_bindings);
+
+            return $genes->pluck('gene');
+        }
 
         return [];
     }
