@@ -14,10 +14,14 @@ return new class extends Migration
         Schema::create('project_genes', function (Blueprint $table) {
             $table->id();
 
-            $table->string('gene', 255)->index();
+            $table->string('gene', 255);
 
             $table->unsignedBigInteger('project_id');
             $table->foreign('project_id')->references('id')->on('projects');
+
+            $table->string('context', 255);
+
+            $table->unique(['gene', 'project_id', ['context']]);
 
             $table->timestamps();
             $table->softDeletes();

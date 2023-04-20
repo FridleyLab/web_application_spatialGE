@@ -238,13 +238,19 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
 
         $parameterNames = ['filter_violin', 'filter_boxplot'];
         foreach($parameterNames as $parameterName) {
-            $fileName = $parameterName . '.png';
-            $file = $workingDir . $fileName;
-            $file_public = $this->workingDirPublic() . $fileName;
-            if (Storage::fileExists($file)) {
-                Storage::copy($file, $file_public);
-                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
-                $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
+
+            $file_extensions = ['svg', 'pdf', 'png'];
+
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $parameterName . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+                }
             }
         }
 
@@ -252,7 +258,7 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
         $file = $workingDir . $parameterName .'.csv';
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            ProjectParameter::insert(['parameter' => $parameterName, 'type' => 'string', 'value' => $data, 'project_id' => $this->id]);
+            ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $data]);
             $result[$parameterName] = $data;
 
         }
@@ -273,7 +279,8 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
             }
         }
 
-        //dd($str_params);
+        $plots = $this->getExportFilesCommands('filter_violin', 'vp');
+        $plots .= $this->getExportFilesCommands('filter_boxplot', 'bp');
 
         $script = "
 setwd('/spatialGE')
@@ -305,11 +312,15 @@ write.csv(df_summary, 'filtered_stlist_summary.csv', row.names=FALSE, quote=FALS
 #source('violin_plots.R')
 #source('utils.R')
 vp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='okabeito')
-ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
 bp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='okabeito', plot_type='box')
-ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
+
+#### Save plots to file
+
+$plots
 
 ";
 
@@ -337,13 +348,17 @@ ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
         $parameterNames = ['filter_violin', 'filter_boxplot'];
         foreach($parameterNames as $parameterName) {
-            $fileName = $parameterName . '.png';
-            $file = $workingDir . $fileName;
-            $file_public = $this->workingDirPublic() . $fileName;
-            if (Storage::fileExists($file)) {
-                Storage::delete($file_public);
-                Storage::copy($file, $file_public);
-                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
+
+            $file_extensions = ['svg', 'pdf', 'png'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $parameterName . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                }
             }
         }
 
@@ -351,6 +366,9 @@ ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 
     public function getFilterPlotsScript($color_palette, $variable) : string {
+
+        $plots = $this->getExportFilesCommands('filter_violin', 'vp');
+        $plots .= $this->getExportFilesCommands('filter_boxplot', 'bp');
 
         $script = "
 setwd('/spatialGE')
@@ -367,11 +385,14 @@ filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
 #source('violin_plots.R')
 #source('utils.R')
 vp = violin_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette')
-ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
 bp = violin_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette', plot_type='box')
-ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
+
+#### save plots to file
+$plots
 
 ";
 
@@ -408,14 +429,18 @@ ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
         $parameterNames = ['normalized_violin', 'normalized_boxplot', 'normalized_boxplot_1', 'normalized_boxplot_2', 'normalized_violin_1', 'normalized_violin_2', 'normalized_density_1', 'normalized_density_2'];
         foreach($parameterNames as $parameterName) {
-            $fileName = $parameterName . '.png';
-            $file = $workingDir . $fileName;
-            $file_public = $this->workingDirPublic() . $fileName;
-            if (Storage::fileExists($file)) {
-                Storage::delete($file_public);
-                Storage::copy($file, $file_public);
-                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
-                $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
+
+            $file_extensions = ['svg', 'pdf', 'png'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $parameterName . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+                }
             }
         }
 
@@ -443,7 +468,14 @@ ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
             }
         }
 
-        //dd($str_params);
+        $plots = $this->getExportFilesCommands('normalized_violin', 'vp');
+        $plots .= $this->getExportFilesCommands('normalized_boxplot', 'bp');
+        $plots .= $this->getExportFilesCommands('normalized_boxplot_1', "den_raw\$boxplot");
+        $plots .= $this->getExportFilesCommands('normalized_boxplot_2', "den_tr\$boxplot");
+        $plots .= $this->getExportFilesCommands('normalized_density_1', "den_raw\$density");
+        $plots .= $this->getExportFilesCommands('normalized_density_2', "den_tr\$density");
+        $plots .= $this->getExportFilesCommands('normalized_violin_1', "den_raw\$violin");
+        $plots .= $this->getExportFilesCommands('normalized_violin_2', "den_tr\$violin");
 
         $script = "
 setwd('/spatialGE')
@@ -468,11 +500,11 @@ write.table(pca_max_var_genes, 'pca_max_var_genes.csv',sep=',', row.names = FALS
 #source('violin_plots.R')
 #source('utils.R')
 vp = violin_plots(normalized_stlist, color_pal='okabeito', data_type='tr', genes='RPL22')
-ggpubr::ggexport(filename = 'normalized_violin.png', vp, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
 bp = violin_plots(normalized_stlist, color_pal='okabeito', plot_type='box', data_type='tr', genes='RPL22')
-ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 800)
 
 
 
@@ -492,14 +524,16 @@ den_tr = count_distribution(normalized_stlist, distrib_subset=0.01, plot_type=c(
 #png('./boxplot.png'); print(ggpubr::ggarrange(den_raw\$boxplot, den_tr\$boxplot, ncol=1)); dev.off()
 #ggpubr::ggexport(filename = 'boxplot.png', ggpubr::ggarrange(den_raw\$boxplot, den_tr\$boxplot, ncol=1), width = 800, height = 800)
 
-ggpubr::ggexport(filename = 'normalized_boxplot_1.png', den_raw\$boxplot, width = 800, height = 800)
-ggpubr::ggexport(filename = 'normalized_boxplot_2.png', den_tr\$boxplot, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_boxplot_1.png', den_raw\$boxplot, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_boxplot_2.png', den_tr\$boxplot, width = 800, height = 800)
 
-ggpubr::ggexport(filename = 'normalized_density_1.png', den_raw\$density, width = 800, height = 800)
-ggpubr::ggexport(filename = 'normalized_density_2.png', den_tr\$density, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_density_1.png', den_raw\$density, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_density_2.png', den_tr\$density, width = 800, height = 800)
 
-ggpubr::ggexport(filename = 'normalized_violin_1.png', den_raw\$violin, width = 800, height = 800)
-ggpubr::ggexport(filename = 'normalized_violin_2.png', den_tr\$violin, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_violin_1.png', den_raw\$violin, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_violin_2.png', den_tr\$violin, width = 800, height = 800)
+
+$plots
 
 ";
 
@@ -582,14 +616,18 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
 
         $parameterNames = ['pseudo_bulk_pca', 'pseudo_bulk_heatmap'];
         foreach($parameterNames as $parameterName) {
-            $fileName = $parameterName . '.svg';
-            $file = $workingDir . $fileName;
-            $file_public = $this->workingDirPublic() . $fileName;
-            if (Storage::fileExists($file)) {
-                Storage::delete($file_public);
-                Storage::copy($file, $file_public);
-                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
-                $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
+
+            $file_extensions = ['svg', 'pdf', 'png'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $parameterName . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+                }
             }
         }
 
@@ -601,10 +639,8 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
 
     public function getPcaScript($plot_meta, $color_pal, $n_genes, $hm_display_genes) : string {
 
-        $export_svgs = '';
-        $export_svgs .= "svglite('pseudo_bulk_pca.svg', width = 8, height = 8)\n";
-        $export_svgs .= "print(plist\$pca)\n";
-        $export_svgs .= "dev.off()\n\n";
+        $plots = $this->getExportFilesCommands('pseudo_bulk_pca', "plist\$pca");
+        $plots .= $this->getExportFilesCommands('pseudo_bulk_heatmap', "plist\$heatmap");
 
         $script = "
 setwd('/spatialGE')
@@ -624,10 +660,10 @@ normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 plist = pseudobulk_plots(normalized_stlist, plot_meta='$plot_meta', max_var_genes=$n_genes, hm_display_genes=$hm_display_genes, color_pal='$color_pal', ptsize=5)
 #hm_display_genes --> text or slider
 
-ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', plist\$pca, width = 800, height = 800)
-ggpubr::ggexport(filename = 'pseudo_bulk_heatmap.png', plist\$heatmap, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', plist\$pca, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'pseudo_bulk_heatmap.png', plist\$heatmap, width = 800, height = 800)
 
-$export_svgs
+$plots
 
 ";
 
@@ -652,14 +688,17 @@ $export_svgs
 
         $parameterNames = ['quilt_plot_1', 'quilt_plot_2'];
         foreach($parameterNames as $parameterName) {
-            $fileName = $parameterName . '.png';
-            $file = $workingDir . $fileName;
-            $file_public = $this->workingDirPublic() . $fileName;
-            if (Storage::fileExists($file)) {
-                Storage::delete($file_public);
-                Storage::copy($file, $file_public);
-                ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
-                $result[$parameterName] = $this->workingDirPublicURL() . $fileName;
+            $file_extensions = ['svg', 'pdf', 'png'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $parameterName . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+                }
             }
         }
 
@@ -670,6 +709,9 @@ $export_svgs
 
 
     public function getQuiltPlotScript($plot_meta, $color_pal, $sample1, $sample2) : string {
+
+        $plots = $this->getExportFilesCommands('quilt_plot_1', "plist1[[1]]");
+        $plots .= $this->getExportFilesCommands('quilt_plot_2', "plist2[[1]]");
 
         $script = "
 setwd('/spatialGE')
@@ -684,8 +726,11 @@ normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
 #### Plot
 plist1 = STplot(normalized_stlist, samples=c('$sample1'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
 plist2 = STplot(normalized_stlist, samples=c('$sample2'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
-ggpubr::ggexport(filename = 'quilt_plot_1.png', plist1[[1]], width = 800, height = 800)
-ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height = 800)
+#ggpubr::ggexport(filename = 'quilt_plot_1.png', plist1[[1]], width = 800, height = 800)
+#ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height = 800)
+
+$plots
+
 ";
 
         return $script;
@@ -746,7 +791,6 @@ ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
-library('svglite')
 
 # Load normalized STList from disk
 #load(file='normalized_stlist.RData')
@@ -823,7 +867,6 @@ $export_files
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
-library('svglite')
 
 # Load normalized STList from disk
 #load(file='normalized_stlist.RData')
@@ -857,6 +900,7 @@ $export_files
         $str .= "ggpubr::ggexport(filename = '$file.pdf', $plot, width = 8, height = 8)\n";
 
         //SVG
+        $str .= "library('svglite')\n";
         $str .= "svglite('$file.svg', width = 8, height = 8)\n";
         $str .= "print($plot)\n";
         $str .= "dev.off()\n";

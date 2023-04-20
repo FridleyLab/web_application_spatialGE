@@ -66,11 +66,11 @@
 
                     <div class="d-xxl-flex">
                         <div class="text-center m-4 w-xxl-50">
-                            <img :src="project.project_parameters.quilt_plot_1 + '?' + Date.now()" class="img-fluid">
+                            <object :data="project.project_parameters.quilt_plot_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                         </div>
 
                         <div class="text-center m-4 w-xxl-50">
-                            <img :src="project.project_parameters.quilt_plot_2 + '?' + Date.now()" class="img-fluid">
+                            <object :data="project.project_parameters.quilt_plot_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                         </div>
                     </div>
 

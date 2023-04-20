@@ -54,14 +54,14 @@
                 <div class="tab-pane fade show active" id="pcaplot" role="tabpanel" aria-labelledby="pcaplot-tab">
 
                     <div class="text-center m-4">
-                        <img :src="project.project_parameters.pseudo_bulk_pca + '?' + Date.now()" class="img-fluid">
+                        <object :data="project.project_parameters.pseudo_bulk_pca + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                     </div>
 
                 </div>
                 <div class="tab-pane fade" id="heatmap" role="tabpanel" aria-labelledby="heatmap-tab">
 
                     <div class="text-center m-4">
-                        <img :src="project.project_parameters.pseudo_bulk_heatmap + '?' + Date.now()" class="img-fluid">
+                        <object :data="project.project_parameters.pseudo_bulk_heatmap + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                     </div>
 
                 </div>

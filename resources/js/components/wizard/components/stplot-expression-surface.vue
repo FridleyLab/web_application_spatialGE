@@ -3,10 +3,11 @@
     <form>
 
         <div class="my-3 text-bold">
-            Quilt Plot
+            Expression surface plot
         </div>
         <div>
-            Select one or more genes to visualize relative expression at each spot/cell.
+            Select one or more genes to plot a surface of the gene expression using spatial interpolation (“kriging”). The expression surfaces allow to easily identify hot or cold spots within the tissue.<br/>
+            This is a time consuming step, please allow some time for the interpolation to complete.
         </div>
 
 

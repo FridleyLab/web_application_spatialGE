@@ -50,11 +50,11 @@
                                 <div class="tab-pane show active" id="log-normalized-density" role="tabpanel" aria-labelledby="log-normalized-density-tab">
                                     <div class="d-xxl-flex">
                                         <div class="text-center m-4 w-xxl-50">
-                                            <img :src="project.project_parameters.normalized_density_1 + '?' + Date.now()" class="img-fluid">
+                                            <object :data="project.project_parameters.normalized_density_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                                         </div>
 
                                         <div class="text-center m-4 w-xxl-50">
-                                            <img :src="project.project_parameters.normalized_density_2 + '?' + Date.now()" class="img-fluid">
+                                            <object :data="project.project_parameters.normalized_density_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                                         </div>
                                     </div>
                                 </div>
@@ -62,11 +62,11 @@
                                 <div class="tab-pane show" id="log-normalized-violinplot" role="tabpanel" aria-labelledby="log-normalized-violinplot-tab">
                                     <div class="d-xxl-flex">
                                         <div class="text-center m-4 w-xxl-50">
-                                            <img :src="project.project_parameters.normalized_violin_1 + '?' + Date.now()" class="img-fluid">
+                                            <object :data="project.project_parameters.normalized_violin_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                                         </div>
 
                                         <div class="text-center m-4 w-xxl-50">
-                                            <img :src="project.project_parameters.normalized_violin_2 + '?' + Date.now()" class="img-fluid">
+                                            <object :data="project.project_parameters.normalized_violin_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                                         </div>
                                     </div>
                                 </div>
@@ -74,11 +74,11 @@
                                 <div class="tab-pane show" id="log-normalized-boxplot" role="tabpanel" aria-labelledby="log-normalized-boxplot-tab">
                                     <div class="d-xxl-flex">
                                         <div class="text-center m-4 w-xxl-50">
-                                            <img :src="project.project_parameters.normalized_boxplot_1 + '?' + Date.now()" class="img-fluid">
+                                            <object :data="project.project_parameters.normalized_boxplot_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                                         </div>
 
                                         <div class="text-center m-4 w-xxl-50">
-                                            <img :src="project.project_parameters.normalized_boxplot_2 + '?' + Date.now()" class="img-fluid">
+                                            <object :data="project.project_parameters.normalized_boxplot_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                                         </div>
                                     </div>
                                 </div>
@@ -130,13 +130,13 @@
 
                                     <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
                                         <div class="text-center m-4">
-                                            <img :src="project.project_parameters.normalized_violin + '?' + Date.now()" class="img-fluid">
+                                            <object :data="project.project_parameters.normalized_violin + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                                         </div>
                                     </div>
 
                                     <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
                                         <div class="text-center m-4">
-                                            <img :src="project.project_parameters.normalized_boxplot + '?' + Date.now()" class="img-fluid">
+                                            <object :data="project.project_parameters.normalized_boxplot + '.svg'  + '?' + Date.now()" class="img-fluid"></object>
                                         </div>
                                     </div>
 

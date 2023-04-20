@@ -281,14 +281,14 @@
 
                     <div class="tab-pane fade" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
                         <div class="text-center m-4">
-                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()" class="img-fluid">
+                            <object :data="project.project_parameters.filter_violin + '.svg' + '?' + Date.now()" class="img-fluid"></object>
 <!--                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()">-->
                         </div>
                     </div>
 
                     <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
                         <div class="text-center m-4">
-                            <img :src="project.project_parameters.filter_boxplot + '?' + Date.now()" class="img-fluid">
+                            <object :data="project.project_parameters.filter_boxplot + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                         </div>
                     </div>
 

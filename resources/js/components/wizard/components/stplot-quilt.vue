@@ -27,7 +27,7 @@
                             v-model="params.genes"
                             mode="tags"
                             placeholder="Select options"
-                            :close-on-select="false"
+                            :close-on-select="true"
                             :searchable="true"
                             :resolve-on-load="false"
                             :delay="0"
@@ -50,7 +50,7 @@
         <div class="row justify-content-center text-center m-4">
             <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                 <div>Color palette</div>
-                <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
+                <div><Multiselect :options="colorPalettes" v-model="params.col_pal" :searchable="true"></Multiselect></div>
             </div>
         </div>
 
@@ -78,13 +78,39 @@
 
         <div class="mt-4" v-if="!generating_quilt && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
             <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
+
+                <li v-if="Object.keys(plots).length > 1" class="nav-item" role="presentation">
+                    <button class="nav-link active" :id="'quilt-' + 'all_plots' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + 'all_plots'" type="button" role="tab" :aria-controls="'quilt-' + 'all_plots'" aria-selected="true">All plots</button>
+                </li>
+
                 <li v-for="(samples, gene, index) in plots" class="nav-item" role="presentation">
-                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'quilt-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene" type="button" role="tab" :aria-controls="'quilt-' + gene" aria-selected="true">{{ gene }}</button>
+                    <button class="nav-link" :class="(Object.keys(plots).length === 1 && index === 0) ? 'active' : ''" :id="'quilt-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene" type="button" role="tab" :aria-controls="'quilt-' + gene" aria-selected="true">{{ gene }}</button>
                 </li>
             </ul>
             <div class="tab-content" id="stplotQuiltContent">
+
+                <div v-if="Object.keys(plots).length > 1" class="tab-pane fade show active" :id="'quilt-' + 'all_plots'" role="tabpanel" :aria-labelledby="'quilt-' + 'all_plots' + '-tab'">
+
+                    <div v-for="sample_object in samples" class="mt-4 ms-4">
+                        <div>
+                            <div class="text-primary text-bold text-lg">{{ sample_object.name }}</div>
+                            <div class="d-xxl-flex">
+                                <template v-for="(samples, gene, index) in plots">
+                                    <template v-for="(image, sample, index) in samples">
+                                        <div v-if="sample === sample_object.name && plots_visible[gene][sample]" class="text-center m-4 w-xxl-50">
+                                            <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+<!--                                            <button @click="hide_plot(gene, sample)" class="btn btn-sm btn-outline-secondary">Hide</button>-->
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
                 <template v-for="(samples, gene, index) in plots">
-                    <div class="tab-pane fade" :class="index === 0 ? 'show active' : ''" :id="'quilt-' + gene" role="tabpanel" :aria-labelledby="'quilt-' + gene + '-tab'">
+                    <div class="tab-pane fade" :class="(Object.keys(plots).length === 1 && index === 0) ? 'show active' : ''" :id="'quilt-' + gene" role="tabpanel" :aria-labelledby="'quilt-' + gene + '-tab'">
 
                         <div class="mt-4">
                             <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">

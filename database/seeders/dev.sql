@@ -64,9 +64,9 @@ INSERT INTO `project_sample` (`id`, `project_id`, `sample_id`, `created_at`, `up
 -- Dumping data for table spatial-ge-dev.samples: ~2 rows (approximately)
 /*!40000 ALTER TABLE `samples` DISABLE KEYS */;
 INSERT INTO `samples` (`id`, `name`, `created_at`, `updated_at`, `deleted_at`) VALUES
-                                                                                   (1, 'Sample01', '2023-03-16 11:11:16', '2023-03-16 11:11:16', NULL),
-                                                                                   (2, 'Sample02', '2023-03-16 11:11:51', '2023-03-16 11:11:51', NULL),
-                                                                                   (3, 'Sample03', '2023-03-16 11:11:58', '2023-03-16 11:11:58', NULL);
+                                                                                   (1, 'sample_093d', '2023-03-16 11:11:16', '2023-03-16 11:11:16', NULL),
+                                                                                   (2, 'sample_095b', '2023-03-16 11:11:51', '2023-03-16 11:11:51', NULL),
+                                                                                   (3, 'sample_396c', '2023-03-16 11:11:58', '2023-03-16 11:11:58', NULL);
 /*!40000 ALTER TABLE `samples` ENABLE KEYS */;
 
 
