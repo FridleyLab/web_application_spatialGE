@@ -222,7 +222,7 @@ export default {
             const columnCount = 6;
 
             let lines = data.split(/\r?\n|\r|\n/g);
-            if((!lines.length || !lines[0].length || lines[0].split(/\t|,/g).length !== 6)) {
+            if((!lines.length || !lines[0].length || lines[0].split(/\t|,/g).length > 6 /*!== 6*/)) {
                this.errorMessage = 'File should be "tissue_positions.csv" from space ranger and have 6 columns';
                return false;
             }
@@ -231,7 +231,7 @@ export default {
             lines.forEach((line) => {
                 let values = line.split(/\t|,/g);
 
-                if(values.length !== 6 && (i < lines.length) && !this.errorMessage.length ) {
+                if(values.length >6 /*!== 6*/ && (i < lines.length) && !this.errorMessage.length ) {
                     this.errorMessage = 'Line ' + i + ': number of columns is not 6';
                     return false;
                 }
