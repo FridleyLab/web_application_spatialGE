@@ -72,18 +72,18 @@
                         <li class="nav-item ps-4">
                             <a class="nav-link text-white @if(url()->current() === route('stplot-visualization', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 3) disabled @endif" style="@if(getActiveProject()->current_step < 3) background-color: transparent !important @endif" href="{{ route('stplot-visualization', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 2) text-secondary @endif">filter_3</i>
+                                    <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 3) text-secondary @endif">filter_3</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 2) text-secondary @endif text-bold">STplot - Visualization</span>
+                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 3) text-secondary @endif text-bold">STplot - Visualization</span>
                             </a>
                         </li>
 
                         <li class="nav-item ps-4">
-                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                            <a class="nav-link text-white @if(url()->current() === route('sthet-spatial-het', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 4) disabled @endif" style="@if(getActiveProject()->current_step < 4) background-color: transparent !important @endif" href="{{ route('sthet-spatial-het', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i class="material-icons opacity-10 text-secondary">filter_4</i>
+                                    <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 4) text-secondary @endif">filter_4</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">SThet - Spatial heterogen.</span>
+                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 4) text-secondary @endif text-bold">SThet - Spatial heterogen.</span>
                             </a>
                         </li>
 

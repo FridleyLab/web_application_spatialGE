@@ -176,7 +176,7 @@ class ProjectController extends Controller
 
     public function applyNormalization(Project $project) {
 
-        $project->current_step = 3;
+        $project->current_step = 4;
         $project->save();
         return $project->applyNormalization(request('parameters'));
 
@@ -228,6 +228,12 @@ class ProjectController extends Controller
 
         return $project->STplotExpressionSurface($genes, $ptsize, $col_pal, $data_type);
 
+    }
+
+    public function sthet_spatial_het(Project $project) {
+        $samples = $project->samples;
+        $color_palettes = ColorPalette::orderBy('label')->get();
+        return view('wizard.sthet-spatial-het')->with(compact('project', 'samples', 'color_palettes'));
     }
 
 

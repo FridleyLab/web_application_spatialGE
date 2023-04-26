@@ -30,6 +30,9 @@ import stplotVisualization from "./components/wizard/stplot-visualization.vue";
 import stplotQuilt from "./components/wizard/components/stplot-quilt.vue";
 import stplotExpressionSurface from "./components/wizard/components/stplot-expression-surface.vue";
 
+import sthetSpatialHet from "./components/wizard/sthet-spatial-het.vue";
+import sthetPlot from "./components/wizard/components/sthet-plot.vue";
+
 
 // Vuetify
 /*import 'vuetify/styles'
@@ -77,6 +80,9 @@ app.component('project-summary-table', projectSummaryTable);
 app.component('stplot-visualization', stplotVisualization);
 app.component('stplot-quilt', stplotQuilt);
 app.component('stplot-expression-surface', stplotExpressionSurface);
+
+app.component('sthet-spatial-het', sthetSpatialHet);
+app.component('sthet-plot', sthetPlot);
 
 //Register the window as a global variable, so it can be accessed everywhere
 app.config.globalProperties.window = window;
