@@ -3,6 +3,15 @@ FROM r-base:4.1.2
 #COPY certs/* /usr/share/ca-certificates/
 #RUN update-ca-certificates --fresh
 
+#COPY moffitt-ca-int.cer /etc/ssl/certs/moffitt-ca-int.cer
+#COPY moffitt-ca.cer /etc/ssl/certs/moffitt-ca.cer
+#COPY ca.moffitt.goskope.com.crt /etc/ssl/certs/ca.moffitt.goskope.com.crt
+#COPY caadmin.netskope.com.crt /etc/ssl/certs/caadmin.netskope.com.crt
+
+#RUN update-ca-certificates --fresh
+
+#RUN echo "Acquire { https::Verify-Peer false }" >> /etc/apt/apt.conf.d/99verify-peer.conf
+
 RUN apt-get -y update && apt-get -y install libhdf5-dev libudunits2-dev libv8-dev libgdal-dev cmake libfftw3-dev libfontconfig1-dev
 
 RUN mkdir /spatialGE
@@ -16,12 +25,15 @@ RUN apt-get -y install libcurl4-openssl-dev
 COPY init2.R init2.R
 RUN Rscript init2.R
 
+RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')"
+
 RUN apt -y install libhiredis-dev
 
 RUN Rscript -e "install.packages('redux')"
 
 RUN apt -y update && apt -y install redis
 
-RUN Rscript -e "install.packages('ComplexHeatmap')"
+RUN Rscript -e "install.packages('svglite')"
 
 CMD ["redis-server"]
+

@@ -1,3 +1,5 @@
+## How to download or build the Docker image for the spatialGE library
+
 Dockerfile contains the reference for a built image, build using:
 
 docker build -t spatialge-april-redis .
