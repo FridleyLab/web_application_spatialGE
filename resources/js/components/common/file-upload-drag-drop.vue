@@ -236,7 +236,8 @@ export default {
                     return false;
                 }
 
-                if((Number(values[4]) < 1000 || Number(values[5]) < 1000) && (i < lines.length) && !this.errorMessage.length ) {
+                //TODO: if cols is 3, check [2] and [3]
+                if((Number(values[4]) < 100 || Number(values[5]) < 100) && (i < lines.length) && !this.errorMessage.length ) {
                     this.errorMessage = 'Line ' + i + ': coordinates too small';
                     return false;
                 }
