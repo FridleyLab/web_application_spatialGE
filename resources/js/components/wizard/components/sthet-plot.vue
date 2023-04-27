@@ -14,48 +14,48 @@
 
 
         <div class="row justify-content-center text-center m-3">
-            <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
+            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                <div>Search and select genes</div>
                 <div>
-                    <div>Search and select genes</div>
-                    <div>
-                        <Multiselect
-                            v-model="params.genes"
-                            mode="tags"
-                            placeholder="Select options"
-                            :close-on-select="true"
-                            :searchable="true"
-                            :resolve-on-load="false"
-                            :delay="0"
-                            :min-chars="1"
-                            :options="async (query) => { return await searchGenes(query) }"
-                        />
-                    </div>
+                    <Multiselect
+                        v-model="params.genes"
+                        mode="tags"
+                        placeholder="Select options"
+                        :close-on-select="true"
+                        :searchable="true"
+                        :resolve-on-load="false"
+                        :delay="0"
+                        :min-chars="1"
+                        :options="async (query) => { return await searchGenes(query) }"
+                    />
                 </div>
             </div>
         </div>
 
-        <div class="col">
-            <div>Color by</div>
-            <div><Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect></div>
-        </div>
-
-        <div class="row justify-content-center text-center m-4">
+        <div class="row justify-content-center text-center m-3">
             <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div class="me-3">Point size: <span class="text-lg text-bold text-primary">{{ params.ptsize }}</span></div>
-                <input type="range" min="0" max="5" step="0.1" class="w-100" v-model="params.ptsize">
+                <div>Color by</div>
+                <div><Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect></div>
             </div>
         </div>
+
+<!--        <div class="row justify-content-center text-center m-4">-->
+<!--            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">-->
+<!--                <div class="me-3">Point size: <span class="text-lg text-bold text-primary">{{ params.ptsize }}</span></div>-->
+<!--                <input type="range" min="0" max="5" step="0.1" class="w-100" v-model="params.ptsize">-->
+<!--            </div>-->
+<!--        </div>-->
 
         <div class="row justify-content-center text-center m-4">
             <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                 <div>Color palette</div>
-                <div><Multiselect :options="colorPalettes" v-model="params.col_pal" :searchable="true"></Multiselect></div>
+                <div><Multiselect :options="colorPalettes" v-model="params.color_pal" :searchable="true"></Multiselect></div>
             </div>
         </div>
 
         <div class="row justify-content-center text-center m-4">
             <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Data type</div>
+                <div>Methods</div>
                 <div>
                     <label class="me-3">
                         <input type="checkbox" value="moran" v-model="params.method"> Moran's I
@@ -69,7 +69,7 @@
 
         <div class="row mt-3">
             <div class="float-end">
-                <input v-if="!generating" type="button" class="btn btn-outline-info float-end" :class="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating ? 'Please wait...' : 'Generate plots'" @click="applyPca">
+                <input v-if="!generating" type="button" class="btn btn-outline-info float-end" :class="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating ? 'Please wait...' : 'Generate plots'" @click="sthetPlot">
                 <img v-if="generating" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />
             </div>
         </div>
@@ -111,7 +111,7 @@ export default {
     props: {
         project: Object,
         samples: Object,
-        stplotQuiltUrl: String,
+        sthetPlotUrl: String,
         colorPalettes: Object,
     },
 
@@ -145,9 +145,9 @@ export default {
 
     methods: {
 
-        quiltPlot() {
+        sthetPlot() {
             this.generating = true;
-            axios.post(this.quiltUrl, this.params)
+            axios.post(this.sthetPlotUrl, this.params)
                 .then((response) => {
                     for(let property in response.data)
                         this.project.project_parameters[property] = response.data[property];

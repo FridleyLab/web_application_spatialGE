@@ -100,11 +100,11 @@ class spatialContainer {
     public function execute($command) {
         try {
 
-            //$exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
-            $exe = $this->exe;
-            $process = Process::run("$exe exec " . $this->project->container_id . ' ' . $command);
+            //set the max execution time for the system call
+            $timeout = 600;
 
-            //dd($process->errorOutput());
+            $exe = $this->exe;
+            $process = Process::timeout($timeout)->run("$exe exec " . $this->project->container_id . ' ' . $command);
 
             return $process->output();
         }

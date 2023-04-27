@@ -236,5 +236,16 @@ class ProjectController extends Controller
         return view('wizard.sthet-spatial-het')->with(compact('project', 'samples', 'color_palettes'));
     }
 
+    public function sthet_spatial_het_plot(Project $project) {
+
+        $genes = request('genes');
+        $method = request('method');
+        $color_pal = request('color_pal');
+        $plot_meta = request('plot_meta');
+
+        return $project->SThetPlot($genes, $method, $color_pal, $plot_meta);
+
+    }
+
 
 }

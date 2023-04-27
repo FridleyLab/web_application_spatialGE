@@ -901,7 +901,7 @@ library('spatialGE')
 #load(file='normalized_stlist.RData')
 r <- redux::hiredis()
 normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
-save(normalized_stlist, file='normalized_stlist.RData')
+#save(normalized_stlist, file='normalized_stlist.RData')
 
 stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
 krp = STplot_interpolation(stlist_expression_surface, genes=$_genes, color_pal='$col_pal')
@@ -916,6 +916,65 @@ $export_files
 
 
 
+    public function SThetPlot($genes, $method, $color_pal, $plot_meta) {
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'SThetPlot.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSThetPlotScript($genes, $method, $color_pal, $plot_meta));
+
+        $this->spatialExecute('Rscript ' . $scriptName);
+
+        $result = [];
+
+        $parameterNames = ['sthet_plot'];
+        foreach($parameterNames as $parameterName) {
+            $file_extensions = ['svg', 'pdf', 'png'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $parameterName . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+
+    private function getSThetPlotScript($genes, $method, $color_pal, $plot_meta) {
+
+        $_genes = "c('" . join("','", $genes) . "')";
+        $_method = "c('" . join("','", $method) . "')";
+
+        $export_files = $this->getExportFilesCommands("sthet_plot", "sthet_plot");
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList from disk
+r <- redux::hiredis()
+normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+
+stlist_sthet = SThet(normalized_stlist, genes=$_genes, method=$_method)
+sthet_plot = compare_SThet(stlist_sthet, samplemeta='$plot_meta', genes=$_genes, color_pal='$color_pal')
+
+$export_files
+
+";
+
+        return $script;
+    }
 
 
     private function getExportFilesCommands($file, $plot) : string {

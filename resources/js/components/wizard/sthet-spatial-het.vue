@@ -15,12 +15,12 @@
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="stplot-quilt-tab" data-bs-toggle="tab" data-bs-target="#stplot-quilt" type="button" role="tab" aria-controls="stplot-quilt" aria-selected="true">Plot</button>
+                                <button class="nav-link active" id="stplot-quilt-tab" data-bs-toggle="tab" data-bs-target="#stplot-quilt" type="button" role="tab" aria-controls="stplot-quilt" aria-selected="true">Spatial het</button>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="stplot-quilt" role="tabpanel" aria-labelledby="stplot-quilt-tab">
-                                <sthet-plot :project="project" :samples="samples" :stplot-quilt-url="stplotQuiltUrl" :color-palettes="colorPalettes"></sthet-plot>
+                                <sthet-plot :project="project" :samples="samples" :sthet-plot-url="sthetPlotUrl" :color-palettes="colorPalettes"></sthet-plot>
                             </div>
                         </div>
                     </div>
