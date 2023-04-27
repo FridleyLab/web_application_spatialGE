@@ -54,14 +54,28 @@
                 <div class="tab-pane fade show active" id="pcaplot" role="tabpanel" aria-labelledby="pcaplot-tab">
 
                     <div class="text-center m-4">
-                        <object :data="project.project_parameters.pseudo_bulk_pca + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                        <div>
+                            <object :data="project.project_parameters.pseudo_bulk_pca + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                        </div>
+                        <div>
+                            <a :href="project.project_parameters.pseudo_bulk_pca + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                            <a :href="project.project_parameters.pseudo_bulk_pca + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                            <a :href="project.project_parameters.pseudo_bulk_pca + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                        </div>
                     </div>
 
                 </div>
                 <div class="tab-pane fade" id="heatmap" role="tabpanel" aria-labelledby="heatmap-tab">
 
                     <div class="text-center m-4">
-                        <object :data="project.project_parameters.pseudo_bulk_heatmap + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                        <div>
+                            <object :data="project.project_parameters.pseudo_bulk_heatmap + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                        </div>
+                        <div>
+                            <a :href="project.project_parameters.pseudo_bulk_heatmap + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                            <a :href="project.project_parameters.pseudo_bulk_heatmap + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                            <a :href="project.project_parameters.pseudo_bulk_heatmap + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                        </div>
                     </div>
 
                 </div>

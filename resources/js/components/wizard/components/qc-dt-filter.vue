@@ -281,14 +281,27 @@
 
                     <div class="tab-pane fade" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
                         <div class="text-center m-4">
-                            <object :data="project.project_parameters.filter_violin + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-<!--                            <img :src="project.project_parameters.filter_violin + '?' + Date.now()">-->
+                            <div>
+                                <object :data="project.project_parameters.filter_violin + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                            </div>
+                            <div>
+                                <a :href="project.project_parameters.filter_violin + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                <a :href="project.project_parameters.filter_violin + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                <a :href="project.project_parameters.filter_violin + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                            </div>
                         </div>
                     </div>
 
                     <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
                         <div class="text-center m-4">
-                            <object :data="project.project_parameters.filter_boxplot + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                            <div>
+                                <object :data="project.project_parameters.filter_boxplot + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                            </div>
+                            <div>
+                                <a :href="project.project_parameters.filter_boxplot + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                <a :href="project.project_parameters.filter_boxplot + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                <a :href="project.project_parameters.filter_boxplot + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                            </div>
                         </div>
                     </div>
 

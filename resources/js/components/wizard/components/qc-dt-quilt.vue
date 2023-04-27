@@ -66,11 +66,25 @@
 
                         <div class="d-xxl-flex">
                             <div class="text-center m-4 w-xxl-50">
-                                <object :data="project.project_parameters.quilt_plot_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                <div>
+                                    <object :data="project.project_parameters.quilt_plot_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                </div>
+                                <div>
+                                    <a :href="project.project_parameters.quilt_plot_1 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                    <a :href="project.project_parameters.quilt_plot_1 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                    <a :href="project.project_parameters.quilt_plot_1 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                </div>
                             </div>
 
                             <div class="text-center m-4 w-xxl-50">
-                                <object :data="project.project_parameters.quilt_plot_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                <div>
+                                    <object :data="project.project_parameters.quilt_plot_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                </div>
+                                <div>
+                                    <a :href="project.project_parameters.quilt_plot_2 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                    <a :href="project.project_parameters.quilt_plot_2 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                    <a :href="project.project_parameters.quilt_plot_2 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                </div>
                             </div>
                         </div>
 

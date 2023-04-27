@@ -15,7 +15,7 @@
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="stplot-quilt-tab" data-bs-toggle="tab" data-bs-target="#stplot-quilt" type="button" role="tab" aria-controls="stplot-quilt" aria-selected="true">Spatial het</button>
+                                <button class="nav-link active" id="stplot-quilt-tab" data-bs-toggle="tab" data-bs-target="#stplot-quilt" type="button" role="tab" aria-controls="stplot-quilt" aria-selected="true">Spatial heterogeneity</button>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">

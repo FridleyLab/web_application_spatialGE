@@ -257,8 +257,6 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
                 //DB::table('table_name')->insert($t);
                 ProjectGene::insert($chunk);
             }
-
-
         }
 
 
@@ -454,6 +452,26 @@ $plots
 //        }
 
 
+        //Load genes present in the normalized STlist into the DB
+        $genes_file = $workingDir . 'genesNormalized.csv';
+        if(Storage::fileExists($genes_file)) {
+            $data = Storage::read($genes_file);
+            $genes = explode("\n", $data);
+            $_genes = [];
+            foreach ($genes as $gene)
+                if(strlen($gene))
+                    $_genes[] = ['gene' => $gene, 'project_id' => $this->id, 'context' => 'normalized'];
+            //ProjectGene::create(['gene' => $gene, 'project_id' => $this->id]);
+            DB::delete("delete from project_genes where context='normalized' and project_id=" . $this->id);
+
+            foreach (array_chunk($_genes,1000) as $chunk)
+            {
+                //DB::table('table_name')->insert($t);
+                ProjectGene::insert($chunk);
+            }
+        }
+
+
         $result = [];
 
         $parameterNames = ['normalized_violin', 'normalized_boxplot', 'normalized_boxplot_1', 'normalized_boxplot_2', 'normalized_violin_1', 'normalized_violin_2', 'normalized_density_1', 'normalized_density_2'];
@@ -519,6 +537,9 @@ filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
 normalized_stlist = transform_data(filtered_stlist, $str_params)
 r\$SET('normalized_stlist', redux::object_to_bin(normalized_stlist))
 #save(normalized_stlist, file='normalized_stlist.RData')
+
+gene_names = unique(unlist(lapply(normalized_stlist@counts, function(i){ genes_tmp = rownames(i) })))
+write.table(gene_names, 'genesNormalized.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 #max_var_genes PCA
 pca_max_var_genes = min(unlist(lapply(normalized_stlist@counts, nrow)))
@@ -901,7 +922,7 @@ library('spatialGE')
 #load(file='normalized_stlist.RData')
 r <- redux::hiredis()
 normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
-#save(normalized_stlist, file='normalized_stlist.RData')
+save(normalized_stlist, file='normalized_stlist.RData')
 
 stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
 krp = STplot_interpolation(stlist_expression_surface, genes=$_genes, color_pal='$col_pal')

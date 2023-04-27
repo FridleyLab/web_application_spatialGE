@@ -1,16 +1,25 @@
 <template>
+
+    <div v-if="generating" id="cover" style="position: fixed; height: 100%; width: 100%; top:0; left: 0; background: white; z-index:9999">
+        <div class="text-center" style="width:600px;position: absolute;top: 50%;left: 50%;margin-top: -100px;margin-left: -300px;height: 100px;">
+            spatialGE is working, please wait!
+        </div>
+        <img v-if="generating" src="/images/loading-circular.gif" style="width:100px;position: absolute;top: 50%;left: 50%;margin-top: -50px;margin-left: -50px;height: 100px;" />
+    </div>
+
 <div class="m-4">
     <form>
 
         <div class="my-3 text-bold">
-            STHet Plot
+            SThet
         </div>
         <div>
-            Select one or more genes to visualize relative expression ***********TODO***********
+            <p class="text-bold">Select one or more genes to calculate spatial autocorrelation statistics for those genes in each sample. Currently supports Moran’s I and Geary’s C statistics, which measure the tendency of gene expression to show “hot spots” within a tissue. The resulting statistics are displayed in a plot along with sample-level variables if available (i.e., overall survival, tissue type).</p>
+            <ul>
+                <li>Moran’s I: Ranges from -1 to 1. When I is closer to -1, the cell/spots with high expression of a given gene tend to be evenly distributed throughout the tissue. If I is closer to 1, the cells/spots with high expression of a given gene tend to be close or aggregated (“hot-spot”)</li>
+                <li class="mt-3 mb-6">Geary’s C: Ranges from 0 to 2. When C is closer to 2, the cell/spots with high expression of a given gene tend to be evenly distributed throughout the tissue. If C is closer to 0, the cells/spots with high expression of a given gene tend to be close or aggregated (“hot-spot”). The Geary’s C statistic tends to be more sensitive to small-scale changes in expression compared to Moran’s I.</li>
+            </ul>
         </div>
-
-
-
 
 
         <div class="row justify-content-center text-center m-3">
@@ -84,9 +93,14 @@
             <div class="tab-content" id="filterDiagramsContent">
                 <div class="tab-pane fade show active" id="nd-sthetplot" role="tabpanel" aria-labelledby="nd-sthetplot-tab">
 
-                    <div>
-                        <div class="text-center m-4">
+                    <div class="text-center m-4">
+                        <div>
                             <object :data="project.project_parameters.sthet_plot + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                        </div>
+                        <div class="">
+                            <a :href="project.project_parameters.sthet_plot + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                            <a :href="project.project_parameters.sthet_plot + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                            <a :href="project.project_parameters.sthet_plot + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
                         </div>
                     </div>
 
@@ -162,7 +176,7 @@ export default {
         searchGenes: async function(query) {
 
             const response = await fetch(
-                '/projects/' + this.project.id + '/search-genes?query=' + query
+                '/projects/' + this.project.id + '/search-genes?context=normalized&query=' + query
             );
 
             const data = await response.json(); // Here you have the data that you need
