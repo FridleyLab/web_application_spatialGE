@@ -156,7 +156,7 @@ class Project extends Model
 
     private function _saveStList($stlist) {
 
-        $persistOn = 'DISK'; //REDIS, DISK
+        $persistOn = env('PERSIST_DATA_ON', 'DISK');
 
         $command = '';
         if($persistOn === 'DISK')
@@ -173,7 +173,7 @@ class Project extends Model
 
     private function _loadStList($stlist) {
 
-        $persistOn = 'DISK'; //REDIS, DISK
+        $persistOn = env('PERSIST_DATA_ON', 'DISK');
 
         $command = '';
         if($persistOn === 'DISK')
