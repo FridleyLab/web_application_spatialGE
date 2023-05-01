@@ -1,1 +1,1 @@
-FROM ramanjar82/spatialge-april-redis
+FROM ramanjar82/spatialge
