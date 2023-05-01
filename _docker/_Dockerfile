@@ -25,6 +25,9 @@ RUN apt-get -y install libcurl4-openssl-dev
 COPY init2.R init2.R
 RUN Rscript init2.R
 
+RUN Rscript -e "install.packages('openxlsx')"
+
+#Install spatialGE library
 RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')"
 
 RUN apt -y install libhiredis-dev

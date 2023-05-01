@@ -154,8 +154,38 @@ class Project extends Model
     }
 
 
+    private function _saveStList($stlist) {
 
+        $persistOn = 'DISK'; //REDIS, DISK
 
+        $command = '';
+        if($persistOn === 'DISK')
+            $command = "save($stlist, file='$stlist.RData')";
+        elseif ($persistOn === 'REDIS')
+            $command = "
+            r <- redux::hiredis()
+            r\$SET('$stlist', redux::object_to_bin($stlist))
+            #r\$HSET('spatialGE', '$stlist', serialize($stlist, NULL))
+            ";
+
+        return $command;
+    }
+
+    private function _loadStList($stlist) {
+
+        $persistOn = 'DISK'; //REDIS, DISK
+
+        $command = '';
+        if($persistOn === 'DISK')
+            $command = "load(file='$stlist.RData')";
+        elseif ($persistOn === 'REDIS')
+            $command = "
+            r <- redux::hiredis()
+            $stlist = redux::bin_to_object(r\$GET('$stlist'))
+            ";
+
+        return $command;
+    }
 
 
     public function getStListScript() : string {
@@ -181,11 +211,10 @@ samplenames = 'clinical_data.csv'
 initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)
 #initial_stlist <- STlist(rnacounts=count_files, samples=samplenames, spotcoords='segundo archivo csv')
 
-#Save the STList to disk
-#save(initial_stlist, file='initial_stlist.RData')
-r <- redux::hiredis()
-r\$SET('initial_stlist', redux::object_to_bin(initial_stlist))
-#r\$HSET('spatialGE', 'initial_stlist', serialize(initial_stlist, NULL))
+#Save the STList
+" .
+$this->_saveStList("initial_stlist")
+. "
 
 #Obtain gene names in samples and save it in a text file
 gene_names = unique(unlist(lapply(initial_stlist@counts, function(i){ genes_tmp = rownames(i) })))
@@ -311,15 +340,17 @@ setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Load STList from disk
-#load(file='initial_stlist.RData')
-r <- redux::hiredis()
-initial_stlist = redux::bin_to_object(r\$GET('initial_stlist'))
+# Load STList
+" .
+$this->_loadStList('initial_stlist')
+. "
 
 # Apply defined filter to the initial STList
 filtered_stlist = filter_data(initial_stlist, $str_params)
-#save(filtered_stlist, file='filtered_stlist.RData')
-r\$SET('filtered_stlist', redux::object_to_bin(filtered_stlist))
+" .
+$this->_saveStList('filtered_stlist')
+.
+"
 
 #### Plots Filter Data
 # Options for plot
@@ -402,10 +433,10 @@ setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Load filtered STList from disk
-#load(file='filtered_stlist.RData')
-r <- redux::hiredis()
-filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
+# Load filtered STList
+" .
+$this->_loadStList('filtered_stlist')
+. "
 
 #### Violin plot
 #library('magrittr')
@@ -529,14 +560,15 @@ setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Load filtered STList from disk
-#load(file='filtered_stlist.RData')
-r <- redux::hiredis()
-filtered_stlist = redux::bin_to_object(r\$GET('filtered_stlist'))
+# Load filtered STList
+" .
+$this->_loadStList('filtered_stlist')
+. "
 
 normalized_stlist = transform_data(filtered_stlist, $str_params)
-r\$SET('normalized_stlist', redux::object_to_bin(normalized_stlist))
-#save(normalized_stlist, file='normalized_stlist.RData')
+" .
+$this->_saveStList('normalized_stlist')
+. "
 
 gene_names = unique(unlist(lapply(normalized_stlist@counts, function(i){ genes_tmp = rownames(i) })))
 write.table(gene_names, 'genesNormalized.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
@@ -628,10 +660,10 @@ setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Load normalized STList from disk
-#load(file='normalized_stlist.RData')
-r <- redux::hiredis()
-normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+# Load normalized STList
+" .
+$this->_loadStList('normalized_stlist')
+. "
 
 #### Violin plot
 #library('magrittr')
@@ -698,11 +730,10 @@ setwd('/spatialGE')
 library('svglite')
 library('spatialGE')
 
-# Load normalized STList from disk
-#load(file='normalized_stlist.RData')
-r <- redux::hiredis()
-normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
-
+# Load normalized STList
+" .
+$this->_loadStList('normalized_stlist')
+. "
 
 #### Box plot
 #pca = pseudobulk_pca(normalized_stlist, plot_meta='$plot_meta', n_genes=$n_genes, color_pal='$color_pal', ptsize=7)
@@ -768,10 +799,10 @@ setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Load normalized STList from disk
-#load(file='normalized_stlist.RData')
-r <- redux::hiredis()
-normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+# Load normalized STList
+" .
+$this->_loadStList('normalized_stlist')
+. "
 
 #### Plot
 plist1 = STplot(normalized_stlist, samples=c('$sample1'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
@@ -842,10 +873,10 @@ setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Load normalized STList from disk
-#load(file='normalized_stlist.RData')
-r <- redux::hiredis()
-normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+# Load normalized STList
+" .
+$this->_loadStList('normalized_stlist')
+. "
 
 qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pal', data_type='$data_type')
 
@@ -918,11 +949,10 @@ setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Load normalized STList from disk
-#load(file='normalized_stlist.RData')
-r <- redux::hiredis()
-normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
-save(normalized_stlist, file='normalized_stlist.RData')
+# Load normalized STList
+" .
+$this->_loadStList('normalized_stlist')
+. "
 
 stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
 krp = STplot_interpolation(stlist_expression_surface, genes=$_genes, color_pal='$col_pal')
@@ -983,9 +1013,10 @@ setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Load normalized STList from disk
-r <- redux::hiredis()
-normalized_stlist = redux::bin_to_object(r\$GET('normalized_stlist'))
+# Load normalized STList
+" .
+$this->_loadStList('normalized_stlist')
+. "
 
 stlist_sthet = SThet(normalized_stlist, genes=$_genes, method=$_method)
 sthet_plot = compare_SThet(stlist_sthet, samplemeta='$plot_meta', genes=$_genes, color_pal='$color_pal')

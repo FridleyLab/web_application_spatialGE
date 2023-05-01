@@ -24,7 +24,7 @@ class spatialContainer {
 
         //dd(env('DOCKER_EXECUTABLE'));
 
-        $this->exe = '"' . env('DOCKER_EXECUTABLE') . '"';
+        $this->exe = '"' . env('DOCKER_EXECUTABLE' . ((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? '_WINDOWS' : '')) . '"';
 
         $this->project = $project;
 
@@ -39,7 +39,7 @@ class spatialContainer {
 
     private function createContainer() : void {
 
-        $image_name = 'spatialge-april-redis';
+        $image_name = env('DOCKER_IMAGE_NAME','spatialge');
 
         $container_id = 'spatial_' . $this->project->id;
 
