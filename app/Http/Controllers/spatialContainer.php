@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Project;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use function PHPUnit\Framework\throwException;
@@ -54,7 +55,12 @@ class spatialContainer {
             //$exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
             $exe = $this->exe;
             $command = "$exe container run -it -v $workingDir:/spatialGE --rm --name $container_id -d $image_name";
+
+            Log::info($command);
+
             $process = Process::run($command);
+
+            Log::info($process->output() . '/*/' . $process->errorOutput());
 
             $ok = true;
             $checks = ['Error', 'error', 'already', 'rename'];
@@ -104,7 +110,13 @@ class spatialContainer {
             $timeout = 600;
 
             $exe = $this->exe;
-            $process = Process::timeout($timeout)->run("$exe exec " . $this->project->container_id . ' ' . $command);
+            $_command = "$exe exec " . $this->project->container_id . ' ' . $command;
+
+            Log::info($_command);
+
+            $process = Process::timeout($timeout)->run($_command);
+
+            Log::info($process->output() . '/*/' . $process->errorOutput());
 
             return $process->output();
         }
