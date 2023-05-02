@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RunScript;
 use App\Models\ColorPalette;
 use App\Models\Project;
 use App\Models\ProjectGene;
@@ -114,7 +115,8 @@ class ProjectController extends Controller
 
     public function createStList(Project $project) {
 
-        $project->createStList();
+        //$project->createStList();
+        RunScript::dispatch($project);
 
         $project->current_step = 2;
         $project->save();
