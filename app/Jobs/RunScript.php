@@ -38,6 +38,7 @@ class RunScript implements ShouldQueue
         //Execute the process
         $command = $this->command;
         Log::info('**### BEGIN** ' . $command);
+        Log::info("\nPARAMS: " . json_encode($this->parameters));
         $result = $this->project->$command($this->parameters);
         Log::info('**END** ' . $command);
 
@@ -47,7 +48,7 @@ class RunScript implements ShouldQueue
         }
         catch (\Exception $e)
         {
-            Log::error('ERROR notifying user ' . $this->project->user->email . ' of process "' . $this->description . '", MESSAGE:\n' . $e->getMessage());
+            Log::error('ERROR notifying user ' . $this->project->user->email . ' of process "' . $this->description . '", MESSAGE:' . $e->getMessage());
         }
     }
 }

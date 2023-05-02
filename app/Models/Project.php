@@ -406,7 +406,7 @@ $plots
 
 
 
-    public function generateFilterPlots($color_palette, $variable) {
+    public function generateFilterPlots($parameters) {
 
         $workingDir = $this->workingDir();
 
@@ -414,9 +414,9 @@ $plots
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getFilterPlotsScript($color_palette, $variable));
+        Storage::put($script, $this->getFilterPlotsScript($parameters));
 
-        $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
         $parameterNames = ['filter_violin', 'filter_boxplot'];
         foreach($parameterNames as $parameterName) {
@@ -434,10 +434,16 @@ $plots
             }
         }
 
+        return ['output' => $output];
+
     }
 
 
-    public function getFilterPlotsScript($color_palette, $variable) : string {
+    public function getFilterPlotsScript($parameters) : string {
+
+        $color_palette = $parameters['color_palette'];
+        $variable = $parameters['variable'];
+
 
         $plots = $this->getExportFilesCommands('filter_violin', 'vp');
         $plots .= $this->getExportFilesCommands('filter_boxplot', 'bp');
@@ -483,7 +489,7 @@ $plots
 
         Storage::put($script, $this->getNormalizationScript($parameters));
 
-        $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
 //        $file = $workingDir . 'filter_meta_options.csv';
 //        if(Storage::fileExists($file)) {
@@ -543,7 +549,7 @@ $plots
             $result['pca_max_var_genes'] = intval($data);
         }
 
-
+        $result['output'] = $output;
         return $result;
 
     }
@@ -640,7 +646,7 @@ $plots
     }
 
 
-    public function generateNormalizationPlots($color_palette, $gene) {
+    public function generateNormalizationPlots($parameters) {
 
         $workingDir = $this->workingDir();
 
@@ -648,13 +654,26 @@ $plots
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getNormalizedPlotsScript($color_palette, $gene));
+        Storage::put($script, $this->getNormalizedPlotsScript($parameters));
 
-        $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
         $parameterNames = ['normalized_violin', 'normalized_boxplot'];
         foreach($parameterNames as $parameterName) {
-            $fileName = $parameterName . '.png';
+            $file_extensions = ['svg', 'pdf', 'png'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $parameterName . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                }
+            }
+        }
+        /*foreach($parameterNames as $parameterName) {
+            $fileName = $parameterName;
             $file = $workingDir . $fileName;
             $file_public = $this->workingDirPublic() . $fileName;
             if (Storage::fileExists($file)) {
@@ -662,12 +681,20 @@ $plots
                 Storage::copy($file, $file_public);
                 ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $fileName]);
             }
-        }
+        }*/
+
+        return ['output' => $output];
 
     }
 
 
-    public function getNormalizedPlotsScript($color_palette, $gene) : string {
+    public function getNormalizedPlotsScript($parameters) : string {
+
+        $color_palette = $parameters['color_palette'];
+        $gene = $parameters['gene'];
+
+        $plots = $this->getExportFilesCommands('normalized_violin', 'vp');
+        $plots .= $this->getExportFilesCommands('normalized_boxplot', 'bp');
 
         $script = "
 setwd('/spatialGE')
@@ -684,11 +711,14 @@ $this->_loadStList('normalized_stlist')
 #source('violin_plots.R')
 #source('utils.R')
 vp = violin_plots(normalized_stlist, color_pal='$color_palette', data_type='tr', genes='$gene')
-ggpubr::ggexport(filename = 'normalized_violin.png', vp, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
 bp = violin_plots(normalized_stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene')
-ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 800)
+#ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 800)
+
+$plots
+
 ";
 
         return $script;
@@ -696,7 +726,7 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
     }
 
 
-    public function applyPca($plot_meta, $color_pal, $n_genes, $hm_display_genes) {
+    public function applyPca($parameters) {
 
         $workingDir = $this->workingDir();
 
@@ -704,9 +734,9 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getPcaScript($plot_meta, $color_pal, $n_genes, $hm_display_genes));
+        Storage::put($script, $this->getPcaScript($parameters));
 
-        $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
         $result = [];
 
@@ -727,13 +757,19 @@ ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 
             }
         }
 
+        $result['output'] = $output;
         return $result;
 
     }
 
 
 
-    public function getPcaScript($plot_meta, $color_pal, $n_genes, $hm_display_genes) : string {
+    public function getPcaScript($parameters) : string {
+
+        $plot_meta = $parameters['plot_meta'];
+        $color_pal = $parameters['color_pal'];
+        $n_genes = $parameters['n_genes'];
+        $hm_display_genes = $parameters['hm_display_genes'];
 
         $plots = $this->getExportFilesCommands('pseudo_bulk_pca', "plist\$pca");
         $plots .= $this->getExportFilesCommands('pseudo_bulk_heatmap', "plist\$heatmap");
@@ -767,7 +803,7 @@ $plots
     }
 
 
-    public function quiltPlot($plot_meta, $color_pal, $sample1, $sample2) {
+    public function quiltPlot($parameters) {
 
         $workingDir = $this->workingDir();
 
@@ -775,9 +811,9 @@ $plots
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getQuiltPlotScript($plot_meta, $color_pal, $sample1, $sample2));
+        Storage::put($script, $this->getQuiltPlotScript($parameters));
 
-        $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
         $result = [];
 
@@ -797,13 +833,19 @@ $plots
             }
         }
 
+        $result['output'] = $output;
         return $result;
 
     }
 
 
 
-    public function getQuiltPlotScript($plot_meta, $color_pal, $sample1, $sample2) : string {
+    public function getQuiltPlotScript($parameters) : string {
+
+        $plot_meta = $parameters['plot_meta'];
+        $color_pal = $parameters['color_pal'];
+        $sample1 = $parameters['sample1'];
+        $sample2 = $parameters['sample2'];
 
         $plots = $this->getExportFilesCommands('quilt_plot_1', "plist1[[1]]");
         $plots .= $this->getExportFilesCommands('quilt_plot_2', "plist2[[1]]");

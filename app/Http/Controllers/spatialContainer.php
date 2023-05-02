@@ -116,9 +116,10 @@ class spatialContainer {
 
             $process = Process::timeout($timeout)->run($_command);
 
-            $output = "\n++++++++++++++++++++++++++++++++++\n";
-            $output .= "\nOUTPUT:\n" . $process->output() . "\n" . $process->errorOutput() . "\nOUTPUT END\n";
-            $output .= "\n++++++++++++++++++++++++++++++++++\n";
+
+            $output = "\n+++++++++++++++++OUTPUT START+++++++++++++++++\n";
+            $output .= $process->output() . "\n" . $process->errorOutput();
+            $output .= "\n++++++++++++++++OUTPUT END++++++++++++++++++\n";
 
             Log::info($output);
 

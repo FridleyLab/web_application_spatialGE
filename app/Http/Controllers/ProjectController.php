@@ -174,7 +174,9 @@ class ProjectController extends Controller
 
     public function generateFilterPlots(Project $project) {
 
-        $project->generateFilterPlots(request('color_palette'), request('variable'));
+        RunScript::dispatch('Generate filter plots', $project, 'generateFilterPlots', ['color_palette' => request('color_palette'), 'variable' => request('variable')]);
+
+        //$project->generateFilterPlots(['color_palette' => request('color_palette'), 'variable' => request('variable')]);
 
         return response('OK');
     }
@@ -183,26 +185,41 @@ class ProjectController extends Controller
 
         $project->current_step = 4;
         $project->save();
-        return $project->applyNormalization(request('parameters'));
+
+        RunScript::dispatch('Normalize data', $project, 'applyNormalization', request('parameters'));
+
+        //return $project->applyNormalization(request('parameters'));
+
+        return 'OK';
 
     }
 
     public function generateNormalizationPlots(Project $project) {
 
-        $project->generateNormalizationPlots(request('color_palette'), request('gene'));
+        RunScript::dispatch('Generate normalization plots', $project, 'generateNormalizationPlots', ['color_palette' => request('color_palette'), 'gene' => request('gene')]);
+
+        //$project->generateNormalizationPlots(['color_palette' => request('color_palette'), 'gene' => request('gene')]);
 
         return response('OK');
     }
 
     public function applyPca(Project $project) {
 
-        return $project->applyPca(request('plot_meta'), request('color_pal'), request('n_genes'), request('hm_display_genes'));
+        RunScript::dispatch('Principal Component Analysis', $project, 'applyPca', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'n_genes' => request('n_genes'), 'hm_display_genes' => request('hm_display_genes')]);
+
+        //return $project->applyPca(['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'n_genes' => request('n_genes'), 'hm_display_genes' => request('hm_display_genes')]);
+
+        return 'OK';
 
     }
 
     public function quiltPlot(Project $project) {
 
-        return $project->quiltPlot(request('plot_meta'), request('color_pal'), request('sample1'), request('sample2'));
+        RunScript::dispatch('Quilt plot', $project, 'quiltPlot', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'sample1' => request('sample1'), 'sample2' => request('sample2')]);
+
+        //return $project->quiltPlot(['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'sample1' => request('sample1'), 'sample2' => request('sample2')]);
+
+        return 'OK';
 
     }
 
