@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
             DB::unprepared(file_get_contents(dirname(__FILE__) . '/dev.sql'));
 
             //Copy sample files and R scripts
-            $src_folder = dirname(__FILE__) . '/dev/';
+            $src_folder = dirname(__FILE__) . '/dev/*';
             $dest_folder = Storage::path('');
             $process = Process::run("cp -r $src_folder $dest_folder");
 

@@ -65,7 +65,8 @@ INSERT INTO `samples` (`id`, `name`, `created_at`, `updated_at`, `deleted_at`) V
 -- Dumping data for table spatial-ge-dev.users: ~0 rows (approximately)
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `email_verification_code`, `email_verified_at`, `password`, `industry`, `job`, `interest`, `remember_token`, `created_at`, `updated_at`) VALUES
-    (9999, 'TestFirstName', 'TestLastName', 'Roberto.Manjarres-Betancur@moffitt.org', 'verified', '2023-03-16 10:53:36', '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', 'test', 'test', 'test', NULL, NULL, NULL);
+    (9999, 'TestFirstName', 'TestLastName', 'test@moffitt.org', 'verified', '2023-03-16 10:53:36', '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', 'test', 'test', 'test', NULL, NULL, NULL);
+--    (9999, 'TestFirstName', 'TestLastName', 'Roberto.Manjarres-Betancur@moffitt.org', 'verified', '2023-03-16 10:53:36', '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', 'test', 'test', 'test', NULL, NULL, NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 
