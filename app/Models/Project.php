@@ -1033,16 +1033,16 @@ $export_files
 
 
 
-    public function SThetPlot($genes, $method, $color_pal, $plot_meta) {
+    public function SThetPlot($parameters) {
         $workingDir = $this->workingDir();
 
         $scriptName = 'SThetPlot.R';
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSThetPlotScript($genes, $method, $color_pal, $plot_meta));
+        Storage::put($script, $this->getSThetPlotScript($parameters));
 
-        $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
         $result = [];
 
@@ -1062,11 +1062,17 @@ $export_files
             }
         }
 
+        $result['output'] = $output;
         return $result;
     }
 
 
-    private function getSThetPlotScript($genes, $method, $color_pal, $plot_meta) {
+    private function getSThetPlotScript($parameters) {
+
+        $genes = $parameters['genes'];
+        $method = $parameters['method'];
+        $color_pal = $parameters['color_pal'];
+        $plot_meta = $parameters['plot_meta'];
 
         $_genes = "c('" . join("','", $genes) . "')";
         $_method = "c('" . join("','", $method) . "')";
