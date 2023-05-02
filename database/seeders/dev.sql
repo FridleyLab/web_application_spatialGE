@@ -21,7 +21,7 @@ INSERT INTO `files` (`id`, `filename`, `type`, `created_at`, `updated_at`, `dele
                                                                                              (3, 'GSM6433596_095B_filtered_feature_bc_matrix.h5', 'expressionFile', '2023-03-16 11:11:52', '2023-03-16 11:11:52', NULL),
                                                                                              (4, 'GSM6433596_095B_tissue_positions_list.csv', 'coordinatesFile', '2023-03-16 11:11:52', '2023-03-16 11:11:52', NULL),
                                                                                              (5, 'GSM6433618_396C_filtered_feature_bc_matrix.h5', 'expressionFile', '2023-03-16 11:11:16', '2023-03-16 11:11:16', NULL),
-                                                                                             (6, 'GSM6433618_396C_tissue_positions_list.csv', 'coordinatesFile', '2023-03-16 11:11:16', '2023-03-16 11:11:16', NULL),
+                                                                                             (6, 'GSM6433618_396C_tissue_positions_list.csv', 'coordinatesFile', '2023-03-16 11:11:16', '2023-03-16 11:11:16', NULL)
 /*!40000 ALTER TABLE `files` ENABLE KEYS */;
 
 
