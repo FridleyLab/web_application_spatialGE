@@ -876,19 +876,19 @@ $plots
 
 
 
-    public function STplotQuilt($genes, $ptsize, $col_pal, $data_type) {
+    public function STplotQuilt($parameters) {
         $workingDir = $this->workingDir();
 
         $scriptName = 'STplot-quiltPlot.R';
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTplotQuiltScript($genes, $ptsize, $col_pal, $data_type));
+        Storage::put($script, $this->getSTplotQuiltScript($parameters));
 
-        $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
         $result = [];
-        foreach($genes as $gene) {
+        foreach($parameters['genes'] as $gene) {
             $result[$gene] = [];
             foreach ($this->samples as $sample) {
                 $parameterName = 'stplot-quilt-' . $gene . '-' . $sample->name;
@@ -911,10 +911,16 @@ $plots
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_quilt', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
 
-        return json_encode($result);
+        return ['output' => $output];
+        //return json_encode($result);
     }
 
-    public function getSTplotQuiltScript($genes, $ptsize, $col_pal, $data_type) : string {
+    public function getSTplotQuiltScript($parameters) : string {
+
+        $genes = $parameters['genes'];
+        $ptsize = $parameters['ptsize'];
+        $col_pal = $parameters['col_pal'];
+        $data_type = $parameters['data_type'];
 
         $_genes = "c('" . join("','", $genes) . "')";
 
@@ -952,19 +958,19 @@ $export_files
 
 
 
-    public function STplotExpressionSurface($genes, $ptsize, $col_pal, $data_type) {
+    public function STplotExpressionSurface($parameters) {
         $workingDir = $this->workingDir();
 
         $scriptName = 'STplot-ExpressionSurface.R';
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTplotExpressionSurfaceScript($genes, $ptsize, $col_pal, $data_type));
+        Storage::put($script, $this->getSTplotExpressionSurfaceScript($parameters));
 
-        $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
         $result = [];
-        foreach($genes as $gene) {
+        foreach($parameters['genes'] as $gene) {
             $result[$gene] = [];
             foreach ($this->samples as $sample) {
                 $parameterName = 'stplot-expression-surface-' . $gene . '-' . $sample->name;
@@ -987,10 +993,14 @@ $export_files
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_expression_surface', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
 
-        return json_encode($result);
+        return ['output' => $output];
+        //return json_encode($result);
     }
 
-    public function getSTplotExpressionSurfaceScript($genes, $ptsize, $col_pal, $data_type) : string {
+    public function getSTplotExpressionSurfaceScript($parameters) : string {
+
+        $genes = $parameters['genes'];
+        $col_pal = $parameters['col_pal'];
 
         $_genes = "c('" . join("','", $genes) . "')";
 

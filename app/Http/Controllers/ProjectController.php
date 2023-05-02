@@ -232,23 +232,33 @@ class ProjectController extends Controller
 
     public function stplot_quilt(Project $project) {
 
-        $genes = request('genes');
-        $ptsize = request('ptsize');
-        $col_pal = request('col_pal');
-        $data_type = request('data_type');
+        $parameters = [
+            'genes' => request('genes'),
+            'ptsize' => request('ptsize'),
+            'col_pal' => request('col_pal'),
+            'data_type' => request('data_type')
+        ];
 
-        return $project->STplotQuilt($genes, $ptsize, $col_pal, $data_type);
+        RunScript::dispatch('STplot - Quilt plot', $project, 'STplotQuilt', $parameters);
+
+        //return $project->STplotQuilt($parameters);
+
+        return 'OK';
 
     }
 
     public function stplot_expression_surface(Project $project) {
 
-        $genes = request('genes');
-        $ptsize = request('ptsize');
-        $col_pal = request('col_pal');
-        $data_type = request('data_type');
+        $parameters = [
+            'genes' => request('genes'),
+            'col_pal' => request('col_pal'),
+        ];
 
-        return $project->STplotExpressionSurface($genes, $ptsize, $col_pal, $data_type);
+        RunScript::dispatch('STplot - Expression surface', $project, 'STplotExpressionSurface', $parameters);
+
+        //return $project->STplotExpressionSurface($parameters);
+
+        return 'OK';
 
     }
 
