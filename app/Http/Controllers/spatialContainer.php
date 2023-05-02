@@ -112,16 +112,22 @@ class spatialContainer {
             $exe = $this->exe;
             $_command = "$exe exec " . $this->project->container_id . ' ' . $command;
 
-            Log::info($_command);
+            Log::info("\nCOMMAND TO EXECUTE: " . $_command . "\n");
 
             $process = Process::timeout($timeout)->run($_command);
 
-            Log::info($process->output() . '/*/' . $process->errorOutput());
+            $output = "\n++++++++++++++++++++++++++++++++++\n";
+            $output .= "\nOUTPUT:\n" . $process->output() . "\n" . $process->errorOutput() . "\nOUTPUT END\n";
+            $output .= "\n++++++++++++++++++++++++++++++++++\n";
 
-            return $process->output();
+            Log::info($output);
+
+            return $output;
         }
         catch (\Exception $e) {
-            return throwException(new \Exception('spatialGE Error: Could not execute command: "' . $command . '" in container with id: ' . $this->project->container_id));
+            $errorMessage = 'spatialGE Error: Could not execute command: "' . $command . '" in container with id: ' . $this->project->container_id;
+            Log::info("***$$$ EXCEPTION: \n" . $errorMessage);
+            return throwException(new \Exception($errorMessage));
         }
     }
 

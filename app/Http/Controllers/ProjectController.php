@@ -116,7 +116,7 @@ class ProjectController extends Controller
     public function createStList(Project $project) {
 
         //$project->createStList();
-        RunScript::dispatch($project);
+        RunScript::dispatch('Data import', $project, 'createStList', []);
 
         $project->current_step = 2;
         $project->save();
@@ -165,7 +165,10 @@ class ProjectController extends Controller
 
     public function applyFilter(Project $project) {
 
-        return $project->applyFilter(request('parameters'));
+        RunScript::dispatch('Filter data', $project, 'applyFilter', request('parameters'));
+
+        return 'OK';
+        //return $project->applyFilter(request('parameters'));
 
     }
 

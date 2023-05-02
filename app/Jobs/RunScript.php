@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Mail\notifyProcessCompleted;
 use App\Models\Project;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -10,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class RunScript implements ShouldQueue
 {
@@ -19,7 +21,10 @@ class RunScript implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
+        public string $description,
         public Project $project,
+        public string $command,
+        public $parameters
     )
     {
         //
@@ -30,7 +35,19 @@ class RunScript implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->project->createStList();
-        Log::info('-+-+-STList created');
+        //Execute the process
+        $command = $this->command;
+        Log::info('**### BEGIN** ' . $command);
+        $result = $this->project->$command($this->parameters);
+        Log::info('**END** ' . $command);
+
+        //Notify the user
+        try {
+            Mail::to($this->project->user->email)->send(new notifyProcessCompleted($this->project, $this->description, $result['output']));
+        }
+        catch (\Exception $e)
+        {
+            Log::error('ERROR notifying user ' . $this->project->user->email . ' of process "' . $this->description . '", MESSAGE:\n' . $e->getMessage());
+        }
     }
 }

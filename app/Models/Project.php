@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\spatialContainer;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,6 +24,11 @@ class Project extends Model
     private ?spatialContainer $_container = null;
 
     //Relations
+
+    public function user() : BelongsTo {
+        return $this->belongsTo(User::class);
+    }
+
     public function samples(): BelongsToMany
     {
         return $this->belongsToMany(Sample::class);
@@ -86,16 +92,62 @@ class Project extends Model
         return $workingDir;
     }
 
-    public function createStList() {
+    public function spatialExecute($command) {
+
+        if(is_null($this->_container))
+            $this->_container = new spatialContainer($this);
+
+        //dd($this->_container);
+
+        return $this->_container->execute($command);
+
+    }
+
+
+    private function _saveStList($stlist) {
+
+        $persistOn = env('PERSIST_DATA_ON', 'DISK');
+
+        $command = '';
+        if($persistOn === 'DISK')
+            $command = "save($stlist, file='$stlist.RData')";
+        elseif ($persistOn === 'REDIS')
+            $command = "
+            r <- redux::hiredis()
+            r\$SET('$stlist', redux::object_to_bin($stlist))
+            #r\$HSET('spatialGE', '$stlist', serialize($stlist, NULL))
+            ";
+
+        return $command;
+    }
+
+    private function _loadStList($stlist) {
+
+        $persistOn = env('PERSIST_DATA_ON', 'DISK');
+
+        $command = '';
+        if($persistOn === 'DISK')
+            $command = "load(file='$stlist.RData')";
+        elseif ($persistOn === 'REDIS')
+            $command = "
+            r <- redux::hiredis()
+            $stlist = redux::bin_to_object(r\$GET('$stlist'))
+            ";
+
+        return $command;
+    }
+
+    public function createStList($parameters) {
 
         $workingDir = $this->workingDir();
 
-        $script = $workingDir . 'STList.R';
+        $scriptName = 'STList.R';
+        $script = $workingDir . $scriptName;
 
         Storage::put($script, $this->getStListScript());
 
         //Create the initial_stlist
-        $this->spatialExecute('Rscript STList.R');
+        $output = $this->spatialExecute("Rscript $scriptName");
 
         //Load genes present in samples into the DB
         $genes_file = $workingDir . 'genes.csv';
@@ -139,53 +191,12 @@ class Project extends Model
             ProjectParameter::insert(['parameter' => 'initial_stlist_summary', 'type' => 'string', 'value' => $data, 'project_id' => $this->id]);
         }
 
+        return ['output' => $output];
 
-    }
-
-    public function spatialExecute($command) {
-
-        if(is_null($this->_container))
-            $this->_container = new spatialContainer($this);
-
-        //dd($this->_container);
-
-        $this->_container->execute($command);
 
     }
 
 
-    private function _saveStList($stlist) {
-
-        $persistOn = env('PERSIST_DATA_ON', 'DISK');
-
-        $command = '';
-        if($persistOn === 'DISK')
-            $command = "save($stlist, file='$stlist.RData')";
-        elseif ($persistOn === 'REDIS')
-            $command = "
-            r <- redux::hiredis()
-            r\$SET('$stlist', redux::object_to_bin($stlist))
-            #r\$HSET('spatialGE', '$stlist', serialize($stlist, NULL))
-            ";
-
-        return $command;
-    }
-
-    private function _loadStList($stlist) {
-
-        $persistOn = env('PERSIST_DATA_ON', 'DISK');
-
-        $command = '';
-        if($persistOn === 'DISK')
-            $command = "load(file='$stlist.RData')";
-        elseif ($persistOn === 'REDIS')
-            $command = "
-            r <- redux::hiredis()
-            $stlist = redux::bin_to_object(r\$GET('$stlist'))
-            ";
-
-        return $command;
-    }
 
 
     public function getStListScript() : string {
@@ -247,11 +258,12 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
 
         $workingDir = $this->workingDir();
 
-        $script = $workingDir . 'Filter.R';
+        $scriptName = 'Filter.R';
+        $script = $workingDir . $scriptName;
 
         Storage::put($script, $this->getFilterDataScript($parameters));
 
-        $this->spatialExecute('Rscript Filter.R');
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
         $result = [];
 
@@ -315,6 +327,8 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
             $result[$parameterName] = $data;
 
         }
+
+        $result['output'] = $output;
 
         return $result;
 
