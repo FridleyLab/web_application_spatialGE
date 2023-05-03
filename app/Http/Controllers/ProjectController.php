@@ -7,6 +7,7 @@ use App\Models\ColorPalette;
 use App\Models\Project;
 use App\Models\ProjectGene;
 use App\Models\ProjectParameter;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -144,7 +145,16 @@ class ProjectController extends Controller
 
         $job = new RunScript('Data import', $project, 'createStList', []);
 
-        $r = Queue::connection()->push($job);
+        $jobId = Queue::connection()->push($job);
+
+        //$queueName = Queue::getName('database');
+        //$queueName = config('queue.default');
+        $queuePosition = DB::table('jobs')
+            ->where('queue', 'default')
+            ->where('id', '<=', $jobId)
+            ->count();
+
+        //$pos = Queue::connection()->
 
 
         //$this->dispatch($job);
@@ -155,7 +165,9 @@ class ProjectController extends Controller
 
         //return route('qc-data-transformation', ['project' => $project->id]);
 
-        return $r;
+        //return $queuePosition;
+
+        return $queuePosition;
 
     }
 
