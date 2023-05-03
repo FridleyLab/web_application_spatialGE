@@ -191,6 +191,10 @@ class Project extends Model
             ProjectParameter::insert(['parameter' => 'initial_stlist_summary', 'type' => 'string', 'value' => $data, 'project_id' => $this->id]);
         }
 
+        //Data imported for this project, proceed to step 2 of the wizard
+        $this->current_step = 2;
+        $this->save();
+
         return ['output' => $output];
 
 

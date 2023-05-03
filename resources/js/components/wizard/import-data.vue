@@ -69,7 +69,11 @@
 
                     <div v-if="samples.length" class="p-3 text-end">
                         <input v-if="!changingStep" type="button" class="btn btn-outline-success" :class="nextStepCssClasses" @click="nextStep" :value="nextStepLabel" />
-                        <img v-if="changingStep" src="/images/loading-circular.gif" class="me-6" style="width:100px" />
+                        <div v-if="changingStep" class="text-info text-bold">
+                            The [Data import] job has been submitted. You will get an email notification when completed. <br />
+                            You can close this window or reload it when notified.
+                        </div>
+<!--                        <img v-if="changingStep" src="/images/loading-circular.gif" class="me-6" style="width:100px" />-->
 
 <!--                        <input v-if="changingStep" type="button" class="btn btn-outline-warning me-2" @click="nextStep" value="Finished importing data, proceed" />-->
 <!--                        <input v-if="changingStep" type="button" class="btn btn-outline-danger" @click="changingStep = false" value="Cancel" />-->
@@ -107,7 +111,8 @@
                 uploading: false,
                 uploadPercentage: 0,
 
-                nextStepLabel: 'Next step: QC & data transformation',
+                nextStepLabel: 'All samples added - Import Data',
+                //nextStepLabel: 'Next step: QC & data transformation',
                 nextStepCssClasses: '',
 
             };
@@ -186,7 +191,8 @@
                 ).then((response) => {
                     console.log('SUCCESS!!');
                     console.log(response.data);
-                    location.reload();
+                    //this.nextStepLabel = 'Data import queued - wait for email notification';
+                    //location.reload();
                 })
                     .catch((error) => {
                         console.log('FAILURE!!');
@@ -206,10 +212,10 @@
 
                 axios.get(this.nexturl)
                     .then((response) => {
-                        this.changingStep = false;
+                        //this.changingStep = false;
                         //console.log(response);
-                        this.nextStepLabel = 'Done - Redirecting';
-                        setTimeout(() => location.href = response.data, 1000);
+                        this.nextStepLabel = 'Data import queued - wait for email notification';
+                        //setTimeout(() => location.href = response.data, 1000);
                         //location.href = response.data;
                     })
 

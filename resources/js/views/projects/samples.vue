@@ -36,11 +36,42 @@
                 <i v-if="!deleting" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deleting = sample.id">delete</i>
 
                 <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deleting = 0" title="Cancel deletion attempt" />
-                <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-danger text-xxs" value="Delete" title="Confirm deletion of this sample" @click="deleteSample(sample)" />
+                <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteSample(sample)" />
 
             </div>
 
             <hr class="dark horizontal my-0">
+        </div>
+
+        <div v-if="samples.length" class="mt-4">
+            <div>Add relevant metadata for the samples</div>
+            <table class="table table-responsive table-striped">
+                <thead>
+                    <tr>
+                        <th>Metadata</th>
+                        <th v-for="sample in samples">
+                            {{ sample.name ?? 'Sample ' + sample.id }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="index in metaDataCount" :key="index">
+                        <th>
+                            <input type="text" class="border border-info border-1 rounded rounded-2 px-2" />
+                        </th>
+                        <td v-for="sample in samples">
+                            <input type="text" class="border border-1 rounded rounded-2 px-2" />
+                        </td>
+                        <td>
+                            <i v-if="!deletingMeta" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deletingMeta = index">delete</i>
+
+                            <input v-if="deletingMeta === index" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deletingMeta = 0" title="Cancel deletion attempt" />
+                            <input v-if="deletingMeta === index" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteMeta(index)" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="btn btn-sm btn-outline-secondary" @click="addMetaData">Add</button>
         </div>
 
         <div v-if="!samples.length">
@@ -59,11 +90,18 @@
 
         data() {
             return {
-                deleting: 0
+                deleting: 0,
+                deletingMeta: 0,
+                metaDataCount: 0,
             }
         },
 
         methods: {
+
+            addMetaData() {
+                this.metaDataCount++;
+            },
+
             getFileExtension(fileName) {
                 return fileName.split('.').pop();
             },

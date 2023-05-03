@@ -118,10 +118,9 @@ class ProjectController extends Controller
         //$project->createStList();
         RunScript::dispatch('Data import', $project, 'createStList', []);
 
-        $project->current_step = 2;
-        $project->save();
+        //return route('qc-data-transformation', ['project' => $project->id]);
 
-        return route('qc-data-transformation', ['project' => $project->id]);
+        return 'OK';
 
     }
 
