@@ -60,13 +60,13 @@
                             <input type="text" class="border border-info border-1 rounded rounded-2 px-2" :value="('name' in metadata[index-1]) ? metadata[index-1].name : ''" @input="setMetadataName($event, index - 1 )" />
                         </th>
                         <td v-for="sample in samples">
-                            <input type="text" class="border border-1 rounded rounded-2 px-2" :value="(sample.name in metadata[index-1].values) ? metadata[index-1].values[sample.name] : ''" @input="setMetadataValue($event, index - 1, sample.name)" :disabled="metadata.length<index || !metadata[index-1].name.trim().length" />
+                            <input type="text" class="border border-1 rounded rounded-2 px-2" :value="(('values' in metadata[index-1]) && sample.name in metadata[index-1].values) ? metadata[index-1].values[sample.name] : ''" @input="setMetadataValue($event, index - 1, sample.name)" :disabled="metadata.length<index || !metadata[index-1].name.trim().length" />
                         </td>
                         <td>
                             <i v-if="!deletingMetadata" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deletingMetadata = index">delete</i>
 
                             <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deletingMetadata = 0" title="Cancel deletion attempt" />
-                            <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteMetadata(index)" />
+                            <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteMetadata(index -1)" />
                         </td>
                     </tr>
                 </tbody>
@@ -101,12 +101,13 @@
         methods: {
 
             deleteMetadata(index) {
-                //TODO: implement
+                this.metadata.splice(index,1);
             },
 
             setMetadataName(event, index) {
 
-                this.metadata[index] = {'name' : event.target.value, 'values' : {}};
+                this.metadata[index] = {'name' : event.target.value /*, 'values' : {}*/};
+                if(!('values' in this.metadata[index])) this.metadata[index].values = {};
 
                 this.saveMetadata();
 
@@ -114,6 +115,8 @@
             },
 
             setMetadataValue(event, index, sampleName) {
+
+                if(!('values' in this.metadata[index])) this.metadata[index].values = {};
 
                 this.metadata[index].values[sampleName] = event.target.value;
 
@@ -123,7 +126,7 @@
             },
 
             addMetadata() {
-                this.metadataCount++;
+                this.metadata[this.metadata.length] = {'name' : '', 'values' : {}};
             },
 
             saveMetadata: _.debounce(function() {
