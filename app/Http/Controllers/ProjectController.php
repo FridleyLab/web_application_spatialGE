@@ -6,8 +6,10 @@ use App\Jobs\RunScript;
 use App\Models\ColorPalette;
 use App\Models\Project;
 use App\Models\ProjectGene;
+use App\Models\ProjectParameter;
 use App\Models\User;
 use Database\Seeders\ProjectStatusSeeder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -85,6 +87,29 @@ class ProjectController extends Controller
 
         return view('wizard.import-data')->with(compact('project', 'samples'));
 
+    }
+
+    public function save_metadata(Project $project) {
+
+        $metadata = request('metadata');
+
+        ProjectParameter::updateOrCreate(['parameter' => 'metadata', 'project_id' => $project->id], ['type' => 'json', 'value' => json_encode($metadata)]);
+
+        $contents = 'samplename';
+        foreach ($metadata as $meta)
+            if(strlen($meta['name'])) $contents .= ',' . $meta['name'];
+        $contents .= "\n";
+        foreach($project->samples as $sample) {
+            $contents .= $sample->name;
+            foreach ($metadata as $meta) {
+                $contents .= (array_key_exists($sample->name, $meta['values']) && strlen($meta['values'][$sample->name])) ? ',' . $meta['values'][$sample->name] : ',';
+            }
+            $contents .= "\n";
+        }
+
+        Storage::put($project->workingDir() . 'clinical_data.csv', $contents);
+
+        return json_encode(request('metadata'));
     }
 
     public function qc_data_transformation(Project $project) {

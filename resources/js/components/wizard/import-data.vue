@@ -65,7 +65,7 @@
                         </div>
                     </template>
 
-                    <project-samples v-if="!showAddSample" :samples="samples"></project-samples>
+                    <project-samples v-if="!showAddSample" :samples="samples" :project="project"></project-samples>
 
                     <div v-if="samples.length" class="p-3 text-end">
                         <input v-if="!changingStep" type="button" class="btn btn-outline-success" :class="nextStepCssClasses" @click="nextStep" :value="nextStepLabel" />
@@ -192,7 +192,7 @@
                     console.log('SUCCESS!!');
                     console.log(response.data);
                     //this.nextStepLabel = 'Data import queued - wait for email notification';
-                    //location.reload();
+                    location.reload();
                 })
                     .catch((error) => {
                         console.log('FAILURE!!');

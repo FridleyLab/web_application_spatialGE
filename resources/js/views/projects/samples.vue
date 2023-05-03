@@ -55,12 +55,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="index in metadataCount" :key="index">
+                    <tr v-for="index in metadata.length" :key="index">
                         <th>
-                            <input type="text" class="border border-info border-1 rounded rounded-2 px-2" @input="setMetadataName($event, index)" />
+                            <input type="text" class="border border-info border-1 rounded rounded-2 px-2" :value="('name' in metadata[index-1]) ? metadata[index-1].name : ''" @input="setMetadataName($event, index - 1 )" />
                         </th>
                         <td v-for="sample in samples">
-                            <input type="text" class="border border-1 rounded rounded-2 px-2" @input="setMetadataValue($event, index, sample.name)" />
+                            <input type="text" class="border border-1 rounded rounded-2 px-2" :value="(sample.name in metadata[index-1].values) ? metadata[index-1].values[sample.name] : ''" @input="setMetadataValue($event, index - 1, sample.name)" :disabled="metadata.length<index || !metadata[index-1].name.trim().length" />
                         </td>
                         <td>
                             <i v-if="!deletingMetadata" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deletingMetadata = index">delete</i>
@@ -86,13 +86,15 @@
 
         props: {
             samples: Object,
+            project: Object
         },
 
         data() {
             return {
                 deleting: 0,
                 deletingMetadata: 0,
-                metadataCount: 0,
+                //metadataCount: 0,
+                metadata: ('metadata' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.metadata) :  [],
             }
         },
 
@@ -103,16 +105,33 @@
             },
 
             setMetadataName(event, index) {
-                console.log(event.target.value, index);
+
+                this.metadata[index] = {'name' : event.target.value, 'values' : {}};
+
+                this.saveMetadata();
+
+                //console.log(this.metadata, index);
             },
 
             setMetadataValue(event, index, sampleName) {
-                console.log(event.target.value, index, sampleName);
+
+                this.metadata[index].values[sampleName] = event.target.value;
+
+                this.saveMetadata();
+
+                //console.log(this.metadata, index);
             },
 
             addMetadata() {
                 this.metadataCount++;
             },
+
+            saveMetadata: _.debounce(function() {
+                axios.post('/projects/' + this.project.id + '/save-metadata', {metadata: this.metadata})
+                    .then((response) => {console.log(response.data);})
+                    .catch((error) => console.log(error));
+
+            }, 1000),
 
             getFileExtension(fileName) {
                 return fileName.split('.').pop();

@@ -17,7 +17,7 @@
 
                         <div v-for="project in projects">
                             <div class="m-3 row">
-                                <div class="text-bolder col-5"><a :href="project.url">{{ project.name }}</a></div>
+                                <div class="col-5"><a class="text-info text-bolder text-lg" :href="project.url">{{ project.name }}</a></div>
                                 <div class="text-bolder col-5">{{ project.description }}</div>
                                 <div class="text-end col-2">
                                     <i v-if="!deleting" class="material-icons opacity-10 text-info cursor-pointer ms-2" title="Delete" @click="editProject(project)">edit</i>
