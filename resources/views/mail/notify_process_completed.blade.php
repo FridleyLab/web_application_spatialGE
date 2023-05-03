@@ -2,7 +2,7 @@
 
 <h2>This is a notification about your project: {{ $project->name  }}</h2>
 
-<h2>The process: {{ $description }}, has completed</h2>
+<h2>The process: [{{ $description }}] has completed</h2>
 
 <p>You can access your project <a href="{{ route('open-project', ['project' => $project]) }}">here</a></p>
 

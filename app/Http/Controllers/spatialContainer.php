@@ -118,7 +118,7 @@ class spatialContainer {
 
 
             $output = "\n+++++++++++++++++OUTPUT START+++++++++++++++++\n";
-            $output .= $process->output() . "\n" . $process->errorOutput();
+            $output .= trim($process->output() . "\n" . $process->errorOutput());
             $output .= "\n++++++++++++++++OUTPUT END++++++++++++++++++\n";
 
             Log::info($output);
