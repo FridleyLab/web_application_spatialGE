@@ -36,7 +36,11 @@
         <div class="row mt-3">
             <div class="float-end">
                 <input v-if="!generating_pca" type="button" class="btn btn-outline-info float-end" :class="generating_pca || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating_pca ? 'Please wait...' : 'Generate plots'" @click="applyPca">
-                <img v-if="generating_pca" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />
+<!--                <img v-if="generating_pca" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />-->
+            </div>
+            <div v-if="generating_pca" class="text-info text-bold float-end m-4">
+                The [Principal Component Analysis - PCA] job has been submitted. You will get an email notification when completed. <br />
+                You can close this window or reload it when notified.
             </div>
         </div>
 
@@ -149,10 +153,10 @@ import Multiselect from '@vueform/multiselect';
                     .then((response) => {
                         for(let property in response.data)
                             this.project.project_parameters[property] = response.data[property];
-                        this.generating_pca = false;
+                        //this.generating_pca = false;
                     })
                     .catch((error) => {
-                        this.generating_pca = false;
+                        //this.generating_pca = false;
                         console.log(error.message)
                     })
             },

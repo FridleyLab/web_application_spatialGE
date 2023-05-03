@@ -44,7 +44,7 @@
         </div>
 
         <div v-if="samples.length" class="mt-4">
-            <div>Add relevant metadata for the samples</div>
+            <div class="text-info text-bolder">Add relevant metadata for the samples</div>
             <table class="table table-responsive table-striped">
                 <thead>
                     <tr>
@@ -102,6 +102,8 @@
 
             deleteMetadata(index) {
                 this.metadata.splice(index,1);
+                this.deletingMetadata = 0;
+                this.saveMetadata();
             },
 
             setMetadataName(event, index) {

@@ -251,7 +251,11 @@
             <div class="w-100">
                 <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
                     <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Normalize' }}</button>
-                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />
+<!--                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />-->
+                </div>
+                <div v-if="processing" class="text-info text-bold float-end m-4">
+                    The [Normalize data] job has been submitted. You will get an email notification when completed. <br />
+                    You can close this window or reload it when notified.
                 </div>
             </div>
         </div>
@@ -311,7 +315,7 @@ import Multiselect from '@vueform/multiselect';
                 axios.post(this.normalizeUrl, {parameters: this.params})
                     .then((response) => {
                         console.log(response.data);
-                        this.processing = false;
+                        //this.processing = false;
 
                         for(let property in response.data)
                             this.project.project_parameters[property] = response.data[property];
@@ -319,7 +323,7 @@ import Multiselect from '@vueform/multiselect';
                     })
                     .catch((error) => {
                         console.log(error.message)
-                        this.processing = false;
+                        //this.processing = false;
                     })
 
 
@@ -329,11 +333,11 @@ import Multiselect from '@vueform/multiselect';
                 this.generating_plots = true;
                 axios.post(this.normalizeUrlPlots, {color_palette: this.filter_color_palette, gene: this.selected_gene})
                     .then((response) => {
-                        this.generating_plots = false;
+                        //this.generating_plots = false;
                     })
                     .catch((error) => {
                         this.generating_plots = false;
-                        console.log(error.message)
+                        //console.log(error.message)
                     })
             },
 

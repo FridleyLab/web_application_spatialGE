@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Mail\notifyProcessCompleted;
 use App\Models\Project;
+use App\Models\ProjectParameter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -35,6 +36,8 @@ class RunScript implements ShouldQueue
      */
     public function handle(): void
     {
+        ProjectParameter::insert([ 'parameter' => 'job', 'project_id' => $this->project->id, 'type' => 'number', 'value' => $this->job->getJobId() ]);
+
         //Execute the process
         $command = $this->command;
         Log::info('**### BEGIN** ' . $command);

@@ -71,7 +71,11 @@
         <div class="row mt-3">
             <div class="float-end">
                 <input v-if="!generating_quilt" type="button" class="btn btn-outline-info float-end" :class="generating_quilt || !params.genes.length  ? 'disabled' : ''" :value="generating_quilt ? 'Please wait...' : 'Generate plots'" @click="quiltPlot">
-                <img v-if="generating_quilt" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />
+<!--                <img v-if="generating_quilt" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />-->
+            </div>
+            <div v-if="generating_quilt" class="text-info text-bold float-end m-4">
+                The [STplot - Quilt] job has been submitted. You will get an email notification when completed. <br />
+                You can close this window or reload it when notified.
             </div>
         </div>
 
@@ -231,10 +235,10 @@ import Multiselect from '@vueform/multiselect';
                 axios.post(this.stplotQuiltUrl, this.params)
                     .then((response) => {
                         this.plots = response.data;
-                        this.generating_quilt = false;
+                        //this.generating_quilt = false;
                     })
                     .catch((error) => {
-                        this.generating_quilt = false;
+                        //this.generating_quilt = false;
                         console.log(error.message);
                     })
             },

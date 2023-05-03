@@ -236,7 +236,12 @@
             <div class="w-100">
                 <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
                     <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Run Filter' }}</button>
-                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />
+
+<!--                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />-->
+                </div>
+                <div v-if="processing" class="text-info text-bold float-end m-4">
+                    The [Filter data] job has been submitted. You will get an email notification when completed. <br />
+                    You can close this window or reload it when notified.
                 </div>
             </div>
         </div>
@@ -513,8 +518,10 @@
                             this.project.project_parameters[property] = response.data[property];
 
 
-                        this.processing = false;
-                        this.generating_plots = false;
+                        //this.processing = false;
+                        //this.generating_plots = false;
+
+
                         /*this.project.project_parameters.filter_meta_options = response.data.filter_meta_options;
                         this.project.project_parameters.filter_violin = response.data.filter_violin;
                         this.project.project_parameters.filter_boxplot = response.data.filter_boxplot;*/

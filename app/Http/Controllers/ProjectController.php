@@ -7,10 +7,8 @@ use App\Models\ColorPalette;
 use App\Models\Project;
 use App\Models\ProjectGene;
 use App\Models\ProjectParameter;
-use App\Models\User;
-use Database\Seeders\ProjectStatusSeeder;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProjectController extends Controller
@@ -141,11 +139,23 @@ class ProjectController extends Controller
     public function createStList(Project $project) {
 
         //$project->createStList();
-        RunScript::dispatch('Data import', $project, 'createStList', []);
+
+        //$job = RunScript::dispatch('Data import', $project, 'createStList', []);
+
+        $job = new RunScript('Data import', $project, 'createStList', []);
+
+        $r = Queue::connection()->push($job);
+
+
+        //$this->dispatch($job);
+
+
+
+        //RunScript::dispatch('Data import', $project, 'createStList', []);
 
         //return route('qc-data-transformation', ['project' => $project->id]);
 
-        return 'OK';
+        return $r;
 
     }
 

@@ -1,11 +1,11 @@
 <template>
 
-    <div v-if="generating" id="cover" style="position: fixed; height: 100%; width: 100%; top:0; left: 0; background: white; z-index:9999; opacity: 80%">
-        <div class="justify-content-center text-center moffitt-bg-blue text-white rounded rounded-pill text-3xl text-bolder" style="width:600px;position: absolute;top: 50%;left: 50%;margin-top: -170px;margin-left: -300px;height: 100px;">
-            spatialGE is working, please wait!
-        </div>
-        <img v-if="generating" src="/images/loading-circular.gif" style="width:100px;position: absolute;top: 50%;left: 50%;margin-top: -50px;margin-left: -50px;height: 100px;" />
-    </div>
+<!--    <div v-if="generating" id="cover" style="position: fixed; height: 100%; width: 100%; top:0; left: 0; background: white; z-index:9999; opacity: 80%">-->
+<!--        <div class="justify-content-center text-center moffitt-bg-blue text-white rounded rounded-pill text-3xl text-bolder" style="width:600px;position: absolute;top: 50%;left: 50%;margin-top: -170px;margin-left: -300px;height: 100px;">-->
+<!--            spatialGE is working, please wait!-->
+<!--        </div>-->
+<!--        <img v-if="generating" src="/images/loading-circular.gif" style="width:100px;position: absolute;top: 50%;left: 50%;margin-top: -50px;margin-left: -50px;height: 100px;" />-->
+<!--    </div>-->
 
 <div class="m-4">
     <form>
@@ -80,6 +80,10 @@
             <div class="float-end">
                 <input v-if="!generating" type="button" class="btn btn-outline-info float-end" :class="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating ? 'Please wait...' : 'Generate plots'" @click="sthetPlot">
 <!--                <img v-if="generating" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />-->
+            </div>
+            <div v-if="generating" class="text-info text-bold float-end m-4">
+                The [Spatial heterogeneity] job has been submitted. You will get an email notification when completed. <br />
+                You can close this window or reload it when notified.
             </div>
         </div>
 
@@ -165,10 +169,10 @@ export default {
                 .then((response) => {
                     for(let property in response.data)
                         this.project.project_parameters[property] = response.data[property];
-                    this.generating = false;
+                    //this.generating = false;
                 })
                 .catch((error) => {
-                    this.generating = false;
+                    //this.generating = false;
                     console.log(error.message)
                 })
         },
