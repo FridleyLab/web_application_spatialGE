@@ -122,23 +122,23 @@ import { getCurrentInstance } from 'vue';
                 //nextStepLabel: 'Next step: QC & data transformation',
                 nextStepCssClasses: '',
 
-                jobPositionInQueue: 0
+                jobPositionInQueue: 0,
+                checkQueueIntervalId: 0,
 
             };
         },
 
         mounted() {
-            this.updateJobPosition();
+            //this.updateJobPosition();
+            this.setIntervalQueue();
         },
 
         watch: {
                 jobPositionInQueue: {
                     handler: function (newValue, oldValue) {
-                        console.log(this.jobPositionInQueue);
-                        this.changingStep = this.jobPositionInQueue;
-                        let vm = this;
-                        if(this.jobPositionInQueue)
-                            setTimeout(function(){vm.updateJobPosition()}, 1000);
+                        console.log('---', this.jobPositionInQueue);
+                        //this.changingStep = !!this.jobPositionInQueue;
+                        if(!this.jobPositionInQueue) clearInterval(this.checkQueueIntervalId);
                 },
                 immediate: true
             }
@@ -162,10 +162,15 @@ import { getCurrentInstance } from 'vue';
 
         methods: {
 
-            updateJobPosition: async function() {
+            setIntervalQueue: function() {
+                this.checkQueueIntervalId = setInterval(async () => {this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'createStList');}, 1800);
+                console.log('Interval set');
+            },
+
+            /*updateJobPosition: async function() {
 
                 this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'createStList');
-            },
+            },*/
 
             importSample() {
                 /*
