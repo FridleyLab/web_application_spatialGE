@@ -124,13 +124,13 @@ class SecurityController extends Controller
 
         try {
             $user = User::where('email_verification_code', $code)->firstOrFail();
-
+            $link = '<a href="' . route('login') . '">Sign in</a>';
             if(is_null($user->email_verified_at)) {
                 $user->email_verified_at = Carbon::now();
                 $user->save();
-                return response()->view('show-message', ['message' => 'Your account has been activated. Now you can sign in'], 200);
+                return response()->view('show-message', ['message' => 'Your account has been activated. Now you can ' . $link], 200);
             }
-            else { return response()->view('show-message', ['message' => 'Your account had already been activated!'], 400); }
+            else { return response()->view('show-message', ['message' => 'Your account had already been activated!' . $link], 400); }
         }
         catch (\Exception $e) {
             return response()->view('show-message', ['message' => 'Something went wrong!'], 400);
