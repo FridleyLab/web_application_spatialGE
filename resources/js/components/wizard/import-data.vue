@@ -86,8 +86,15 @@
     </div>
 </template>
 <script>
+
+import { getCurrentInstance } from 'vue';
+
     export default {
         name: 'importData',
+
+        setup() {
+            const app = getCurrentInstance();
+        },
 
         props: {
             project: Object,
@@ -115,7 +122,26 @@
                 //nextStepLabel: 'Next step: QC & data transformation',
                 nextStepCssClasses: '',
 
+                jobPositionInQueue: 0
+
             };
+        },
+
+        mounted() {
+            this.updateJobPosition();
+        },
+
+        watch: {
+                jobPositionInQueue: {
+                    handler: function (newValue, oldValue) {
+                        console.log(this.jobPositionInQueue);
+                        this.changingStep = this.jobPositionInQueue;
+                        let vm = this;
+                        if(this.jobPositionInQueue)
+                            setTimeout(function(){vm.updateJobPosition()}, 1000);
+                },
+                immediate: true
+            }
         },
 
         computed: {
@@ -135,6 +161,11 @@
         },
 
         methods: {
+
+            updateJobPosition: async function() {
+
+                this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'createStList');
+            },
 
             importSample() {
                 /*
@@ -211,12 +242,17 @@
                 //return;
 
                 axios.get(this.nexturl)
-                    .then((response) => {
+                    .then(async (response) => {
                         //this.changingStep = false;
                         //console.log(response);
                         this.nextStepLabel = 'Data import queued - wait for email notification';
                         //setTimeout(() => location.href = response.data, 1000);
                         //location.href = response.data;
+
+                        let position = await this.$getJobPositionInQueue(this.project.id, 'createStList');
+
+                        console.log('Job position =>', position);
+
                     })
 
             },

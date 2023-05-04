@@ -135,7 +135,10 @@ class ProjectController extends Controller
     }
 
 
-
+    public function getJobPositionInQueue(Project $project) {
+        $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
+        return $jobId ? $project->getJobPositionInQueue($jobId) : 0;
+    }
 
     public function createStList(Project $project) {
 
@@ -143,31 +146,20 @@ class ProjectController extends Controller
 
         //$job = RunScript::dispatch('Data import', $project, 'createStList', []);
 
-        $job = new RunScript('Data import', $project, 'createStList', []);
+        /*$job = new RunScript('Data import', $project, 'createStList', []);
 
         $jobId = Queue::connection()->push($job);
 
         //$queueName = Queue::getName('database');
-        //$queueName = config('queue.default');
+        $queueName = env('QUEUE_DEFAULT_NAME');
         $queuePosition = DB::table('jobs')
-            ->where('queue', 'default')
+            ->where('queue', $queueName)
             ->where('id', '<=', $jobId)
-            ->count();
+            ->count();*/
 
-        //$pos = Queue::connection()->
+        $jobId = $project->createJob('Data import', 'createStList', []);
 
-
-        //$this->dispatch($job);
-
-
-
-        //RunScript::dispatch('Data import', $project, 'createStList', []);
-
-        //return route('qc-data-transformation', ['project' => $project->id]);
-
-        //return $queuePosition;
-
-        return $queuePosition;
+        return $project->getJobPositionInQueue($jobId);
 
     }
 

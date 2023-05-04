@@ -61,6 +61,9 @@ Route::middleware(['auth'])->group(function() {
     Route::delete('/samples/{sample}', [SampleController::class, 'destroy'])->name('destroy-sample');
 
 
+    Route::get('/projects/{project}/get-job-position-in-queue',[ProjectController::class, 'getJobPositionInQueue'])->name('get-job-position-in-queue')->middleware('project');
+
+
 
     Route::get('/projects/{project}/stplot-visualization',[ProjectController::class, 'stplot_visualization'])->name('stplot-visualization')->middleware('project');
     Route::post('/projects/{project}/stplot/quilt', [ProjectController::class, 'stplot_quilt'])->name('stplot-quilt')->middleware('project');
