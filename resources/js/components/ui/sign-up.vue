@@ -109,9 +109,9 @@
 
                                     <show-message class="text-center m-4" :message="errorMessage" role="danger"></show-message>
 
-                                    <div class="text-center m-3">
-                                        <div class="g-recaptcha" data-sitekey="6Lf1JIkkAAAAAEyfq5XDevFmu98B4K052NZi7z4K"></div>
-                                    </div>
+<!--                                    <div class="text-center m-3">-->
+<!--                                        <div class="g-recaptcha" data-sitekey="6Lf1JIkkAAAAAEyfq5XDevFmu98B4K052NZi7z4K"></div>-->
+<!--                                    </div>-->
 
                                     <div class="text-center">
                                         <button type="submit" class="btn btn-lg bg-gradient-info btn-lg w-100 w-md-50 mt-4 mb-0">Sign Up</button>
