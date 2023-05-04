@@ -571,6 +571,10 @@ $plots
 
     public function getNormalizationScript($parameters) : string {
 
+        //If there's no filtered stlist use the initial stlist
+        $stlist = 'filtered_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'initial_stlist';
+
         $str_params = '';
         foreach ($parameters as $key => $value) {
             if(strlen($value)) {
@@ -596,10 +600,10 @@ library('spatialGE')
 
 # Load filtered STList
 " .
-$this->_loadStList('filtered_stlist')
+$this->_loadStList($stlist)
 . "
 
-normalized_stlist = transform_data(filtered_stlist, $str_params)
+normalized_stlist = transform_data($stlist, $str_params)
 " .
 $this->_saveStList('normalized_stlist')
 . "
@@ -704,6 +708,13 @@ $plots
 
     public function getNormalizedPlotsScript($parameters) : string {
 
+        //If there's no normalizes stlist use the initial stlist
+        $stlist = 'normalized_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData"))
+            $stlist = 'filtered_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData"))
+            $stlist = 'initial_stlist';
+
         $color_palette = $parameters['color_palette'];
         $gene = $parameters['gene'];
 
@@ -717,18 +728,18 @@ library('spatialGE')
 
 # Load normalized STList
 " .
-$this->_loadStList('normalized_stlist')
+$this->_loadStList($stlist)
 . "
 
 #### Violin plot
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = violin_plots(normalized_stlist, color_pal='$color_palette', data_type='tr', genes='$gene')
+vp = violin_plots($stlist, color_pal='$color_palette', data_type='tr', genes='$gene')
 #ggpubr::ggexport(filename = 'normalized_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
-bp = violin_plots(normalized_stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene')
+bp = violin_plots($stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene')
 #ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 800)
 
 $plots
@@ -780,6 +791,13 @@ $plots
 
     public function getPcaScript($parameters) : string {
 
+        //If there's no normalizes stlist use the initial stlist
+        $stlist = 'normalized_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData"))
+            $stlist = 'filtered_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData"))
+            $stlist = 'initial_stlist';
+
         $plot_meta = $parameters['plot_meta'];
         $color_pal = $parameters['color_pal'];
         $n_genes = $parameters['n_genes'];
@@ -796,13 +814,13 @@ library('spatialGE')
 
 # Load normalized STList
 " .
-$this->_loadStList('normalized_stlist')
+$this->_loadStList($stlist)
 . "
 
 #### Box plot
-#pca = pseudobulk_pca(normalized_stlist, plot_meta='$plot_meta', n_genes=$n_genes, color_pal='$color_pal', ptsize=7)
+#pca = pseudobulk_pca($stlist, plot_meta='$plot_meta', n_genes=$n_genes, color_pal='$color_pal', ptsize=7)
 
-plist = pseudobulk_plots(normalized_stlist, plot_meta='$plot_meta', max_var_genes=$n_genes, hm_display_genes=$hm_display_genes, color_pal='$color_pal', ptsize=5)
+plist = pseudobulk_plots($stlist, plot_meta='$plot_meta', max_var_genes=$n_genes, hm_display_genes=$hm_display_genes, color_pal='$color_pal', ptsize=5)
 #hm_display_genes --> text or slider
 
 #ggpubr::ggexport(filename = 'pseudo_bulk_pca.png', plist\$pca, width = 800, height = 800)
@@ -856,6 +874,13 @@ $plots
 
     public function getQuiltPlotScript($parameters) : string {
 
+        //If there's no normalizes stlist use the initial stlist
+        $stlist = 'normalized_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData"))
+            $stlist = 'filtered_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData"))
+            $stlist = 'initial_stlist';
+
         $plot_meta = $parameters['plot_meta'];
         $color_pal = $parameters['color_pal'];
         $sample1 = $parameters['sample1'];
@@ -871,12 +896,12 @@ library('spatialGE')
 
 # Load normalized STList
 " .
-$this->_loadStList('normalized_stlist')
+$this->_loadStList($stlist)
 . "
 
 #### Plot
-plist1 = STplot(normalized_stlist, samples=c('$sample1'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
-plist2 = STplot(normalized_stlist, samples=c('$sample2'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
+plist1 = STplot($stlist, samples=c('$sample1'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
+plist2 = STplot($stlist, samples=c('$sample2'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
 #ggpubr::ggexport(filename = 'quilt_plot_1.png', plist1[[1]], width = 800, height = 800)
 #ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height = 800)
 

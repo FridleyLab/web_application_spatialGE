@@ -107,6 +107,7 @@ import { getCurrentInstance } from 'vue';
             project: Object,
             samples: Object,
             nexturl: String,
+            qcDtUrl: String,
         },
 
         data() {
@@ -149,7 +150,7 @@ import { getCurrentInstance } from 'vue';
                         this.changingStep = !!this.jobPositionInQueue;
                         if(!this.jobPositionInQueue) {
                             clearInterval(this.checkQueueIntervalId);
-                            if(this.reloadPage) location.reload();
+                            if(this.reloadPage) location.href=this.qcDtUrl //location.reload();
                         }
                 },
                 immediate: true
