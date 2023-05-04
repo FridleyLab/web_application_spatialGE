@@ -120,10 +120,10 @@
             //For developing purposes
             testUser: function() {
 
-                this.email = 'test@moffitt.org';
+                /*this.email = 'test@moffitt.org';
                 this.password = '12345678';
 
-                this.overrideValidations = true;
+                this.overrideValidations = true;*/
 
             }
         }
