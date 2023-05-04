@@ -157,7 +157,7 @@ class SecurityController extends Controller
 
         }
         catch (\Exception $e) {
-            return response('Email address nor found!', 400);
+            return response('Email address not found!', 400);
         }
     }
 

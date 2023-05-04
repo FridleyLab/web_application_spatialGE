@@ -137,7 +137,7 @@ import { getCurrentInstance } from 'vue';
                 jobPositionInQueue: {
                     handler: function (newValue, oldValue) {
                         console.log('---', this.jobPositionInQueue);
-                        //this.changingStep = !!this.jobPositionInQueue;
+                        this.changingStep = !!this.jobPositionInQueue;
                         if(!this.jobPositionInQueue) clearInterval(this.checkQueueIntervalId);
                 },
                 immediate: true
