@@ -241,7 +241,7 @@ import { getCurrentInstance } from 'vue';
 
                 this.changingStep = true;
 
-                this.nextStepLabel = 'Processing samples... please wait!';
+                //this.nextStepLabel = 'Processing samples... please wait!';
                 this.nextStepCssClasses = 'disabled';
 
                 //return;
@@ -250,7 +250,7 @@ import { getCurrentInstance } from 'vue';
                     .then(async (response) => {
                         //this.changingStep = false;
                         //console.log(response);
-                        this.nextStepLabel = 'Data import queued - wait for email notification';
+                        //this.nextStepLabel = 'Data import queued - wait for email notification';
                         //setTimeout(() => location.href = response.data, 1000);
                         //location.href = response.data;
 
