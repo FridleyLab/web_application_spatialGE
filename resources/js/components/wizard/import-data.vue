@@ -69,10 +69,17 @@
 
                     <div v-if="samples.length" class="p-3 text-end">
                         <input v-if="!changingStep" type="button" class="btn btn-outline-success" :class="nextStepCssClasses" @click="nextStep" :value="nextStepLabel" />
-                        <div v-if="changingStep" class="text-info text-bold">
-                            The [Data import] job has been submitted. You will get an email notification when completed. <br />
-                            You can close this window or reload it when notified.
+                        <div v-if="changingStep">
+                            <div class="text-info text-bold">
+                                The [Data import] job has been submitted. You will get an email notification when completed. <br />
+                                You can close this window or wait for it to reload when completed.<br />
+                            </div>
+                            <div v-if="jobPositionInQueue<=1">The job is being executed</div>
+                            <div v-if="jobPositionInQueue>1">
+                                The job position in the queue is: {{jobPositionInQueue}}
+                            </div>
                         </div>
+
 <!--                        <img v-if="changingStep" src="/images/loading-circular.gif" class="me-6" style="width:100px" />-->
 
 <!--                        <input v-if="changingStep" type="button" class="btn btn-outline-warning me-2" @click="nextStep" value="Finished importing data, proceed" />-->
@@ -124,6 +131,7 @@ import { getCurrentInstance } from 'vue';
 
                 jobPositionInQueue: 0,
                 checkQueueIntervalId: 0,
+                reloadPage: false,
 
             };
         },
@@ -134,11 +142,15 @@ import { getCurrentInstance } from 'vue';
         },
 
         watch: {
-                jobPositionInQueue: {
+            jobPositionInQueue: {
                     handler: function (newValue, oldValue) {
                         console.log('---', this.jobPositionInQueue);
+                        if(this.jobPositionInQueue) this.reloadPage = true;
                         this.changingStep = !!this.jobPositionInQueue;
-                        if(!this.jobPositionInQueue) clearInterval(this.checkQueueIntervalId);
+                        if(!this.jobPositionInQueue) {
+                            clearInterval(this.checkQueueIntervalId);
+                            if(this.reloadPage) location.reload();
+                        }
                 },
                 immediate: true
             }

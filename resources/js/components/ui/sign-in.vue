@@ -98,7 +98,7 @@
                 {
                     axios.get(this.resetPasswordUrl, {params: {'email' : this.email}})
                         .then((response) => { location.href = this.resetPasswordUrl + '?email=' + this.email })
-                        .catch((error) => { this.errorMessage = error.message});
+                        .catch((error) => { this.errorMessage = error.response.data});
                     return;
                 }
 
@@ -108,7 +108,7 @@
                     })
                     .catch((error) => {
                         console.log(error.message);
-                        this.errorMessage = error.message;
+                        this.errorMessage = error.response.data;
                     });
             },
 

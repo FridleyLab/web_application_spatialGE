@@ -170,7 +170,8 @@ class SecurityController extends Controller
             return view('mail.user_account_password_reset_dev')->with(['user' => $user]);
         }
         catch(\Exception $e) {
-            return response('Something went wrong! ' . $email, 500);
+            return response('Email address not found!', 500);
+            //return response('Something went wrong! ' . $email, 500);
         }
 
 

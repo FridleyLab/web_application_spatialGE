@@ -233,15 +233,21 @@
 
 
         <div class="row">
-            <div class="w-100">
+            <div class="w-100 float-end">
                 <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
                     <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Run Filter' }}</button>
 
 <!--                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />-->
                 </div>
-                <div v-if="processing" class="text-info text-bold float-end m-4">
-                    The [Filter data] job has been submitted. You will get an email notification when completed. <br />
-                    You can close this window or reload it when notified.
+                <div v-if="processing" class="float-end m-4">
+                    <div v-if="processing" class="text-info text-bold">
+                        The [Filter data] job has been submitted. You will get an email notification when completed. <br />
+                        You can close this window or wait for it to reload when completed.
+                    </div>
+                    <div v-if="jobPositionInQueue<=1">The job is being executed</div>
+                    <div v-if="jobPositionInQueue>1">
+                        The job position in the queue is: {{jobPositionInQueue}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -386,7 +392,15 @@
 
                 processing: false,
 
+                jobPositionInQueue: 0,
+                checkQueueIntervalId: 0,
+                reloadPage: false,
+
             }
+        },
+
+        mounted() {
+            this.setIntervalQueue();
         },
 
         /*computed: {
@@ -400,12 +414,30 @@
                 console.log(newValue);
                 this.params.gene_minspots = Math.round(Number(this.project.project_parameters.max_spots_number) * newValue/100);
                 console.log(this.params.gene_minspots);
+            },
+
+            jobPositionInQueue: {
+                handler: function (newValue, oldValue) {
+                    console.log('---', this.jobPositionInQueue);
+                    if(this.jobPositionInQueue) this.reloadPage = true;
+                    this.processing = !!this.jobPositionInQueue;
+                    if(!this.jobPositionInQueue) {
+                        clearInterval(this.checkQueueIntervalId);
+                        if(this.reloadPage) location.reload();
+                    }
+                },
+                immediate: true
             }
         },
 
 
         methods: {
             toJSON,
+
+            setIntervalQueue: function() {
+                this.checkQueueIntervalId = setInterval(async () => {this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'applyFilter');}, 1800);
+                console.log('Interval set');
+            },
 
             removeSample(e) {
                 console.log(e);

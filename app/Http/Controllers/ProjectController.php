@@ -203,10 +203,11 @@ class ProjectController extends Controller
 
     public function applyFilter(Project $project) {
 
-        RunScript::dispatch('Filter data', $project, 'applyFilter', request('parameters'));
+        //RunScript::dispatch('Filter data', $project, 'applyFilter', request('parameters'));
+        //return 'OK';
 
-        return 'OK';
-        //return $project->applyFilter(request('parameters'));
+        $jobId = $project->createJob('Filter data', 'applyFilter', request('parameters'));
+        return $project->getJobPositionInQueue($jobId);
 
     }
 
