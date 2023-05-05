@@ -96,7 +96,7 @@ class spatialContainer {
 
     }
 
-    private function _OLD_execute($command) {
+    /*private function _OLD_execute($command) {
         try {
 
             //set the max execution time for the system call
@@ -123,7 +123,7 @@ class spatialContainer {
             Log::info("***$$$ EXCEPTION: \n" . $errorMessage);
             return throwException(new \Exception($errorMessage));
         }
-    }
+    }*/
 
 
 
@@ -136,7 +136,7 @@ class spatialContainer {
 
         $container_id = 'spatial_' . $this->project->id;
 
-
+        $command = '';
         try {
 
             $workingDir = Storage::path('/users/' . $this->project->user_id . '/' . $this->project->id . '/');
@@ -161,8 +161,8 @@ class spatialContainer {
 
         }
         catch(\Exception $e) {
-            $errorMessage = 'spatialGE Error: Could not execute command: "' . $command . '" in container with id: ' . $this->project->container_id;
-            Log::info("***$$$ EXCEPTION: \n" . $errorMessage);
+            $errorMessage = 'spatialGE Error: Could not execute command: "' . $command . '" in container with id: ' . $container_id;
+            Log::info("ERROR ***$$$ EXCEPTION: \n" . $errorMessage);
             return throwException(new \Exception($errorMessage));
         }
     }
