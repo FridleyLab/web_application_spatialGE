@@ -47,12 +47,11 @@ class spatialContainer {
 
         try {
 
-            $workingDir = Storage::path('/users/' . (auth()->id() ?? '9999') . '/' . $this->project->id . '/');
+            $workingDir = Storage::path('/users/' . auth()->id() . '/' . $this->project->id . '/');
             $workingDir = str_replace(':', '', $workingDir);
             $workingDir = str_replace('\\', '/', $workingDir);
-            $workingDir = '/' . $workingDir;
+            //$workingDir = '/' . $workingDir;
 
-            //$exe = '"C:/Program Files/Docker/Docker/resources/bin/docker.exe"';
             $exe = $this->exe;
             $command = "$exe container run -it -v $workingDir:/spatialGE --rm --name $container_id -d $image_name";
 
