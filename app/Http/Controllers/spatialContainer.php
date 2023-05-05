@@ -12,6 +12,11 @@ class spatialContainer {
     private string $exe;
     private Project $project;
 
+
+    private function isWindows() : bool {
+        return (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+    }
+
     /**
      * @param $container_id
      * @param Project $project
@@ -19,7 +24,7 @@ class spatialContainer {
     public function __construct(Project $project)
     {
 
-        $this->exe = '"' . env('DOCKER_EXECUTABLE' . ((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? '_WINDOWS' : '')) . '"';
+        $this->exe = '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : '')) . '"';
 
         $this->project = $project;
 
@@ -156,6 +161,22 @@ class spatialContainer {
             $output .= "\n++++++++++++++++OUTPUT END++++++++++++++++++\n";
 
             Log::info($output);
+
+
+            //TODO: configure the docker image to run with the same user as apache or figure a better way to gran read permissions to files
+            try {
+                if(!$this->isWindows()) {
+                    $public_dir = Storage::path('/public/users/' . $this->project->user_id . '/' . $this->project->id . '/');
+                    $process = Process::run('chmod -R 755 ' . $public_dir);
+                    $chmodout = "\n+++++++++++++++++CHMOD+++++++++++++++++\n";
+                    $chmodout .= trim($process->output() . "\n" . $process->errorOutput());
+                    $chmodout .= "\n++++++++++++++++CHMOD END++++++++++++++++++\n";
+                    Log::info($chmodout);
+                }
+            }
+            catch(\Exception $e) {}
+
+
 
             return $output;
 
