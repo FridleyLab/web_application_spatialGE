@@ -74,22 +74,22 @@ class Project extends Model
     }
 
     public function workingDir() : string {
-        $workingDir = '/users/' . (auth()->id() ?? '9999') . '/' . $this->id . '/';
+        $workingDir = '/users/' . $this->user_id . '/' . $this->id . '/';
         $workingDir = str_replace('\\', '/', $workingDir);
         return $workingDir;
     }
 
     public function workingDirPublic() : string {
         Storage::createDirectory('/public/users');
-        Storage::createDirectory('/public/users/' . (auth()->id() ?? '9999'));
-        Storage::createDirectory('/public/users/' . (auth()->id() ?? '9999') . '/' . $this->id);
-        $workingDir = '/public/users/' . (auth()->id() ?? '9999') . '/' . $this->id . '/';
+        Storage::createDirectory('/public/users/' . $this->user_id);
+        Storage::createDirectory('/public/users/' . $this->user_id . '/' . $this->id);
+        $workingDir = '/public/users/' . $this->user_id . '/' . $this->id . '/';
         $workingDir = str_replace('\\', '/', $workingDir);
         return $workingDir;
     }
 
     public function workingDirPublicURL() : string {
-        $workingDir = '/storage/users/' . (auth()->id() ?? '9999') . '/' . $this->id . '/';
+        $workingDir = '/storage/users/' . $this->user_id . '/' . $this->id . '/';
         $workingDir = str_replace('\\', '/', $workingDir);
         return $workingDir;
     }
