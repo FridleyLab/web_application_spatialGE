@@ -99,8 +99,6 @@ class Project extends Model
         if(is_null($this->_container))
             $this->_container = new spatialContainer($this);
 
-        //dd($this->_container);
-
         return $this->_container->execute($command);
 
     }
@@ -145,10 +143,6 @@ class Project extends Model
 
         $scriptName = 'STList.R';
         $script = $workingDir . $scriptName;
-
-        //Create CSV with metadata
-
-
 
         Storage::put($script, $this->getStListScript());
 

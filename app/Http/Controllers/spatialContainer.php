@@ -19,17 +19,11 @@ class spatialContainer {
     public function __construct(Project $project)
     {
 
-
-        //set_include_path(env('DOCKER_EXECUTABLE'));
-        //putenv(env('DOCKER_EXECUTABLE'));
-
-        //dd(env('DOCKER_EXECUTABLE'));
-
         $this->exe = '"' . env('DOCKER_EXECUTABLE' . ((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? '_WINDOWS' : '')) . '"';
 
         $this->project = $project;
 
-        $this->checkIfRunningOrCreate();
+        //$this->checkIfRunningOrCreate();
 
     }
 
@@ -102,11 +96,11 @@ class spatialContainer {
 
     }
 
-    public function execute($command) {
+    private function _OLD_execute($command) {
         try {
 
             //set the max execution time for the system call
-            $timeout = 600;
+            $timeout = 1800;
 
             $exe = $this->exe;
             $_command = "$exe exec " . $this->project->container_id . ' ' . $command;
@@ -125,6 +119,48 @@ class spatialContainer {
             return $output;
         }
         catch (\Exception $e) {
+            $errorMessage = 'spatialGE Error: Could not execute command: "' . $command . '" in container with id: ' . $this->project->container_id;
+            Log::info("***$$$ EXCEPTION: \n" . $errorMessage);
+            return throwException(new \Exception($errorMessage));
+        }
+    }
+
+
+
+    public function execute($docker_command) {
+
+        //set the max execution time for the system call
+        $timeout = 1800;
+
+        $image_name = env('DOCKER_IMAGE_NAME','spatialge');
+
+        $container_id = 'spatial_' . $this->project->id;
+
+
+        try {
+
+            $workingDir = Storage::path('/users/' . $this->project->user_id . '/' . $this->project->id . '/');
+            $workingDir = str_replace(':', '', $workingDir);
+            $workingDir = str_replace('\\', '/', $workingDir);
+            $workingDir = '/' . $workingDir;
+
+            $exe = $this->exe;
+            $command = "$exe container run -i -v $workingDir:/spatialGE --rm --name $container_id $image_name $docker_command";
+
+            Log::info("\nCOMMAND TO EXECUTE: " . $command . "\n");
+
+            $process = Process::timeout($timeout)->run($command);
+
+            $output = "\n+++++++++++++++++OUTPUT START+++++++++++++++++\n";
+            $output .= trim($process->output() . "\n" . $process->errorOutput());
+            $output .= "\n++++++++++++++++OUTPUT END++++++++++++++++++\n";
+
+            Log::info($output);
+
+            return $output;
+
+        }
+        catch(\Exception $e) {
             $errorMessage = 'spatialGE Error: Could not execute command: "' . $command . '" in container with id: ' . $this->project->container_id;
             Log::info("***$$$ EXCEPTION: \n" . $errorMessage);
             return throwException(new \Exception($errorMessage));
