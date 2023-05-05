@@ -167,8 +167,10 @@ class spatialContainer {
             try {
                 if(!$this->isWindows()) {
                     $public_dir = Storage::path('/public/users/' . $this->project->user_id . '/' . $this->project->id . '/');
-                    $process = Process::run('chmod -R 755 ' . $public_dir);
+                    $commandline = 'chmod -R 755 ' . $public_dir;
+                    $process = Process::run($commandline);
                     $chmodout = "\n+++++++++++++++++CHMOD+++++++++++++++++\n";
+                    $chmodout = "COMMAND: $commandline\n";
                     $chmodout .= trim($process->output() . "\n" . $process->errorOutput());
                     $chmodout .= "\n++++++++++++++++CHMOD END++++++++++++++++++\n";
                     Log::info($chmodout);
