@@ -93,8 +93,6 @@ app.config.globalProperties.window = window;
 const getJobPositionInQueue = async (projectId, command) => {
     let position = 0;
     const response = await axios.get('/projects/' + projectId + '/get-job-position-in-queue', {params :{'command': command}});
-    //.then((response) => {return 22})
-    //.catch((error) => {return 44});
     return response.data;
 }
 app.config.globalProperties.$getJobPositionInQueue = getJobPositionInQueue;
@@ -114,10 +112,10 @@ let scripts = [
     '/assets/js/material-dashboard.js?v=3.0.4'];
 scripts.forEach((_script) => {
     const code = document.createElement("script");
-    code.setAttribute(
-        "src",
-        _script
-    );
+    //code.setAttribute("src",_script);
+    //code.setAttribute("async",false);
+    code.src=_script;
+    code.async = false;
     document.getElementById('app').appendChild(code);
 });
 
