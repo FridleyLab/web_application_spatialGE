@@ -170,7 +170,7 @@ class spatialContainer {
                     $commandline = 'chmod -R 755 ' . $public_dir;
                     $process = Process::run($commandline);
                     $chmodout = "\n+++++++++++++++++CHMOD+++++++++++++++++\n";
-                    $chmodout = "COMMAND: $commandline\n";
+                    $chmodout .= "COMMAND: $commandline\n";
                     $chmodout .= trim($process->output() . "\n" . $process->errorOutput());
                     $chmodout .= "\n++++++++++++++++CHMOD END++++++++++++++++++\n";
                     Log::info($chmodout);
