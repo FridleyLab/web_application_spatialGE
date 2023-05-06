@@ -13,6 +13,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Storage;
 
 class RunScript implements ShouldQueue
 {
@@ -31,6 +33,11 @@ class RunScript implements ShouldQueue
         //
     }
 
+
+    private function isWindows() : bool {
+        return (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+    }
+
     /**
      * Execute the job.
      */
@@ -42,6 +49,22 @@ class RunScript implements ShouldQueue
         Log::info("\nPARAMS: " . json_encode($this->parameters));
         $result = $this->project->$command($this->parameters);
         Log::info('**END** ' . $command);
+
+        //TODO: configure the docker image to run with the same user as apache or figure a better way to grant read permissions to files
+        try {
+            if(!$this->isWindows()) {
+                $public_dir = Storage::path('/public/users/' . $this->project->user_id . '/' . $this->project->id . '/');
+                $commandline = 'chown -R apache:apache ' . $public_dir;
+                $process = Process::run($commandline);
+                $chmodout = "\n+++++++++++++++++CHOWN+++++++++++++++++\n";
+                $chmodout .= "COMMAND: $commandline\n";
+                $chmodout .= trim($process->output() . "\n" . $process->errorOutput());
+                $chmodout .= "\n++++++++++++++++CHOWN END++++++++++++++++++\n";
+                Log::info($chmodout);
+            }
+        }
+        catch(\Exception $e) {}
+
 
         //Notify the user
         try {
