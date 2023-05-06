@@ -53,14 +53,15 @@ class RunScript implements ShouldQueue
         //TODO: configure the docker image to run with the same user as apache or figure a better way to grant read permissions to files
         try {
             if(!$this->isWindows()) {
-                $public_dir = Storage::path('/public/users/' . $this->project->user_id . '/' . $this->project->id . '/');
-                $commandline = 'chown -R apache:apache ' . $public_dir;
+                $public_dir = Storage::path('/public/users/' . $this->project->user_id . '/' /* . $this->project->id . '/' */);
+                //$commandline = 'chown -R apache:apache ' . $public_dir;
+                $commandline = 'chmod -R 755 ' . $public_dir;
                 $process = Process::run($commandline);
-                $chmodout = "\n+++++++++++++++++CHOWN+++++++++++++++++\n";
-                $chmodout .= "COMMAND: $commandline\n";
-                $chmodout .= trim($process->output() . "\n" . $process->errorOutput());
-                $chmodout .= "\n++++++++++++++++CHOWN END++++++++++++++++++\n";
-                Log::info($chmodout);
+                $chownout = "\n+++++++++++++++++CHOWN+++++++++++++++++\n";
+                $chownout .= "COMMAND: $commandline\n";
+                $chownout .= trim($process->output() . "\n" . $process->errorOutput());
+                $chownout .= "\n++++++++++++++++CHOWN END++++++++++++++++++\n";
+                Log::info($chownout);
             }
         }
         catch(\Exception $e) {}
