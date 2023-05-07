@@ -1,34 +1,81 @@
 <template>
-    <div v-if="samples.length" class="p-3 text-end">
-        <input v-if="!changingStep" type="button" class="btn btn-outline-success" :class="nextStepCssClasses" @click="nextStep" :value="nextStepLabel" />
-        <div v-if="changingStep">
+        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="processing ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
+        <div v-if="processing">
             <div class="text-info text-bold">
-                The [Data import] job has been submitted. You will get an email notification when completed. <br />
-                You can close this window or wait for it to reload when completed.<br />
+                Process sent to server<br />
+                Queue position: <span class="text-warning text-lg">{{ queuePosition }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span> <br />
+                [] email me when completed<br />
             </div>
-            <div v-if="jobPositionInQueue<=1">The job is being executed</div>
-            <div v-if="jobPositionInQueue>1">
-                The job position in the queue is: {{jobPositionInQueue}}
+            <div class="my-3">
+                <img src="/images/loading-circular.gif" class="me-6" style="width:100px" />
             </div>
         </div>
-
-        <!--                        <img v-if="changingStep" src="/images/loading-circular.gif" class="me-6" style="width:100px" />-->
-
-        <!--                        <input v-if="changingStep" type="button" class="btn btn-outline-warning me-2" @click="nextStep" value="Finished importing data, proceed" />-->
-        <!--                        <input v-if="changingStep" type="button" class="btn btn-outline-danger" @click="changingStep = false" value="Cancel" />-->
-
-    </div>
 </template>
 
 <script>
 export default {
     name: 'sendJobButton',
 
+    emits: ['started', 'completed'],
+
     props: {
-        processing: Boolean,
-        classes: {type: String, default: ''},
+
+        //classes: {type: String, default: ''},
         label: String,
-        queuePosition: Number,
-    }
+        projectId: Number,
+        jobName: String,
+    },
+
+    data() {
+        return {
+            queuePosition: -1,
+            checkQueueIntervalId: 0,
+            processing: false,
+        }
+    },
+
+    watch: {
+        queuePosition: {
+            handler: function (newValue, oldValue) {
+
+                if(oldValue < 0) return;
+
+                console.log('Queue position ' + this.jobName + ': ' + this.queuePosition);
+
+                if(!this.queuePosition) {
+                    clearInterval(this.checkQueueIntervalId);
+                    this.processing = false;
+                    this.$emit('completed')
+                }
+
+                if(this.queuePosition !== null && this.queuePosition>0)
+                    this.processing = true;
+            },
+            immediate: true
+        }
+    },
+
+    mounted() {
+        //this.updateJobPosition();
+        this.setIntervalQueue();
+    },
+
+    methods: {
+        sendStartSignal: function() {
+            this.setIntervalQueue();
+            this.processing = true;
+            this.$emit('started');
+        },
+
+
+        setIntervalQueue: function() {
+            //Clear any previously running interval
+            if(this.checkQueueIntervalId) clearInterval(this.checkQueueIntervalId);
+            this.checkQueueIntervalId = 0;
+
+            this.checkQueueIntervalId = setInterval(async () => {this.queuePosition =  await this.$getJobPositionInQueue(this.projectId, this.jobName);}, 1800);
+            console.log('Interval set: ' + this.jobName);
+        },
+    },
 }
 </script>

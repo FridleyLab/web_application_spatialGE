@@ -69,7 +69,7 @@ class SecurityController extends Controller
         if(strlen($password) < 8)
             return false;
 
-        //TODO: complete verifications
+        //TODO: complete same verifications used in the frontend
 
 
         return true;
@@ -128,7 +128,7 @@ class SecurityController extends Controller
             if(is_null($user->email_verified_at)) {
                 $user->email_verified_at = Carbon::now();
                 $user->save();
-                return response()->view('show-message', ['message' => 'Your account has been activated. Now you can ' . $link], 200);
+                return response()->view('show-message', ['message' => 'Your account has been activated! <br /> ' . $link], 200);
             }
             else { return response()->view('show-message', ['message' => 'Your account had already been activated! <br />' . $link], 400); }
         }

@@ -114,11 +114,11 @@
 <!--                                    </div>-->
 
                                     <div class="text-center">
-                                        <button type="submit" class="btn btn-lg bg-gradient-info btn-lg w-100 w-md-50 mt-4 mb-0">Sign Up</button>
+                                        <button type="submit" class="btn btn-lg bg-gradient-info btn-lg w-100 w-md-50 mt-4 mb-0" :class="processing ? 'disabled' : ''">Sign Up</button>
                                     </div>
                                 </form>
                             </div>
-                            <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                            <div v-if="!processing" class="card-footer text-center pt-0 px-lg-2 px-1">
                                 <p class="mb-2 text-sm mx-auto">
                                     Already have an account?
                                     <a :href="signInUrl" class="text-info text-gradient font-weight-bold">Sign in</a>
@@ -158,7 +158,9 @@
 
                 job: '',
                 interest: '',
-                industry: ''
+                industry: '',
+
+                processing: false,
 
                 //industries: ['Biotech', 'Contract Research Organization', 'Government', 'Hospital/Medical Center', 'Institute', 'Pharma', 'Service', 'University', 'Vendor'],
                 //jobs: ['Administrative', 'Bioinformatician', 'Biologist', 'Clinician', 'Data Analyst', 'Data Scientist', 'Field Application Scientist', 'Graduate Student', 'Intern', 'Lab Director', 'Lab Manager', 'Lab Technician', 'Non-scientific', 'Pathologist', 'Physician', 'Post-Doctoral', 'Principal Investigator', 'Professor', 'Researcher', 'Scientist', 'Senior Scientist', 'Statistician', 'Student', 'Undergraduate Student', 'Other'],
@@ -211,12 +213,15 @@
                     return;
                 }
 
+                this.processing = true;
+
                 axios.post(this.targetUrl , {'first_name' : this.first_name, 'last_name' : this.last_name, 'email' : this.email, 'password': this.password, 'job': this.job, 'interest': this.interest, 'industry': this.industry})
                     .then((response) => {
                         //this.errorMessage = response.data;
                         window.location.href = response.data;
                     })
                     .catch((error) => {
+                        this.processing = false;
                         console.log(error.message);
                         this.errorMessage = error.response.data;
                     });

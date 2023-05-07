@@ -33,6 +33,8 @@ import stplotExpressionSurface from "./components/wizard/components/stplot-expre
 import sthetSpatialHet from "./components/wizard/sthet-spatial-het.vue";
 import sthetPlot from "./components/wizard/components/sthet-plot.vue";
 
+import sendJobButton from "./components/common/send-job-button.vue";
+
 
 // Vuetify
 /*import 'vuetify/styles'
@@ -83,6 +85,8 @@ app.component('stplot-expression-surface', stplotExpressionSurface);
 
 app.component('sthet-spatial-het', sthetSpatialHet);
 app.component('sthet-plot', sthetPlot);
+
+app.component('send-job-button', sendJobButton);
 
 //Register the window as a global variable, so it can be accessed everywhere
 app.config.globalProperties.window = window;

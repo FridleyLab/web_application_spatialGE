@@ -232,25 +232,30 @@
 
 
 
-        <div class="row">
-            <div class="w-100 float-end">
-                <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
-                    <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Run Filter' }}</button>
-
-<!--                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />-->
-                </div>
-                <div v-if="processing" class="float-end m-4">
-                    <div v-if="processing" class="text-info text-bold">
-                        The [Filter data] job has been submitted. You will get an email notification when completed. <br />
-                        You can close this window or wait for it to reload when completed.
-                    </div>
-                    <div v-if="jobPositionInQueue<=1">The job is being executed</div>
-                    <div v-if="jobPositionInQueue>1">
-                        The job position in the queue is: {{jobPositionInQueue}}
-                    </div>
-                </div>
-            </div>
+        <div class="p-3 text-end">
+            <send-job-button label="Apply filter" :project-id="project.id" job-name="applyFilter" @started="startProcess" @completed="" ></send-job-button>
         </div>
+
+
+<!--        <div class="row">-->
+<!--            <div class="w-100 float-end">-->
+<!--                <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">-->
+<!--                    <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Run Filter' }}</button>-->
+
+<!--&lt;!&ndash;                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />&ndash;&gt;-->
+<!--                </div>-->
+<!--                <div v-if="processing" class="float-end m-4">-->
+<!--                    <div v-if="processing" class="text-info text-bold">-->
+<!--                        The [Filter data] job has been submitted. You will get an email notification when completed. <br />-->
+<!--                        You can close this window or wait for it to reload when completed.-->
+<!--                    </div>-->
+<!--                    <div v-if="jobPositionInQueue<=1">The job is being executed</div>-->
+<!--                    <div v-if="jobPositionInQueue>1">-->
+<!--                        The job position in the queue is: {{jobPositionInQueue}}-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
         <div v-if="'filter_violin' in project.project_parameters">
 
@@ -399,9 +404,9 @@
             }
         },
 
-        mounted() {
-            this.setIntervalQueue();
-        },
+        // mounted() {
+        //     this.setIntervalQueue();
+        // },
 
         /*computed: {
             samplesToFilter() {
@@ -416,28 +421,28 @@
                 console.log(this.params.gene_minspots);
             },
 
-            jobPositionInQueue: {
-                handler: function (newValue, oldValue) {
-                    console.log('---', this.jobPositionInQueue);
-                    if(this.jobPositionInQueue) this.reloadPage = true;
-                    this.processing = !!this.jobPositionInQueue;
-                    if(!this.jobPositionInQueue) {
-                        clearInterval(this.checkQueueIntervalId);
-                        if(this.reloadPage) location.reload();
-                    }
-                },
-                immediate: true
-            }
+            // jobPositionInQueue: {
+            //     handler: function (newValue, oldValue) {
+            //         console.log('---', this.jobPositionInQueue);
+            //         if(this.jobPositionInQueue) this.reloadPage = true;
+            //         this.processing = !!this.jobPositionInQueue;
+            //         if(!this.jobPositionInQueue) {
+            //             clearInterval(this.checkQueueIntervalId);
+            //             if(this.reloadPage) location.reload();
+            //         }
+            //     },
+            //     immediate: true
+            // }
         },
 
 
         methods: {
             toJSON,
 
-            setIntervalQueue: function() {
-                this.checkQueueIntervalId = setInterval(async () => {this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'applyFilter');}, 1800);
-                console.log('Interval set');
-            },
+            // setIntervalQueue: function() {
+            //     this.checkQueueIntervalId = setInterval(async () => {this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'applyFilter');}, 1800);
+            //     console.log('Interval set');
+            // },
 
             removeSample(e) {
                 console.log(e);
