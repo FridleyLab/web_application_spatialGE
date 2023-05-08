@@ -34,18 +34,23 @@
         </div>
 
         <div class="row mt-3">
-            <div class="float-end">
-                <input v-if="!generating_pca" type="button" class="btn btn-outline-info float-end" :class="generating_pca || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating_pca ? 'Please wait...' : 'Generate plots'" @click="applyPca">
-<!--                <img v-if="generating_pca" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />-->
+
+            <div class="p-3 text-end">
+                <send-job-button label="Generate plots" :disabled="generating_pca || !params.color_pal.length || !params.plot_meta.length" :project-id="project.id" job-name="applyPca" @started="applyPca" @completed="processCompleted" :project="project" ></send-job-button>
             </div>
-            <div v-if="generating_pca" class="text-info text-bold float-end m-4">
-                The [Principal Component Analysis - PCA] job has been submitted. You will get an email notification when completed. <br />
-                You can close this window or reload it when notified.
-            </div>
+
+<!--            <div class="float-end">-->
+<!--                <input v-if="!generating_pca" type="button" class="btn btn-outline-info float-end" :class="generating_pca || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating_pca ? 'Please wait...' : 'Generate plots'" @click="applyPca">-->
+<!--&lt;!&ndash;                <img v-if="generating_pca" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />&ndash;&gt;-->
+<!--            </div>-->
+<!--            <div v-if="generating_pca" class="text-info text-bold float-end m-4">-->
+<!--                The [Principal Component Analysis - PCA] job has been submitted. You will get an email notification when completed. <br />-->
+<!--                You can close this window or reload it when notified.-->
+<!--            </div>-->
         </div>
 
 
-        <div class="mt-4" v-if="'pseudo_bulk_pca' in project.project_parameters">
+        <div class="mt-4" v-if="!generating_pca && 'pseudo_bulk_pca' in project.project_parameters">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="pcaplot-tab" data-bs-toggle="tab" data-bs-target="#pcaplot" type="button" role="tab" aria-controls="pcaplot" aria-selected="true">PCA plot</button>
@@ -151,8 +156,8 @@ import Multiselect from '@vueform/multiselect';
                 this.generating_pca = true;
                 axios.post(this.pcaUrl, this.params)
                     .then((response) => {
-                        for(let property in response.data)
-                            this.project.project_parameters[property] = response.data[property];
+                        //for(let property in response.data)
+                        //    this.project.project_parameters[property] = response.data[property];
                         //this.generating_pca = false;
                     })
                     .catch((error) => {
@@ -160,6 +165,10 @@ import Multiselect from '@vueform/multiselect';
                         console.log(error.message)
                     })
             },
+
+            processCompleted() {
+                this.generating_pca = false;
+            }
         },
 
     }

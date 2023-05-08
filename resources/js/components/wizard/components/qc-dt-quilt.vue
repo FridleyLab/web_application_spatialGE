@@ -48,14 +48,19 @@
             </div>
 
             <div class="row mt-3">
-                <div class="float-end">
-                    <input v-if="!generating_quilt" type="button" class="btn btn-outline-info float-end" :class="generating_quilt || !params.color_pal.length || !params.plot_meta.length || !params.sample1.length || !params.sample2.length || (params.sample1===params.sample2) ? 'disabled' : ''" :value="generating_quilt ? 'Please wait...' : 'Generate plot'" @click="quiltPlot">
-<!--                    <img v-if="generating_quilt" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />-->
+
+                <div class="p-3 text-end">
+                    <send-job-button label="Generate plots" :disabled="generating_quilt || !params.color_pal.length || !params.plot_meta.length || !params.sample1.length || !params.sample2.length || (params.sample1===params.sample2)" :project-id="project.id" job-name="quiltPlot" @started="quiltPlot" @completed="processCompleted" :project="project" ></send-job-button>
                 </div>
-                <div v-if="generating_quilt" class="text-info text-bold float-end m-4">
-                    The [Quilt Plot] job has been submitted. You will get an email notification when completed. <br />
-                    You can close this window or reload it when notified.
-                </div>
+
+<!--                <div class="float-end">-->
+<!--                    <input v-if="!generating_quilt" type="button" class="btn btn-outline-info float-end" :class="generating_quilt || !params.color_pal.length || !params.plot_meta.length || !params.sample1.length || !params.sample2.length || (params.sample1===params.sample2) ? 'disabled' : ''" :value="generating_quilt ? 'Please wait...' : 'Generate plot'" @click="quiltPlot">-->
+<!--&lt;!&ndash;                    <img v-if="generating_quilt" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />&ndash;&gt;-->
+<!--                </div>-->
+<!--                <div v-if="generating_quilt" class="text-info text-bold float-end m-4">-->
+<!--                    The [Quilt Plot] job has been submitted. You will get an email notification when completed. <br />-->
+<!--                    You can close this window or reload it when notified.-->
+<!--                </div>-->
             </div>
 
 
@@ -143,15 +148,19 @@ import Multiselect from '@vueform/multiselect';
                 this.generating_quilt = true;
                 axios.post(this.quiltUrl, this.params)
                     .then((response) => {
-                        for(let property in response.data)
+                        /*for(let property in response.data)
                             this.project.project_parameters[property] = response.data[property];
-                        this.generating_quilt = false;
+                        this.generating_quilt = false;*/
                     })
                     .catch((error) => {
                         this.generating_quilt = false;
                         console.log(error.message)
                     })
             },
+
+            processCompleted() {
+                this.generating_quilt = false;
+            }
         },
 
     }
