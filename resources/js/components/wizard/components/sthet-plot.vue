@@ -104,6 +104,9 @@
 
                     <div class="text-center m-4">
                         <div>
+                            <a v-if="'sthet_plot_table_results' in project.project_parameters" :href="project.project_parameters.sthet_plot_table_results + '.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Download results</a>
+                        </div>
+                        <div>
                             <object :data="project.project_parameters.sthet_plot + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                         </div>
                         <div class="">

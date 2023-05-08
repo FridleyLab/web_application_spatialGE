@@ -1,5 +1,6 @@
 <template>
-        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
+<!--        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />-->
+        <input v-if="!processing" type="button" class="btn btn-lg bg-gradient-info mt-2 mb-0" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
         <div v-if="processing">
             <div class="text-info text-bold">
                 <div>
