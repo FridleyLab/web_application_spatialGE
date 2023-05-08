@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function() {
 
 
     Route::get('/projects/{project}/get-job-position-in-queue',[ProjectController::class, 'getJobPositionInQueue'])->name('get-job-position-in-queue')->middleware('project');
+    Route::get('/projects/{project}/set-job-email-notification',[ProjectController::class, 'setJobEmailNotification'])->name('set-job-email-notification')->middleware('project');
 
 
 

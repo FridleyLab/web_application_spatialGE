@@ -146,6 +146,15 @@ class ProjectController extends Controller
         return $jobId ? $project->getJobPositionInQueue($jobId) : 0;
     }
 
+    public function setJobEmailNotification(Project $project) {
+
+        $command = request('command');
+        $sendEmail = request('sendemail', false);
+        $project->setJobEmailNotification($command, $sendEmail);
+
+        return 'OK';
+    }
+
     public function createStList(Project $project) {
 
         //$project->createStList();

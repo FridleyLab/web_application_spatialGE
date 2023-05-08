@@ -50,26 +50,34 @@ class RunScript implements ShouldQueue
         $result = $this->project->$command($this->parameters);
         Log::info('**END** ' . $command);
 
-        //TODO: configure the docker image to run with the same user as apache or figure a better way to grant read permissions to files
         try {
-            if(!$this->isWindows()) {
-                $public_dir = Storage::path('/public/users/' . $this->project->user_id . '/' /* . $this->project->id . '/' */);
+            if(!$this->isWindows()) { //change folder permissions so the generated files and plots can be viewed and downloaded
+                $public_dir = Storage::path('/public/users/' . $this->project->user_id . '/');
                 //$commandline = 'chown -R apache:apache ' . $public_dir;
                 $commandline = 'chmod -R 755 ' . $public_dir;
                 $process = Process::run($commandline);
-                $chownout = "\n+++++++++++++++++CHOWN+++++++++++++++++\n";
-                $chownout .= "COMMAND: $commandline\n";
-                $chownout .= trim($process->output() . "\n" . $process->errorOutput());
-                $chownout .= "\n++++++++++++++++CHOWN END++++++++++++++++++\n";
-                Log::info($chownout);
+
+                //Log CHMOD output -- when debugging
+                /*$chownout = "\n+++++++++++++++++CHOWN+++++++++++++++++\n";
+                $chmodout .= "COMMAND: $commandline\n";
+                $chmodout .= trim($process->output() . "\n" . $process->errorOutput());
+                $chmodout .= "\n++++++++++++++++CHOWN END++++++++++++++++++\n";
+                Log::info($chmodout);*/
             }
         }
         catch(\Exception $e) {}
 
 
-        //Notify the user
+        //Notify the user if requested
         try {
-            Mail::to($this->project->user->email)->send(new notifyProcessCompleted($this->project, $this->description, $result['output']));
+            //Load the project again because this class' instance was loaded when the process started and the user could've changed their mind
+            $this->project->fresh();
+            //$project = Project::findOrFail($this->project->id);
+
+            //Check if the user requested to be notified via email
+            $key = "job.{$this->command}.email";
+            if( array_key_exists($key, $this->project->project_parameters) && intval($this->project->project_parameters[$key]))
+                Mail::to($this->project->user->email)->send(new notifyProcessCompleted($this->project, $this->description, $result['output']));
         }
         catch (\Exception $e)
         {

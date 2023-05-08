@@ -1165,8 +1165,16 @@ $export_files
 
         //save the jobId to the project parameters table
         ProjectParameter::updateOrCreate(['parameter' => 'job.' . $command, 'project_id' => $this->id], ['type' => 'number', 'value' => $jobId]);
+        //Set the email notification off by default
+        $this->setJobEmailNotification($command, 0);
 
         return $jobId;
+
+    }
+
+    public function setJobEmailNotification($command, $sendEmail) {
+
+        ProjectParameter::updateOrCreate(['parameter' => 'job.' . $command . '.email', 'project_id' => $this->id], ['type' => 'number', 'value' => $sendEmail ? 1 : 0]);
 
     }
 
