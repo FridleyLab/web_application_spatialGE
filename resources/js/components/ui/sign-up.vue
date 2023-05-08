@@ -39,7 +39,7 @@
                                         <div class="w-50">
                                             <div class="input-group input-group-outline mb-3" :class="(validEmailAddress && email === emailConfirmation) ? 'is-valid' : ''">
                                                 <label class="form-label">Email confirmation </label>
-                                                <input required type="email_confirmation" class="form-control" name="emailConfirmation" v-model="emailConfirmation">
+                                                <input required type="email" class="form-control" name="emailConfirmation" v-model="emailConfirmation">
                                             </div>
                                         </div>
                                     </div>
@@ -58,7 +58,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <show-message :message="errorMessagePassword" role="danger"></show-message>
+                                    <show-message v-if="!passwordStrength" :message="errorMessagePassword" role="danger"></show-message>
 
                                     <div class="mb-3">
                                         <div>Please select the main sector you work with</div>
