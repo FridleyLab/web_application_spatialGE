@@ -177,15 +177,18 @@
 
                 if(!this.password.length) return true;
 
+                let upperLower = new RegExp('(?=.*[a-z])(?=.*[A-Z])');
+                let numbers = new RegExp('(?=.*[0-9])');
                 let strongPassword = new RegExp('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})');
+                let specialChars = new RegExp('(?=.*[^A-Za-z0-9])');
                 //let mediumPassword = new RegExp('((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{6,}))|((?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9])(?=.{8,}))');
                 if(!strongPassword.test(this.password)) {
                     this.errorMessagePassword =
                         'Password must:<ul>' +
-                            '<li>Be at least 8 characters long</li>' +
-                            '<li>Contain upper/lower case letter(s)</li>' +
-                            '<li>Contain number(s)</li>' +
-                            '<li>Contain special character(s) (+, -, *, etc.)</li>' +
+                        (this.password.length < 8 ? '<li>Be at least 8 characters long</li>' : '') +
+                        (!upperLower.test(this.password) ? '<li>Contain upper/lower case letter(s)</li>' : '') +
+                        (!numbers.test(this.password) ? '<li>Contain number(s)</li>' : '') +
+                        (!specialChars.test(this.password) ? '<li>Contain special character(s) (+, -, *, etc.)</li>' : '') +
                         '</ul>';
                 }
                 return strongPassword.test(this.password);
