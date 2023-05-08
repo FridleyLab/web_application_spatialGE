@@ -76,6 +76,7 @@ export default {
 
     methods: {
         sendStartSignal: function() {
+            this.sendEmail = 0;
             this.setIntervalQueue();
             this.processing = true;
             this.$emit('started');

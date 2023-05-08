@@ -1087,9 +1087,9 @@ $export_files
 
         $result = [];
 
-        $parameterNames = ['sthet_plot'];
+        $parameterNames = ['sthet_plot', 'sthet_plot_table_results'];
         foreach($parameterNames as $parameterName) {
-            $file_extensions = ['svg', 'pdf', 'png'];
+            $file_extensions = ['svg', 'pdf', 'png', 'xlsx'];
             foreach ($file_extensions as $file_extension) {
                 $fileName = $parameterName . '.' . $file_extension;
                 $file = $workingDir . $fileName;
@@ -1135,6 +1135,10 @@ stlist_sthet = SThet(normalized_stlist, genes=$_genes, method=$_method)
 sthet_plot = compare_SThet(stlist_sthet, samplemeta='$plot_meta', genes=$_genes, color_pal='$color_pal')
 
 $export_files
+
+# Get table with SThet results
+sthet_table = get_gene_meta(normalized_stlist, sthet_only=T)
+openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
 
 ";
 
