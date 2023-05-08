@@ -49,14 +49,19 @@
         </div>
 
         <div class="row mt-3">
-            <div class="float-end">
-                <input v-if="!generating_quilt" type="button" class="btn btn-outline-info float-end" :class="generating_quilt || !params.genes.length  ? 'disabled' : ''" :value="generating_quilt ? 'Please wait...' : 'Generate plots'" @click="quiltPlot">
-<!--                <img v-if="generating_quilt" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />-->
+
+            <div class="p-3 text-end">
+                <send-job-button label="Generate plots" :disabled="generating_quilt || !params.col_pal.length || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="quiltPlot" @completed="processCompleted" :project="project" ></send-job-button>
             </div>
-            <div v-if="generating_quilt" class="text-info text-bold float-end m-4">
-                The [Expression surface plot] job has been submitted. You will get an email notification when completed. <br />
-                You can close this window or reload it when notified.
-            </div>
+
+<!--            <div class="float-end">-->
+<!--                <input v-if="!generating_quilt" type="button" class="btn btn-outline-info float-end" :class="generating_quilt || !params.genes.length  ? 'disabled' : ''" :value="generating_quilt ? 'Please wait...' : 'Generate plots'" @click="quiltPlot">-->
+<!--&lt;!&ndash;                <img v-if="generating_quilt" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />&ndash;&gt;-->
+<!--            </div>-->
+<!--            <div v-if="generating_quilt" class="text-info text-bold float-end m-4">-->
+<!--                The [Expression surface plot] job has been submitted. You will get an email notification when completed. <br />-->
+<!--                You can close this window or reload it when notified.-->
+<!--            </div>-->
         </div>
 
 
@@ -188,13 +193,18 @@ import Multiselect from '@vueform/multiselect';
                 this.generating_quilt = true;
                 axios.post(this.stplotExpressionSurfaceUrl, this.params)
                     .then((response) => {
-                        this.plots = response.data;
+                        //this.plots = response.data;
                         //this.generating_quilt = false;
                     })
                     .catch((error) => {
                         //this.generating_quilt = false;
                         console.log(error.message);
                     })
+            },
+
+            processCompleted() {
+                this.plots = ('stplot_expression_surface' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_expression_surface) : {};
+                this.generating_quilt = false;
             },
 
             hide_plot: function(gene, sample) {

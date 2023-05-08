@@ -77,18 +77,23 @@
         </div>
 
         <div class="row mt-3">
-            <div class="float-end">
-                <input v-if="!generating" type="button" class="btn btn-outline-info float-end" :class="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating ? 'Please wait...' : 'Generate plots'" @click="sthetPlot">
-<!--                <img v-if="generating" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />-->
+
+            <div class="p-3 text-end">
+                <send-job-button label="Generate plots" :disabled="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length" :project-id="project.id" job-name="SThetPlot" @started="sthetPlot" @completed="processCompleted" :project="project" ></send-job-button>
             </div>
-            <div v-if="generating" class="text-info text-bold float-end m-4">
-                The [Spatial heterogeneity] job has been submitted. You will get an email notification when completed. <br />
-                You can close this window or reload it when notified.
-            </div>
+
+<!--            <div class="float-end">-->
+<!--                <input v-if="!generating" type="button" class="btn btn-outline-info float-end" :class="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating ? 'Please wait...' : 'Generate plots'" @click="sthetPlot">-->
+<!--&lt;!&ndash;                <img v-if="generating" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />&ndash;&gt;-->
+<!--            </div>-->
+<!--            <div v-if="generating" class="text-info text-bold float-end m-4">-->
+<!--                The [Spatial heterogeneity] job has been submitted. You will get an email notification when completed. <br />-->
+<!--                You can close this window or reload it when notified.-->
+<!--            </div>-->
         </div>
 
 
-        <div class="mt-4" v-if="'sthet_plot' in project.project_parameters">
+        <div class="mt-4" v-if="!generating && 'sthet_plot' in project.project_parameters">
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="nd-sthetplot-tab" data-bs-toggle="tab" data-bs-target="#nd-sthetplot" type="button" role="tab" aria-controls="nd-sthetplot" aria-selected="true">SThet plot</button>
@@ -154,7 +159,7 @@ export default {
     watch: {
         params: {
             handler(newValue, oldValue) {
-                console.log(this.params);
+                //console.log(this.params);
             },
             deep: true
         }
@@ -167,14 +172,18 @@ export default {
             this.generating = true;
             axios.post(this.sthetPlotUrl, this.params)
                 .then((response) => {
-                    for(let property in response.data)
-                        this.project.project_parameters[property] = response.data[property];
+                    //for(let property in response.data)
+                    //    this.project.project_parameters[property] = response.data[property];
                     //this.generating = false;
                 })
                 .catch((error) => {
                     //this.generating = false;
                     console.log(error.message)
                 })
+        },
+
+        processCompleted() {
+            this.generating = false;
         },
 
         searchGenes: async function(query) {

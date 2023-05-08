@@ -289,11 +289,12 @@ class ProjectController extends Controller
             'data_type' => request('data_type')
         ];
 
-        RunScript::dispatch('STplot - Quilt plot', $project, 'STplotQuilt', $parameters);
+        //RunScript::dispatch('STplot - Quilt plot', $project, 'STplotQuilt', $parameters);
 
         //return $project->STplotQuilt($parameters);
 
-        return 'OK';
+        $jobId = $project->createJob('STplot - Quilt plot', 'STplotQuilt', $parameters);
+        return $project->getJobPositionInQueue($jobId);
 
     }
 
@@ -304,11 +305,12 @@ class ProjectController extends Controller
             'col_pal' => request('col_pal'),
         ];
 
-        RunScript::dispatch('STplot - Expression surface', $project, 'STplotExpressionSurface', $parameters);
+        //RunScript::dispatch('STplot - Expression surface', $project, 'STplotExpressionSurface', $parameters);
 
         //return $project->STplotExpressionSurface($parameters);
 
-        return 'OK';
+        $jobId = $project->createJob('STplot - Expression surface', 'STplotExpressionSurface', $parameters);
+        return $project->getJobPositionInQueue($jobId);
 
     }
 
@@ -327,11 +329,12 @@ class ProjectController extends Controller
             'plot_meta' => request('plot_meta')
         ];
 
-        RunScript::dispatch('SThet - Spatial heterogeneity', $project, 'SThetPlot', $parameters);
+        //RunScript::dispatch('SThet - Spatial heterogeneity', $project, 'SThetPlot', $parameters);
 
         //return $project->SThetPlot($parameters);
 
-        return 'OK';
+        $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThetPlot', $parameters);
+        return $project->getJobPositionInQueue($jobId);
 
     }
 
