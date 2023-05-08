@@ -126,10 +126,16 @@ import Multiselect from '@vueform/multiselect';
                     hm_display_genes: 30
                 },
 
-                plot_meta_options: ['race', 'therapy'],
+                //plot_meta_options: ['race', 'therapy'],
+                plot_meta_options: 'metadata_names' in this.project.project_parameters ? this.project.project_parameters.metadata_names : [],
 
                 generating_pca: false,
             }
+        },
+
+        mounted() {
+            console.log(this.project.project_parameters);
+            console.log(this.project.project_parameters.metadata_names);
         },
 
         watch: {

@@ -58,6 +58,14 @@ class Project extends Model
 
         $params['total_genes'] = $this->genes()->count();
 
+        if(array_key_exists('metadata', $params))
+        {
+            $names = [];
+            foreach(json_decode($params['metadata']) as $meta)
+                $names[] = $meta->name;
+            $params['metadata_names'] = $names;
+        }
+
         return $params;
     }
 

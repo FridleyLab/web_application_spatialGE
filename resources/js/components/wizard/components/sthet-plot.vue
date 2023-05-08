@@ -152,7 +152,8 @@ export default {
 
             generating: false,
 
-            plot_meta_options: ['race', 'therapy'],
+            //plot_meta_options: ['race', 'therapy'],
+            plot_meta_options: 'metadata_names' in this.project.project_parameters ? this.project.project_parameters.metadata_names : [],
         }
     },
 
