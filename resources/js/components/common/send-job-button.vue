@@ -1,9 +1,9 @@
 <template>
-        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="processing ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
+        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
         <div v-if="processing">
             <div class="text-info text-bold">
                 Process sent to server<br />
-                Queue position: <span class="text-warning text-lg">{{ queuePosition }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span> <br />
+                <div v-if="queuePosition>0">Queue position: <span class="text-warning text-lg">{{ queuePosition }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span> <br /></div>
                 [] email me when completed<br />
             </div>
             <div class="my-3">
@@ -24,6 +24,8 @@ export default {
         label: String,
         projectId: Number,
         jobName: String,
+        project: {type: Object, default: null},
+        disabled: {type: Boolean, default: false},
     },
 
     data() {
@@ -40,12 +42,12 @@ export default {
 
                 if(oldValue < 0) return;
 
-                console.log('Queue position ' + this.jobName + ': ' + this.queuePosition);
+                //console.log('Queue position ' + this.jobName + ': ' + this.queuePosition);
 
                 if(!this.queuePosition) {
                     clearInterval(this.checkQueueIntervalId);
                     this.processing = false;
-                    this.$emit('completed')
+                    this.updateProjectParameters();
                 }
 
                 if(this.queuePosition !== null && this.queuePosition>0)
@@ -72,10 +74,23 @@ export default {
             //Clear any previously running interval
             if(this.checkQueueIntervalId) clearInterval(this.checkQueueIntervalId);
             this.checkQueueIntervalId = 0;
-
+            //Create the interval to check queue position
             this.checkQueueIntervalId = setInterval(async () => {this.queuePosition =  await this.$getJobPositionInQueue(this.projectId, this.jobName);}, 1800);
-            console.log('Interval set: ' + this.jobName);
         },
+
+        updateProjectParameters: function() {
+            if(this.project === null) {
+                this.$emit('completed');
+            }
+            else {
+                axios.get('/projects/' + this.project.id + '/get-project-parameters')
+                    .then((response) => {
+                        this.project.project_parameters = response.data;
+                        this.$emit('completed');
+                    })
+                    .catch((error) => console.log(error));
+            }
+        }
     },
 }
 </script>

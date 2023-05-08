@@ -79,6 +79,12 @@ class ProjectController extends Controller
         return response(route('my-projects'));
     }
 
+    public function getProjectParameters(Project $project) {
+
+        return $project->project_parameters;
+
+    }
+
 
     public function import_data(Project $project): View
     {
@@ -213,11 +219,13 @@ class ProjectController extends Controller
 
     public function generateFilterPlots(Project $project) {
 
-        RunScript::dispatch('Generate filter plots', $project, 'generateFilterPlots', ['color_palette' => request('color_palette'), 'variable' => request('variable')]);
+
+        //RunScript::dispatch('Generate filter plots', $project, 'generateFilterPlots', ['color_palette' => request('color_palette'), 'variable' => request('variable')]);
 
         //$project->generateFilterPlots(['color_palette' => request('color_palette'), 'variable' => request('variable')]);
 
-        return response('OK');
+        $jobId = $project->createJob('Generate filter plots', 'generateFilterPlots', ['color_palette' => request('color_palette'), 'variable' => request('variable')]);
+        return $project->getJobPositionInQueue($jobId);
     }
 
     public function applyNormalization(Project $project) {
@@ -225,21 +233,22 @@ class ProjectController extends Controller
         $project->current_step = 4;
         $project->save();
 
-        RunScript::dispatch('Normalize data', $project, 'applyNormalization', request('parameters'));
+        $jobId = $project->createJob('Normalize data', 'applyNormalization', request('parameters'));
 
-        //return $project->applyNormalization(request('parameters'));
+        //RunScript::dispatch('Normalize data', $project, 'applyNormalization', request('parameters'));
 
-        return 'OK';
+        return $project->getJobPositionInQueue($jobId);
 
     }
 
     public function generateNormalizationPlots(Project $project) {
 
-        RunScript::dispatch('Generate normalization plots', $project, 'generateNormalizationPlots', ['color_palette' => request('color_palette'), 'gene' => request('gene')]);
+        //RunScript::dispatch('Generate normalization plots', $project, 'generateNormalizationPlots', ['color_palette' => request('color_palette'), 'gene' => request('gene')]);
 
         //$project->generateNormalizationPlots(['color_palette' => request('color_palette'), 'gene' => request('gene')]);
 
-        return response('OK');
+        $jobId = $project->createJob('Generate normalization plots', 'generateNormalizationPlots', ['color_palette' => request('color_palette'), 'gene' => request('gene')]);
+        return $project->getJobPositionInQueue($jobId);
     }
 
     public function applyPca(Project $project) {

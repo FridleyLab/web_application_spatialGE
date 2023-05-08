@@ -34,8 +34,11 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/new',[ProjectController::class, 'create'])->name('new-project');
     Route::get('/projects/{project}',[ProjectController::class, 'open'])->name('open-project')->middleware('project');
     Route::get('/projects/{project}/edit',[ProjectController::class, 'edit'])->name('edit-project')->middleware('project');
-    Route::get('/projects/{project}/go-to-step/{step}',[ProjectController::class, 'go_to_step'])->name('go-to-step')->middleware('project');
     Route::patch('/projects/{project}',[ProjectController::class, 'update'])->name('update-project')->middleware('project');
+    Route::get('/projects/{project}/get-project-parameters',[ProjectController::class, 'getProjectParameters'])->name('get-project-parameters')->middleware('project');
+
+    Route::get('/projects/{project}/go-to-step/{step}',[ProjectController::class, 'go_to_step'])->name('go-to-step')->middleware('project');
+
     Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data')->middleware('project');
     Route::post('/projects/{project}/save-metadata',[ProjectController::class, 'save_metadata'])->name('save-metadata')->middleware('project');
     Route::get('/projects/{project}/qc-data-transformation',[ProjectController::class, 'qc_data_transformation'])->name('qc-data-transformation')->middleware('project');

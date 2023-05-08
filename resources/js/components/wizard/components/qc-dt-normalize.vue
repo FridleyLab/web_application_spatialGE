@@ -31,7 +31,7 @@
 
                         <h5 class="mt-4">Count distribution by sample</h5>
 
-                        <div class="mt-4" v-if="!generating_plots && ('normalized_boxplot_1' in project.project_parameters)">
+                        <div class="mt-4" v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
                             <ul class="nav nav-tabs" id="logNormalizedDiagrams" role="tablist">
 
                                 <li class="nav-item" role="presentation">
@@ -129,35 +129,40 @@
 
                         <h5 class="mt-4">Count distribution by gene</h5>
 
-                        <div v-if="'normalized_violin' in project.project_parameters">
 
-                            <div class="row mt-5 row-cols-2">
-                                <div class="col">
-                                    <div>Color palette</div>
-                                    <div><Multiselect :options="colorPalettes" v-model="filter_color_palette"></Multiselect></div>
-                                </div>
-                                <div class="col">
-                                    <div>Gene</div>
-                                    <div>
-                                        <Multiselect
+                        <div class="row mt-5 row-cols-2">
+                            <div class="col">
+                                <div>Color palette</div>
+                                <div><Multiselect :options="colorPalettes" v-model="filter_color_palette"></Multiselect></div>
+                            </div>
+                            <div class="col">
+                                <div>Gene</div>
+                                <div>
+                                    <Multiselect
 
-                                            v-model="selected_gene"
-                                            placeholder="Select options"
-                                            :close-on-select="true"
-                                            :searchable="true"
-                                            :resolve-on-load="false"
-                                            :delay="0"
-                                            :min-chars="1"
-                                            :options="async (query) => { return await searchGenes(query) }"
-                                        />
-                                    </div>
+                                        v-model="selected_gene"
+                                        placeholder="Select options"
+                                        :close-on-select="true"
+                                        :searchable="true"
+                                        :resolve-on-load="false"
+                                        :delay="0"
+                                        :min-chars="1"
+                                        :options="async (query) => { return await searchGenes(query) }"
+                                    />
                                 </div>
                             </div>
-                            <div class="row mt-3">
-                                <div class="float-end">
-                                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots || !filter_color_palette.length || !selected_gene.length ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="normalizedPlots">
-                                </div>
+                        </div>
+                        <div class="row mt-3">
+
+                            <div class="p-3 text-end">
+                                <send-job-button label="Generate plots" :disabled="generating_plots || !filter_color_palette.length || !selected_gene.length" :project-id="project.id" job-name="generateNormalizationPlots" @started="normalizedPlots" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
                             </div>
+
+                            <!--                                <div class="float-end">-->
+                            <!--                                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots || !filter_color_palette.length || !selected_gene.length ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="normalizedPlots">-->
+                            <!--                                </div>-->
+                        </div>
+                        <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
 
                             <div class="mt-4" v-if="!generating_plots">
                                 <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
@@ -247,18 +252,25 @@
         </div>
 
 
-        <div class="row">
-            <div class="w-100">
-                <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">
-                    <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Normalize' }}</button>
-<!--                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />-->
-                </div>
-                <div v-if="processing" class="text-info text-bold float-end m-4">
-                    The [Normalize data] job has been submitted. You will get an email notification when completed. <br />
-                    You can close this window or reload it when notified.
-                </div>
-            </div>
+
+
+        <div class="p-3 text-end">
+            <send-job-button label="Normalize data" :project-id="project.id" job-name="applyNormalization" @started="startProcess" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
+
+
+<!--        <div class="row">-->
+<!--            <div class="w-100">-->
+<!--                <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">-->
+<!--                    <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Normalize' }}</button>-->
+<!--&lt;!&ndash;                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />&ndash;&gt;-->
+<!--                </div>-->
+<!--                <div v-if="processing" class="text-info text-bold float-end m-4">-->
+<!--                    The [Normalize data] job has been submitted. You will get an email notification when completed. <br />-->
+<!--                    You can close this window or reload it when notified.-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
 
 
@@ -314,11 +326,11 @@ import Multiselect from '@vueform/multiselect';
 
                 axios.post(this.normalizeUrl, {parameters: this.params})
                     .then((response) => {
-                        console.log(response.data);
+                        //console.log(response.data);
                         //this.processing = false;
 
-                        for(let property in response.data)
-                            this.project.project_parameters[property] = response.data[property];
+                        //for(let property in response.data)
+                            //this.project.project_parameters[property] = response.data[property];
 
                     })
                     .catch((error) => {
@@ -327,6 +339,10 @@ import Multiselect from '@vueform/multiselect';
                     })
 
 
+            },
+
+            processCompleted() {
+                this.processing = false;
             },
 
             normalizedPlots() {
@@ -339,6 +355,10 @@ import Multiselect from '@vueform/multiselect';
                         this.generating_plots = false;
                         //console.log(error.message)
                     })
+            },
+
+            plotsProcessCompleted() {
+                this.generating_plots = false;
             },
 
             searchGenes: async function(query) {

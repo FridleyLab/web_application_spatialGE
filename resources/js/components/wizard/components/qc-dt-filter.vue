@@ -233,7 +233,7 @@
 
 
         <div class="p-3 text-end">
-            <send-job-button label="Apply filter" :project-id="project.id" job-name="applyFilter" @started="startProcess" @completed="" ></send-job-button>
+            <send-job-button label="Apply filter" :project-id="project.id" job-name="applyFilter" @started="startProcess" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 
@@ -257,7 +257,7 @@
 <!--            </div>-->
 <!--        </div>-->
 
-        <div v-if="'filter_violin' in project.project_parameters">
+        <div v-if="!processing && 'filter_violin' in project.project_parameters">
 
             <div class="row mt-5 row-cols-2">
                 <div class="col">
@@ -270,9 +270,14 @@
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="float-end">
-                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="filterPlots">
+
+                <div class="p-3 text-end">
+                    <send-job-button label="Generate plots" :project-id="project.id" job-name="generateFilterPlots" @started="filterPlots" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
                 </div>
+
+<!--                <div class="float-end">-->
+<!--                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="filterPlots">-->
+<!--                </div>-->
             </div>
 
             <div class="mt-4" v-if="!generating_plots">
@@ -508,7 +513,6 @@
             startProcess() {
 
                 this.processing = true;
-                this.generating_plots = true;
 
                 let _params = JSON.parse(JSON.stringify(this.params));
 
@@ -547,21 +551,7 @@
 
                 axios.post(this.filterUrl, {parameters: _params})
                     .then((response) => {
-                        console.log(response.data);
-
-                        //this.plots_data = response.data;
-
-                        for(let property in response.data)
-                            this.project.project_parameters[property] = response.data[property];
-
-
-                        //this.processing = false;
-                        //this.generating_plots = false;
-
-
-                        /*this.project.project_parameters.filter_meta_options = response.data.filter_meta_options;
-                        this.project.project_parameters.filter_violin = response.data.filter_violin;
-                        this.project.project_parameters.filter_boxplot = response.data.filter_boxplot;*/
+                        //logic moved to the queue job-button component
                     })
                     .catch((error) => {
                         console.log(error.message)
@@ -572,15 +562,23 @@
 
             },
 
+            processCompleted() {
+                this.processing = false;
+            },
+
             filterPlots() {
                 this.generating_plots = true;
                 axios.post(this.filterUrlPlots, {color_palette: this.filter_color_palette, variable: this.filter_variable})
                     .then((response) => {
-                        this.generating_plots = false;
+                        //this.generating_plots = false;
                     })
                     .catch((error) => {
                         console.log(error.message)
                     })
+            },
+
+            plotsProcessCompleted() {
+                this.generating_plots = false;
             }
         },
 
