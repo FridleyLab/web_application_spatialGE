@@ -15,116 +15,40 @@
                 </h2>
                 <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
 
-                    <div class="row justify-content-center text-center m-3">
-                        <div class="w-100 w-md-80 w-lg-70  w-xxl-55 row row-cols-2">
-                            <div class="col">
-                                <label for="sampleList2" class="form-label text-lg">Selected samples:</label>
-                                <select ref="selectedSamples" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="removeSample" title="Click to remove sample">
-                                    <option v-for="sample in samples" :value="sample.name">{{ sample.name }}</option>
-                                </select>
+                    <div class="text-center justify-content-center w-100">
+                        <div class="m-4 gap-4">
+                            <div class="text-info text-lg text-bolder text-center mb-4">Click to add/remove sample</div>
+                            <div class="container-fluid" v-for="sample in samples">
+                                <button type="button" class="btn btn-lg" :class="params.samples.includes(sample.name) ? 'bg-gradient-info' : 'btn-outline-info'" @click="toggleSample(sample.name)">
+                                    {{ sample.name }}
+                                </button>
                             </div>
-                            <div class="col">
-                                <label for="sampleList1" class="form-label text-lg">Excluded samples:</label>
-                                <select ref="availableSamples" id="sampleList1" multiple class="p-2 form-select w-100 border border-1" @click="addSample" title="Click to add sample">
-                                </select>
-                            </div>
+                            <div class="text-info text-lg text-center mt-2" v-if="params.samples.length === samples.length">All samples selected</div>
+                            <div class="text-info text-lg text-center mt-2" v-if="!params.samples.length">You must select at least one sample</div>
                         </div>
                     </div>
+
+
+<!--                    <div class="row justify-content-center text-center m-3">-->
+<!--                        <div class="w-100 w-md-80 w-lg-70  w-xxl-55 row row-cols-2">-->
+<!--                            <div class="col">-->
+<!--                                <label for="sampleList2" class="form-label text-lg">Selected samples:</label>-->
+<!--                                <select ref="selectedSamples" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="removeSample" title="Click to remove sample">-->
+<!--                                    <option v-for="sample in samples" :value="sample.name">{{ sample.name }}</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                            <div class="col">-->
+<!--                                <label for="sampleList1" class="form-label text-lg">Excluded samples:</label>-->
+<!--                                <select ref="availableSamples" id="sampleList1" multiple class="p-2 form-select w-100 border border-1" @click="addSample" title="Click to add sample">-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
 
                 </div>
             </div>
 
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingRemoveGenes">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRemoveGenes" aria-expanded="false" aria-controls="collapseRemoveGenes">
-                        Filter genes
-                    </button>
-                </h2>
-                <div id="collapseRemoveGenes" class="accordion-collapse collapse" aria-labelledby="headingRemoveGenes" data-bs-parent="#accordionFilterTab">
 
-                    <div class="row justify-content-center text-center m-3">
-                        <div class="w-100 w-md-80 w-lg-70 w-xxl-40 row row-cols-2">
-                            <div class="col">
-                                <input type="text" class="form-control form-control-plaintext border border-1 py-1 px-2 text-sm" placeholder="Search genes here..." @input="searchGenes">
-                                <select ref="geneFilter" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="addFilterGene" title="Click to remove sample">
-                                    <option v-for="gene in filter_genes" :value="gene">{{ gene }}</option>
-                                </select>
-                            </div>
-                            <div class="col align">
-                                <label for="genesExcluded" class="form-label">Excluded genes:</label>
-                                <select ref="genesExcluded" id="genesExcluded" multiple class="p-2 form-select w-100 border border-1" @click="removeFilterGene" title="Click to add sample">
-                                    <option v-for="gene in filter_genes_selected" :value="gene">{{ gene }}</option>
-                                </select>
-                            </div>
-                        </div>
-
-
-                        <div class="my-4 d-flex justify-content-center">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="chkFilterGeneRemoveMT" v-model="filter_genes_regexp_remove_mt">
-                                <label class="form-check-label" for="chkFilterGeneRemoveMT">
-                                    Remove mitochondrial genes (^MT-)
-                                </label>
-                            </div>
-
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="chkFilterGeneRemoveRP" v-model="filter_genes_regexp_remove_rp">
-                                <label class="form-check-label" for="chkFilterGeneRemoveRP">
-                                    Remove ribosomal genes (^RP[L|S])
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="accordion w-100 w-xxl-60" id="accordionRegExFilterGenes">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingRegExFilterGenes">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRegExFilterGenes" aria-expanded="false" aria-controls="collapseRegExFilterGenes">
-                                        Remove genes using regular expression (advanced users)
-                                    </button>
-                                </h2>
-                                <div id="collapseRegExFilterGenes" class="accordion-collapse collapse" aria-labelledby="headingRegExFilterGenes" data-bs-parent="#accordionRegExFilterGenes">
-
-                                    <div class="row justify-content-center text-center m-3">
-                                        <div class="row justify-content-center text-center m-3">
-                                            <div class="w-100 w-md-80 w-lg-70 w-xxl-60 d-flex">
-                                                <input type="text" class="form-control form-control-plaintext border border-1 px-2 text-sm w-100" placeholder="RegEx here... e.g. ^MT-" v-model="params.rm_genes_expr" @input="filterGenesRegexp">
-                                                <a class="ms-3 link-info text-lg float-end" href="https://towardsdatascience.com/regular-expressions-clearly-explained-with-examples-822d76b037b4" target="_blank">?</a>
-                                            </div>
-                                            <div class="mt-3" v-if="filter_genes_regexp.length">
-                                                <label for="filter_genes_regexp" class="form-label">Matched genes (preview):</label>
-                                                <select ref="filter_genes_regexp" id="filter_genes_regexp" multiple class="p-2 form-select w-100 border border-1" @click="removeFilterGene" title="Click to add sample">
-                                                    <option v-for="gene in filter_genes_regexp" :value="gene">{{ gene }}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="m-4 gap-1">
-                            <div class="row">
-                                <div class="pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep genes with counts between:" title-class="text-bold" :min="0" :max="project.project_parameters.max_gene_counts" :step="500" @updated="(min,max) => {params.gene_minreads = min; params.gene_maxreads = max}"></numeric-range>
-                                </div>
-                                <div class="mt-4">
-                                    <div class="text-start text-bold">Keep genes expressed in:</div>
-                                    <div class="mt-2">
-<!--                                        TODO: script maximum number of spots  -->
-                                        <numeric-range title="Number of spots:" :show-percentages="true" :min="0" :max="project.project_parameters.max_spots_number" :step="50" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
-                                    </div>
-<!--                                    <div class="mt-4">-->
-<!--                                        <numeric-range title="Percentage of spots" :min="0" :max="100" :step="1" @updated="(min,max) => {gene_minpct = min; gene_maxpct = max}"></numeric-range>-->
-<!--                                    </div>-->
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
 
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingSpotCell">
@@ -213,6 +137,98 @@
                 </div>
             </div>
 
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingRemoveGenes">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRemoveGenes" aria-expanded="false" aria-controls="collapseRemoveGenes">
+                        Filter genes
+                    </button>
+                </h2>
+                <div id="collapseRemoveGenes" class="accordion-collapse collapse" aria-labelledby="headingRemoveGenes" data-bs-parent="#accordionFilterTab">
+
+                    <div class="row justify-content-center text-center m-3">
+                        <div class="w-100 w-md-80 w-lg-70 w-xxl-40 row row-cols-2">
+                            <div class="col">
+                                <input type="text" class="form-control form-control-plaintext border border-1 py-1 px-2 text-sm" placeholder="Search genes here..." @input="searchGenes">
+                                <select ref="geneFilter" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="addFilterGene" title="Click to remove sample">
+                                    <option v-for="gene in filter_genes" :value="gene">{{ gene }}</option>
+                                </select>
+                            </div>
+                            <div class="col align">
+                                <label for="genesExcluded" class="form-label">Excluded genes:</label>
+                                <select ref="genesExcluded" id="genesExcluded" multiple class="p-2 form-select w-100 border border-1" @click="removeFilterGene" title="Click to add sample">
+                                    <option v-for="gene in filter_genes_selected" :value="gene">{{ gene }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="my-4 d-flex justify-content-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="chkFilterGeneRemoveMT" v-model="filter_genes_regexp_remove_mt">
+                                <label class="form-check-label" for="chkFilterGeneRemoveMT">
+                                    Remove mitochondrial genes (^MT-)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="chkFilterGeneRemoveRP" v-model="filter_genes_regexp_remove_rp">
+                                <label class="form-check-label" for="chkFilterGeneRemoveRP">
+                                    Remove ribosomal genes (^RP[L|S])
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="accordion w-100 w-xxl-60" id="accordionRegExFilterGenes">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingRegExFilterGenes">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRegExFilterGenes" aria-expanded="false" aria-controls="collapseRegExFilterGenes">
+                                        Remove genes using regular expression (advanced users)
+                                    </button>
+                                </h2>
+                                <div id="collapseRegExFilterGenes" class="accordion-collapse collapse" aria-labelledby="headingRegExFilterGenes" data-bs-parent="#accordionRegExFilterGenes">
+
+                                    <div class="row justify-content-center text-center m-3">
+                                        <div class="row justify-content-center text-center m-3">
+                                            <div class="w-100 w-md-80 w-lg-70 w-xxl-60 d-flex">
+                                                <input type="text" class="form-control form-control-plaintext border border-1 px-2 text-sm w-100" placeholder="RegEx here... e.g. ^MT-" v-model="params.rm_genes_expr" @input="filterGenesRegexp">
+                                                <a class="ms-3 link-info text-lg float-end" href="https://towardsdatascience.com/regular-expressions-clearly-explained-with-examples-822d76b037b4" target="_blank">?</a>
+                                            </div>
+                                            <div class="mt-3" v-if="filter_genes_regexp.length">
+                                                <label for="filter_genes_regexp" class="form-label">Matched genes (preview):</label>
+                                                <select ref="filter_genes_regexp" id="filter_genes_regexp" multiple class="p-2 form-select w-100 border border-1" @click="removeFilterGene" title="Click to add sample">
+                                                    <option v-for="gene in filter_genes_regexp" :value="gene">{{ gene }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="m-4 gap-1">
+                            <div class="row">
+                                <div class="pb-4 border border-4 border-start-0 border-end-0 border-top-0">
+                                    <numeric-range title="Keep genes with counts between:" title-class="text-bold" :min="0" :max="project.project_parameters.max_gene_counts" :step="500" @updated="(min,max) => {params.gene_minreads = min; params.gene_maxreads = max}"></numeric-range>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="text-start text-bold">Keep genes expressed in:</div>
+                                    <div class="mt-2">
+                                        <!--                                        TODO: script maximum number of spots  -->
+                                        <numeric-range title="Number of spots:" :show-percentages="true" :min="0" :max="project.project_parameters.max_spots_number" :step="50" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
+                                    </div>
+                                    <!--                                    <div class="mt-4">-->
+                                    <!--                                        <numeric-range title="Percentage of spots" :min="0" :max="100" :step="1" @updated="(min,max) => {gene_minpct = min; gene_maxpct = max}"></numeric-range>-->
+                                    <!--                                    </div>-->
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
 
 
         </div>
@@ -233,7 +249,7 @@
 
 
         <div class="p-3 text-end">
-            <send-job-button label="Apply filter" :project-id="project.id" job-name="applyFilter" @started="startProcess" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button label="Apply filter" :disabled="!params.samples.length" :project-id="project.id" job-name="applyFilter" @started="startProcess" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 
@@ -397,7 +413,8 @@
                     rm_genes: [],
                     rm_genes_expr: '',
 
-                    samples: [],
+                    //samples: [],
+                    samples: this.samples.map(sample => sample.name),
                 },
 
                 processing: false,
@@ -443,6 +460,16 @@
 
         methods: {
             toJSON,
+
+            toggleSample(sampleName) {
+
+                const index = this.params.samples.indexOf(sampleName);
+                if (index > -1)
+                    this.params.samples.splice(index, 1);
+                else
+                    this.params.samples.push(sampleName);
+
+            },
 
             // setIntervalQueue: function() {
             //     this.checkQueueIntervalId = setInterval(async () => {this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'applyFilter');}, 1800);
@@ -517,9 +544,10 @@
                 let _params = JSON.parse(JSON.stringify(this.params));
 
                 //Check if specific samples were selected and form the list
-                if(this.$refs.availableSamples.options.length && this.$refs.selectedSamples.options.length)
+                /*if(this.$refs.availableSamples.options.length && this.$refs.selectedSamples.options.length)
                     for(let i = 0; i< this.$refs.selectedSamples.options.length; i++)
-                        _params.samples.push(this.$refs.selectedSamples.options[i].value);
+                        _params.samples.push(this.$refs.selectedSamples.options[i].value);*/
+
                 if(_params.samples.length) {
                     _params.samples = _params.samples.join("','");
                     _params.samples = "c('" + _params.samples + "')";

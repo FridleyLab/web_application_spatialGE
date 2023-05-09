@@ -9,12 +9,19 @@
             The following PCA plot has been created by calculating the average expression of genes within each sample. This PCA does not incorporate any spatial component of the data.
         </div>
 
-        <div class="mt-4">
-            <label class="form-label">Variable genes to calculate PCA:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes">
-            <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="form-range" v-model="params.n_genes">
+<!--        <div class="mt-4">-->
+<!--            <label class="form-label">Variable genes to calculate PCA:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes">-->
+<!--            <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="form-range" v-model="params.n_genes">-->
+<!--        </div>-->
+
+        <div class="row justify-content-center text-center m-4">
+            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                <div class="me-3">Variable genes to calculate PCA: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"></div>
+                <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="w-100" v-model="params.n_genes">
+            </div>
         </div>
 
-        <div class="mt-4">
+        <div class="mt-4 row justify-content-center text-center">
             <label class="form-label">hm_display_genes:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.hm_display_genes">
 <!--            <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="10" class="form-range" v-model="params.hm_display_genes">-->
         </div>

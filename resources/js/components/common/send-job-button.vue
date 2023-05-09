@@ -7,10 +7,11 @@
                     Process sent to server
                 </div>
                 <div class="py-2 justify-content-center align-items-center">
-                    Send email when completed?
-                    <button type="button" @click="setEmailNofitication" class="btn btn-sm" :class="sendEmail ? 'btn-outline-success' : 'btn-outline-secondary'">
+                    <span class="text-lg me-2">Send email when completed?</span>
+                    <button type="button" @click="setEmailNofitication" class="btn btn-sm text-sm" :class="sendEmail ? 'btn-outline-success' : 'btn-outline-secondary'">
                         {{ sendEmail ? 'YES' : 'NO' }}
                     </button>
+
                 </div>
                 <div v-if="queuePosition>0">
                     Queue position: <span class="text-warning text-lg">{{ queuePosition }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span>
