@@ -310,7 +310,7 @@ import Multiselect from '@vueform/multiselect';
                 generating_plots: false,
 
                 selected_gene: [],
-                filter_color_palette: 'sunset',
+                filter_color_palette: 'Spectral',
             }
         },
 

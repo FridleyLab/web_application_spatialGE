@@ -52,7 +52,6 @@
                     <td></td>
                     <td v-for="index in metadata.length" class="text-center">
                         <i v-if="!deletingMetadata" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deletingMetadata = index">delete</i>
-
                         <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-success text-xxs p-1" value="Cancel" @click="deletingMetadata = 0" title="Cancel deletion attempt" />
                         <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2 p-1" value="Delete" title="Confirm deletion of this sample" @click="deleteMetadata(index -1)" />
                     </td>
@@ -61,6 +60,7 @@
                     <th>Sample/Metadata</th>
                     <td v-for="index in metadata.length" class="text-center">
                         <input type="text" class="border border-info border-1 rounded rounded-2 px-2" :style="'width:' + (activeColumn===index ? '120' : '60') + 'px'" :value="('name' in metadata[index-1]) ? metadata[index-1].name : ''" @input="setMetadataName($event, index - 1 )" @focus="activeColumn = index" @focusout="activeColumn = -1" />
+<!--                        <a v-if="activeColumnHeader !== index" class="btn btn-outline-info" @click="activeColumnHeader = index">{{ metadata[index-1].name }}</a>-->
                     </td>
                 </tr>
                 </thead>
@@ -134,6 +134,7 @@
                 metadata: ('metadata' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.metadata) :  [],
 
                 activeColumn: -1,
+                //activeColumnHeader: -1,
             }
         },
 

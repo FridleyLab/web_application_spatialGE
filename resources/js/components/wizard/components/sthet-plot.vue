@@ -145,7 +145,7 @@ export default {
         return {
 
             params: {
-                color_pal: 'sunset',
+                color_pal: 'Spectral',
                 plot_meta: '',
                 method: [],
                 genes: []

@@ -128,7 +128,7 @@ import Multiselect from '@vueform/multiselect';
                 textOutput: '',
 
                 params: {
-                    color_pal: 'sunset',
+                    color_pal: 'Spectral',
                     plot_meta: '',
                     n_genes: 3000,
                     hm_display_genes: 30

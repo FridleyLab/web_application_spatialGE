@@ -399,11 +399,11 @@ write.csv(df_summary, 'filtered_stlist_summary.csv', row.names=FALSE, quote=FALS
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='okabeito')
+vp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='Spectral')
 #ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
-bp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='okabeito', plot_type='box')
+bp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='Spectral', plot_type='box')
 #ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 #### Save plots to file
@@ -621,11 +621,11 @@ write.table(pca_max_var_genes, 'pca_max_var_genes.csv',sep=',', row.names = FALS
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = violin_plots(normalized_stlist, color_pal='okabeito', data_type='tr', genes='RPL22')
+vp = violin_plots(normalized_stlist, color_pal='Spectral', data_type='tr', genes='RPL22')
 #ggpubr::ggexport(filename = 'normalized_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
-bp = violin_plots(normalized_stlist, color_pal='okabeito', plot_type='box', data_type='tr', genes='RPL22')
+bp = violin_plots(normalized_stlist, color_pal='Spectral', plot_type='box', data_type='tr', genes='RPL22')
 #ggpubr::ggexport(filename = 'normalized_boxplot.png', bp, width = 800, height = 800)
 
 
