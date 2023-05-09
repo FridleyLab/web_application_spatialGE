@@ -133,7 +133,7 @@
                         <div class="row mt-5 row-cols-2">
                             <div class="col">
                                 <div>Color palette</div>
-                                <div><Multiselect :options="colorPalettes" v-model="filter_color_palette"></Multiselect></div>
+                                <div><Multiselect :options="colorPalettes" v-model="filter_color_palette" :close-on-select="true" :searchable="true"></Multiselect></div>
                             </div>
                             <div class="col">
                                 <div>Gene</div>
@@ -310,7 +310,7 @@ import Multiselect from '@vueform/multiselect';
                 generating_plots: false,
 
                 selected_gene: [],
-                filter_color_palette: [],
+                filter_color_palette: 'sunset',
             }
         },
 

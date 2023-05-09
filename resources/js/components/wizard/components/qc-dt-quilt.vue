@@ -17,7 +17,7 @@
                 <div class="w-100 w-md-80 w-lg-70  w-xxl-55 row row-cols-2">
                 <div class="col">
                     <div>Color palette</div>
-                    <div><Multiselect :options="colorPalettes" v-model="params.color_pal"></Multiselect></div>
+                    <div><Multiselect :options="colorPalettes" v-model="params.color_pal" :close-on-select="true" :searchable="true"></Multiselect></div>
                 </div>
 
                 <div class="col">
@@ -64,7 +64,7 @@
             </div>
 
 
-            <div class="mt-4" v-if="'quilt_plot_1' in project.project_parameters">
+            <div class="mt-4" v-if="!generating_quilt && 'quilt_plot_1' in project.project_parameters">
                 <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="nd-boxplot-tab" data-bs-toggle="tab" data-bs-target="#nd-bloxplot" type="button" role="tab" aria-controls="nd-bloxplot" aria-selected="true">Quilt plot</button>
@@ -72,6 +72,35 @@
                 </ul>
                 <div class="tab-content" id="filterDiagramsContent">
                     <div class="tab-pane fade show active" id="nd-bloxplot" role="tabpanel" aria-labelledby="nd-bloxplot-tab">
+
+                        <div class="my-3 text-center"><h3>Initial data set</h3></div>
+
+                        <div class="d-xxl-flex">
+                            <div class="text-center m-4 w-xxl-50">
+                                <div>
+                                    <object :data="project.project_parameters.quilt_plot_1_initial + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                </div>
+                                <div>
+                                    <a :href="project.project_parameters.quilt_plot_1_initial + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                    <a :href="project.project_parameters.quilt_plot_1_initial + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                    <a :href="project.project_parameters.quilt_plot_1_initial + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                </div>
+                            </div>
+
+                            <div class="text-center m-4 w-xxl-50">
+                                <div>
+                                    <object :data="project.project_parameters.quilt_plot_2_initial + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                </div>
+                                <div>
+                                    <a :href="project.project_parameters.quilt_plot_2_initial + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                    <a :href="project.project_parameters.quilt_plot_2_initial + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                    <a :href="project.project_parameters.quilt_plot_2_initial + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="mb-3 mt-5 text-center"><h3>Normalized data set</h3></div>
 
                         <div class="d-xxl-flex">
                             <div class="text-center m-4 w-xxl-50">
@@ -128,7 +157,7 @@ import Multiselect from '@vueform/multiselect';
             return {
 
                 params: {
-                    color_pal: '',
+                    color_pal: 'Spectral',
                     plot_meta: '',
                     sample1: '',
                     sample2: '',

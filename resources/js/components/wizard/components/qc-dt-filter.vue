@@ -382,7 +382,7 @@
                 filter_spots_regexp_remove_mt: false,
                 filter_spots_regexp_remove_rp: false,
 
-                filter_color_palette: 'okabeito',
+                filter_color_palette: 'sunset',
                 filter_variable: 'total_counts',
 
                 generating_plots: false,

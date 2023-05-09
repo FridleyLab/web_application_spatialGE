@@ -851,7 +851,7 @@ $plots
 
         $result = [];
 
-        $parameterNames = ['quilt_plot_1', 'quilt_plot_2'];
+        $parameterNames = ['quilt_plot_1', 'quilt_plot_2', 'quilt_plot_1_initial', 'quilt_plot_2_initial'];
         foreach($parameterNames as $parameterName) {
             $file_extensions = ['svg', 'pdf', 'png'];
             foreach ($file_extensions as $file_extension) {
@@ -883,6 +883,8 @@ $plots
         if(!Storage::fileExists($this->workingDir() . "$stlist.RData"))
             $stlist = 'initial_stlist';
 
+        $initial_stlist = 'initial_stlist';
+
         $plot_meta = $parameters['plot_meta'];
         $color_pal = $parameters['color_pal'];
         $sample1 = $parameters['sample1'];
@@ -891,23 +893,30 @@ $plots
         $plots = $this->getExportFilesCommands('quilt_plot_1', "plist1[[1]]");
         $plots .= $this->getExportFilesCommands('quilt_plot_2', "plist2[[1]]");
 
+        $plots_initial = $this->getExportFilesCommands('quilt_plot_1_initial', "plist1_initial[[1]]");
+        $plots_initial .= $this->getExportFilesCommands('quilt_plot_2_initial', "plist2_initial[[1]]");
+
         $script = "
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
 # Load normalized STList
-" .
-$this->_loadStList($stlist)
-. "
+{$this->_loadStList($stlist)}
+# Load initial STList
+{$this->_loadStList($initial_stlist)}
 
-#### Plot
+#### Normalized Plots
 plist1 = STplot($stlist, samples=c('$sample1'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
 plist2 = STplot($stlist, samples=c('$sample2'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
-#ggpubr::ggexport(filename = 'quilt_plot_1.png', plist1[[1]], width = 800, height = 800)
-#ggpubr::ggexport(filename = 'quilt_plot_2.png', plist2[[1]], width = 800, height = 800)
+#### Initial Plots
+plist1_initial = STplot($initial_stlist, samples=c('$sample1'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
+plist2_initial = STplot($initial_stlist, samples=c('$sample2'), plot_meta='$plot_meta', color_pal='$color_pal', ptsize=2)
+
 
 $plots
+
+$plots_initial
 
 ";
 
@@ -1137,7 +1146,7 @@ sthet_plot = compare_SThet(stlist_sthet, samplemeta='$plot_meta', genes=$_genes,
 $export_files
 
 # Get table with SThet results
-sthet_table = get_gene_meta(normalized_stlist, sthet_only=T)
+sthet_table = get_gene_meta(stlist_sthet, sthet_only=T)
 openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
 
 ";
@@ -1151,14 +1160,14 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
         $str = "if(!is.null($plot)){\n";
 
         //PNG
-        $str .= "ggpubr::ggexport(filename = '$file.png', $plot, width = 800, height = 800)\n";
+        $str .= "ggpubr::ggexport(filename = '$file.png', $plot, width = 800, height = 600)\n";
 
         //PDF
-        $str .= "ggpubr::ggexport(filename = '$file.pdf', $plot, width = 8, height = 8)\n";
+        $str .= "ggpubr::ggexport(filename = '$file.pdf', $plot, width = 8, height = 6)\n";
 
         //SVG
         $str .= "library('svglite')\n";
-        $str .= "svglite('$file.svg', width = 8, height = 8)\n";
+        $str .= "svglite('$file.svg', width = 8, height = 6)\n";
         $str .= "print($plot)\n";
         $str .= "dev.off()\n";
 

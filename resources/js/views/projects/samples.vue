@@ -73,12 +73,6 @@
                     <td v-for="index in metadata.length" class="text-center">
                         <input type="text" class="border border-1 rounded rounded-2 px-2" :style="'width:' + (activeColumn===index ? '120' : '60') + 'px'" :value="(('values' in metadata[index-1]) && sample.name in metadata[index-1].values) ? metadata[index-1].values[sample.name] : ''" @input="setMetadataValue($event, index - 1, sample.name)" :disabled="metadata.length<index || !metadata[index-1].name.trim().length" @focus="activeColumn = index" @focusout="activeColumn = -1" />
                     </td>
-<!--                    <td>-->
-<!--                        <i v-if="!deletingMetadata" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deletingMetadata = index">delete</i>-->
-
-<!--                        <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deletingMetadata = 0" title="Cancel deletion attempt" />-->
-<!--                        <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteMetadata(index -1)" />-->
-<!--                    </td>-->
                 </tr>
                 </tbody>
             </table>

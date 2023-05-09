@@ -207,7 +207,7 @@ import Multiselect from '@vueform/multiselect';
                 params: {
                     genes: [],
                     ptsize: 2,
-                    col_pal: '',
+                    col_pal: 'Spectral',
                     data_type: 'tr'
                 },
 
