@@ -311,14 +311,24 @@ class ProjectController extends Controller
 
         $parameters = [
             'genes' => request('genes'),
+            //'col_pal' => request('col_pal'),
+        ];
+
+        ProjectParameter::updateOrCreate(['parameter' => 'STplotExpressionSurface.genes', 'project_id' => $project->id], ['type' => 'json', 'value' => json_encode(request('genes'))]);
+
+        $jobId = $project->createJob('STplot - Expression surface', 'STplotExpressionSurface', $parameters);
+        return $project->getJobPositionInQueue($jobId);
+
+    }
+
+    public function stplot_expression_surface_plots(Project $project) {
+
+        $parameters = [
+            'genes' => json_decode($project->project_parameters['STplotExpressionSurface.genes']),
             'col_pal' => request('col_pal'),
         ];
 
-        //RunScript::dispatch('STplot - Expression surface', $project, 'STplotExpressionSurface', $parameters);
-
-        //return $project->STplotExpressionSurface($parameters);
-
-        $jobId = $project->createJob('STplot - Expression surface', 'STplotExpressionSurface', $parameters);
+        $jobId = $project->createJob('STplot - Expression surface', 'STplotExpressionSurfacePlots', $parameters);
         return $project->getJobPositionInQueue($jobId);
 
     }

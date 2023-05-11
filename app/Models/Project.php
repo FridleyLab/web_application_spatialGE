@@ -1050,7 +1050,8 @@ $export_files
     public function getSTplotExpressionSurfaceScript($parameters) : string {
 
         $genes = $parameters['genes'];
-        $col_pal = $parameters['col_pal'];
+        $col_pal = array_key_exists('col_pal', $parameters) ? $parameters['col_pal'] : '';
+        $col_pal = ($col_pal !== null && strlen($col_pal)) ? $col_pal : 'sunset';
 
         $_genes = "c('" . join("','", $genes) . "')";
 
@@ -1071,6 +1072,88 @@ $this->_loadStList('normalized_stlist')
 . "
 
 stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
+
+{$this->_saveStList('stlist_expression_surface')}
+
+krp = STplot_interpolation(stlist_expression_surface, genes=$_genes, color_pal='$col_pal')
+
+$export_files
+
+";
+
+        return $script;
+
+    }
+
+
+    public function STplotExpressionSurfacePlots($parameters) {
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'STplot-ExpressionSurfacePlots.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSTplotExpressionSurfacePlotsScript($parameters));
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
+
+        $result = [];
+        foreach($parameters['genes'] as $gene) {
+            $result[$gene] = [];
+            foreach ($this->samples as $sample) {
+                $parameterName = 'stplot-expression-surface-' . $gene . '-' . $sample->name;
+
+                $file_extensions = ['svg', 'pdf', 'png'];
+
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $parameterName . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                        $result[$gene][$sample->name] = $this->workingDirPublicURL() . $parameterName; // $fileName;
+                    }
+                }
+
+            }
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stplot_expression_surface', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
+
+        return ['output' => $output];
+        //return json_encode($result);
+    }
+
+
+    public function getSTplotExpressionSurfacePlotsScript($parameters) : string {
+
+        $genes = $parameters['genes'];
+        $col_pal = array_key_exists('col_pal', $parameters) ? $parameters['col_pal'] : '';
+        $col_pal = ($col_pal !== null && strlen($col_pal)) ? $col_pal : 'sunset';
+
+        $_genes = "c('" . join("','", $genes) . "')";
+
+        $export_files = '';
+        foreach ($genes as $gene)
+            foreach ($this->samples as $sample)
+                $export_files .= $this->getExportFilesCommands("stplot-expression-surface-$gene-" . $sample->name, "krp\$" . $gene . "_" . $sample->name);
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList
+" .
+            $this->_loadStList('normalized_stlist')
+            . "
+
+#stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
+
+{$this->_loadStList('stlist_expression_surface')}
+
 krp = STplot_interpolation(stlist_expression_surface, genes=$_genes, color_pal='$col_pal')
 
 $export_files

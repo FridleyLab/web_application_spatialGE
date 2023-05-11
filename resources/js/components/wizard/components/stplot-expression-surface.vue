@@ -37,93 +37,96 @@
                         />
                     </div>
                 </div>
+                <div class="p-3 text-center">
+                    <send-job-button label="Estimate surfaces" :disabled="processing || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="estimateSurfaces" @completed="processCompleted" :project="project" ></send-job-button>
+                </div>
             </div>
 
         </div>
 
-        <div class="row justify-content-center text-center m-4">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Color palette</div>
-                <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
+
+
+
+        <div v-if="'STplotExpressionSurface.genes' in project.project_parameters">
+
+            <div class="row justify-content-center text-center m-4">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                    <div>Color palette</div>
+                    <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
+                </div>
+            </div>
+
+
+            <div class="row mt-3">
+                <div class="p-3 text-end">
+                    <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @completed="processCompleted" :project="project" ></send-job-button>
+                </div>
             </div>
         </div>
 
-        <div class="row mt-3">
 
-            <div class="p-3 text-end">
-                <send-job-button label="Generate plots" :disabled="generating_quilt || !params.col_pal.length || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="quiltPlot" @completed="processCompleted" :project="project" ></send-job-button>
-            </div>
+        <div v-if="!processing && 'STplotExpressionSurface.genes' in project.project_parameters">
 
-<!--            <div class="float-end">-->
-<!--                <input v-if="!generating_quilt" type="button" class="btn btn-outline-info float-end" :class="generating_quilt || !params.genes.length  ? 'disabled' : ''" :value="generating_quilt ? 'Please wait...' : 'Generate plots'" @click="quiltPlot">-->
-<!--&lt;!&ndash;                <img v-if="generating_quilt" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />&ndash;&gt;-->
-<!--            </div>-->
-<!--            <div v-if="generating_quilt" class="text-info text-bold float-end m-4">-->
-<!--                The [Expression surface plot] job has been submitted. You will get an email notification when completed. <br />-->
-<!--                You can close this window or reload it when notified.-->
-<!--            </div>-->
-        </div>
+            <div class="mt-4" v-if="!processing && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
+                <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
+                    <li v-for="(samples, gene, index) in plots" class="nav-item" role="presentation">
+                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene" type="button" role="tab" :aria-controls="'expression-surface-' + gene" aria-selected="true">{{ gene }}</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="stplotQuiltContent">
+                    <template v-for="(samples, gene, index) in plots">
+                        <div class="tab-pane fade" :class="index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '-tab'">
 
+                            <div class="mt-4">
+                                <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
+                                    <li v-if="Object.keys(samples).length > 1" class="nav-item" role="presentation">
+                                        <button class="nav-link active" :id="'expression-surface-' + gene + '_' + 'all_samples' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene + '_' + 'all_samples'" type="button" role="tab" :aria-controls="'expression-surface-' + gene + '_' + 'all_samples'" aria-selected="true">All samples</button>
+                                    </li>
+                                    <li v-for="(image, sample, index) in samples" class="nav-item" role="presentation">
+                                        <button class="nav-link" :class="Object.keys(samples).length === 1 && index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '_' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene + '_' + sample" type="button" role="tab" :aria-controls="'expression-surface-' + gene + '_' + sample" aria-selected="true">{{ sample }}</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="stplotQuiltContent">
 
-        <div class="mt-4" v-if="!generating_quilt && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
-            <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
-                <li v-for="(samples, gene, index) in plots" class="nav-item" role="presentation">
-                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene" type="button" role="tab" :aria-controls="'expression-surface-' + gene" aria-selected="true">{{ gene }}</button>
-                </li>
-            </ul>
-            <div class="tab-content" id="stplotQuiltContent">
-                <template v-for="(samples, gene, index) in plots">
-                    <div class="tab-pane fade" :class="index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '-tab'">
+                                    <div v-if="Object.keys(samples).length > 1" class="tab-pane fade show active" :id="'expression-surface-' + gene + '_' + 'all_samples'" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + 'all_samples' + '-tab'">
 
-                        <div class="mt-4">
-                            <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
-                                <li v-if="Object.keys(samples).length > 1" class="nav-item" role="presentation">
-                                    <button class="nav-link active" :id="'expression-surface-' + gene + '_' + 'all_samples' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene + '_' + 'all_samples'" type="button" role="tab" :aria-controls="'expression-surface-' + gene + '_' + 'all_samples'" aria-selected="true">All samples</button>
-                                </li>
-                                <li v-for="(image, sample, index) in samples" class="nav-item" role="presentation">
-                                    <button class="nav-link" :class="Object.keys(samples).length === 1 && index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '_' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene + '_' + sample" type="button" role="tab" :aria-controls="'expression-surface-' + gene + '_' + sample" aria-selected="true">{{ sample }}</button>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="stplotQuiltContent">
+                                        <div v-if="show_reset(gene)" class="m-4">
+                                            <button class="btn btn-outline-info" @click="reset_plots(gene)">Reset</button>
+                                        </div>
 
-                                <div v-if="Object.keys(samples).length > 1" class="tab-pane fade show active" :id="'expression-surface-' + gene + '_' + 'all_samples'" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + 'all_samples' + '-tab'">
-
-                                    <div v-if="show_reset(gene)" class="m-4">
-                                        <button class="btn btn-outline-info" @click="reset_plots(gene)">Reset</button>
-                                    </div>
-
-                                    <div class="d-xxl-flex">
-                                        <template v-for="(image, sample, index) in samples">
-                                            <div v-if="plots_visible[gene][sample]" class="text-center m-4 w-xxl-50">
-                                                <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                                <button @click="hide_plot(gene, sample)" class="btn btn-sm btn-outline-secondary">Hide</button>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <template v-for="(image, sample, index) in samples">
-                                    <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + sample + '-tab'">
-                                        <div>
-                                            <div class="text-center m-4">
-                                                <div>
+                                        <div class="d-xxl-flex">
+                                            <template v-for="(image, sample, index) in samples">
+                                                <div v-if="plots_visible[gene][sample]" class="text-center m-4 w-xxl-50">
                                                     <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                                    <button @click="hide_plot(gene, sample)" class="btn btn-sm btn-outline-secondary">Hide</button>
                                                 </div>
-                                                <div class="">
-                                                    <a :href="image + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                    <a :href="image + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                    <a :href="image + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                                </div>
-<!--                                                <img :src="image + '?' + Date.now()" class="img-fluid">-->
-                                            </div>
+                                            </template>
                                         </div>
                                     </div>
-                                </template>
-                            </div>
-                        </div>
 
-                    </div>
-                </template>
+                                    <template v-for="(image, sample, index) in samples">
+                                        <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + sample + '-tab'">
+                                            <div>
+                                                <div class="text-center m-4">
+                                                    <div>
+                                                        <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                                    </div>
+                                                    <div class="">
+                                                        <a :href="image + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                                        <a :href="image + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                                        <a :href="image + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                                    </div>
+    <!--                                                <img :src="image + '?' + Date.now()" class="img-fluid">-->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
 
@@ -146,6 +149,7 @@ import Multiselect from '@vueform/multiselect';
             project: Object,
             samples: Object,
             stplotExpressionSurfaceUrl: String,
+            stplotExpressionSurfacePlotsUrl: String,
             colorPalettes: Object,
         },
 
@@ -167,8 +171,6 @@ import Multiselect from '@vueform/multiselect';
 
                 filter_variable: '',
 
-                generating_quilt: false,
-
                 plots_visible: []
             }
         },
@@ -189,22 +191,32 @@ import Multiselect from '@vueform/multiselect';
 
         methods: {
 
-            quiltPlot() {
-                this.generating_quilt = true;
+            estimateSurfaces() {
+                this.processing = true;
                 axios.post(this.stplotExpressionSurfaceUrl, this.params)
                     .then((response) => {
-                        //this.plots = response.data;
-                        //this.generating_quilt = false;
                     })
                     .catch((error) => {
-                        //this.generating_quilt = false;
+                        this.processing = false;
                         console.log(error.message);
                     })
             },
 
             processCompleted() {
                 this.plots = ('stplot_expression_surface' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_expression_surface) : {};
-                this.generating_quilt = false;
+                this.processing = false;
+            },
+
+            generatePlots() {
+                this.processing = true;
+                console.log(this.stplotExpressionSurfacePlotsUrl);
+                axios.post(this.stplotExpressionSurfacePlotsUrl, this.params)
+                    .then((response) => {
+                    })
+                    .catch((error) => {
+                        this.processing = false;
+                        console.log(error.response);
+                    })
             },
 
             hide_plot: function(gene, sample) {

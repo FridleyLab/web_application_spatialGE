@@ -100,7 +100,7 @@
                         </div>
 
 
-                        <div class="mb-3 mt-5 text-center"><h3>Normalized data set</h3></div>
+                        <div class="mb-3 mt-5 text-center"><h3>Filtered & Normalized data set</h3></div>
 
                         <div class="d-xxl-flex">
                             <div class="text-center m-4 w-xxl-50">

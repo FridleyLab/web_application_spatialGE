@@ -1,5 +1,31 @@
 FROM r-base:4.1.2
 
+######CERTS#####################
+
+
+RUN apt-get update -qq && \
+    apt-get upgrade -y && \
+    apt-get clean all && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates locales wget libcurl4-openssl-dev libxml2-dev libssl-dev && \
+    apt-get clean && \
+    apt-get purge && \
+    rm -rf /var/lib/apt/lists/* && \
+    wget --no-check-certificate -O /usr/local/share/ca-certificates/caadmin.netskope.com.crt \
+      "https://gitlab.moffitt.usf.edu:8000/singularity/mcc-certificates/-/raw/main/certs/caadmin.netskope.com.crt" && \
+    wget --no-check-certificate -O /usr/local/share/ca-certificates/ca.moffitt.goskope.com.crt \
+      "https://gitlab.moffitt.usf.edu:8000/singularity/mcc-certificates/-/raw/main/certs/ca.moffitt.goskope.com.crt" && \
+    wget --no-check-certificate -O /usr/local/share/ca-certificates/moffitt-ca.crt \
+      "https://gitlab.moffitt.usf.edu:8000/singularity/mcc-certificates/-/raw/main/certs/moffitt-ca.cer" && \
+    wget --no-check-certificate -O /usr/local/share/ca-certificates/moffitt-ca-int.crt \
+      "https://gitlab.moffitt.usf.edu:8000/singularity/mcc-certificates/-/raw/main/certs/moffitt-ca-int.cer" && \
+    wget --no-check-certificate -O /usr/local/share/ca-certificates/moffitt-chain \
+      "https://gitlab.moffitt.usf.edu:8000/singularity/mcc-certificates/-/raw/main/certs/moffitt-chain" && \
+    chmod 644 /usr/local/share/ca-certificates/*moffitt* && \
+    update-ca-certificates --verbose && \
+      echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && locale-gen en_US.utf8 && update-locale LANG=en_US.UTF-8
+
+
 #COPY certs/* /usr/share/ca-certificates/
 #RUN update-ca-certificates --fresh
 
@@ -11,6 +37,11 @@ FROM r-base:4.1.2
 #RUN update-ca-certificates --fresh
 
 #RUN echo "Acquire { https::Verify-Peer false }" >> /etc/apt/apt.conf.d/99verify-peer.conf
+
+
+#########END CERTS##############
+
+
 
 RUN apt-get -y update && apt-get -y install libhdf5-dev libudunits2-dev libv8-dev libgdal-dev cmake libfftw3-dev libfontconfig1-dev
 
@@ -28,15 +59,6 @@ RUN Rscript init2.R
 RUN Rscript -e "install.packages('openxlsx')"
 
 #Install spatialGE library
-RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev') "
-
-RUN apt -y install libhiredis-dev
-
-RUN Rscript -e "install.packages('redux')"
-
-RUN apt -y update && apt -y install redis
+RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')   "
 
 RUN Rscript -e "install.packages('svglite')"
-
-CMD ["redis-server"]
-
