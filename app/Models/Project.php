@@ -77,6 +77,9 @@ class Project extends Model
         if($this->current_step === 2)
             return route('qc-data-transformation', ['project' => $this->id]);
 
+        if($this->current_step >= 3)
+            return route('stplot-visualization', ['project' => $this->id]);
+
 
         return '/';
     }
