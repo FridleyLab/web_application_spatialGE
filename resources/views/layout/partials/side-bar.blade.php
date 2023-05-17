@@ -88,11 +88,12 @@
                         </li>
 
                         <li class="nav-item ps-4">
-                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                            <a class="nav-link text-white @if(url()->current() === route('spatial-domain-detection', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 5) disabled @endif" style="@if(getActiveProject()->current_step < 4) background-color: transparent !important @endif" href="{{ route('spatial-domain-detection', ['project' => session('project_id')]) }}">
+{{--                            <a class="nav-link text-white disabled" style="background-color: transparent !important">--}}
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i class="material-icons opacity-10 text-secondary">filter_5</i>
+                                    <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 5) text-secondary @endif">filter_5</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">Spatial domain detection</span>
+                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 5) text-secondary @endif text-bold">Spatial domain detection</span>
                             </a>
                         </li>
 

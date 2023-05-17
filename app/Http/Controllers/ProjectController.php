@@ -239,7 +239,7 @@ class ProjectController extends Controller
 
     public function applyNormalization(Project $project) {
 
-        $project->current_step = 4;
+        $project->current_step = 5;
         $project->save();
 
         $jobId = $project->createJob('Normalize data', 'applyNormalization', request('parameters'));
@@ -355,6 +355,12 @@ class ProjectController extends Controller
         $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThetPlot', $parameters);
         return $project->getJobPositionInQueue($jobId);
 
+    }
+
+    public function spatial_domain_detection(Project $project) {
+        $samples = $project->samples;
+        $color_palettes = ColorPalette::orderBy('label')->get();
+        return view('wizard.spatial-domain-detection')->with(compact('project', 'samples', 'color_palettes'));
     }
 
 

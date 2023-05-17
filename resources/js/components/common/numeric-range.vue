@@ -35,12 +35,14 @@ import Slider from '@vueform/slider'
             max: {type: Number, default: 100},
             step: {type: Number, default: 1},
             showPercentages: {type: Boolean, default: false},
+            defaultMin: {type: Number, default: -1},
+            defaultMax: {type: Number, default: -1}
         },
 
         data() {
             return {
 
-                value: [this.min, this.max],
+                value: [this.defaultMin < 0 ? this.min : this.defaultMin , this.defaultMax < 0 ? this.max : this.defaultMax],
 
                 // minValue: Number(this.startDefault),
                 // maxValue: Number(this.endDefault),

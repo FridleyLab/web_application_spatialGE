@@ -35,6 +35,9 @@ import sthetPlot from "./components/wizard/components/sthet-plot.vue";
 
 import sendJobButton from "./components/common/send-job-button.vue";
 
+import spatialDomainDetection from "./components/wizard/spatial-domain-detection.vue";
+import sddStclust from "./components/wizard/components/sdd-stclust.vue";
+
 
 // Vuetify
 /*import 'vuetify/styles'
@@ -87,6 +90,9 @@ app.component('sthet-spatial-het', sthetSpatialHet);
 app.component('sthet-plot', sthetPlot);
 
 app.component('send-job-button', sendJobButton);
+
+app.component('spatial-domain-detection', spatialDomainDetection);
+app.component('sdd-stclust', sddStclust);
 
 //Register the window as a global variable, so it can be accessed everywhere
 app.config.globalProperties.window = window;

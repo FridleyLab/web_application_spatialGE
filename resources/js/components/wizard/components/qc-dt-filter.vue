@@ -17,14 +17,15 @@
 
                     <div class="text-center justify-content-center w-100">
                         <div class="m-4 gap-4">
-                            <div class="text-info text-lg text-bolder text-center mb-4">Click to add/remove sample</div>
+                            <div class="text-info text-lg text-bolder text-center mb-2">Click to add/remove a sample</div>
+                            <div class="text-info text-lg text-center mb-2" v-if="params.samples.length === samples.length">All samples selected</div>
+                            <div class="text-info text-lg text-center mb-2" v-if="!params.samples.length">You must select at least one sample</div>
                             <div class="container-fluid" v-for="sample in samples">
                                 <button type="button" class="btn btn-lg" :class="params.samples.includes(sample.name) ? 'bg-gradient-info' : 'btn-outline-info'" @click="toggleSample(sample.name)">
                                     {{ sample.name }}
                                 </button>
                             </div>
-                            <div class="text-info text-lg text-center mt-2" v-if="params.samples.length === samples.length">All samples selected</div>
-                            <div class="text-info text-lg text-center mt-2" v-if="!params.samples.length">You must select at least one sample</div>
+
                         </div>
                     </div>
 

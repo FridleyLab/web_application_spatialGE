@@ -77,6 +77,8 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/sthet-spatial-het',[ProjectController::class, 'sthet_spatial_het'])->name('sthet-spatial-het')->middleware('project');
     Route::post('/projects/{project}/sthet-spatial-het/plot', [ProjectController::class, 'sthet_spatial_het_plot'])->name('sthet-spatial-het-plot')->middleware('project');
 
+    Route::get('/projects/{project}/spatial-domain-detection',[ProjectController::class, 'spatial_domain_detection'])->name('spatial-domain-detection')->middleware('project');
+    Route::post('/projects/{project}/sdd/stclust', [ProjectController::class, 'sdd_stclust'])->name('sdd-stclust')->middleware('project');
 
 });
 
