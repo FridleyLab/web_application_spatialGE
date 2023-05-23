@@ -6,7 +6,7 @@
 <!--            <multiselect></multiselect>-->
 <!--        </div>-->
 
-        <div class="accordion" id="accordionFilterTab" :style="processing ? 'pointer-events:none; opacity: 0.4' : ''">
+        <div class="accordion" id="accordionFilterTab" :class="processing || generating_plots ? 'disabled-clicks' : ''">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingSelectSamples">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
@@ -246,7 +246,7 @@
 
 
 
-        <div class="p-3 text-end">
+        <div class="p-3 text-end" :class="generating_plots ? 'disabled-clicks' : ''">
             <send-job-button label="Apply filter" :disabled="!params.samples.length" :project-id="project.id" job-name="applyFilter" @started="startProcess" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
@@ -273,7 +273,7 @@
 
         <div v-if="!processing && 'filter_violin' in project.project_parameters">
 
-            <div class="row mt-5 row-cols-2">
+            <div class="row mt-5 row-cols-2" :class="generating_plots ? 'disabled-clicks' : ''">
                 <div class="col">
                     <div>Color palette</div>
                     <div><Multiselect :options="colorPalettes" v-model="filter_color_palette"></Multiselect></div>
@@ -286,7 +286,7 @@
             <div class="row mt-3">
 
                 <div class="p-3 text-end">
-                    <send-job-button label="Generate plots" :project-id="project.id" job-name="generateFilterPlots" @started="filterPlots" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
+                    <send-job-button label="Generate plots" :project-id="project.id" job-name="generateFilterPlots" @started="filterPlots" @ongoing="generating_plots = true" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
                 </div>
 
 <!--                <div class="float-end">-->

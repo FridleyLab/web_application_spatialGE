@@ -5,7 +5,7 @@
         <div class="my-3 text-bold">
             Select a method:
         </div>
-        <div class="accordion" id="accordionExample">
+        <div class="accordion" :class="processing ? 'disabled-clicks' : ''" id="accordionExample">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingOne">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
@@ -29,9 +29,10 @@
                         </div>
 
 
-                        <h5 class="mt-4">Count distribution by sample</h5>
+
 
                         <div class="mt-4" v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
+                            <h5 class="mt-4">Count distribution by sample</h5>
                             <ul class="nav nav-tabs" id="logNormalizedDiagrams" role="tablist">
 
                                 <li class="nav-item" role="presentation">
@@ -127,82 +128,84 @@
                             </div>
                         </div>
 
-                        <h5 class="mt-4">Count distribution by gene</h5>
 
+                        <div v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
+                            <h5 class="mt-4">Count distribution by gene</h5>
 
-                        <div class="row mt-5 row-cols-2">
-                            <div class="col">
-                                <div>Color palette</div>
-                                <div><Multiselect :options="colorPalettes" v-model="filter_color_palette" :close-on-select="true" :searchable="true"></Multiselect></div>
-                            </div>
-                            <div class="col">
-                                <div>Gene</div>
-                                <div>
-                                    <Multiselect
+                            <div class="row mt-5 row-cols-2" :class="generating_plots ? 'disabled-clicks' : ''">
+                                <div class="col">
+                                    <div>Color palette</div>
+                                    <div><Multiselect :options="colorPalettes" v-model="filter_color_palette" :close-on-select="true" :searchable="true"></Multiselect></div>
+                                </div>
+                                <div class="col">
+                                    <div>Gene</div>
+                                    <div>
+                                        <Multiselect
 
-                                        v-model="selected_gene"
-                                        placeholder="Select options"
-                                        :close-on-select="true"
-                                        :searchable="true"
-                                        :resolve-on-load="false"
-                                        :delay="0"
-                                        :min-chars="1"
-                                        :options="async (query) => { return await searchGenes(query) }"
-                                    />
+                                            v-model="selected_gene"
+                                            placeholder="Select options"
+                                            :close-on-select="true"
+                                            :searchable="true"
+                                            :resolve-on-load="false"
+                                            :delay="0"
+                                            :min-chars="1"
+                                            :options="async (query) => { return await searchGenes(query) }"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row mt-3">
+                            <div class="row mt-3">
 
-                            <div class="p-3 text-end">
-                                <send-job-button label="Generate plots" :disabled="generating_plots || !filter_color_palette.length || !selected_gene.length" :project-id="project.id" job-name="generateNormalizationPlots" @started="normalizedPlots" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
+                                <div class="p-3 text-end">
+                                    <send-job-button label="Generate plots" :disabled="generating_plots || !filter_color_palette.length || !selected_gene.length" :project-id="project.id" job-name="generateNormalizationPlots" @started="normalizedPlots" @ongoing="generating_plots = true" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
+                                </div>
+
+                                <!--                                <div class="float-end">-->
+                                <!--                                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots || !filter_color_palette.length || !selected_gene.length ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="normalizedPlots">-->
+                                <!--                                </div>-->
                             </div>
+                            <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
 
-                            <!--                                <div class="float-end">-->
-                            <!--                                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots || !filter_color_palette.length || !selected_gene.length ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="normalizedPlots">-->
-                            <!--                                </div>-->
-                        </div>
-                        <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
+                                <div class="mt-4" v-if="!generating_plots">
+                                    <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="false">Boxplots</button>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content" id="normalizedDiagramsContent">
 
-                            <div class="mt-4" v-if="!generating_plots">
-                                <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="false">Boxplots</button>
-                                    </li>
-                                </ul>
-                                <div class="tab-content" id="normalizedDiagramsContent">
-
-                                    <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
-                                        <div class="text-center m-4">
-                                            <div>
-                                                <object :data="project.project_parameters.normalized_violin + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                            </div>
-                                            <div>
-                                                <a :href="project.project_parameters.normalized_violin + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                <a :href="project.project_parameters.normalized_violin + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                <a :href="project.project_parameters.normalized_violin + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                        <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
+                                            <div class="text-center m-4">
+                                                <div>
+                                                    <object :data="project.project_parameters.normalized_violin + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                                </div>
+                                                <div>
+                                                    <a :href="project.project_parameters.normalized_violin + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                                    <a :href="project.project_parameters.normalized_violin + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                                    <a :href="project.project_parameters.normalized_violin + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
-                                        <div class="text-center m-4">
-                                            <div>
-                                                <object :data="project.project_parameters.normalized_boxplot + '.svg'  + '?' + Date.now()" class="img-fluid"></object>
-                                            </div>
-                                            <div>
-                                                <a :href="project.project_parameters.normalized_boxplot + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                <a :href="project.project_parameters.normalized_boxplot + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                <a :href="project.project_parameters.normalized_boxplot + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                        <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
+                                            <div class="text-center m-4">
+                                                <div>
+                                                    <object :data="project.project_parameters.normalized_boxplot + '.svg'  + '?' + Date.now()" class="img-fluid"></object>
+                                                </div>
+                                                <div>
+                                                    <a :href="project.project_parameters.normalized_boxplot + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                                    <a :href="project.project_parameters.normalized_boxplot + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                                    <a :href="project.project_parameters.normalized_boxplot + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                                                </div>
                                             </div>
                                         </div>
+
+
+
                                     </div>
-
-
-
                                 </div>
                             </div>
                         </div>
@@ -211,7 +214,7 @@
 
                 </div>
             </div>
-            <div class="accordion-item">
+            <div class="accordion-item" :class="generating_plots ? 'disabled-clicks' : ''">
                 <h2 class="accordion-header" id="headingTwo">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                         SCTransform (Seurat implementation)
@@ -255,7 +258,7 @@
 
 
         <div class="p-3 text-end">
-            <send-job-button label="Normalize data" :project-id="project.id" job-name="applyNormalization" @started="startProcess" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button :disabled="!params.method.length || generating_plots" label="Normalize data" :project-id="project.id" job-name="applyNormalization" @started="startProcess" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 
@@ -301,7 +304,7 @@ import Multiselect from '@vueform/multiselect';
             return {
 
                 params: {
-                    method: 'sct',
+                    method: '',
                     scale_f: 10000
                 },
 

@@ -90,7 +90,7 @@
   }
 }
 
-
+.disabled-clicks {pointer-events:none; opacity: 0.4}
 
 .main-color-success {border-color: #3d8b40 !important;}
 

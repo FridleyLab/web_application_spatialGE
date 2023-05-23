@@ -2,7 +2,7 @@
     <div class="container-fluid py-4 col-xl-11 col-md-11 col-sm-12">
         <div class="row justify-content-center">
             <div class="col-xl-10 col-sm-10 mb-xl-0 mb-4 mt-4">
-                <div class="card">
+                <div class="card" :class="changingStep ? 'disabled-clicks' : ''">
                     <div class="card-header p-3 pt-2">
                         <div class="icon icon-lg icon-shape bg-gradient-info shadow-dark text-center border-radius-xl mt-n4 position-absolute">
                             <i class="material-icons opacity-10">filter_1</i>
@@ -68,9 +68,7 @@
                     <project-samples v-if="!showAddSample" :samples="samples" :project="project" :disabled="uploading || changingStep"></project-samples>
 
 
-                    <div v-if="samples.length" class="p-3 text-end">
-                        <send-job-button label="Import Data" :project-id="project.id" job-name="createStList" @started="nextStep" @ongoing="changingStep = true" @completed="importCompleted" ></send-job-button>
-                    </div>
+
 
 
 <!--                    <div v-if="samples.length" class="p-3 text-end">-->
@@ -93,6 +91,10 @@
 
 <!--                    </div>-->
 
+                </div>
+
+                <div v-if="samples.length" class="p-3 text-end">
+                    <send-job-button label="Import Data" :project-id="project.id" job-name="createStList" @started="nextStep" @ongoing="changingStep = true" @completed="importCompleted" ></send-job-button>
                 </div>
             </div>
         </div>
