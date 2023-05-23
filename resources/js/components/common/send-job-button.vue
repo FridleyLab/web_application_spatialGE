@@ -1,25 +1,25 @@
 <template>
 <!--        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />-->
         <input v-if="startButtonVisible && !processing" type="button" class="btn btn-lg bg-gradient-info mt-2 mb-0" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
-        <div v-if="processing">
+        <div v-if="processing" :class="processing ? 'popup-center' : ''" class="border border-1 rounded rounded-2 bg-gray-400 p-4">
             <div class="text-info text-bold">
-                <div>
+                <div class="text-center">
                     Process sent to server
                 </div>
-                <div class="py-2 justify-content-center align-items-center">
+                <div class="py-2 justify-content-center align-items-center text-center">
                     <span class="text-lg me-2">Send email when completed?</span>
                     <button type="button" @click="setEmailNofitication" class="btn btn-sm text-sm" :class="sendEmail ? 'btn-outline-success' : 'btn-outline-secondary'">
                         {{ sendEmail ? 'YES' : 'NO' }}
                     </button>
-
                 </div>
-                <div v-if="queuePosition>0">
+                <div v-if="queuePosition>0" class="text-center">
                     Queue position: <span class="text-warning text-lg">{{ queuePosition }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span>
                 </div>
+                <div class="my-3 text-center">
+                    <img src="/images/loading-circular.gif" class="" style="width:100px" />
+                </div>
             </div>
-            <div class="my-3">
-                <img src="/images/loading-circular.gif" class="me-6" style="width:100px" />
-            </div>
+
         </div>
 </template>
 

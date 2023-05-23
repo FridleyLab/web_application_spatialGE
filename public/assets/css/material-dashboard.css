@@ -90,7 +90,18 @@
   }
 }
 
-.disabled-clicks {pointer-events:none; opacity: 0.4}
+.disabled-clicks {
+    pointer-events:none;
+    opacity: 0.4
+}
+
+.popup-center {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
 
 .main-color-success {border-color: #3d8b40 !important;}
 
