@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects/{project}/qc/normalize-plots', [ProjectController::class, 'generateNormalizationPlots'])->name('qc-dt-normalize-plots')->middleware('project');
 
     Route::post('/projects/{project}/qc/pca', [ProjectController::class, 'applyPca'])->name('qc-dt-pca')->middleware('project');
+    Route::post('/projects/{project}/qc/pca-plots', [ProjectController::class, 'pcaPlots'])->name('qc-dt-pca-plots')->middleware('project');
     Route::post('/projects/{project}/qc/quilt', [ProjectController::class, 'quiltPlot'])->name('qc-dt-quilt')->middleware('project');
 
     Route::get('/projects/{project}/search-genes',[ProjectController::class, 'searchGenes'])->name('search-genes')->middleware('project');

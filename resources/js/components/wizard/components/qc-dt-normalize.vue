@@ -160,9 +160,6 @@
                                     <send-job-button label="Generate plots" :disabled="generating_plots || !filter_color_palette.length || !selected_gene.length" :project-id="project.id" job-name="generateNormalizationPlots" @started="normalizedPlots" @ongoing="generating_plots = true" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
                                 </div>
 
-                                <!--                                <div class="float-end">-->
-                                <!--                                    <input type="button" class="btn btn-outline-info float-end" :class="generating_plots || !filter_color_palette.length || !selected_gene.length ? 'disabled' : ''" :value="generating_plots ? 'Please wait...' : 'Generate plots'" @click="normalizedPlots">-->
-                                <!--                                </div>-->
                             </div>
                             <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
 
@@ -260,23 +257,6 @@
         <div class="p-3 text-end">
             <send-job-button :disabled="!params.method.length || generating_plots" label="Normalize data" :project-id="project.id" job-name="applyNormalization" @started="startProcess" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
-
-
-<!--        <div class="row">-->
-<!--            <div class="w-100">-->
-<!--                <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">-->
-<!--                    <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Normalize' }}</button>-->
-<!--&lt;!&ndash;                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />&ndash;&gt;-->
-<!--                </div>-->
-<!--                <div v-if="processing" class="text-info text-bold float-end m-4">-->
-<!--                    The [Normalize data] job has been submitted. You will get an email notification when completed. <br />-->
-<!--                    You can close this window or reload it when notified.-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-
-
 
 
     </form>

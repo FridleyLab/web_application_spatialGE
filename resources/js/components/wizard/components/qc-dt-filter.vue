@@ -29,23 +29,6 @@
                         </div>
                     </div>
 
-
-<!--                    <div class="row justify-content-center text-center m-3">-->
-<!--                        <div class="w-100 w-md-80 w-lg-70  w-xxl-55 row row-cols-2">-->
-<!--                            <div class="col">-->
-<!--                                <label for="sampleList2" class="form-label text-lg">Selected samples:</label>-->
-<!--                                <select ref="selectedSamples" id="sampleList2" multiple class="p-2 form-select w-100 border border-1" @click="removeSample" title="Click to remove sample">-->
-<!--                                    <option v-for="sample in samples" :value="sample.name">{{ sample.name }}</option>-->
-<!--                                </select>-->
-<!--                            </div>-->
-<!--                            <div class="col">-->
-<!--                                <label for="sampleList1" class="form-label text-lg">Excluded samples:</label>-->
-<!--                                <select ref="availableSamples" id="sampleList1" multiple class="p-2 form-select w-100 border border-1" @click="addSample" title="Click to add sample">-->
-<!--                                </select>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-
                 </div>
             </div>
 
@@ -250,26 +233,6 @@
             <send-job-button label="Apply filter" :disabled="!params.samples.length" :project-id="project.id" job-name="applyFilter" @started="startProcess" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
-
-<!--        <div class="row">-->
-<!--            <div class="w-100 float-end">-->
-<!--                <div class="text-center w-100 w-md-40 w-lg-30 w-xl-20 float-end">-->
-<!--                    <button v-if="!processing" type="button" class="btn btn-lg bg-gradient-info w-100 mt-4 mb-0" @click="startProcess" :disabled="processing">{{ processing ? 'Please wait...' : 'Run Filter' }}</button>-->
-
-<!--&lt;!&ndash;                    <img v-if="processing" src="/images/loading-circular.gif" class="mt-3 me-6" style="width:100px" />&ndash;&gt;-->
-<!--                </div>-->
-<!--                <div v-if="processing" class="float-end m-4">-->
-<!--                    <div v-if="processing" class="text-info text-bold">-->
-<!--                        The [Filter data] job has been submitted. You will get an email notification when completed. <br />-->
-<!--                        You can close this window or wait for it to reload when completed.-->
-<!--                    </div>-->
-<!--                    <div v-if="jobPositionInQueue<=1">The job is being executed</div>-->
-<!--                    <div v-if="jobPositionInQueue>1">-->
-<!--                        The job position in the queue is: {{jobPositionInQueue}}-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
 
         <div v-if="!processing && 'filter_violin' in project.project_parameters">
 

@@ -151,12 +151,11 @@
 
             setMetadataName(event, index) {
 
-                this.metadata[index] = {'name' : event.target.value /*, 'values' : {}*/};
+                this.metadata[index].name = event.target.value;
                 if(!('values' in this.metadata[index])) this.metadata[index].values = {};
 
                 this.saveMetadata();
 
-                //console.log(this.metadata, index);
             },
 
             setMetadataValue(event, index, sampleName) {

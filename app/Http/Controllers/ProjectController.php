@@ -157,21 +157,6 @@ class ProjectController extends Controller
 
     public function createStList(Project $project) {
 
-        //$project->createStList();
-
-        //$job = RunScript::dispatch('Data import', $project, 'createStList', []);
-
-        /*$job = new RunScript('Data import', $project, 'createStList', []);
-
-        $jobId = Queue::connection()->push($job);
-
-        //$queueName = Queue::getName('database');
-        $queueName = env('QUEUE_DEFAULT_NAME');
-        $queuePosition = DB::table('jobs')
-            ->where('queue', $queueName)
-            ->where('id', '<=', $jobId)
-            ->count();*/
-
         $jobId = $project->createJob('Data import', 'createStList', []);
 
         return $project->getJobPositionInQueue($jobId);
@@ -261,21 +246,15 @@ class ProjectController extends Controller
     }
 
     public function applyPca(Project $project) {
-
-        //RunScript::dispatch('Principal Component Analysis', $project, 'applyPca', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'n_genes' => request('n_genes'), 'hm_display_genes' => request('hm_display_genes')]);
-
-        //return $project->applyPca(['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'n_genes' => request('n_genes'), 'hm_display_genes' => request('hm_display_genes')]);
-
-        $jobId = $project->createJob('Principal Component Analysis', 'applyPca', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'n_genes' => request('n_genes'), 'hm_display_genes' => request('hm_display_genes')]);
+        $jobId = $project->createJob('Principal Component Analysis', 'applyPca', ['n_genes' => request('n_genes')]);
         return $project->getJobPositionInQueue($jobId);
-
+    }
+    public function pcaPlots(Project $project) {
+        $jobId = $project->createJob('Principal Component Analysis Plots', 'pcaPlots', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'n_genes' => request('n_genes'), 'hm_display_genes' => request('hm_display_genes')]);
+        return $project->getJobPositionInQueue($jobId);
     }
 
     public function quiltPlot(Project $project) {
-
-        //RunScript::dispatch('Quilt plot', $project, 'quiltPlot', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'sample1' => request('sample1'), 'sample2' => request('sample2')]);
-
-        //return $project->quiltPlot(['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'sample1' => request('sample1'), 'sample2' => request('sample2')]);
 
         $jobId = $project->createJob('Quilt plot', 'quiltPlot', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'sample1' => request('sample1'), 'sample2' => request('sample2')]);
         return $project->getJobPositionInQueue($jobId);
