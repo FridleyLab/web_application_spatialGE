@@ -348,10 +348,6 @@ class ProjectController extends Controller
             'plot_meta' => request('plot_meta')
         ];
 
-        //RunScript::dispatch('SThet - Spatial heterogeneity', $project, 'SThetPlot', $parameters);
-
-        //return $project->SThetPlot($parameters);
-
         $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThetPlot', $parameters);
         return $project->getJobPositionInQueue($jobId);
 
@@ -361,6 +357,20 @@ class ProjectController extends Controller
         $samples = $project->samples;
         $color_palettes = ColorPalette::orderBy('label')->get();
         return view('wizard.spatial-domain-detection')->with(compact('project', 'samples', 'color_palettes'));
+    }
+
+    public function sdd_stclust(Project $project) {
+
+        /*$parameters = [
+            'ws' => request('ws'),
+            'ks' => request('ks'),
+            'topgenes' => request('topgenes'),
+            'deepSplit' => request('deepSplit')
+        ];*/
+
+        $jobId = $project->createJob('Spatial Domain Detection - STclust', 'STclust', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+
     }
 
 

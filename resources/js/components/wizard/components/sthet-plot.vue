@@ -79,7 +79,7 @@
         <div class="row mt-3">
 
             <div class="p-3 text-end">
-                <send-job-button label="Generate plots" :disabled="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length" :project-id="project.id" job-name="SThetPlot" @started="sthetPlot" @completed="processCompleted" :project="project" ></send-job-button>
+                <send-job-button label="Generate plots" :disabled="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length" :project-id="project.id" job-name="SThetPlot" @started="sthetPlot" @ongoing="generating = true" @completed="processCompleted" :project="project" ></send-job-button>
             </div>
 
 <!--            <div class="float-end">-->
@@ -104,15 +104,15 @@
 
                     <div class="text-center m-4">
                         <div>
-                            <a v-if="'sthet_plot_table_results' in project.project_parameters" :href="project.project_parameters.sthet_plot_table_results + '.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Download spatial statistics</a>
-                        </div>
-                        <div>
                             <object :data="project.project_parameters.sthet_plot + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                         </div>
                         <div class="">
                             <a :href="project.project_parameters.sthet_plot + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
                             <a :href="project.project_parameters.sthet_plot + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
                             <a :href="project.project_parameters.sthet_plot + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                        </div>
+                        <div>
+                            <a v-if="'sthet_plot_table_results' in project.project_parameters" :href="project.project_parameters.sthet_plot_table_results + '.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Download spatial statistics</a>
                         </div>
                     </div>
 

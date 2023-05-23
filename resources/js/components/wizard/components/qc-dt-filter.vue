@@ -6,7 +6,7 @@
 <!--            <multiselect></multiselect>-->
 <!--        </div>-->
 
-        <div class="accordion" id="accordionFilterTab">
+        <div class="accordion" id="accordionFilterTab" :style="processing ? 'pointer-events:none; opacity: 0.4' : ''">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingSelectSamples">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
@@ -73,9 +73,6 @@
                                 </div>
 
                                 <div class="mt-4">
-
-
-
 
                                     <div class="text-start text-bold mt-2">Keep spots/cells by percentage of counts:</div>
                                     <div class="mt-2 justify-content-center row row-cols-2">
@@ -250,7 +247,7 @@
 
 
         <div class="p-3 text-end">
-            <send-job-button label="Apply filter" :disabled="!params.samples.length" :project-id="project.id" job-name="applyFilter" @started="startProcess" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button label="Apply filter" :disabled="!params.samples.length" :project-id="project.id" job-name="applyFilter" @started="startProcess" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 

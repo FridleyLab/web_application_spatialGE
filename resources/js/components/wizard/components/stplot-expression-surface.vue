@@ -28,7 +28,7 @@
                             v-model="params.genes"
                             mode="tags"
                             placeholder="Select options"
-                            :close-on-select="false"
+                            :close-on-select="true"
                             :searchable="true"
                             :resolve-on-load="false"
                             :delay="0"
@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <div class="p-3 text-center">
-                    <send-job-button label="Estimate surfaces" :disabled="processing || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="estimateSurfaces" @completed="processCompleted" :project="project" ></send-job-button>
+                    <send-job-button label="Estimate surfaces" :disabled="processing || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="estimateSurfaces" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
                 </div>
             </div>
 
@@ -59,7 +59,7 @@
 
             <div class="row mt-3">
                 <div class="p-3 text-end">
-                    <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @completed="processCompleted" :project="project" ></send-job-button>
+                    <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
                 </div>
             </div>
         </div>

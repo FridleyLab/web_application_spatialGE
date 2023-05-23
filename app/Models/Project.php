@@ -1241,6 +1241,78 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
     }
 
 
+    public function STclust($parameters) : string {
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'STclust.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSTclustScript($parameters));
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
+
+
+        $file = $workingDir . 'stclust_plots.csv';
+        if(Storage::fileExists($file)) {
+            $data = trim(Storage::read($file));
+            $plots = [];
+            foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot){
+                $plots[] = $this->workingDirPublicURL() . $plot;
+                $file_extensions = ['svg', 'pdf', 'png'];
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $plot . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                    }
+                }
+            }
+            ProjectParameter::updateOrCreate(['parameter' => 'stclust', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
+        }
+
+        return $output;
+    }
+
+    public function getSTclustScript($parameters) : string {
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList
+{$this->_loadStList('normalized_stlist')}
+
+stclust_stlist = STclust(x=normalized_stlist,
+                         ws={$parameters['ws']},
+                         ks={$parameters['ks']},
+                         topgenes={$parameters['topgenes']},
+                         deepSplit={$parameters['deepSplit']})
+
+{$this->_saveStList('stclust_stlist')}
+
+ps = STplot(x=stclust_stlist, ks={$parameters['ks']}, ws={$parameters['ws']}, ptsize=2)
+n_plots = names(ps)
+write.table(n_plots, 'stclust_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+library('svglite')
+for(p in n_plots) {
+    print(p)
+    ggpubr::ggexport(filename = paste(p,'.png', sep=''), ps[[p]], width = 800, height = 600)
+    ggpubr::ggexport(filename = paste(p,'.pdf', sep=''), ps[[p]], width = 8, height = 6)
+    svglite(paste(p,'.svg', sep=''), width = 8, height = 6)
+    print(ps[[p]])
+    dev.off()
+}
+";
+
+        return $script;
+    }
+
+
     private function getExportFilesCommands($file, $plot) : string {
 
         $str = "if(!is.null($plot)){\n";

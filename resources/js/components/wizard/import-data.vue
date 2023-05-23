@@ -17,7 +17,7 @@
                     </div>
 
                     <div v-if="samples.length" class="p-3">
-                        <input type="button" class="btn" :class="showAddSample ? 'btn-outline-info' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Hide sample form' : 'Add sample'" />
+                        <input v-if="!uploading && !changingStep" type="button" class="btn" :class="showAddSample ? 'btn-outline-info' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Hide sample form' : 'Add sample'" />
                     </div>
 
 
@@ -65,11 +65,11 @@
                         </div>
                     </template>
 
-                    <project-samples v-if="!showAddSample" :samples="samples" :project="project"></project-samples>
+                    <project-samples v-if="!showAddSample" :samples="samples" :project="project" :disabled="uploading || changingStep"></project-samples>
 
 
                     <div v-if="samples.length" class="p-3 text-end">
-                        <send-job-button label="Import Data" :project-id="project.id" job-name="createStList" @started="nextStep" @completed="importCompleted" ></send-job-button>
+                        <send-job-button label="Import Data" :project-id="project.id" job-name="createStList" @started="nextStep" @ongoing="changingStep = true" @completed="importCompleted" ></send-job-button>
                     </div>
 
 

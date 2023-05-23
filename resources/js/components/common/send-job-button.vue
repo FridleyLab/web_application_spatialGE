@@ -1,6 +1,6 @@
 <template>
 <!--        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />-->
-        <input v-if="!processing" type="button" class="btn btn-lg bg-gradient-info mt-2 mb-0" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
+        <input v-if="startButtonVisible && !processing" type="button" class="btn btn-lg bg-gradient-info mt-2 mb-0" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
         <div v-if="processing">
             <div class="text-info text-bold">
                 <div>
@@ -27,7 +27,7 @@
 export default {
     name: 'sendJobButton',
 
-    emits: ['started', 'completed'],
+    emits: ['started', 'ongoing', 'completed'],
 
     props: {
 
@@ -45,6 +45,8 @@ export default {
             checkQueueIntervalId: 0,
             processing: false,
             sendEmail: 0,
+
+            startButtonVisible: false
         }
     },
 
@@ -90,7 +92,19 @@ export default {
             if(this.checkQueueIntervalId) clearInterval(this.checkQueueIntervalId);
             this.checkQueueIntervalId = 0;
             //Create the interval to check queue position
-            this.checkQueueIntervalId = setInterval(async () => {this.queuePosition =  await this.$getJobPositionInQueue(this.projectId, this.jobName); console.log('ASYNC --', this.jobName, this.queuePosition); if(!this.queuePosition) clearInterval(this.checkQueueIntervalId);}, 1800);
+            this.checkQueueIntervalId = setInterval(async () => {
+                this.queuePosition =  await this.$getJobPositionInQueue(this.projectId, this.jobName);
+                console.log('ASYNC --', this.jobName, this.queuePosition);
+                if(!this.queuePosition) {
+                    this.startButtonVisible = true;
+                    clearInterval(this.checkQueueIntervalId);
+                }
+                else {
+                    this.$emit('ongoing');
+                    this.processing = true;
+                }
+
+            }, 1300);
         },
 
         setEmailNofitication: _.debounce(function () {

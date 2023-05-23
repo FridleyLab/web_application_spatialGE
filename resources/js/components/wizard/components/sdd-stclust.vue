@@ -16,43 +16,48 @@
         <div class="row justify-content-center text-center m-3">
             <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
 
-                <div class="row justify-content-center text-center my-4">
+                <div class="row justify-content-center text-center mt-4">
                     <div class="">
                         <div class="me-3">Spatial weight: <span class="text-lg text-bold text-primary">{{ params.ws }}</span></div>
                         <input type="range" min="0" max="1" step="0.025" class="w-100" v-model="params.ws">
                     </div>
                 </div>
 
-                <div class="form-check">
+                <div class="form-check mt-4">
                     <input class="form-check-input" type="checkbox" v-model="dynamicTreeCuts" id="flexCheckDefault">
-                    <label class="form-check-label" for="flexCheckDefault">
+                    <label class="form-check-label text-lg" for="flexCheckDefault">
                         DynamicTreeCuts - using {{dynamicTreeCuts ? 'deep split' : 'number of domains'}}
                     </label>
                 </div>
 
-                <div v-if="!dynamicTreeCuts" class="mt-2 pb-4">
-                    <numeric-range title="Number of domains:" title-class="text-bold" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
+                <div v-if="!dynamicTreeCuts" class="mt-4">
+                    <numeric-range title="Number of domains:" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
                 </div>
 
-                <div v-if="dynamicTreeCuts" class="row justify-content-center text-center my-4">
+                <div v-if="dynamicTreeCuts" class="row justify-content-center text-center mt-4">
                     <div class="">
                         <div class="me-3">DeepSplit: <span class="text-lg text-bold text-primary">{{ params.deepSplit }}</span></div>
                         <input type="range" min="0" max="4" step="0.5" class="w-100" v-model="params.deepSplit">
                     </div>
                 </div>
 
+                <div class="row justify-content-center text-center mt-5">
+                    <div class="">
+                        <div class="me-3">Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"></div>
+                        <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="w-100" v-model="params.n_genes">
+                    </div>
+                </div>
 
-                <div class="p-3 text-center">
-                    <send-job-button label="Estimate surfaces" :disabled="processing || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="estimateSurfaces" @completed="processCompleted" :project="project" ></send-job-button>
+
+                <div class="p-3 text-center mt-4">
+                    <send-job-button label="Run STclust" :disabled="processing" :project-id="project.id" job-name="STclust" @started="SDD_STclust" @completed="processCompleted" :project="project" ></send-job-button>
                 </div>
             </div>
 
         </div>
 
 
-
-
-        <div v-if="'STplotExpressionSurface.genes' in project.project_parameters">
+        <div v-if="'SDD_STclust' in project.project_parameters">
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
@@ -70,69 +75,35 @@
         </div>
 
 
-        <div v-if="!processing && 'STplotExpressionSurface.genes' in project.project_parameters">
+        <div v-if="!processing && 'stclust' in project.project_parameters">
 
-            <div class="mt-4" v-if="!processing && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
-                <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
-                    <li v-for="(samples, gene, index) in plots" class="nav-item" role="presentation">
-                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene" type="button" role="tab" :aria-controls="'expression-surface-' + gene" aria-selected="true">{{ gene }}</button>
-                    </li>
-                </ul>
-                <div class="tab-content" id="stplotQuiltContent">
-                    <template v-for="(samples, gene, index) in plots">
-                        <div class="tab-pane fade" :class="index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '-tab'">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
+                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>
+                </li>
+            </ul>
 
-                            <div class="mt-4">
-                                <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
-                                    <li v-if="Object.keys(samples).length > 1" class="nav-item" role="presentation">
-                                        <button class="nav-link active" :id="'expression-surface-' + gene + '_' + 'all_samples' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene + '_' + 'all_samples'" type="button" role="tab" :aria-controls="'expression-surface-' + gene + '_' + 'all_samples'" aria-selected="true">All samples</button>
-                                    </li>
-                                    <li v-for="(image, sample, index) in samples" class="nav-item" role="presentation">
-                                        <button class="nav-link" :class="Object.keys(samples).length === 1 && index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '_' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene + '_' + sample" type="button" role="tab" :aria-controls="'expression-surface-' + gene + '_' + sample" aria-selected="true">{{ sample }}</button>
-                                    </li>
-                                </ul>
-                                <div class="tab-content" id="stplotQuiltContent">
-
-                                    <div v-if="Object.keys(samples).length > 1" class="tab-pane fade show active" :id="'expression-surface-' + gene + '_' + 'all_samples'" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + 'all_samples' + '-tab'">
-
-                                        <div v-if="show_reset(gene)" class="m-4">
-                                            <button class="btn btn-outline-info" @click="reset_plots(gene)">Reset</button>
-                                        </div>
-
-                                        <div class="d-xxl-flex">
-                                            <template v-for="(image, sample, index) in samples">
-                                                <div v-if="plots_visible[gene][sample]" class="text-center m-4 w-xxl-50">
-                                                    <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                                    <button @click="hide_plot(gene, sample)" class="btn btn-sm btn-outline-secondary">Hide</button>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-
-                                    <template v-for="(image, sample, index) in samples">
-                                        <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + sample + '-tab'">
-                                            <div>
-                                                <div class="text-center m-4">
-                                                    <div>
-                                                        <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                                    </div>
-                                                    <div class="">
-                                                        <a :href="image + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                        <a :href="image + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                        <a :href="image + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                                    </div>
-    <!--                                                <img :src="image + '?' + Date.now()" class="img-fluid">-->
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
+            <div class="tab-content" id="myTabContent">
+                <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">
+                    <div v-for="image in stclust.plots">
+                        <div v-if="image.includes(sample.name)" class="text-center m-4">
+                            <div>
+                                <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
                             </div>
-
+                            <div class="">
+                                <a :href="image + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+                                <a :href="image + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+                                <a :href="image + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+                            </div>
+                            <!--                                                <img :src="image + '?' + Date.now()" class="img-fluid">-->
                         </div>
-                    </template>
+                    </div>
                 </div>
+
+
             </div>
+
+
         </div>
 
 
@@ -160,7 +131,7 @@ import Multiselect from '@vueform/multiselect';
         data() {
             return {
 
-                plots: ('stplot_expression_surface' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_expression_surface) : {},
+                stclust: ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {},
 
                 processing: false,
 
@@ -172,6 +143,7 @@ import Multiselect from '@vueform/multiselect';
                     number_of_domains_min: 2,
                     number_of_domains_max: 5,
                     deepSplit: 0,
+                    n_genes: 3000,
 
                     genes: [],
                     col_pal: 'sunset',
@@ -184,10 +156,10 @@ import Multiselect from '@vueform/multiselect';
             }
         },
 
-        watch: {
-            plots: {
+        /*watch: {
+            stclust: {
                 handler: function(value) {
-                    for (const [gene, samples] of Object.entries(this.plots)) {
+                    for (const [gene, samples] of Object.entries(this.stclust)) {
                         this.plots_visible[gene] = [];
                         for (const [index, sample] of Object.entries(samples)) {
                             this.plots_visible[gene][index] = true;
@@ -196,13 +168,24 @@ import Multiselect from '@vueform/multiselect';
                 },
                 immediate: true,
             }
-        },
+        },*/
 
         methods: {
 
-            estimateSurfaces() {
+            SDD_STclust() {
                 this.processing = true;
-                axios.post(this.stplotExpressionSurfaceUrl, this.params)
+
+                let parameters = {
+                    ws: this.params.ws > 0 ? 'c(0,' + this.params.ws + ')' : '0',
+                    ks: !this.dynamicTreeCuts ? 'c(' + this.params.number_of_domains_min + ':' + this.params.number_of_domains_max + ')' : "'dtc'",
+                    topgenes: this.params.n_genes,
+                    deepSplit: (!this.dynamicTreeCuts || this.params.deepSplit === 0) ? 'F' : this.params.deepSplit,
+                    number_of_domains_min: this.params.number_of_domains_min,
+                    number_of_domains_max: this.params.number_of_domains_max,
+                    ws_value: this.params.ws
+                };
+
+                axios.post(this.sddStclustUrl, parameters)
                     .then((response) => {
                     })
                     .catch((error) => {
@@ -212,7 +195,8 @@ import Multiselect from '@vueform/multiselect';
             },
 
             processCompleted() {
-                this.plots = ('stplot_expression_surface' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_expression_surface) : {};
+                //console.log(this.project.project_parameters);
+                this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
                 this.processing = false;
             },
 
