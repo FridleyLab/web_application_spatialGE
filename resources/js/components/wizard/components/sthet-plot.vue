@@ -10,68 +10,63 @@
 <div class="m-4">
     <form>
 
-        <div class="my-3 text-bold">
-            SThet
-        </div>
-        <div>
-            <p class="text-bold">Select one or more genes to calculate spatial autocorrelation statistics for those genes in each sample. Currently supports Moran’s I and Geary’s C statistics, which measure the tendency of gene expression to show “hot spots” within a tissue. The resulting statistics are displayed in a plot along with sample-level variables if available (i.e., overall survival, tissue type).</p>
-            <ul>
-                <li>Moran’s I: Ranges from -1 to 1. When I is closer to -1, the cell/spots with high expression of a given gene tend to be evenly distributed throughout the tissue. If I is closer to 1, the cells/spots with high expression of a given gene tend to be close or aggregated (“hot-spot”)</li>
-                <li class="mt-3 mb-6">Geary’s C: Ranges from 0 to 2. When C is closer to 2, the cell/spots with high expression of a given gene tend to be evenly distributed throughout the tissue. If C is closer to 0, the cells/spots with high expression of a given gene tend to be close or aggregated (“hot-spot”). The Geary’s C statistic tends to be more sensitive to small-scale changes in expression compared to Moran’s I.</li>
-            </ul>
-        </div>
+        <div :class="generating ? 'disabled-clicks' : ''">
+            <div class="my-3 text-bold">
+                SThet
+            </div>
+            <div>
+                <p class="text-bold">Select one or more genes to calculate spatial autocorrelation statistics for those genes in each sample. Currently supports Moran’s I and Geary’s C statistics, which measure the tendency of gene expression to show “hot spots” within a tissue. The resulting statistics are displayed in a plot along with sample-level variables if available (i.e., overall survival, tissue type).</p>
+                <ul>
+                    <li>Moran’s I: Ranges from -1 to 1. When I is closer to -1, the cell/spots with high expression of a given gene tend to be evenly distributed throughout the tissue. If I is closer to 1, the cells/spots with high expression of a given gene tend to be close or aggregated (“hot-spot”)</li>
+                    <li class="mt-3 mb-6">Geary’s C: Ranges from 0 to 2. When C is closer to 2, the cell/spots with high expression of a given gene tend to be evenly distributed throughout the tissue. If C is closer to 0, the cells/spots with high expression of a given gene tend to be close or aggregated (“hot-spot”). The Geary’s C statistic tends to be more sensitive to small-scale changes in expression compared to Moran’s I.</li>
+                </ul>
+            </div>
 
 
-        <div class="row justify-content-center text-center m-3">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Search and select genes</div>
-                <div>
-                    <Multiselect
-                        v-model="params.genes"
-                        mode="tags"
-                        placeholder="Select options"
-                        :close-on-select="true"
-                        :searchable="true"
-                        :resolve-on-load="false"
-                        :delay="0"
-                        :min-chars="1"
-                        :options="async (query) => { return await searchGenes(query) }"
-                    />
+            <div class="row justify-content-center text-center m-3">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                    <div>Search and select genes</div>
+                    <div>
+                        <Multiselect
+                            v-model="params.genes"
+                            mode="tags"
+                            placeholder="Select options"
+                            :close-on-select="true"
+                            :searchable="true"
+                            :resolve-on-load="false"
+                            :delay="0"
+                            :min-chars="1"
+                            :options="async (query) => { return await searchGenes(query) }"
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row justify-content-center text-center m-3">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Color by</div>
-                <div><Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect></div>
+            <div class="row justify-content-center text-center m-3">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                    <div>Color by</div>
+                    <div><Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect></div>
+                </div>
             </div>
-        </div>
 
-<!--        <div class="row justify-content-center text-center m-4">-->
-<!--            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">-->
-<!--                <div class="me-3">Point size: <span class="text-lg text-bold text-primary">{{ params.ptsize }}</span></div>-->
-<!--                <input type="range" min="0" max="5" step="0.1" class="w-100" v-model="params.ptsize">-->
-<!--            </div>-->
-<!--        </div>-->
-
-        <div class="row justify-content-center text-center m-4">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Color palette</div>
-                <div><Multiselect :options="colorPalettes" v-model="params.color_pal" :searchable="true"></Multiselect></div>
+            <div class="row justify-content-center text-center m-4">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                    <div>Color palette</div>
+                    <div><Multiselect :options="colorPalettes" v-model="params.color_pal" :searchable="true"></Multiselect></div>
+                </div>
             </div>
-        </div>
 
-        <div class="row justify-content-center text-center m-4">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Methods</div>
-                <div>
-                    <label class="me-3">
-                        <input type="checkbox" value="moran" v-model="params.method"> Moran's I
-                    </label>
-                    <label>
-                        <input type="checkbox" value="geary" v-model="params.method"> Geary's C
-                    </label>
+            <div class="row justify-content-center text-center m-4">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                    <div>Methods</div>
+                    <div>
+                        <label class="me-3">
+                            <input type="checkbox" value="moran" v-model="params.method"> Moran's I
+                        </label>
+                        <label>
+                            <input type="checkbox" value="geary" v-model="params.method"> Geary's C
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -82,14 +77,6 @@
                 <send-job-button label="Generate plots" :disabled="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length" :project-id="project.id" job-name="SThetPlot" @started="sthetPlot" @ongoing="generating = true" @completed="processCompleted" :project="project" ></send-job-button>
             </div>
 
-<!--            <div class="float-end">-->
-<!--                <input v-if="!generating" type="button" class="btn btn-outline-info float-end" :class="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length ? 'disabled' : ''" :value="generating ? 'Please wait...' : 'Generate plots'" @click="sthetPlot">-->
-<!--&lt;!&ndash;                <img v-if="generating" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />&ndash;&gt;-->
-<!--            </div>-->
-<!--            <div v-if="generating" class="text-info text-bold float-end m-4">-->
-<!--                The [Spatial heterogeneity] job has been submitted. You will get an email notification when completed. <br />-->
-<!--                You can close this window or reload it when notified.-->
-<!--            </div>-->
         </div>
 
 

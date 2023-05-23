@@ -2,52 +2,46 @@
 <div class="m-4">
     <form>
 
-        <div class="my-3 text-bold">
-            Expression surface plot
-        </div>
-        <div>
-            Select one or more genes to plot a surface of the gene expression using spatial interpolation (“kriging”). The expression surfaces allow to easily identify hot or cold spots within the tissue.<br/>
-            This is a time consuming step, please allow some time for the interpolation to complete.
-        </div>
-
-
-
-
-
-        <div class="row justify-content-center text-center m-3">
-            <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
-<!--                <div class="col">-->
-<!--                    <div>Color palette</div>-->
-<!--                    <div><Multiselect :options="colorPalettes" v-model="params.color_pal"></Multiselect></div>-->
-<!--                </div>-->
-
-                <div>
-                    <div>Search and select genes</div>
-                    <div>
-                        <Multiselect
-                            v-model="params.genes"
-                            mode="tags"
-                            placeholder="Select options"
-                            :close-on-select="true"
-                            :searchable="true"
-                            :resolve-on-load="false"
-                            :delay="0"
-                            :min-chars="1"
-                            :options="async (query) => { return await searchGenes(query) }"
-                        />
-                    </div>
-                </div>
-                <div class="p-3 text-center">
-                    <send-job-button label="Estimate surfaces" :disabled="processing || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="estimateSurfaces" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
-                </div>
+        <div :class="processing || processingPlots ? 'disabled-clicks' : ''">
+            <div class="my-3 text-bold">
+                Expression surface plot
+            </div>
+            <div>
+                Select one or more genes to plot a surface of the gene expression using spatial interpolation (“kriging”). The expression surfaces allow to easily identify hot or cold spots within the tissue.<br/>
+                This is a time consuming step, please allow some time for the interpolation to complete.
             </div>
 
+            <div class="row justify-content-center text-center m-3">
+                <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
+
+                    <div>
+                        <div>Search and select genes</div>
+                        <div>
+                            <Multiselect
+                                v-model="params.genes"
+                                mode="tags"
+                                placeholder="Select options"
+                                :close-on-select="true"
+                                :searchable="true"
+                                :resolve-on-load="false"
+                                :delay="0"
+                                :min-chars="1"
+                                :options="async (query) => { return await searchGenes(query) }"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-3 text-center">
+            <send-job-button label="Estimate surfaces" :disabled="processing || processingPlots || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="estimateSurfaces" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 
 
 
-        <div v-if="'STplotExpressionSurface.genes' in project.project_parameters">
+        <div v-if="!processing && 'STplotExpressionSurface.genes' in project.project_parameters" :class="processingPlots ? 'disabled-clicks' : ''">
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
@@ -56,18 +50,18 @@
                 </div>
             </div>
 
+        </div>
 
-            <div class="row mt-3">
-                <div class="p-3 text-end">
-                    <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
-                </div>
+        <div v-if="!processing" class="row mt-3">
+            <div class="p-3 text-end">
+                <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @ongoing="processingPlots = true" @completed="processPlotsCompleted" :project="project" ></send-job-button>
             </div>
         </div>
 
 
-        <div v-if="!processing && 'STplotExpressionSurface.genes' in project.project_parameters">
+        <div v-if="!processing && !processingPlots && 'STplotExpressionSurface.genes' in project.project_parameters">
 
-            <div class="mt-4" v-if="!processing && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
+            <div class="mt-4" v-if="!processing && Object.keys(plots).length">
                 <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
                     <li v-for="(samples, gene, index) in plots" class="nav-item" role="presentation">
                         <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'expression-surface-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#expression-surface-' + gene" type="button" role="tab" :aria-controls="'expression-surface-' + gene" aria-selected="true">{{ gene }}</button>
@@ -159,6 +153,7 @@ import Multiselect from '@vueform/multiselect';
                 plots: ('stplot_expression_surface' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_expression_surface) : {},
 
                 processing: false,
+                processingPlots: false,
 
                 textOutput: '',
 
@@ -208,7 +203,7 @@ import Multiselect from '@vueform/multiselect';
             },
 
             generatePlots() {
-                this.processing = true;
+                this.processingPlots = true;
                 console.log(this.stplotExpressionSurfacePlotsUrl);
                 axios.post(this.stplotExpressionSurfacePlotsUrl, this.params)
                     .then((response) => {
@@ -217,6 +212,11 @@ import Multiselect from '@vueform/multiselect';
                         this.processing = false;
                         console.log(error.response);
                     })
+            },
+
+            processPlotsCompleted() {
+                this.plots = ('stplot_expression_surface' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_expression_surface) : {};
+                this.processingPlots = false;
             },
 
             hide_plot: function(gene, sample) {

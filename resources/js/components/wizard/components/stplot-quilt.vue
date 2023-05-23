@@ -13,75 +13,63 @@
 
 
 
-        <div class="row justify-content-center text-center m-3">
-            <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
-<!--                <div class="col">-->
-<!--                    <div>Color palette</div>-->
-<!--                    <div><Multiselect :options="colorPalettes" v-model="params.color_pal"></Multiselect></div>-->
-<!--                </div>-->
+        <div :class="generating_quilt ? 'disabled-clicks' : ''">
+            <div class="row justify-content-center text-center m-3">
+                <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
 
-                <div>
-                    <div>Search and select genes</div>
                     <div>
-                        <Multiselect
-                            v-model="params.genes"
-                            mode="tags"
-                            placeholder="Select options"
-                            :close-on-select="true"
-                            :searchable="true"
-                            :resolve-on-load="false"
-                            :delay="0"
-                            :min-chars="1"
-                            :options="async (query) => { return await searchGenes(query) }"
-                        />
+                        <div>Search and select genes</div>
+                        <div>
+                            <Multiselect
+                                v-model="params.genes"
+                                mode="tags"
+                                placeholder="Select options"
+                                :close-on-select="true"
+                                :searchable="true"
+                                :resolve-on-load="false"
+                                :delay="0"
+                                :min-chars="1"
+                                :options="async (query) => { return await searchGenes(query) }"
+                            />
+                        </div>
                     </div>
+                </div>
+
+            </div>
+
+            <div class="row justify-content-center text-center m-4">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                    <div class="me-3">Point size: <span class="text-lg text-bold text-primary">{{ params.ptsize }}</span></div>
+                    <input type="range" min="0" max="5" step="0.1" class="w-100" v-model="params.ptsize">
                 </div>
             </div>
 
-        </div>
-
-        <div class="row justify-content-center text-center m-4">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div class="me-3">Point size: <span class="text-lg text-bold text-primary">{{ params.ptsize }}</span></div>
-                <input type="range" min="0" max="5" step="0.1" class="w-100" v-model="params.ptsize">
+            <div class="row justify-content-center text-center m-4">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                    <div>Color palette</div>
+                    <div><Multiselect :options="colorPalettes" v-model="params.col_pal" :searchable="true"></Multiselect></div>
+                </div>
             </div>
-        </div>
 
-        <div class="row justify-content-center text-center m-4">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Color palette</div>
-                <div><Multiselect :options="colorPalettes" v-model="params.col_pal" :searchable="true"></Multiselect></div>
-            </div>
-        </div>
-
-        <div class="row justify-content-center text-center m-4">
-            <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                <div>Data type</div>
-                <div>
-                    <label class="me-3">
-                        <input type="radio" value="tr" v-model="params.data_type"> Normalized expression
-                    </label>
-                    <label>
-                        <input type="radio" value="raw" v-model="params.data_type"> Raw counts
-                    </label>
+            <div class="row justify-content-center text-center m-4">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                    <div>Data type</div>
+                    <div>
+                        <label class="me-3">
+                            <input type="radio" value="tr" v-model="params.data_type"> Normalized expression
+                        </label>
+                        <label>
+                            <input type="radio" value="raw" v-model="params.data_type"> Raw counts
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="row mt-3">
-
             <div class="p-3 text-end">
-                <send-job-button label="Generate plots" :disabled="generating_quilt || !params.col_pal.length || !params.genes.length" :project-id="project.id" job-name="STplotQuilt" @started="quiltPlot" @completed="processCompleted" :project="project" ></send-job-button>
+                <send-job-button label="Generate plots" :disabled="generating_quilt || !params.col_pal.length || !params.genes.length" :project-id="project.id" job-name="STplotQuilt" @started="quiltPlot" @ongoing="generating_quilt = true" @completed="processCompleted" :project="project" ></send-job-button>
             </div>
-
-<!--            <div class="float-end">-->
-<!--                <input v-if="!generating_quilt" type="button" class="btn btn-outline-info float-end" :class="generating_quilt || !params.genes.length  ? 'disabled' : ''" :value="generating_quilt ? 'Please wait...' : 'Generate plots'" @click="quiltPlot">-->
-<!--&lt;!&ndash;                <img v-if="generating_quilt" src="/images/loading-circular.gif" class="float-end mt-3 me-6" style="width:100px" />&ndash;&gt;-->
-<!--            </div>-->
-<!--            <div v-if="generating_quilt" class="text-info text-bold float-end m-4">-->
-<!--                The [STplot - Quilt] job has been submitted. You will get an email notification when completed. <br />-->
-<!--                You can close this window or reload it when notified.-->
-<!--            </div>-->
         </div>
 
 

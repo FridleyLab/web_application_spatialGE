@@ -2,62 +2,62 @@
 <div class="m-4">
     <form>
 
-        <div class="my-3 text-bold">
-            Spatial Domain Detection with STclust
-        </div>
-        <div>
-            The algorithm STclust detects spatial domains via hierarchical clustering of gene expression weighted by spot-to-spot distances. Users have the option of specifying a number of clusters (k) or use automatic detection using DynamicTreeCuts. The number of clusters inferred by DynamicTreeCuts can be controlled via DeepSplit.
-        </div>
-
-
-
-
-
-        <div class="row justify-content-center text-center m-3">
-            <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
-
-                <div class="row justify-content-center text-center mt-4">
-                    <div class="">
-                        <div class="me-3">Spatial weight: <span class="text-lg text-bold text-primary">{{ params.ws }}</span></div>
-                        <input type="range" min="0" max="1" step="0.025" class="w-100" v-model="params.ws">
-                    </div>
-                </div>
-
-                <div class="form-check mt-4">
-                    <input class="form-check-input" type="checkbox" v-model="dynamicTreeCuts" id="flexCheckDefault">
-                    <label class="form-check-label text-lg" for="flexCheckDefault">
-                        DynamicTreeCuts - using {{dynamicTreeCuts ? 'deep split' : 'number of domains'}}
-                    </label>
-                </div>
-
-                <div v-if="!dynamicTreeCuts" class="mt-4">
-                    <numeric-range title="Number of domains:" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
-                </div>
-
-                <div v-if="dynamicTreeCuts" class="row justify-content-center text-center mt-4">
-                    <div class="">
-                        <div class="me-3">DeepSplit: <span class="text-lg text-bold text-primary">{{ params.deepSplit }}</span></div>
-                        <input type="range" min="0" max="4" step="0.5" class="w-100" v-model="params.deepSplit">
-                    </div>
-                </div>
-
-                <div class="row justify-content-center text-center mt-5">
-                    <div class="">
-                        <div class="me-3">Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"></div>
-                        <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="w-100" v-model="params.n_genes">
-                    </div>
-                </div>
-
-
-                <div class="p-3 text-center mt-4">
-                    <send-job-button label="Run STclust" :disabled="processing" :project-id="project.id" job-name="STclust" @started="SDD_STclust" @completed="processCompleted" :project="project" ></send-job-button>
-                </div>
+        <div :class="processing ? 'disabled-clicks' : ''">
+            <div class="my-3 text-bold">
+                Spatial Domain Detection with STclust
+            </div>
+            <div>
+                The algorithm STclust detects spatial domains via hierarchical clustering of gene expression weighted by spot-to-spot distances. Users have the option of specifying a number of clusters (k) or use automatic detection using DynamicTreeCuts. The number of clusters inferred by DynamicTreeCuts can be controlled via DeepSplit.
             </div>
 
+
+
+
+
+            <div class="row justify-content-center text-center m-3">
+                <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
+
+                    <div class="row justify-content-center text-center mt-4">
+                        <div class="">
+                            <div class="me-3">Spatial weight: <span class="text-lg text-bold text-primary">{{ params.ws }}</span></div>
+                            <input type="range" min="0" max="1" step="0.025" class="w-100" v-model="params.ws">
+                        </div>
+                    </div>
+
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" v-model="dynamicTreeCuts" id="flexCheckDefault">
+                        <label class="form-check-label text-lg" for="flexCheckDefault">
+                            DynamicTreeCuts - using {{dynamicTreeCuts ? 'deep split' : 'number of domains'}}
+                        </label>
+                    </div>
+
+                    <div v-if="!dynamicTreeCuts" class="mt-4">
+                        <numeric-range title="Number of domains:" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
+                    </div>
+
+                    <div v-if="dynamicTreeCuts" class="row justify-content-center text-center mt-4">
+                        <div class="">
+                            <div class="me-3">DeepSplit: <span class="text-lg text-bold text-primary">{{ params.deepSplit }}</span></div>
+                            <input type="range" min="0" max="4" step="0.5" class="w-100" v-model="params.deepSplit">
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center text-center mt-5">
+                        <div class="">
+                            <div class="me-3">Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"></div>
+                            <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="w-100" v-model="params.n_genes">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-3 text-center mt-4">
+            <send-job-button label="Run STclust" :disabled="processing" :project-id="project.id" job-name="STclust" @started="SDD_STclust" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 
-        <div v-if="'SDD_STclust' in project.project_parameters">
+        <div v-if="!processing && 'SDD_STclust' in project.project_parameters">
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
