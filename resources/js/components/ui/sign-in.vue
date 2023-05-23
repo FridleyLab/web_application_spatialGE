@@ -11,7 +11,7 @@
                             <div class="card-body">
                                 <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST" autocomplete="off">
 
-                                    <input type="hidden" name="_token" :value="window._token">
+<!--                                    <input type="hidden" name="_token" :value="window._token">-->
 
                                     <div class="input-group input-group-outline mb-3" :class="(validEmailAddress ? 'is-valid' : '') + (this.overrideValidations ? 'focused is-focused is-valid' : '')">
                                         <label class="form-label">Email</label>
