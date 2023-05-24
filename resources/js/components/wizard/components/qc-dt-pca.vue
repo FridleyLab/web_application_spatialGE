@@ -12,10 +12,6 @@
                 The PCA is calculated with a number of user-selected most variable genes based on standard deviation.
             </div>
 
-    <!--        <div class="mt-4">-->
-    <!--            <label class="form-label">Variable genes to calculate PCA:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes">-->
-    <!--            <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="form-range" v-model="params.n_genes">-->
-    <!--        </div>-->
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
@@ -34,7 +30,6 @@
         <template v-if="!generating_pca && !generating_plots && 'qc_pca' in project.project_parameters">
             <div class="mt-4 row justify-content-center text-center">
                 <label class="form-label">Number of genes to display on heatmap:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.hm_display_genes">
-    <!--            <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="10" class="form-range" v-model="params.hm_display_genes">-->
             </div>
 
 
@@ -70,37 +65,13 @@
             </ul>
             <div class="tab-content" id="filterDiagramsContent">
                 <div class="tab-pane fade show active" id="pcaplot" role="tabpanel" aria-labelledby="pcaplot-tab">
-
-                    <div class="text-center m-4">
-                        <div>
-                            <object :data="project.project_parameters.pseudo_bulk_pca + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                        </div>
-                        <div>
-                            <a :href="project.project_parameters.pseudo_bulk_pca + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                            <a :href="project.project_parameters.pseudo_bulk_pca + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                            <a :href="project.project_parameters.pseudo_bulk_pca + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                        </div>
-                    </div>
-
+                    <show-plot :src="project.project_parameters.pseudo_bulk_pca"></show-plot>
                 </div>
                 <div class="tab-pane fade" id="heatmap" role="tabpanel" aria-labelledby="heatmap-tab">
-
-                    <div class="text-center m-4">
-                        <div>
-                            <object :data="project.project_parameters.pseudo_bulk_heatmap + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                        </div>
-                        <div>
-                            <a :href="project.project_parameters.pseudo_bulk_heatmap + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                            <a :href="project.project_parameters.pseudo_bulk_heatmap + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                            <a :href="project.project_parameters.pseudo_bulk_heatmap + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                        </div>
-                    </div>
-
+                    <show-plot :src="project.project_parameters.pseudo_bulk_heatmap"></show-plot>
                 </div>
             </div>
         </div>
-
-
 
     </form>
 </div>

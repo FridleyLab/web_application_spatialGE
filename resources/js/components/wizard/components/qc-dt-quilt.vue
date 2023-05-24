@@ -70,54 +70,16 @@
                         <div class="my-3 text-center"><h3>Initial data set</h3></div>
 
                         <div class="d-xxl-flex">
-                            <div class="text-center m-4 w-xxl-50">
-                                <div>
-                                    <object :data="project.project_parameters.quilt_plot_1_initial + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                </div>
-                                <div>
-                                    <a :href="project.project_parameters.quilt_plot_1_initial + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                    <a :href="project.project_parameters.quilt_plot_1_initial + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                    <a :href="project.project_parameters.quilt_plot_1_initial + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                </div>
-                            </div>
-
-                            <div class="text-center m-4 w-xxl-50">
-                                <div>
-                                    <object :data="project.project_parameters.quilt_plot_2_initial + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                </div>
-                                <div>
-                                    <a :href="project.project_parameters.quilt_plot_2_initial + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                    <a :href="project.project_parameters.quilt_plot_2_initial + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                    <a :href="project.project_parameters.quilt_plot_2_initial + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                </div>
-                            </div>
+                            <show-plot :src="project.project_parameters.quilt_plot_1_initial" css-classes="w-xxl-50"></show-plot>
+                            <show-plot :src="project.project_parameters.quilt_plot_2_initial" css-classes="w-xxl-50"></show-plot>
                         </div>
 
 
                         <div class="mb-3 mt-5 text-center"><h3>Filtered & Normalized data set</h3></div>
 
                         <div class="d-xxl-flex">
-                            <div class="text-center m-4 w-xxl-50">
-                                <div>
-                                    <object :data="project.project_parameters.quilt_plot_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                </div>
-                                <div>
-                                    <a :href="project.project_parameters.quilt_plot_1 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                    <a :href="project.project_parameters.quilt_plot_1 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                    <a :href="project.project_parameters.quilt_plot_1 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                </div>
-                            </div>
-
-                            <div class="text-center m-4 w-xxl-50">
-                                <div>
-                                    <object :data="project.project_parameters.quilt_plot_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                </div>
-                                <div>
-                                    <a :href="project.project_parameters.quilt_plot_2 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                    <a :href="project.project_parameters.quilt_plot_2 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                    <a :href="project.project_parameters.quilt_plot_2 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                </div>
-                            </div>
+                            <show-plot :src="project.project_parameters.quilt_plot_1" css-classes="w-xxl-50"></show-plot>
+                            <show-plot :src="project.project_parameters.quilt_plot_2" css-classes="w-xxl-50"></show-plot>
                         </div>
 
                     </div>

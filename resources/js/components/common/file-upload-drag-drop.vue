@@ -104,26 +104,32 @@ export default {
                     let contents = reader.result;
                     if(!this.checkCoordinatesData(contents) || this.errorMessage.length) {
                         this.file = null;
-                        return;
                     }
+                    else
+                        this.$emit('fileSelected', this.file);
                 }).bind(this), false);
                 reader.readAsText(this.file);
-
             }
-            else if (this.code === 'image' && !(/\.(jpe?g|png|gif|tiff)$/i.test(this.file.name))) {
-                this.errorMessage = 'File type must be jpeg, png, gif, or tiff';
-                this.file = null;
-                return;
+            else if (this.code === 'image') {
+                if(!(/\.(jpe?g|png|gif|tiff)$/i.test(this.file.name))) {
+                    this.errorMessage = 'File type must be jpeg, png, gif, or tiff';
+                    this.file = null;
+                    return;
+                }
+                else
+                    this.$emit('fileSelected', this.file);
             }
-            else if (this.code === 'scale' && !(/\.json$/i.test(this.file.name))) {
-                this.errorMessage = 'File type must be json';
-                this.file = null;
-                return;
+            else if (this.code === 'scale') {
+                if(!(/\.json$/i.test(this.file.name))) {
+                    this.errorMessage = 'File type must be json';
+                    this.file = null;
+                    return;
+                }
+                else
+                    this.$emit('fileSelected', this.file);
             }
 
             this.getImagePreviews();
-
-            this.$emit('fileSelected', this.file);
 
         },
 

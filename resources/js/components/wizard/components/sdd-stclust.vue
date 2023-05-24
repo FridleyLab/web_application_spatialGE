@@ -86,17 +86,7 @@
             <div class="tab-content" id="myTabContent">
                 <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">
                     <div v-for="image in stclust.plots">
-                        <div v-if="image.includes(sample.name)" class="text-center m-4">
-                            <div>
-                                <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                            </div>
-                            <div class="">
-                                <a :href="image + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                <a :href="image + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                <a :href="image + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                            </div>
-                            <!--                                                <img :src="image + '?' + Date.now()" class="img-fluid">-->
-                        </div>
+                        <show-plot v-if="image.includes(sample.name)" :src="image"></show-plot>
                     </div>
                 </div>
 

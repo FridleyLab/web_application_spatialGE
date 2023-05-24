@@ -58,7 +58,7 @@
                             <progress max="100" :value.prop="uploadPercentage" class="w-100"></progress>
                         </div>
 
-                        <div class="mt-6 w-100 text-center">
+                        <div class="my-6 w-100 text-center">
                             <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">
                                 Import sample
                             </button>
@@ -68,32 +68,9 @@
                     <project-samples v-if="!showAddSample" :samples="samples" :project="project" :disabled="uploading || changingStep"></project-samples>
 
 
-
-
-
-<!--                    <div v-if="samples.length" class="p-3 text-end">-->
-<!--                        <input v-if="!changingStep" type="button" class="btn btn-outline-success" :class="nextStepCssClasses" @click="nextStep" :value="nextStepLabel" />-->
-<!--                        <div v-if="changingStep">-->
-<!--                            <div class="text-info text-bold">-->
-<!--                                The [Data import] job has been submitted. You will get an email notification when completed. <br />-->
-<!--                                You can close this window or wait for it to reload when completed.<br />-->
-<!--                            </div>-->
-<!--                            <div v-if="jobPositionInQueue<=1">The job is being executed</div>-->
-<!--                            <div v-if="jobPositionInQueue>1">-->
-<!--                                The job position in the queue is: {{jobPositionInQueue}}-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--&lt;!&ndash;                        <img v-if="changingStep" src="/images/loading-circular.gif" class="me-6" style="width:100px" />&ndash;&gt;-->
-
-<!--&lt;!&ndash;                        <input v-if="changingStep" type="button" class="btn btn-outline-warning me-2" @click="nextStep" value="Finished importing data, proceed" />&ndash;&gt;-->
-<!--&lt;!&ndash;                        <input v-if="changingStep" type="button" class="btn btn-outline-danger" @click="changingStep = false" value="Cancel" />&ndash;&gt;-->
-
-<!--                    </div>-->
-
                 </div>
 
-                <div v-if="samples.length" class="p-3 text-end">
+                <div v-if="samples.length && !showAddSample" class="p-3 text-end">
                     <send-job-button label="Import Data" :project-id="project.id" job-name="createStList" @started="nextStep" @ongoing="changingStep = true" @completed="importCompleted" ></send-job-button>
                 </div>
             </div>

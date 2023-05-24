@@ -94,9 +94,8 @@
                             <div class="d-xxl-flex">
                                 <template v-for="(samples, gene, index) in plots">
                                     <template v-for="(image, sample, index) in samples">
-                                        <div v-if="sample === sample_object.name && plots_visible[gene][sample]" class="text-center m-4 w-xxl-50">
-                                            <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-<!--                                            <button @click="hide_plot(gene, sample)" class="btn btn-sm btn-outline-secondary">Hide</button>-->
+                                        <div v-if="sample === sample_object.name && plots_visible[gene][sample]" class="text-center w-xxl-50">
+                                            <show-plot :src="image" :downloadable="false"></show-plot>
                                         </div>
                                     </template>
                                 </template>
@@ -128,8 +127,8 @@
 
                                     <div class="d-xxl-flex">
                                         <template v-for="(image, sample, index) in samples">
-                                            <div v-if="plots_visible[gene][sample]" class="text-center m-4 w-xxl-50">
-                                                <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
+                                            <div v-if="plots_visible[gene][sample]" class="text-center w-xxl-50">
+                                                <show-plot :src="image" :downloadable="false"></show-plot>
                                                 <button @click="hide_plot(gene, sample)" class="btn btn-sm btn-outline-secondary">Hide</button>
                                             </div>
                                         </template>
@@ -139,17 +138,7 @@
                                 <template v-for="(image, sample, index) in samples">
                                     <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'quilt-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + sample + '-tab'">
                                         <div>
-                                            <div class="text-center m-4">
-                                                <div>
-                                                    <object :data="image + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                                </div>
-                                                <div class="">
-                                                    <a :href="image + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                    <a :href="image + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                    <a :href="image + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                                </div>
-<!--                                                <img :src="image + '?' + Date.now()" class="img-fluid">-->
-                                            </div>
+                                            <show-plot :src="image"></show-plot>
                                         </div>
                                     </div>
                                 </template>

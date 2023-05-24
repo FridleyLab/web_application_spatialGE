@@ -16,7 +16,6 @@
                     <div class="accordion-body">
                         <div>
                             <strong>Log-normalization:</strong> Counts are normalized to library size (total number of counts per spot or cell), followed by multiplication with a scaling factor. Then, scaled counts are log-transformed (natural logarithm + 1).
-<!--                            <strong>The Log-normal method</strong> uses... <code>features</code>, etc.-->
                         </div>
                         <div class="my-3">
                             <label class="form-label">Scaling factor:</label> <input type="number" class="text-end text-sm border border-1 rounded w-10" v-model="params.scale_f">
@@ -25,7 +24,6 @@
                             <label>
                                 <input type="radio" name="method" value="log" @click="params.method = 'log'"> Use Log-normal
                             </label>
-<!--                            <a href="#" class="btn btn-sm btn-outline-info">Use this method</a>-->
                         </div>
 
 
@@ -50,79 +48,22 @@
 
                                 <div class="tab-pane show active" id="log-normalized-density" role="tabpanel" aria-labelledby="log-normalized-density-tab">
                                     <div class="d-xxl-flex">
-                                        <div class="text-center m-4 w-xxl-50">
-                                            <div>
-                                                <object :data="project.project_parameters.normalized_density_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                            </div>
-                                            <div>
-                                                <a :href="project.project_parameters.normalized_density_1 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                <a :href="project.project_parameters.normalized_density_1 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                <a :href="project.project_parameters.normalized_density_1 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                            </div>
-                                        </div>
-
-                                        <div class="text-center m-4 w-xxl-50">
-                                            <div>
-                                                <object :data="project.project_parameters.normalized_density_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                            </div>
-                                            <div>
-                                                <a :href="project.project_parameters.normalized_density_2 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                <a :href="project.project_parameters.normalized_density_2 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                <a :href="project.project_parameters.normalized_density_2 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                            </div>
-                                        </div>
+                                        <show-plot :src="project.project_parameters.normalized_density_1" css-classes="w-xxl-50"></show-plot>
+                                        <show-plot :src="project.project_parameters.normalized_density_2" css-classes="w-xxl-50"></show-plot>
                                     </div>
                                 </div>
 
                                 <div class="tab-pane show" id="log-normalized-violinplot" role="tabpanel" aria-labelledby="log-normalized-violinplot-tab">
                                     <div class="d-xxl-flex">
-                                        <div class="text-center m-4 w-xxl-50">
-                                            <div>
-                                                <object :data="project.project_parameters.normalized_violin_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                            </div>
-                                            <div>
-                                                <a :href="project.project_parameters.normalized_violin_1 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                <a :href="project.project_parameters.normalized_violin_1 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                <a :href="project.project_parameters.normalized_violin_1 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                            </div>
-                                        </div>
-
-                                        <div class="text-center m-4 w-xxl-50">
-                                            <div>
-                                                <object :data="project.project_parameters.normalized_violin_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                            </div>
-                                            <div>
-                                                <a :href="project.project_parameters.normalized_violin_2 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                <a :href="project.project_parameters.normalized_violin_2 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                <a :href="project.project_parameters.normalized_violin_2 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                            </div>
-                                        </div>
+                                        <show-plot :src="project.project_parameters.normalized_violin_1" css-classes="w-xxl-50"></show-plot>
+                                        <show-plot :src="project.project_parameters.normalized_violin_2" css-classes="w-xxl-50"></show-plot>
                                     </div>
                                 </div>
 
                                 <div class="tab-pane show" id="log-normalized-boxplot" role="tabpanel" aria-labelledby="log-normalized-boxplot-tab">
                                     <div class="d-xxl-flex">
-                                        <div class="text-center m-4 w-xxl-50">
-                                            <div>
-                                                <object :data="project.project_parameters.normalized_boxplot_1 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                            </div>
-                                            <div>
-                                                <a :href="project.project_parameters.normalized_boxplot_1 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                <a :href="project.project_parameters.normalized_boxplot_1 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                <a :href="project.project_parameters.normalized_boxplot_1 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                            </div>
-                                        </div>
-
-                                        <div class="text-center m-4 w-xxl-50">
-                                            <div>
-                                                <object :data="project.project_parameters.normalized_boxplot_2 + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                            </div>
-                                            <div>
-                                                <a :href="project.project_parameters.normalized_boxplot_2 + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                <a :href="project.project_parameters.normalized_boxplot_2 + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                <a :href="project.project_parameters.normalized_boxplot_2 + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                            </div>
-                                        </div>
+                                        <show-plot :src="project.project_parameters.normalized_boxplot_1" css-classes="w-xxl-50"></show-plot>
+                                        <show-plot :src="project.project_parameters.normalized_boxplot_2" css-classes="w-xxl-50"></show-plot>
                                     </div>
                                 </div>
                             </div>
@@ -175,32 +116,12 @@
                                     <div class="tab-content" id="normalizedDiagramsContent">
 
                                         <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
-                                            <div class="text-center m-4">
-                                                <div>
-                                                    <object :data="project.project_parameters.normalized_violin + '.svg' + '?' + Date.now()" class="img-fluid"></object>
-                                                </div>
-                                                <div>
-                                                    <a :href="project.project_parameters.normalized_violin + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                    <a :href="project.project_parameters.normalized_violin + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                    <a :href="project.project_parameters.normalized_violin + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                                </div>
-                                            </div>
+                                            <show-plot :src="project.project_parameters.normalized_violin"></show-plot>
                                         </div>
 
                                         <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
-                                            <div class="text-center m-4">
-                                                <div>
-                                                    <object :data="project.project_parameters.normalized_boxplot + '.svg'  + '?' + Date.now()" class="img-fluid"></object>
-                                                </div>
-                                                <div>
-                                                    <a :href="project.project_parameters.normalized_boxplot + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-                                                    <a :href="project.project_parameters.normalized_boxplot + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-                                                    <a :href="project.project_parameters.normalized_boxplot + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-                                                </div>
-                                            </div>
+                                            <show-plot :src="project.project_parameters.normalized_boxplot"></show-plot>
                                         </div>
-
-
 
                                     </div>
                                 </div>
