@@ -16,13 +16,20 @@
                     {{ file.name }}
                 </div>
                 <div v-if="file" class="text-center">
-                    <a class="btn btn-sm text-danger" v-on:click="removeFile( key )">Remove</a>
+                    <a class="btn btn-sm text-danger" v-on:click="removeFile()">Remove</a>
                 </div>
                 <div v-if="errorMessage.length" class="text-center text-danger text-xs">
                     {{ errorMessage }}
                 </div>
+<!--                <div class="mt-1"><i class="material-icons opacity-10 text-info">help</i></div>-->
+                <div v-if="!file && !errorMessage.length">
+                    Valid file types:
+                    {{ this.acceptedFileTypes[this.code].join(' | ') }}
+                </div>
             </form>
+
         </div>
+
 
     </div>
 </template>
@@ -54,7 +61,15 @@ export default {
 
             sample_name: '',
 
-            errorMessage: ''
+            errorMessage: '',
+
+            acceptedFileTypes: {
+                'expression': ['h5', 'csv', 'tsv', 'txt'],
+                'coordinates': ['csv', 'tsv', 'txt'],
+                'image': ['jpeg', 'jpg', 'png', 'gif', 'tiff'],
+                'scale': ['json']
+            },
+
         }
     },
 
@@ -87,17 +102,19 @@ export default {
 
             this.errorMessage = '';
             //TODO: after the first sample, all samples must match in format
-            if(this.code === 'expression' && !(/\.(h5|csv|tsv|txt)$/i.test(this.file.name))) {
-                this.errorMessage = 'File must be of type h5 or csv';
+
+            //Check the file type
+            if(!(RegExp('\.(' + this.acceptedFileTypes[this.code].join('|') + ')$', 'i').test(this.file.name)))
+            {
+                this.errorMessage = 'File type must be: ' + this.acceptedFileTypes[this.code].join(' | ');
                 this.file = null;
                 return;
             }
+
+            if(this.code === 'expression') {
+                this.$emit('fileSelected', this.file);
+            }
             else if(this.code === 'coordinates') {
-                if(!(/\.(csv|tsv|txt)$/i.test( this.file.name ))) {
-                    this.errorMessage = 'File type must be csv, tsv or txt';
-                    this.file = null;
-                    return;
-                }
 
                 let reader = new FileReader();
                 reader.addEventListener("load", (() => {
@@ -111,22 +128,10 @@ export default {
                 reader.readAsText(this.file);
             }
             else if (this.code === 'image') {
-                if(!(/\.(jpe?g|png|gif|tiff)$/i.test(this.file.name))) {
-                    this.errorMessage = 'File type must be jpeg, png, gif, or tiff';
-                    this.file = null;
-                    return;
-                }
-                else
-                    this.$emit('fileSelected', this.file);
+                this.$emit('fileSelected', this.file);
             }
             else if (this.code === 'scale') {
-                if(!(/\.json$/i.test(this.file.name))) {
-                    this.errorMessage = 'File type must be json';
-                    this.file = null;
-                    return;
-                }
-                else
-                    this.$emit('fileSelected', this.file);
+                this.$emit('fileSelected', this.file);
             }
 
             this.getImagePreviews();
@@ -177,7 +182,7 @@ export default {
             }
         },
 
-        removeFile( key ){
+        removeFile(){
             this.file = null;
             //this.getImagePreviews();
 

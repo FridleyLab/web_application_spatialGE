@@ -44,9 +44,9 @@
         </div>
 
 
-        <div v-if="samples.length" class="mt-5">
+        <div v-if="samples.length" class="table-responsive mt-5">
             <div class="text-info text-bolder">Add relevant metadata for the samples</div>
-            <table class="table table-responsive table-striped">
+            <table class="table table-striped">
                 <thead>
                 <tr>
                     <td></td>
@@ -61,7 +61,7 @@
                 <tr>
                     <th>Sample/Metadata</th>
                     <td v-for="index in metadata.length" class="text-center">
-                        <input :disabled="disabled" type="text" class="border border-info border-1 rounded rounded-2 px-2" :style="'width:' + (activeColumn===index ? '120' : '60') + 'px'" :value="('name' in metadata[index-1]) ? metadata[index-1].name : ''" @input="setMetadataName($event, index - 1 )" @focus="activeColumn = index" @focusout="activeColumn = -1" />
+                        <input :disabled="disabled" type="text" class="border border-info border-1 rounded rounded-2 px-2" :style="'width:' + (activeColumn===index ? '180' : '120') + 'px'" :value="('name' in metadata[index-1]) ? metadata[index-1].name : ''" @input="setMetadataName($event, index - 1 )" @focus="activeColumn = index" @focusout="activeColumn = -1" />
 <!--                        <a v-if="activeColumnHeader !== index" class="btn btn-outline-info" @click="activeColumnHeader = index">{{ metadata[index-1].name }}</a>-->
                     </td>
                 </tr>
@@ -73,45 +73,13 @@
 <!--                        <input type="text" class="border border-info border-1 rounded rounded-2 px-2" :value="sample.name ?? 'Sample ' + sample.id" @input="" />-->
                     </th>
                     <td v-for="index in metadata.length" class="text-center">
-                        <input type="text" class="border border-1 rounded rounded-2 px-2" :style="'width:' + (activeColumn===index ? '120' : '60') + 'px'" :value="(('values' in metadata[index-1]) && sample.name in metadata[index-1].values) ? metadata[index-1].values[sample.name] : ''" @input="setMetadataValue($event, index - 1, sample.name)" :disabled="metadata.length<index || !metadata[index-1].name.trim().length || disabled" @focus="activeColumn = index" @focusout="activeColumn = -1" />
+                        <input type="text" class="border border-1 rounded rounded-2 px-2" :style="'width:' + (activeColumn===index ? '180' : '120') + 'px'" :value="(('values' in metadata[index-1]) && sample.name in metadata[index-1].values) ? metadata[index-1].values[sample.name] : ''" @input="setMetadataValue($event, index - 1, sample.name)" :disabled="metadata.length<index || !metadata[index-1].name.trim().length || disabled" @focus="activeColumn = index" @focusout="activeColumn = -1" />
                     </td>
                 </tr>
                 </tbody>
             </table>
             <button v-if="!disabled" class="btn btn-sm btn-outline-secondary" @click="addMetadata">Add</button>
         </div>
-
-
-<!--        <div v-if="samples.length" class="mt-5">-->
-<!--            <div class="text-info text-bolder">Add relevant metadata for the samples</div>-->
-<!--            <table class="table table-responsive table-striped">-->
-<!--                <thead>-->
-<!--                    <tr>-->
-<!--                        <th>Metadata</th>-->
-<!--                        <th v-for="sample in samples">-->
-<!--                            {{ sample.name ?? 'Sample ' + sample.id }}-->
-<!--                        </th>-->
-<!--                    </tr>-->
-<!--                </thead>-->
-<!--                <tbody>-->
-<!--                    <tr v-for="index in metadata.length" :key="index">-->
-<!--                        <th>-->
-<!--                            <input type="text" class="border border-info border-1 rounded rounded-2 px-2" :value="('name' in metadata[index-1]) ? metadata[index-1].name : ''" @input="setMetadataName($event, index - 1 )" />-->
-<!--                        </th>-->
-<!--                        <td v-for="sample in samples">-->
-<!--                            <input type="text" class="border border-1 rounded rounded-2 px-2" :value="(('values' in metadata[index-1]) && sample.name in metadata[index-1].values) ? metadata[index-1].values[sample.name] : ''" @input="setMetadataValue($event, index - 1, sample.name)" :disabled="metadata.length<index || !metadata[index-1].name.trim().length" />-->
-<!--                        </td>-->
-<!--                        <td>-->
-<!--                            <i v-if="!deletingMetadata" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deletingMetadata = index">delete</i>-->
-
-<!--                            <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deletingMetadata = 0" title="Cancel deletion attempt" />-->
-<!--                            <input v-if="deletingMetadata === index" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteMetadata(index -1)" />-->
-<!--                        </td>-->
-<!--                    </tr>-->
-<!--                </tbody>-->
-<!--            </table>-->
-<!--            <button class="btn btn-sm btn-outline-secondary" @click="addMetadata">Add</button>-->
-<!--        </div>-->
 
         <div v-if="!samples.length">
             You haven't uploaded any samples yet!

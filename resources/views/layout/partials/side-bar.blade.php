@@ -74,7 +74,7 @@
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                                     <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 3) text-secondary @endif">filter_3</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 3) text-secondary @endif text-bold">STplot - Visualization</span>
+                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 3) text-secondary @endif text-bold">Visualization</span>
                             </a>
                         </li>
 
@@ -83,7 +83,7 @@
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                                     <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 4) text-secondary @endif">filter_4</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 4) text-secondary @endif text-bold">SThet - Spatial heterogen.</span>
+                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 4) text-secondary @endif text-bold">Spatial heterogeneity</span>
                             </a>
                         </li>
 
@@ -102,7 +102,7 @@
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                                     <i class="material-icons opacity-10 text-secondary">filter_6</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">STDE - Differential expr.</span>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">Differential expression</span>
                             </a>
                         </li>
 
@@ -111,7 +111,16 @@
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                                     <i class="material-icons opacity-10 text-secondary">filter_7</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">STenrich - Spatial gene set</span>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">Spatial gene set enrichment</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ps-4">
+                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i class="material-icons opacity-10 text-secondary">filter_8</i>
+                                </div>
+                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">Spatial gradients</span>
                             </a>
                         </li>
 

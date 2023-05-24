@@ -704,6 +704,34 @@ $plots
 
     }
 
+    public function getNormalizedDataScript() : string {
+
+        //If there's no normalizes stlist use the initial stlist
+        $stlist = 'normalized_stlist';
+
+        $script = "
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+library('magrittr')
+
+# Load normalized STList
+{$this->_loadStList($stlist)}
+
+## Extract spot/cell normalized data for all samples
+norm_data = lapply($stlist@tr_counts, function(i){
+  df_tmp = as.data.frame(as.matrix(i)) %>%
+    tibble::rownames_to_column('gene')
+
+  return(df_tmp)
+})
+openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
+";
+
+        return $script;
+
+    }
+
 
     public function applyPca($parameters) {
 
