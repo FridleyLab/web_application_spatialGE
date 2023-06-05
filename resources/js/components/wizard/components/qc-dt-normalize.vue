@@ -21,113 +21,10 @@
                             <label class="form-label">Scaling factor:</label> <input type="number" class="text-end text-sm border border-1 rounded w-10" v-model="params.scale_f">
                         </div>
                         <div class="mt-3">
-                            <label>
-                                <input type="radio" name="method" value="log" @click="params.method = 'log'"> Use Log-normal
+                            <label class="text-lg">
+                                <input type="radio" name="method" value="log" v-model="params.method" @click="params.method = 'log'"> Use Log-normal
                             </label>
                         </div>
-
-
-
-
-                        <div class="mt-4" v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
-                            <h5 class="mt-4">Count distribution by sample</h5>
-                            <ul class="nav nav-tabs" id="logNormalizedDiagrams" role="tablist">
-
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="log-normalized-density-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-density" type="button" role="tab" aria-controls="log-normalized-density" aria-selected="false">Density plots</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="log-normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-violinplot" type="button" role="tab" aria-controls="log-normalized-violinplot" aria-selected="false">Violin plots</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="log-normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-boxplot" type="button" role="tab" aria-controls="log-normalized-boxplot" aria-selected="false">Boxplots</button>
-                                </li>
-                            </ul>
-
-                            <div class="tab-content" id="logNormalizedDiagramsContent">
-
-                                <div class="tab-pane show active" id="log-normalized-density" role="tabpanel" aria-labelledby="log-normalized-density-tab">
-                                    <div class="d-xxl-flex">
-                                        <show-plot :src="project.project_parameters.normalized_density_1" css-classes="w-xxl-50"></show-plot>
-                                        <show-plot :src="project.project_parameters.normalized_density_2" css-classes="w-xxl-50"></show-plot>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane show" id="log-normalized-violinplot" role="tabpanel" aria-labelledby="log-normalized-violinplot-tab">
-                                    <div class="d-xxl-flex">
-                                        <show-plot :src="project.project_parameters.normalized_violin_1" css-classes="w-xxl-50"></show-plot>
-                                        <show-plot :src="project.project_parameters.normalized_violin_2" css-classes="w-xxl-50"></show-plot>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane show" id="log-normalized-boxplot" role="tabpanel" aria-labelledby="log-normalized-boxplot-tab">
-                                    <div class="d-xxl-flex">
-                                        <show-plot :src="project.project_parameters.normalized_boxplot_1" css-classes="w-xxl-50"></show-plot>
-                                        <show-plot :src="project.project_parameters.normalized_boxplot_2" css-classes="w-xxl-50"></show-plot>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
-                            <h5 class="mt-4">Count distribution by gene</h5>
-
-                            <div class="row mt-5 row-cols-2" :class="generating_plots ? 'disabled-clicks' : ''">
-                                <div class="col">
-                                    <div>Color palette</div>
-                                    <div><Multiselect :options="colorPalettes" v-model="filter_color_palette" :close-on-select="true" :searchable="true"></Multiselect></div>
-                                </div>
-                                <div class="col">
-                                    <div>Gene</div>
-                                    <div>
-                                        <Multiselect
-
-                                            v-model="selected_gene"
-                                            placeholder="Select options"
-                                            :close-on-select="true"
-                                            :searchable="true"
-                                            :resolve-on-load="false"
-                                            :delay="0"
-                                            :min-chars="1"
-                                            :options="async (query) => { return await searchGenes(query) }"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-
-                                <div class="p-3 text-end">
-                                    <send-job-button label="Generate plots" :disabled="generating_plots || !filter_color_palette.length || !selected_gene.length" :project-id="project.id" job-name="generateNormalizationPlots" @started="normalizedPlots" @ongoing="generating_plots = true" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
-                                </div>
-
-                            </div>
-                            <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
-
-                                <div class="mt-4" v-if="!generating_plots">
-                                    <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="false">Boxplots</button>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content" id="normalizedDiagramsContent">
-
-                                        <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
-                                            <show-plot :src="project.project_parameters.normalized_violin"></show-plot>
-                                        </div>
-
-                                        <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
-                                            <show-plot :src="project.project_parameters.normalized_boxplot"></show-plot>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
                 </div>
@@ -144,7 +41,7 @@
                             <strong>SCTransform:</strong> Method implemented in Seurat for count transformation and reduction of technical effects. The method applies regularized negative binomial regression with counts per spot or cell as covariate (See their <a class="link-info" href="https://doi.org/10.1186/s13059-019-1874-1">technical article</a> for more details).
                         </div>
                         <div class="mt-3">
-                            <label>
+                            <label class="text-lg">
                                 <input type="radio" name="method" value="log" @click="params.method = 'sct'"> Use SCTransform
                             </label>
                         </div>
@@ -173,10 +70,117 @@
         </div>
 
 
-
-
         <div class="p-3 text-end">
-            <send-job-button :disabled="!params.method.length || generating_plots" label="Normalize data" :project-id="project.id" job-name="applyNormalization" @started="startProcess" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button :disabled="!params.method.length || generating_data || generating_plots" label="Normalize data" :project-id="project.id" job-name="applyNormalization" @started="startProcess" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+        </div>
+
+        <div v-if="('normalized_boxplot_1' in project.project_parameters)" class="p-3 text-end">
+            <send-job-button v-if="!('normalizedData' in project.project_parameters)" :disabled="processing || generating_plots" label="Extract normalized data" :project-id="project.id" job-name="generateNormalizationData" @started="normalizedData" @ongoing="generating_data = true" @completed="normalizedDataCompleted" :project="project" :secondary="true" ></send-job-button>
+            <div v-if="!processing && !generating_data && 'normalizedData' in project.project_parameters" class="mt-2">
+                <a :href="project.project_parameters.normalizedData + '.xlsx'" class="btn btn-sm btn-outline-info" download>Download Normalized data</a>
+            </div>
+        </div>
+
+
+        <div :class="processing || generating_plots ? 'disabled-clicks' : ''" id="accordionExample">
+            <div class="mt-4" v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
+                <h5 class="mt-4">Count distribution by sample</h5>
+                <ul class="nav nav-tabs" id="logNormalizedDiagrams" role="tablist">
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="log-normalized-density-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-density" type="button" role="tab" aria-controls="log-normalized-density" aria-selected="false">Density plots</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="log-normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-violinplot" type="button" role="tab" aria-controls="log-normalized-violinplot" aria-selected="false">Violin plots</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="log-normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#log-normalized-boxplot" type="button" role="tab" aria-controls="log-normalized-boxplot" aria-selected="false">Boxplots</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="logNormalizedDiagramsContent">
+
+                    <div class="tab-pane show active" id="log-normalized-density" role="tabpanel" aria-labelledby="log-normalized-density-tab">
+                        <div class="d-xxl-flex">
+                            <show-plot :src="project.project_parameters.normalized_density_1" css-classes="w-xxl-50"></show-plot>
+                            <show-plot :src="project.project_parameters.normalized_density_2" css-classes="w-xxl-50"></show-plot>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane show" id="log-normalized-violinplot" role="tabpanel" aria-labelledby="log-normalized-violinplot-tab">
+                        <div class="d-xxl-flex">
+                            <show-plot :src="project.project_parameters.normalized_violin_1" css-classes="w-xxl-50"></show-plot>
+                            <show-plot :src="project.project_parameters.normalized_violin_2" css-classes="w-xxl-50"></show-plot>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane show" id="log-normalized-boxplot" role="tabpanel" aria-labelledby="log-normalized-boxplot-tab">
+                        <div class="d-xxl-flex">
+                            <show-plot :src="project.project_parameters.normalized_boxplot_1" css-classes="w-xxl-50"></show-plot>
+                            <show-plot :src="project.project_parameters.normalized_boxplot_2" css-classes="w-xxl-50"></show-plot>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
+                <h5 class="mt-4">Count distribution by gene</h5>
+
+                <div class="row mt-5 row-cols-2" :class="generating_plots ? 'disabled-clicks' : ''">
+                    <div class="col">
+                        <div>Color palette</div>
+                        <div><Multiselect :options="colorPalettes" v-model="filter_color_palette" :close-on-select="true" :searchable="true"></Multiselect></div>
+                    </div>
+                    <div class="col">
+                        <div>Gene</div>
+                        <div>
+                            <Multiselect
+
+                                v-model="selected_gene"
+                                placeholder="Select options"
+                                :close-on-select="true"
+                                :searchable="true"
+                                :resolve-on-load="false"
+                                :delay="0"
+                                :min-chars="1"
+                                :options="async (query) => { return await searchGenes(query) }"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+
+                    <div class="p-3 text-end">
+                        <send-job-button label="Generate plots" :disabled="generating_plots || generating_data || !filter_color_palette.length || !selected_gene.length" :project-id="project.id" job-name="generateNormalizationPlots" @started="normalizedPlots" @ongoing="generating_plots = true" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
+                    </div>
+
+                </div>
+                <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
+
+                    <div class="mt-4" v-if="!generating_plots">
+                        <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="false">Boxplots</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="normalizedDiagramsContent">
+
+                            <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
+                                <show-plot :src="project.project_parameters.normalized_violin"></show-plot>
+                            </div>
+
+                            <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
+                                <show-plot :src="project.project_parameters.normalized_boxplot"></show-plot>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
@@ -199,19 +203,21 @@ import Multiselect from '@vueform/multiselect';
             colorPalettes: Object,
             normalizeUrl: String,
             normalizeUrlPlots: String,
+            normalizedUrlData: String,
         },
 
         data() {
             return {
 
                 params: {
-                    method: '',
+                    method: 'log',
                     scale_f: 10000
                 },
 
                 processing: false,
 
                 generating_plots: false,
+                generating_data: false,
 
                 selected_gene: [],
                 filter_color_palette: 'Spectral',
@@ -263,6 +269,22 @@ import Multiselect from '@vueform/multiselect';
 
             plotsProcessCompleted() {
                 this.generating_plots = false;
+            },
+
+            normalizedData() {
+                this.generating_data = true;
+                axios.post(this.normalizedUrlData)
+                    .then((response) => {
+                        //this.generating_plots = false;
+                    })
+                    .catch((error) => {
+                        this.generating_plots = false;
+                        //console.log(error.message)
+                    })
+            },
+
+            normalizedDataCompleted() {
+                this.generating_data = false;
             },
 
             searchGenes: async function(query) {

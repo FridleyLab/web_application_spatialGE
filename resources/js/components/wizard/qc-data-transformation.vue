@@ -39,7 +39,7 @@
                                 <qc-dt-filter :project="project" :samples="samples" :color-palettes="colorPalettes" :filter-url="filterUrl" :filter-url-plots="filterUrlPlots"></qc-dt-filter>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="normalize" role="tabpanel" aria-labelledby="normalize-tab">
-                                <qc-dt-normalize :samples="samples" :project="project" :color-palettes="colorPalettes" :normalize-url="normalizeUrl" :normalize-url-plots="normalizeUrlPlots"></qc-dt-normalize>
+                                <qc-dt-normalize :samples="samples" :project="project" :color-palettes="colorPalettes" :normalize-url="normalizeUrl" :normalize-url-plots="normalizeUrlPlots" :normalized-url-data="normalizedUrlData"></qc-dt-normalize>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="pca" role="tabpanel" aria-labelledby="pca-tab">
                                 <qc-dt-pca :samples="samples" :project="project" :pca-url="pcaUrl" :pca-plots-url="pcaPlotsUrl" :color-palettes="colorPalettes"></qc-dt-pca>
@@ -68,6 +68,7 @@
             filterUrlPlots: String,
             normalizeUrl: String,
             normalizeUrlPlots: String,
+            normalizedUrlData: String,
             pcaUrl: String,
             pcaPlotsUrl: String,
             quiltUrl: String,

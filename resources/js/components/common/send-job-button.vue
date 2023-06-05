@@ -1,6 +1,6 @@
 <template>
 <!--        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />-->
-        <input v-if="startButtonVisible && !processing" type="button" class="btn btn-lg bg-gradient-info mt-2 mb-0" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />
+        <input v-if="startButtonVisible && !processing" type="button" class="btn btn-lg mt-2 mb-0" :class="((processing || disabled) ? 'disabled' : '') + (!secondary ? ' bg-gradient-info' : ' btn-sm btn-outline-info')" @click="sendStartSignal" :value="label" />
         <div v-if="processing" :class="processing ? 'popup-center' : ''" class="border border-1 rounded rounded-2 bg-gray-400 p-4">
             <div class="text-info text-bold">
                 <div class="text-center">
@@ -37,6 +37,7 @@ export default {
         jobName: String,
         project: {type: Object, default: null},
         disabled: {type: Boolean, default: false},
+        secondary: {type: Boolean, default: false},
     },
 
     data() {

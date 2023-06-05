@@ -245,6 +245,11 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function generateNormalizationData(Project $project) {
+        $jobId = $project->createJob('Generate normalization data', 'generateNormalizationData', []);
+        return $project->getJobPositionInQueue($jobId);
+    }
+
     public function applyPca(Project $project) {
         $jobId = $project->createJob('Principal Component Analysis', 'applyPca', ['n_genes' => request('n_genes')]);
         return $project->getJobPositionInQueue($jobId);

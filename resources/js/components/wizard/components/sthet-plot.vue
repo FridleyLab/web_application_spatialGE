@@ -152,7 +152,7 @@ export default {
             params: {
                 color_pal: 'Spectral',
                 plot_meta: '',
-                method: [],
+                method: ['moran'],
                 genes: []
             },
 

@@ -61,8 +61,9 @@ class Project extends Model
         if(array_key_exists('metadata', $params))
         {
             $names = [];
+            //$names[] = ['label' =>'select a metadata (optional)', 'value' => ''];
             foreach(json_decode($params['metadata']) as $meta)
-                $names[] = $meta->name;
+                $names[] = ['label' =>$meta->name, 'value' => $meta->name];
             $params['metadata_names'] = $names;
         }
 
@@ -542,7 +543,7 @@ $plots
 
         $result = [];
 
-        $parameterNames = ['normalized_violin', 'normalized_boxplot', 'normalized_boxplot_1', 'normalized_boxplot_2', 'normalized_violin_1', 'normalized_violin_2', 'normalized_density_1', 'normalized_density_2'];
+        $parameterNames = [/*'normalized_violin', 'normalized_boxplot', */'normalized_boxplot_1', 'normalized_boxplot_2', 'normalized_violin_1', 'normalized_violin_2', 'normalized_density_1', 'normalized_density_2'];
         foreach($parameterNames as $parameterName) {
 
             $file_extensions = ['svg', 'pdf', 'png'];
@@ -566,6 +567,9 @@ $plots
             $result['pca_max_var_genes'] = intval($data);
         }
 
+        //Delete (if any) previously generated normalized data
+        ProjectParameter::where('parameter','normalizedData')->where('project_id', $this->id)->delete();
+
         $result['output'] = $output;
         return $result;
 
@@ -587,9 +591,9 @@ $plots
             }
         }
 
-        $plots = $this->getExportFilesCommands('normalized_violin', 'vp');
-        $plots .= $this->getExportFilesCommands('normalized_boxplot', 'bp');
-        $plots .= $this->getExportFilesCommands('normalized_boxplot_1', "den_raw\$boxplot");
+        //$plots = $this->getExportFilesCommands('normalized_violin', 'vp');
+        //$plots .= $this->getExportFilesCommands('normalized_boxplot', 'bp');
+        $plots = $this->getExportFilesCommands('normalized_boxplot_1', "den_raw\$boxplot");
         $plots .= $this->getExportFilesCommands('normalized_boxplot_2', "den_tr\$boxplot");
         $plots .= $this->getExportFilesCommands('normalized_density_1', "den_raw\$density");
         $plots .= $this->getExportFilesCommands('normalized_density_2', "den_tr\$density");
@@ -617,10 +621,10 @@ pca_max_var_genes = min(unlist(lapply(normalized_stlist@counts, nrow)))
 write.table(pca_max_var_genes, 'pca_max_var_genes.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 #### Violin plot
-vp = violin_plots(normalized_stlist, color_pal='Spectral', data_type='tr', genes='RPL22')
+#vp = violin_plots(normalized_stlist, color_pal='Spectral', data_type='tr', genes='RPL22')
 
 #### Box plot
-bp = violin_plots(normalized_stlist, color_pal='Spectral', plot_type='box', data_type='tr', genes='RPL22')
+#bp = violin_plots(normalized_stlist, color_pal='Spectral', plot_type='box', data_type='tr', genes='RPL22')
 
 den_raw = count_distribution(normalized_stlist, distrib_subset=0.01, data_type='raw', plot_type=c('density', 'violin', 'box'))
 den_tr = count_distribution(normalized_stlist, distrib_subset=0.01, plot_type=c('density', 'violin', 'box'))
@@ -701,6 +705,38 @@ $plots
 ";
 
         return $script;
+
+    }
+
+
+    public function generateNormalizationData($parameters) {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'generateNormalizedData.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getNormalizedDataScript($parameters));
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
+
+        $parameterNames = ['normalizedData'];
+        foreach($parameterNames as $parameterName) {
+            $file_extensions = ['xlsx'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $parameterName . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                }
+            }
+        }
+
+        return ['output' => $output];
 
     }
 
@@ -835,8 +871,9 @@ pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes)
         $stlist = 'pca_stlist';
 
         $plot_meta = $parameters['plot_meta'];
+        $plot_meta = strlen($plot_meta) ? ", plot_meta='$plot_meta'" : '';
+
         $color_pal = $parameters['color_pal'];
-        //$n_genes = $parameters['n_genes'];
         $hm_display_genes = $parameters['hm_display_genes'];
 
         $plots = $this->getExportFilesCommands('pseudo_bulk_pca', "pca_p");
@@ -851,18 +888,12 @@ library('spatialGE')
 # Load PCA STList
 {$this->_loadStList($stlist)}
 
-pca_p = pseudobulk_pca_plot(pca_stlist, plot_meta='$plot_meta', color_pal='$color_pal', ptsize=5)
-hm_p = pseudobulk_heatmap(pca_stlist, plot_meta='$plot_meta', hm_display_genes=$hm_display_genes, color_pal='$color_pal')
+pca_p = pseudobulk_pca_plot(pca_stlist $plot_meta, color_pal='$color_pal', ptsize=5)
+hm_p = pseudobulk_heatmap(pca_stlist $plot_meta, hm_display_genes=$hm_display_genes, color_pal='$color_pal')
 
 $plots
 
 ";
-
-
-//pca_p = pseudobulk_pca_plot(stlist_pca, plot_meta='$plot_meta', hm_display_genes=$hm_display_genes, color_pal='$color_pal', ptsize=5)
-//hm_p = pseudobulk_heatmap(stlist_pca, plot_meta='$plot_meta', hm_display_genes=$hm_display_genes, color_pal='$color_pal', ptsize=5)
-
-
         return $script;
 
     }

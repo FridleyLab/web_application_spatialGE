@@ -49,7 +49,7 @@
         </template>
         <div v-if="!generating_pca" class="row mt-3">
             <div class="p-3 text-end">
-                <send-job-button label="Generate plots" :disabled="generating_pca || !params.color_pal.length || !params.plot_meta.length" :project-id="project.id" job-name="pcaPlots" @started="pcaPlots" @ongoing="generating_plots = true" @completed="processPlotsCompleted" :project="project" ></send-job-button>
+                <send-job-button label="Generate plots" :disabled="generating_pca || !params.color_pal.length /*|| !params.plot_meta.length*/" :project-id="project.id" job-name="pcaPlots" @started="pcaPlots" @ongoing="generating_plots = true" @completed="processPlotsCompleted" :project="project" ></send-job-button>
             </div>
         </div>
 
@@ -107,7 +107,7 @@ import Multiselect from '@vueform/multiselect';
                     hm_display_genes: 30
                 },
 
-                plot_meta_options: 'metadata_names' in this.project.project_parameters ? this.project.project_parameters.metadata_names : [],
+                plot_meta_options: 'metadata_names' in this.project.project_parameters ? [{'label': 'select a metadata (optional)', 'value': ''} ,...this.project.project_parameters.metadata_names] : [{'label': 'select a metadata (optional)', 'value': ''}],
 
                 generating_pca: false,
                 generating_plots: false,

@@ -19,28 +19,44 @@
 
                     <div class="row justify-content-center text-center mt-4">
                         <div class="">
-                            <div class="me-3">Spatial weight: <span class="text-lg text-bold text-primary">{{ params.ws }}</span></div>
-                            <input type="range" min="0" max="1" step="0.025" class="w-100" v-model="params.ws">
+                            <div class="me-3">
+                                Spatial weight: <span class="text-lg text-bold text-primary">{{ params.ws }}</span>
+                            </div>
+                            <input type="range" min="0" max="0.1" step="0.01" class="w-100" v-model="params.ws">
                         </div>
                     </div>
 
                     <div class="form-check mt-4">
-                        <input class="form-check-input" type="checkbox" v-model="dynamicTreeCuts" id="flexCheckDefault">
-                        <label class="form-check-label text-lg" for="flexCheckDefault">
-                            DynamicTreeCuts - using {{dynamicTreeCuts ? 'deep split' : 'number of domains'}}
+<!--                        <input class="form-check-input" type="checkbox" v-model="dynamicTreeCuts" id="flexCheckDefault">-->
+<!--                        <label class="form-check-label text-lg" for="flexCheckDefault">-->
+<!--                            DynamicTreeCuts - using {{dynamicTreeCuts ? 'deep split' : 'number of domains'}}-->
+<!--                        </label>-->
+                        <label class="text-lg">
+                            <input type="radio" name="method" value="ds" v-model="method"> Select a range of Ks
+                        </label>
+
+                        <label class="text-lg ms-4">
+                            <input type="radio" name="method" value="dtc" v-model="method"> Use DynamicTreeCuts
                         </label>
                     </div>
 
-                    <div v-if="!dynamicTreeCuts" class="mt-4">
-                        <numeric-range title="Number of domains:" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
-                    </div>
-
-                    <div v-if="dynamicTreeCuts" class="row justify-content-center text-center mt-4">
+<!--                    <div :class="method === 'dtc' ? '' : 'disabled-clicks'" class="row justify-content-center text-center mt-4">-->
+                    <div v-if="method === 'dtc'" class="row justify-content-center text-center mt-4">
                         <div class="">
-                            <div class="me-3">DeepSplit: <span class="text-lg text-bold text-primary">{{ params.deepSplit }}</span></div>
+                            <div class="me-3">
+                                DeepSplit: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.deepSplit">
+                                <!--                                DeepSplit: <span class="text-lg text-bold text-primary">{{ params.deepSplit }}</span>-->
+                            </div>
                             <input type="range" min="0" max="4" step="0.5" class="w-100" v-model="params.deepSplit">
                         </div>
                     </div>
+
+<!--                    <div :class="method === 'ds' ? '' : 'disabled-clicks'" class="mt-4">-->
+                    <div v-if="method === 'ds'" class="mt-4">
+                        <numeric-range title="Number of domains:" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
+                    </div>
+
+
 
                     <div class="row justify-content-center text-center mt-5">
                         <div class="">
@@ -75,7 +91,8 @@
         </div>
 
 
-        <div v-if="!processing && 'stclust' in project.project_parameters">
+<!--        <div v-if="!processing && ('stclust' in project.project_parameters) && stclust.parameters.ks === '\'dtc\''">-->
+        <div>
 
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
@@ -89,12 +106,35 @@
                         <show-plot v-if="image.includes(sample.name)" :src="image"></show-plot>
                     </div>
                 </div>
-
-
             </div>
-
-
         </div>
+
+
+<!--        <div v-if="!processing && ('stclust' in project.project_parameters) && stclust.parameters.ks !== '\'dtc\''">-->
+
+<!--            <ul class="nav nav-tabs" id="myTab" role="tablist">-->
+<!--                <template v-for="k in stclust.parameters.number_of_domains_max">-->
+<!--                    <li v-if="k >= stclust.parameters.number_of_domains_min" class="nav-item" role="presentation">-->
+<!--                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>-->
+<!--                    </li>-->
+<!--                </template>-->
+<!--            </ul>-->
+
+
+<!--            <ul class="nav nav-tabs" id="myTab" role="tablist">-->
+<!--                <li v-for="(sample, index) in samples" class="nav-item" role="presentation">-->
+<!--                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>-->
+<!--                </li>-->
+<!--            </ul>-->
+
+<!--            <div class="tab-content" id="myTabContent">-->
+<!--                <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">-->
+<!--                    <div v-for="image in stclust.plots">-->
+<!--                        <show-plot v-if="image.includes(sample.name)" :src="image"></show-plot>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
 
     </form>
@@ -127,9 +167,10 @@ import Multiselect from '@vueform/multiselect';
 
                 textOutput: '',
 
+                method: 'ds',
                 dynamicTreeCuts: false,
                 params: {
-                    ws: 0.025,
+                    ws: 0.03,
                     number_of_domains_min: 2,
                     number_of_domains_max: 5,
                     deepSplit: 0,
@@ -146,8 +187,23 @@ import Multiselect from '@vueform/multiselect';
             }
         },
 
-        /*watch: {
-            stclust: {
+        watch: {
+
+            'params.deepSplit'(newValue) {
+                if(this.params.deepSplit > 4)
+                    this.params.deepSplit = 4;
+                else if(this.params.deepSplit < 0)
+                    this.params.deepSplit = 0;
+            },
+
+            'params.ws'(newValue) {
+                if(this.params.ws > 0.1)
+                    this.params.ws = 0.1;
+                else if(this.params.ws < 0)
+                    this.params.ws = 0;
+            },
+
+            /*stclust: {
                 handler: function(value) {
                     for (const [gene, samples] of Object.entries(this.stclust)) {
                         this.plots_visible[gene] = [];
@@ -157,8 +213,8 @@ import Multiselect from '@vueform/multiselect';
                     }
                 },
                 immediate: true,
-            }
-        },*/
+            }*/
+        },
 
         methods: {
 
@@ -167,9 +223,9 @@ import Multiselect from '@vueform/multiselect';
 
                 let parameters = {
                     ws: this.params.ws > 0 ? 'c(0,' + this.params.ws + ')' : '0',
-                    ks: !this.dynamicTreeCuts ? 'c(' + this.params.number_of_domains_min + ':' + this.params.number_of_domains_max + ')' : "'dtc'",
+                    ks: this.method === 'ds' ? 'c(' + this.params.number_of_domains_min + ':' + this.params.number_of_domains_max + ')' : "'dtc'",
                     topgenes: this.params.n_genes,
-                    deepSplit: (!this.dynamicTreeCuts || this.params.deepSplit === 0) ? 'F' : this.params.deepSplit,
+                    deepSplit: (this.method !== 'dtc' || this.params.deepSplit === 0) ? 'F' : this.params.deepSplit,
                     number_of_domains_min: this.params.number_of_domains_min,
                     number_of_domains_max: this.params.number_of_domains_max,
                     ws_value: this.params.ws

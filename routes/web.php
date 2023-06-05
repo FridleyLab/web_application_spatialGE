@@ -51,6 +51,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::post('/projects/{project}/qc/normalize', [ProjectController::class, 'applyNormalization'])->name('qc-dt-normalize')->middleware('project');
     Route::post('/projects/{project}/qc/normalize-plots', [ProjectController::class, 'generateNormalizationPlots'])->name('qc-dt-normalize-plots')->middleware('project');
+    Route::post('/projects/{project}/qc/normalized-data', [ProjectController::class, 'generateNormalizationData'])->name('qc-dt-normalized-data')->middleware('project');
 
     Route::post('/projects/{project}/qc/pca', [ProjectController::class, 'applyPca'])->name('qc-dt-pca')->middleware('project');
     Route::post('/projects/{project}/qc/pca-plots', [ProjectController::class, 'pcaPlots'])->name('qc-dt-pca-plots')->middleware('project');
