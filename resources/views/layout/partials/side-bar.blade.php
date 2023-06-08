@@ -70,39 +70,38 @@
                         </li>
 
                         <li class="nav-item ps-4">
-                            <a class="nav-link text-white @if(url()->current() === route('stplot-visualization', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 3) disabled @endif" style="@if(getActiveProject()->current_step < 3) background-color: transparent !important @endif" href="{{ route('stplot-visualization', ['project' => session('project_id')]) }}">
+                            <a id="stplot-visualization-a" class="nav-link text-white @if(url()->current() === route('stplot-visualization', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 3) disabled @endif" style="@if(getActiveProject()->current_step < 3) background-color: transparent !important @endif" href="{{ route('stplot-visualization', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 3) text-secondary @endif">filter_3</i>
+                                    <i id="stplot-visualization-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 3) text-secondary @endif">filter_3</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 3) text-secondary @endif text-bold">Visualization</span>
+                                <span id="stplot-visualization-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 3) text-secondary @endif text-bold">Visualization</span>
                             </a>
                         </li>
 
                         <li class="nav-item ps-4">
-                            <a class="nav-link text-white @if(url()->current() === route('sthet-spatial-het', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 4) disabled @endif" style="@if(getActiveProject()->current_step < 4) background-color: transparent !important @endif" href="{{ route('sthet-spatial-het', ['project' => session('project_id')]) }}">
+                            <a id="sthet-spatial-het-a" class="nav-link text-white @if(url()->current() === route('sthet-spatial-het', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 4) disabled @endif" style="@if(getActiveProject()->current_step < 4) background-color: transparent !important @endif" href="{{ route('sthet-spatial-het', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 4) text-secondary @endif">filter_4</i>
+                                    <i id="sthet-spatial-het-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 4) text-secondary @endif">filter_4</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 4) text-secondary @endif text-bold">Spatial heterogeneity</span>
+                                <span id="sthet-spatial-het-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 4) text-secondary @endif text-bold">Spatial heterogeneity</span>
                             </a>
                         </li>
 
                         <li class="nav-item ps-4">
-                            <a class="nav-link text-white @if(url()->current() === route('spatial-domain-detection', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 5) disabled @endif" style="@if(getActiveProject()->current_step < 4) background-color: transparent !important @endif" href="{{ route('spatial-domain-detection', ['project' => session('project_id')]) }}">
-{{--                            <a class="nav-link text-white disabled" style="background-color: transparent !important">--}}
+                            <a id="spatial-domain-detection-a" class="nav-link text-white @if(url()->current() === route('spatial-domain-detection', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 5) disabled @endif" style="@if(getActiveProject()->current_step < 4) background-color: transparent !important @endif" href="{{ route('spatial-domain-detection', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i class="material-icons opacity-10 @if(getActiveProject()->current_step < 5) text-secondary @endif">filter_5</i>
+                                    <i id="spatial-domain-detection-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 5) text-secondary @endif">filter_5</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 5) text-secondary @endif text-bold">Spatial domain detection</span>
+                                <span id="spatial-domain-detection-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 5) text-secondary @endif text-bold">Spatial domain detection</span>
                             </a>
                         </li>
 
                         <li class="nav-item ps-4">
-                            <a class="nav-link text-white disabled" style="background-color: transparent !important">
+                            <a id="differential-expression-a" class="nav-link text-white @if(url()->current() === route('differential-expression', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 6) disabled @endif" style="@if(getActiveProject()->current_step < 5) background-color: transparent !important @endif" href="{{ route('differential-expression', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i class="material-icons opacity-10 text-secondary">filter_6</i>
+                                    <i id="differential-expression-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 6) text-secondary @endif">filter_6</i>
                                 </div>
-                                <span class="nav-link-text ms-1 text-xs text-secondary text-bold">Differential expression</span>
+                                <span id="differential-expression-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 6) text-secondary @endif text-bold">Differential expression</span>
                             </a>
                         </li>
 

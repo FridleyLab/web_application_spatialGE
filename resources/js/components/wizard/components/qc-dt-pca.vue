@@ -9,7 +9,7 @@
             </div>
             <div>
                 The following PCA plot has been created by calculating the average expression of genes within each sample. This PCA does not incorporate any spatial component of the data.
-                The PCA is calculated with a number of user-selected most variable genes based on standard deviation.
+                The PCA is calculated with a number of user-selected most variable genes based on standard deviation. <span class="text-bold">Note:</span> Pseudobulk analysis can only be performed on three samples or more.
             </div>
 
 
@@ -23,8 +23,12 @@
         </div>
 
         <div class="p-3 text-center">
-            <send-job-button label="Calculate PCA" :disabled="generating_pca || generating_plots" :project-id="project.id" job-name="applyPca" @started="applyPca" @ongoing="generating_pca = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button v-if="samples.length > 2" label="Calculate PCA" :disabled="generating_pca || generating_plots" :project-id="project.id" job-name="applyPca" @started="applyPca" @ongoing="generating_pca = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <div v-else class="text-warning text-xl-center">
+                A minimum of 3 samples are needed to Calculate PCA
+            </div>
         </div>
+
 
 
         <template v-if="!generating_pca && !generating_plots && 'qc_pca' in project.project_parameters">
@@ -47,7 +51,7 @@
             </div>
 
         </template>
-        <div v-if="!generating_pca" class="row mt-3">
+        <div v-if="!generating_pca && 'qc_pca' in project.project_parameters" class="row mt-3">
             <div class="p-3 text-end">
                 <send-job-button label="Generate plots" :disabled="generating_pca || !params.color_pal.length /*|| !params.plot_meta.length*/" :project-id="project.id" job-name="pcaPlots" @started="pcaPlots" @ongoing="generating_plots = true" @completed="processPlotsCompleted" :project="project" ></send-job-button>
             </div>

@@ -82,6 +82,9 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/spatial-domain-detection',[ProjectController::class, 'spatial_domain_detection'])->name('spatial-domain-detection')->middleware('project');
     Route::post('/projects/{project}/sdd/stclust', [ProjectController::class, 'sdd_stclust'])->name('sdd-stclust')->middleware('project');
 
+    Route::get('/projects/{project}/differential-expression',[ProjectController::class, 'differential_expression'])->name('differential-expression')->middleware('project');
+    Route::post('/projects/{project}/differential-expression/non-spatial', [ProjectController::class, 'differential_expression_non_spatial'])->name('differential-expression-non-spatial')->middleware('project');
+
 });
 
 Route::get('/login',[SecurityController::class, 'login'])->name('login')->middleware('guest');

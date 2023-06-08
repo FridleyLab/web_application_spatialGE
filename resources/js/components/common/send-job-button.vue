@@ -38,6 +38,8 @@ export default {
         project: {type: Object, default: null},
         disabled: {type: Boolean, default: false},
         secondary: {type: Boolean, default: false},
+
+        reload: {type: Boolean, default: false}
     },
 
     data() {
@@ -63,6 +65,10 @@ export default {
 
                 if(!this.queuePosition) {
                     clearInterval(this.checkQueueIntervalId);
+
+                    //reload the page if necessary
+                    if(this.reload) window.document.location.href = window.document.location.href;
+
                     this.processing = false;
                     this.updateProjectParameters();
                 }

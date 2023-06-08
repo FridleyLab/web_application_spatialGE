@@ -38,6 +38,9 @@ import sendJobButton from "./components/common/send-job-button.vue";
 import spatialDomainDetection from "./components/wizard/spatial-domain-detection.vue";
 import sddStclust from "./components/wizard/components/sdd-stclust.vue";
 
+import differentialExpression from "./components/wizard/differential-expression.vue";
+import stdeNonSpatial from "./components/wizard/components/stde-non-spatial.vue";
+
 import showPlot from "./components/common/show-plot.vue";
 
 
@@ -96,6 +99,9 @@ app.component('send-job-button', sendJobButton);
 app.component('spatial-domain-detection', spatialDomainDetection);
 app.component('sdd-stclust', sddStclust);
 
+app.component('differential-expression', differentialExpression);
+app.component('stde-non-spatial', stdeNonSpatial);
+
 app.component('show-plot', showPlot);
 
 //Register the window as a global variable, so it can be accessed everywhere
@@ -110,7 +116,14 @@ const getJobPositionInQueue = async (projectId, command) => {
     return response.data;
 }
 app.config.globalProperties.$getJobPositionInQueue = getJobPositionInQueue;
-
+const enableWizardStep = (step) => {
+    ['a', 'i', 'span'].forEach(tag => {
+        let element = window.document.getElementById(step + '-' + tag);
+        element.classList.remove('disabled');
+        element.classList.remove('text-secondary');
+    });
+}
+app.config.globalProperties.$enableWizardStep = enableWizardStep;
 
 
 app.mount('#app');

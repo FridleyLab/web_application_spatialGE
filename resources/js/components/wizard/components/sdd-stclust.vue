@@ -91,50 +91,58 @@
         </div>
 
 
-<!--        <div v-if="!processing && ('stclust' in project.project_parameters) && stclust.parameters.ks === '\'dtc\''">-->
-        <div>
+        <!-- Create tabs for each sample-->
+        <div v-if="!processing && ('stclust' in project.project_parameters) && stclust.parameters.ks.includes('dtc')">
+            <div>
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
+                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>
+                    </li>
+                </ul>
 
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
-                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>
-                </li>
-            </ul>
-
-            <div class="tab-content" id="myTabContent">
-                <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">
-                    <div v-for="image in stclust.plots">
-                        <show-plot v-if="image.includes(sample.name)" :src="image"></show-plot>
+                <div class="tab-content" id="myTabContent">
+                    <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">
+                        <div v-for="image in stclust.plots">
+                            <show-plot v-if="image.includes(sample.name)" :src="image"></show-plot>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
 
-<!--        <div v-if="!processing && ('stclust' in project.project_parameters) && stclust.parameters.ks !== '\'dtc\''">-->
+        <!-- Create tabs for each K value and sub-tabs for each sample -->
+        <div v-if="!processing && ('stclust' in project.project_parameters) && !stclust.parameters.ks.includes('dtc')">
 
-<!--            <ul class="nav nav-tabs" id="myTab" role="tablist">-->
-<!--                <template v-for="k in stclust.parameters.number_of_domains_max">-->
-<!--                    <li v-if="k >= stclust.parameters.number_of_domains_min" class="nav-item" role="presentation">-->
-<!--                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>-->
-<!--                    </li>-->
-<!--                </template>-->
-<!--            </ul>-->
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <template v-for="index in stclust.parameters.number_of_domains_max">
+                    <li v-if="index >= stclust.parameters.number_of_domains_min" class="nav-item" role="presentation">
+                        <button class="nav-link" :class="index === stclust.parameters.number_of_domains_min ? 'active' : ''" :id="'K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + 'K_' + index" type="button" role="tab" :aria-controls="'K_' + index" aria-selected="true">{{ 'K=' + index }}</button>
+                    </li>
+                </template>
+            </ul>
 
+            <div class="tab-content m-4" id="myTabContent">
 
-<!--            <ul class="nav nav-tabs" id="myTab" role="tablist">-->
-<!--                <li v-for="(sample, index) in samples" class="nav-item" role="presentation">-->
-<!--                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>-->
-<!--                </li>-->
-<!--            </ul>-->
+                <div v-for="k in stclust.parameters.number_of_domains_max" class="tab-pane fade min-vh-50" :class="k === stclust.parameters.number_of_domains_min ? 'show active' : ''" :id="'K_' + k" role="tabpanel" :aria-labelledby="'K_' + k + '-tab'">
 
-<!--            <div class="tab-content" id="myTabContent">-->
-<!--                <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">-->
-<!--                    <div v-for="image in stclust.plots">-->
-<!--                        <show-plot v-if="image.includes(sample.name)" :src="image"></show-plot>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
+                    <ul class="nav nav-tabs" :id="'myTab' + k" role="tablist">
+                        <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
+                            <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'K_' + k + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'K_' + k" type="button" role="tab" :aria-controls="sample.name + 'K_' + k" aria-selected="true">{{ sample.name }}</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" :id="'myTabContent' + k">
+                        <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'K_' + k + '-tab'">
+                            <div v-for="image in stclust.plots">
+                                <show-plot v-if="image.includes(sample.name) && image.includes('k' + k)" :src="image"></show-plot>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
 
 
     </form>
@@ -174,7 +182,7 @@ import Multiselect from '@vueform/multiselect';
                     number_of_domains_min: 2,
                     number_of_domains_max: 5,
                     deepSplit: 0,
-                    n_genes: 3000,
+                    n_genes: (('pca_max_var_genes' in this.project.project_parameters) && this.project.project_parameters.pca_max_var_genes >= 3000) ? 3000 : ('pca_max_var_genes' in this.project.project_parameters) ? this.project.project_parameters.pca_max_var_genes/2 : 0,
 
                     genes: [],
                     col_pal: 'sunset',
@@ -244,6 +252,7 @@ import Multiselect from '@vueform/multiselect';
                 //console.log(this.project.project_parameters);
                 this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
                 this.processing = false;
+                this.$enableWizardStep('differential-expression');
             },
 
             generatePlots() {

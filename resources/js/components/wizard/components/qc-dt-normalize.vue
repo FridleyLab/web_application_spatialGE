@@ -253,6 +253,9 @@ import Multiselect from '@vueform/multiselect';
 
             processCompleted() {
                 this.processing = false;
+                this.$enableWizardStep('stplot-visualization');
+                this.$enableWizardStep('sthet-spatial-het');
+                this.$enableWizardStep('spatial-domain-detection');
             },
 
             normalizedPlots() {

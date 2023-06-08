@@ -224,9 +224,6 @@ class ProjectController extends Controller
 
     public function applyNormalization(Project $project) {
 
-        $project->current_step = 5;
-        $project->save();
-
         $jobId = $project->createJob('Normalize data', 'applyNormalization', request('parameters'));
 
         //RunScript::dispatch('Normalize data', $project, 'applyNormalization', request('parameters'));
@@ -344,17 +341,19 @@ class ProjectController extends Controller
     }
 
     public function sdd_stclust(Project $project) {
-
-        /*$parameters = [
-            'ws' => request('ws'),
-            'ks' => request('ks'),
-            'topgenes' => request('topgenes'),
-            'deepSplit' => request('deepSplit')
-        ];*/
-
         $jobId = $project->createJob('Spatial Domain Detection - STclust', 'STclust', request()->all());
         return $project->getJobPositionInQueue($jobId);
+    }
 
+
+    public function differential_expression(Project $project) {
+        $samples = $project->samples;
+        return view('wizard.differential-expression')->with(compact('project', 'samples'));
+    }
+
+    public function differential_expression_non_spatial(Project $project) {
+        $jobId = $project->createJob('Differential Expression - STDiff', 'STDiffNonSpatial', request()->all());
+        return $project->getJobPositionInQueue($jobId);
     }
 
 

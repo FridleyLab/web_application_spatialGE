@@ -61,10 +61,37 @@ class Project extends Model
         if(array_key_exists('metadata', $params))
         {
             $names = [];
-            //$names[] = ['label' =>'select a metadata (optional)', 'value' => ''];
             foreach(json_decode($params['metadata']) as $meta)
                 $names[] = ['label' =>$meta->name, 'value' => $meta->name];
             $params['metadata_names'] = $names;
+        }
+
+        $fileName = $this->workingDir() . 'stdiff_annotation_variables.csv';
+        if(Storage::fileExists($fileName))
+        {
+            $data = Storage::read($fileName);
+            $lines = explode("\n", $data);
+            $annotations = [];
+            foreach($lines as $annotation)
+                if(strlen(trim($annotation)))
+                    $annotations[] = ['label' =>$annotation, 'value' => $annotation];
+            $params['annotation_variables'] = $annotations;
+        }
+
+        $fileName = $this->workingDir() . 'stdiff_annotation_variables_clusters.csv';
+        if(Storage::fileExists($fileName))
+        {
+            $data = Storage::read($fileName);
+            $lines = explode("\n", $data);
+            $annotations_clusters = [];
+            foreach($lines as $annotation) {
+                if (strlen(trim($annotation))) {
+                    $values = explode(',', $annotation);
+                    $annotations_clusters[] = ['annotation' => $values[0], 'cluster' => $values[1]];
+                    //$annotations_clusters[] = ['annotation' => $values[0], 'cluster' => $values[1]];
+                }
+            }
+            $params['annotation_variables_clusters'] = $annotations_clusters;
         }
 
         return $params;
@@ -569,6 +596,10 @@ $plots
 
         //Delete (if any) previously generated normalized data
         ProjectParameter::where('parameter','normalizedData')->where('project_id', $this->id)->delete();
+
+
+        $this->current_step = 5;
+        $this->save();
 
         $result['output'] = $output;
         return $result;
@@ -1332,6 +1363,9 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
             ProjectParameter::updateOrCreate(['parameter' => 'stclust', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
         }
 
+        $this->current_step = 6;
+        $this->save();
+
         return $output;
     }
 
@@ -1342,6 +1376,7 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
+library('magrittr')
 
 # Load normalized STList
 {$this->_loadStList('normalized_stlist')}
@@ -1352,9 +1387,25 @@ stclust_stlist = STclust(x=normalized_stlist,
                          topgenes={$parameters['topgenes']},
                          deepSplit={$parameters['deepSplit']})
 
+#annot_variables used for Differential Expression analyses
+annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('stclust_', colnames(i), value=T); return(var_cols) })))
+write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+##clusters_by_annot_variables used for Differential Expression analyses
+cluster_values = tibble::tibble()
+for(i in names(stclust_stlist@spatial_meta)){
+  for(cl in grep('stclust_', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
+    cluster_values = dplyr::bind_rows(cluster_values,
+                                      tibble::tibble(cluster=unique(stclust_stlist@spatial_meta[[i]][[cl]])) %>%
+                                        tibble::add_column(annotation=cl))
+  }}
+cluster_values = dplyr::distinct(cluster_values) %>%
+  dplyr::select(annotation, cluster)
+write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F, row.names=F, col.names=F, sep=',')
+
+
 {$this->_saveStList('stclust_stlist')}
 
-ps = STplot(x=stclust_stlist, ks={$parameters['ks']}, ws={$parameters['ws']}, ptsize=2)
+ps = STplot(x=stclust_stlist, ks={$parameters['ks']}, ws={$parameters['ws']}, ptsize=2, color_pal='smoothrainbow')
 n_plots = names(ps)
 write.table(n_plots, 'stclust_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 library('svglite')
@@ -1370,6 +1421,80 @@ for(p in n_plots) {
 
         return $script;
     }
+
+
+
+    public function STDiffNonSpatial($parameters) {
+        $workingDir = $this->workingDir();
+        $workingDirPublic = $this->workingDirPublic();
+
+        $scriptName = 'STDiff_NonSpatial.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSTDiffNonSpatialScript($parameters));
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
+
+
+        $files = ['stdiff_ns_results.xlsx'];
+        foreach($parameters['samples_array'] as $sample)
+            $files[] = 'stdiff_ns_' . $sample . '.csv';
+        foreach($files as $file)
+            if(Storage::fileExists($workingDir . $file)) {
+                $file_public = $workingDirPublic . $file;
+                $file_to_move = $workingDir . $file;
+                Storage::delete($file_public);
+                Storage::move($file_to_move, $file_public);
+            }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stdiff_ns', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
+        return $output;
+    }
+
+
+    private function getSTDiffNonSpatialScript($parameters) {
+
+        $samples = $parameters['samples'];
+        $annotation = $parameters['annotation'];
+        $topgenes = $parameters['topgenes'];
+        $test_type = $parameters['test_type'];
+        $pairwise = $parameters['pairwise'];
+        $clusters = $parameters['clusters'];
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList
+" .
+            $this->_loadStList('stclust_stlist')
+            . "
+
+de_genes_results = STdiff(stclust_stlist, #### NORMALIZED STList
+                          samples=$samples,   #### Users should be able to select which samples to include in analysis
+                          annot='$annotation',  #### Name of variable to use in analysis... Dropdown to select one of `annot_variables`
+                          topgenes=$topgenes, #### !!! Defines a lot of the speed. 100 are too few genes. Minimally would like 5000 but is SLOW. Can be a slider as in pseudobulk
+                          test_type='$test_type', #### Other options are 't_test' and 'mm',
+                          pairwise=$pairwise, #### Check box
+                          clusters=$clusters, #### Need ideas for this one. Values in `cluster_values` and after user selected value in annot dropdown
+                          cores=4) #### You know, the more the merrier
+
+# Get workbook with results (samples in spreadsheets)
+openxlsx::write.xlsx(de_genes_results, file='stdiff_ns_results.xlsx')
+
+# Each sample as a CSV
+lapply(names(de_genes_results), function(i){
+  write.csv(de_genes_results[[i]], paste0('stdiff_ns_', i, '.csv'), row.names=T, quote=F)
+})
+
+";
+
+        return $script;
+    }
+
 
 
     private function getExportFilesCommands($file, $plot) : string {
