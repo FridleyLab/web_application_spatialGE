@@ -143,7 +143,6 @@ class ProjectController extends Controller
 
     public function getJobPositionInQueue(Project $project) {
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
-        //dd($jobId);
         return $jobId ? $project->getJobPositionInQueue($jobId) : 0;
     }
 
@@ -244,7 +243,7 @@ class ProjectController extends Controller
     }
 
     public function generateNormalizationData(Project $project) {
-        $jobId = $project->createJob('Generate normalization data', 'generateNormalizationData', []);
+        $jobId = $project->createJob('Generate normalization data', 'generateNormalizationData', [], 'low');
         return $project->getJobPositionInQueue($jobId);
     }
 
