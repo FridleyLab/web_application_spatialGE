@@ -68,7 +68,7 @@
 
             <div class="row justify-content-center text-center m-3">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div>Clusters</div>
+                    <div>Cluster annotations to test</div>
                     <div>
                         <span>
                             <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters" v-model="params.clusters"></Multiselect>
@@ -96,6 +96,11 @@
         <div class="p-3 text-center mt-4">
             <send-job-button label="Run Non-Spatial tests" :disabled="processing || !this.params.samples.length || !this.params.test_type.length || !this.params.annotation.length || !this.params.clusters.length" :project-id="project.id" job-name="STDiffNonSpatial" @started="nonSpatial" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
+
+<!--        <vue3-easy-data-table-->
+<!--            :headers="headers"-->
+<!--            :items="items"-->
+<!--        />-->
 
 
         <div v-if="!processing && ('stdiff_ns' in project.project_parameters)" class="p-3 text-center mt-4">
@@ -135,11 +140,16 @@
 
 import Multiselect from '@vueform/multiselect';
 
+//import Vue3EasyDataTable from 'vue3-easy-data-table';
+//import 'vue3-easy-data-table/dist/style.css';
+
+
     export default {
         name: 'stdeNonSpatial',
 
         components: {
             Multiselect,
+            //Vue3EasyDataTable
         },
 
         props: {
@@ -151,6 +161,23 @@ import Multiselect from '@vueform/multiselect';
 
         data() {
             return {
+
+                headers: [
+                    { text: "PLAYER", value: "player" },
+                    { text: "TEAM", value: "team"},
+                    { text: "NUMBER", value: "number"},
+                    { text: "POSITION", value: "position"},
+                    { text: "HEIGHT", value: "indicator.height"},
+                    { text: "WEIGHT (lbs)", value: "indicator.weight", sortable: true},
+                    { text: "LAST ATTENDED", value: "lastAttended", width: 200},
+                    { text: "COUNTRY", value: "country"},
+                ],
+                items: [
+                    { player: "Stephen Curry", team: "GSW", number: 30, position: 'G', indicator: {"height": '6-2', "weight": 185}, lastAttended: "Davidson", country: "USA"},
+                    { player: "Lebron James", team: "LAL", number: 6, position: 'F', indicator: {"height": '6-9', "weight": 250}, lastAttended: "St. Vincent-St. Mary HS (OH)", country: "USA"},
+                    { player: "Kevin Durant", team: "BKN", number: 7, position: 'F', indicator: {"height": '6-10', "weight": 240}, lastAttended: "Texas-Austin", country: "USA"},
+                    { player: "Giannis Antetokounmpo", team: "MIL", number: 34, position: 'F', indicator: {"height": '6-11', "weight": 242}, lastAttended: "Filathlitikos", country: "Greece"},
+                ],
 
                 annotation_variables_clusters: [],
 

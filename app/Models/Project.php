@@ -10,8 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Monolog\Logger;
 
 class Project extends Model
 {
@@ -1519,12 +1521,12 @@ lapply(names(de_genes_results), function(i){
     }
 
 
-    public function createJob($description, $command, $parameters) : int {
+    public function createJob($description, $command, $parameters, $queue = 'default') : int {
 
         //create the job instance
         $job = new RunScript($description, $this, $command, $parameters);
         //push the job to que queue and get the jobId
-        $jobId = Queue::connection()->push($job);
+        $jobId = Queue::connection()->pushOn($queue, $job);
 
         //save the jobId to the project parameters table
         ProjectParameter::updateOrCreate(['parameter' => 'job.' . $command, 'project_id' => $this->id], ['type' => 'number', 'value' => $jobId]);
@@ -1543,12 +1545,25 @@ lapply(names(de_genes_results), function(i){
 
     public function getJobPositionInQueue($jobId) : int {
 
-        $queueName = env('QUEUE_DEFAULT_NAME', 'default');
+        //$queueName = env('QUEUE_DEFAULT_NAME', 'default');
 
-        $queuePosition = DB::table('jobs')
-            ->where('queue', $queueName)
-            ->where('id', '<=', $jobId)
-            ->count();
+        $queuePosition = 0;
+
+        try {
+            $jobInfo = DB::table('jobs')
+                ->where('id', $jobId)
+                ->get();
+            if(!$jobInfo->count())
+                return $queuePosition;
+
+            $queueName = $jobInfo[0]->queue;
+
+            $queuePosition = DB::table('jobs')
+                ->where('queue', $queueName)
+                ->where('id', '<=', $jobId)
+                ->count();
+        }
+        catch(\Exception $e) {}
 
         return $queuePosition;
     }

@@ -41,7 +41,7 @@ class spatialContainer {
 
         $image_name = env('DOCKER_IMAGE_NAME','spatialge');
 
-        $container_id = 'spatial_' . $this->project->id;
+        $container_id = 'spatial_' . $this->project->user->id . '_' . $this->project->id . '_' . substr(microtime(true) * 1000, 0, 13);
 
 
         try {
@@ -139,7 +139,8 @@ class spatialContainer {
 
         $image_name = env('DOCKER_IMAGE_NAME','spatialge');
 
-        $container_id = 'spatial_' . $this->project->id;
+        //$container_id = 'spatial_' . $this->project->id;
+        $container_id = 'spatial_' . $this->project->user->id . '_' . $this->project->id . '_' . substr(microtime(true) * 1000, 0, 13);
 
         $command = '';
         try {

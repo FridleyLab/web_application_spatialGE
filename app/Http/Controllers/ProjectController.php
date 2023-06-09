@@ -143,6 +143,7 @@ class ProjectController extends Controller
 
     public function getJobPositionInQueue(Project $project) {
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
+        //dd($jobId);
         return $jobId ? $project->getJobPositionInQueue($jobId) : 0;
     }
 
@@ -328,8 +329,7 @@ class ProjectController extends Controller
             'color_pal' => request('color_pal'),
             'plot_meta' => request('plot_meta')
         ];
-
-        $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThetPlot', $parameters);
+        $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThetPlot', $parameters, 'low');
         return $project->getJobPositionInQueue($jobId);
 
     }

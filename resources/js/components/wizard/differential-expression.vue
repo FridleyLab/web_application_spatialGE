@@ -8,7 +8,7 @@
                             <i class="material-icons opacity-10">filter_6</i>
                         </div>
                         <div class="text-end pt-1">
-                            <h6 class="mb-0 text-capitalize">Spatial domain detection</h6>
+                            <h6 class="mb-0 text-capitalize">Differential expression</h6>
                         </div>
                     </div>
 
