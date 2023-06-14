@@ -355,5 +355,15 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function spatial_gene_set_enrichment(Project $project) {
+        $samples = $project->samples;
+        return view('wizard.spatial-gene-set-enrichment')->with(compact('project', 'samples'));
+    }
+
+    public function spatial_gene_set_enrichment_stenrich(Project $project) {
+        $jobId = $project->createJob('Spatial gene set enrichment', 'STenrich', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
 
 }

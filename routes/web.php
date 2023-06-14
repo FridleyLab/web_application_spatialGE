@@ -85,6 +85,9 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/differential-expression',[ProjectController::class, 'differential_expression'])->name('differential-expression')->middleware('project');
     Route::post('/projects/{project}/differential-expression/non-spatial', [ProjectController::class, 'differential_expression_non_spatial'])->name('differential-expression-non-spatial')->middleware('project');
 
+    Route::get('/projects/{project}/spatial-gene-set-enrichment',[ProjectController::class, 'spatial_gene_set_enrichment'])->name('spatial-gene-set-enrichment')->middleware('project');
+    Route::post('/projects/{project}/spatial-gene-set-enrichment/stenrich',[ProjectController::class, 'spatial_gene_set_enrichment_stenrich'])->name('spatial-gene-set-enrichment-stenrich')->middleware('project');
+
 });
 
 Route::get('/login',[SecurityController::class, 'login'])->name('login')->middleware('guest');

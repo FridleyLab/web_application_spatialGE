@@ -5,10 +5,10 @@
                 <div class="card">
                     <div class="card-header p-3 pt-2">
                         <div class="icon icon-lg icon-shape bg-gradient-info shadow-dark text-center border-radius-xl mt-n4 position-absolute">
-                            <i class="material-icons opacity-10">filter_4</i>
+                            <i class="material-icons opacity-10">filter_7</i>
                         </div>
                         <div class="text-end pt-1">
-                            <h6 class="mb-0 text-capitalize">Spatial heterogeneity</h6>
+                            <h6 class="mb-0 text-capitalize">Spatial gene set enrichment</h6>
                         </div>
                     </div>
 
@@ -20,7 +20,7 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="stplot-quilt" role="tabpanel" aria-labelledby="stplot-quilt-tab">
-                                <sthet-plot :project="project" :samples="samples" :sthet-plot-url="sthetPlotUrl" :color-palettes="colorPalettes"></sthet-plot>
+                                <stenrich :project="project" :samples="samples" :stenrich-url="stenrichUrl"></stenrich>
                             </div>
                         </div>
                     </div>
@@ -33,13 +33,12 @@
 
 <script>
     export default {
-        name: 'sthetSpatialHet',
+        name: 'spatialGeneSetEnrichment',
 
         props: {
             project: Object,
             samples: Object,
-            colorPalettes: Object,
-            sthetPlotUrl: String,
+            stenrichUrl: String,
         },
 
         mounted() {

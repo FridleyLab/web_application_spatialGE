@@ -43,7 +43,7 @@ export default {
         label: String,
         projectId: Number,
         jobName: String,
-        project: {type: Object, default: null},
+        project: Object,
         disabled: {type: Boolean, default: false},
         secondary: {type: Boolean, default: false},
 
@@ -55,7 +55,7 @@ export default {
             queuePosition: -1,
             checkQueueIntervalId: 0,
             processing: false,
-            sendEmail: 0,
+            sendEmail: ('job.' + this.jobName + '.email') in this.project.project_parameters ? this.project.project_parameters['job.' + this.jobName + '.email'] : 0,
 
             startButtonVisible: false
         }

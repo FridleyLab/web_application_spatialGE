@@ -71,7 +71,7 @@
                 </div>
 
                 <div v-if="samples.length && !showAddSample" class="p-3 text-end">
-                    <send-job-button label="Import Data" :project-id="project.id" job-name="createStList" @started="nextStep" @ongoing="changingStep = true" @completed="importCompleted" ></send-job-button>
+                    <send-job-button label="Import Data" :project-id="project.id" :project="project" job-name="createStList" @started="nextStep" @ongoing="changingStep = true" @completed="importCompleted" ></send-job-button>
                 </div>
             </div>
         </div>

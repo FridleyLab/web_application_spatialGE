@@ -36,35 +36,30 @@
 
                                 <div class="carousel-item active text-center">
                                     <div>
-{{--                                        <h2>The method</h2>--}}
                                         <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-01.png') }}">
                                     </div>
                                 </div>
 
                                 <div class="carousel-item text-center">
                                     <div>
-                                        {{--                                        <h2>The method</h2>--}}
                                         <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-02.png') }}">
                                     </div>
                                 </div>
 
                                 <div class="carousel-item text-center">
                                     <div>
-                                        {{--                                        <h2>The method</h2>--}}
                                         <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-03.png') }}">
                                     </div>
                                 </div>
 
                                 <div class="carousel-item text-center">
                                     <div>
-                                        {{--                                        <h2>The method</h2>--}}
                                         <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-04.png') }}">
                                     </div>
                                 </div>
 
                                 <div class="carousel-item text-center">
                                     <div>
-                                        {{--                                        <h2>The method</h2>--}}
                                         <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-05.png') }}">
                                     </div>
                                 </div>
