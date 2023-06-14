@@ -8,9 +8,17 @@
                 </div>
                 <div class="py-2 justify-content-center align-items-center text-center">
                     <span class="text-lg me-2">Send email when completed?</span>
-                    <button type="button" @click="setEmailNofitication" class="btn btn-sm text-sm" :class="sendEmail ? 'btn-outline-success' : 'btn-outline-secondary'">
-                        {{ sendEmail ? 'YES' : 'NO' }}
-                    </button>
+<!--                    <button type="button" @click="setEmailNofitication" class="btn btn-sm text-sm" :class="sendEmail ? 'btn-outline-success' : 'btn-outline-secondary'">-->
+<!--                        {{ sendEmail ? 'YES' : 'NO' }}-->
+<!--                    </button>-->
+                    <div>
+                        <label class="me-3">
+                            <input type="radio" :value="0" v-model="sendEmail" @click="setEmailNofitication"> No
+                        </label>
+                        <label>
+                            <input type="radio" :value="1" v-model="sendEmail" @click="setEmailNofitication"> Yes
+                        </label>
+                    </div>
                 </div>
                 <div v-if="queuePosition>0" class="text-center">
                     Queue position: <span class="text-warning text-lg">{{ queuePosition }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span>
@@ -115,7 +123,7 @@ export default {
         },
 
         setEmailNofitication: _.debounce(function () {
-            this.sendEmail = this.sendEmail ? 0 : 1;
+            //this.sendEmail = this.sendEmail ? 0 : 1;
             console.log('email: ' + this.sendEmail);
             axios.get('/projects/' + this.projectId + '/set-job-email-notification', {params: {'command': this.jobName, 'sendemail': this.sendEmail}})
                 .then((response) => {

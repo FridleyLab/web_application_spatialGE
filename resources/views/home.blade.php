@@ -29,57 +29,87 @@
                                 <button type="button" data-bs-target="#carouselAboutSpatialGE" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
                                 <button type="button" data-bs-target="#carouselAboutSpatialGE" data-bs-slide-to="1" aria-label="Slide 2"></button>
                                 <button type="button" data-bs-target="#carouselAboutSpatialGE" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                                <button type="button" data-bs-target="#carouselAboutSpatialGE" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                                <button type="button" data-bs-target="#carouselAboutSpatialGE" data-bs-slide-to="4" aria-label="Slide 5"></button>
                             </div>
-                            <div class="carousel-inner height-600">
+                            <div class="carousel-inner height-700">
+
+                                <div class="carousel-item active text-center">
+                                    <div>
+{{--                                        <h2>The method</h2>--}}
+                                        <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-01.png') }}">
+                                    </div>
+                                </div>
 
                                 <div class="carousel-item text-center">
                                     <div>
-                                        <h2>The method</h2>
-                                        <img class="p-4 my-4 height-500" src="{{ asset('/images/spatialge_diagram.png') }}">
+                                        {{--                                        <h2>The method</h2>--}}
+                                        <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-02.png') }}">
                                     </div>
                                 </div>
 
-                                <div class="carousel-item active">
-                                    <div class="px-8">
-
-                                        <h2>spatialGE</h2>
-                                        <p>spatialGE takes data sets from several ST technologies including Visium, GeoMx, SMI, and MERFISH. In general, any ST data set can be analyzed with spatialGE if these two inputs are provided:</p>
-                                        <ol type="1">
-                                            <li>RNAseq counts for the whole transcriptome or a targeted panel</li>
-                                            <li>Spatial 2D coordinates of the places where those counts come within a tissue sample</li>
-
-                                        </ol>
-                                        <p>spatialGE takes data sets from several ST technologies including Visium, GeoMx, SMI, and MERFISH. In general, any ST data set can be analyzed with spatialGE if these two inputs are provided:</p>
-                                        <ol type="1">
-                                            <li>RNAseq counts for the whole transcriptome or a targeted panel</li>
-                                            <li>Spatial 2D coordinates of the places where those counts come within a tissue sample</li>
-
-                                        </ol>
-
+                                <div class="carousel-item text-center">
+                                    <div>
+                                        {{--                                        <h2>The method</h2>--}}
+                                        <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-03.png') }}">
                                     </div>
                                 </div>
 
-                                <div class="carousel-item">
-                                    <div class="px-8">
-                                        <p>The methods in spatialGE apply spatial statistics to perform analyses within tissues or comparative analyses across tissue samples:</p>
-
-                                        <ul>
-                                            <li>Detection of tissue niches inferred from gene expression (STclust)</li>
-                                            <li>Test of differentially expressed genes between tissue niches (STde)</li>
-                                            <li>Discovery of spatial patterns for gene sets/pathways (STenrich)</li>
-                                            <li>Assessment of gene expression gradients at the interface of tissue niches (STgradient)</li>
-                                            <li>Options for gene expression visualization within tissue (STplot)</li>
-                                            <li>Comparison of gene expression patterns across samples and potential associations with patient-level data (SThet)</li>
-                                        </ul>
-
-                                        <p>Other methods under development include:</p>
-                                        <ul>
-                                            <li>Cell type annotation (phenotyping/deconvolution) using deep neural networks (STwdl)</li>
-                                            <li>Prediction of ligand-receptor interactions (STcorr)</li>
-                                        </ul>
-
+                                <div class="carousel-item text-center">
+                                    <div>
+                                        {{--                                        <h2>The method</h2>--}}
+                                        <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-04.png') }}">
                                     </div>
                                 </div>
+
+                                <div class="carousel-item text-center">
+                                    <div>
+                                        {{--                                        <h2>The method</h2>--}}
+                                        <img class="p-4 my-4 img-fluid" src="{{ asset('/images/landing/landing-05.png') }}">
+                                    </div>
+                                </div>
+
+{{--                                <div class="carousel-item active">--}}
+{{--                                    <div class="px-8">--}}
+
+{{--                                        <h2>spatialGE</h2>--}}
+{{--                                        <p>spatialGE takes data sets from several ST technologies including Visium, GeoMx, SMI, and MERFISH. In general, any ST data set can be analyzed with spatialGE if these two inputs are provided:</p>--}}
+{{--                                        <ol type="1">--}}
+{{--                                            <li>RNAseq counts for the whole transcriptome or a targeted panel</li>--}}
+{{--                                            <li>Spatial 2D coordinates of the places where those counts come within a tissue sample</li>--}}
+
+{{--                                        </ol>--}}
+{{--                                        <p>spatialGE takes data sets from several ST technologies including Visium, GeoMx, SMI, and MERFISH. In general, any ST data set can be analyzed with spatialGE if these two inputs are provided:</p>--}}
+{{--                                        <ol type="1">--}}
+{{--                                            <li>RNAseq counts for the whole transcriptome or a targeted panel</li>--}}
+{{--                                            <li>Spatial 2D coordinates of the places where those counts come within a tissue sample</li>--}}
+
+{{--                                        </ol>--}}
+
+{{--                                    </div>--}}
+{{--                                </div>--}}
+
+{{--                                <div class="carousel-item">--}}
+{{--                                    <div class="px-8">--}}
+{{--                                        <p>The methods in spatialGE apply spatial statistics to perform analyses within tissues or comparative analyses across tissue samples:</p>--}}
+
+{{--                                        <ul>--}}
+{{--                                            <li>Detection of tissue niches inferred from gene expression (STclust)</li>--}}
+{{--                                            <li>Test of differentially expressed genes between tissue niches (STde)</li>--}}
+{{--                                            <li>Discovery of spatial patterns for gene sets/pathways (STenrich)</li>--}}
+{{--                                            <li>Assessment of gene expression gradients at the interface of tissue niches (STgradient)</li>--}}
+{{--                                            <li>Options for gene expression visualization within tissue (STplot)</li>--}}
+{{--                                            <li>Comparison of gene expression patterns across samples and potential associations with patient-level data (SThet)</li>--}}
+{{--                                        </ul>--}}
+
+{{--                                        <p>Other methods under development include:</p>--}}
+{{--                                        <ul>--}}
+{{--                                            <li>Cell type annotation (phenotyping/deconvolution) using deep neural networks (STwdl)</li>--}}
+{{--                                            <li>Prediction of ligand-receptor interactions (STcorr)</li>--}}
+{{--                                        </ul>--}}
+
+{{--                                    </div>--}}
+{{--                                </div>--}}
                             </div>
                             <button class="carousel-control-prev" type="button" data-bs-target="#carouselAboutSpatialGE" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
