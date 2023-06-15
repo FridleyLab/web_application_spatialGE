@@ -81,10 +81,7 @@
             <send-job-button label="Run STenrich" :disabled="processing || !this.params.gene_sets.length || !(this.params.permutations >= 100)" :project-id="project.id" job-name="STEnrich" @started="STEnrich" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
-<!--        <vue3-easy-data-table-->
-<!--            :headers="headers"-->
-<!--            :items="items"-->
-<!--        />-->
+
 
 
         <div v-if="!processing && ('stenrich' in project.project_parameters)" class="p-3 text-center mt-4">
@@ -105,9 +102,18 @@
 
                 <div class="tab-content" id="myTabContent">
                     <div v-for="(sample, index) in stenrich.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
+                        <div class="m-4">
+<!--                            <a :href="stenrich.base_url + 'stenrich_' + sample + '.csv'" class="btn btn-sm btn-outline-info my-3" download>CSV results</a>-->
 
-                        <a :href="stenrich.base_url + 'stenrich_' + sample + '.csv'" class="btn btn-sm btn-outline-info m-6" download>CSV results</a>
-
+                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"
+                                                  :headers="results[sample].data.headers"
+                                                  :items="results[sample].data.items"
+                                                  alternating
+                                                  border-cell
+                                                  body-text-direction="center"
+                                                  header-text-direction="center"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -124,11 +130,15 @@
 
 import Multiselect from '@vueform/multiselect';
 
+import Vue3EasyDataTable from 'vue3-easy-data-table';
+import 'vue3-easy-data-table/dist/style.css';
+
     export default {
         name: 'stenrich',
 
         components: {
             Multiselect,
+            Vue3EasyDataTable
         },
 
         props: {
@@ -140,9 +150,10 @@ import Multiselect from '@vueform/multiselect';
         data() {
             return {
 
-                gene_sets_options: [{'label': 'Kegg', 'value': 'kegg'}, {'label': 'Hallmark', 'value': 'hallmark'}],
+                gene_sets_options: [{'label': 'KEGG', 'value': 'kegg'}, {'label': 'HALLMARK', 'value': 'hallmark'}],
 
                 stenrich: ('stenrich' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stenrich) : {},
+                results: {},
 
                 processing: false,
 
@@ -165,6 +176,7 @@ import Multiselect from '@vueform/multiselect';
 
         mounted() {
             //console.log(this.project.project_parameters.annotation_variables_clusters);
+            this.loadResults();
         },
 
         watch: {
@@ -191,7 +203,30 @@ import Multiselect from '@vueform/multiselect';
                 this.stclust = ('stenrich' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
                 this.processing = false;
                 //this.$enableWizardStep('differential-expression');
+
+                this.loadResults();
             },
+
+            loadResults() {
+                if(!('base_url') in this.stenrich)
+                    return;
+
+                this.stenrich.samples.forEach( sample => {
+                    axios.get(this.stenrich.base_url + 'stenrich_' + sample + '.json')
+                        .then((response) => {
+                            this.results[sample] = {};
+                            this.results[sample].data = response.data;
+                            this.results[sample].loaded = true;
+                            console.log(this.results[sample].data);
+                        })
+                        .catch((error) => {
+                            this.results[sample] = {};
+                            this.results[sample].data = {};
+                            this.results[sample].loaded = false;
+                            console.log(error.message);
+                        })
+                });
+            }
         },
 
     }

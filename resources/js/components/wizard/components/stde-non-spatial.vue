@@ -44,11 +44,11 @@
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                     <div>Type of test</div>
                     <div class="d-flex">
-                        <span class="w-70">
+                        <span class="w-40">
                             <Multiselect :options="test_types" v-model="params.test_type"></Multiselect>
                         </span>
-                        <label class="w-30 text-lg">
-                            <input type="checkbox" value="moran" v-model="params.pairwise"> Pairwise?
+                        <label class="w-60 text-lg">
+                            <input type="checkbox" value="moran" v-model="params.pairwise"> All pairwise comparisons between the tissue domains?
                         </label>
                     </div>
                 </div>
@@ -97,11 +97,6 @@
             <send-job-button label="Run Non-Spatial tests" :disabled="processing || !this.params.samples.length || !this.params.test_type.length || !this.params.annotation.length || !this.params.clusters.length" :project-id="project.id" job-name="STDiffNonSpatial" @started="nonSpatial" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
-        <vue3-easy-data-table
-            :headers="headers"
-            :items="items"
-        />
-
 
         <div v-if="!processing && ('stdiff_ns' in project.project_parameters)" class="p-3 text-center mt-4">
             <a :href="stdiff_ns.base_url + 'stdiff_ns_results.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Excel results - All samples</a>
@@ -122,7 +117,20 @@
                 <div class="tab-content" id="myTabContent">
                     <div v-for="(sample, index) in stdiff_ns.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
 
-                        <a :href="stdiff_ns.base_url + 'stdiff_ns_' + sample + '.csv'" class="btn btn-sm btn-outline-info m-6" download>CSV results</a>
+<!--                        <a :href="stdiff_ns.base_url + 'stdiff_ns_' + sample + '.csv'" class="btn btn-sm btn-outline-info m-6" download>CSV results</a>-->
+
+                        <div class="m-4">
+<!--                            <a :href="stdiff_ns.base_url + 'stdiff_ns_' + sample + '.csv'" class="btn btn-sm btn-outline-info my-3" download>CSV results</a>-->
+
+                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"
+                                                  :headers="results[sample].data.headers"
+                                                  :items="results[sample].data.items"
+                                                  alternating
+                                                  border-cell
+                                                  body-text-direction="center"
+                                                  header-text-direction="center"
+                            />
+                        </div>
 
                     </div>
                 </div>
@@ -162,28 +170,12 @@ import 'vue3-easy-data-table/dist/style.css';
         data() {
             return {
 
-                headers: [
-                    { text: "PLAYER", value: "player" },
-                    { text: "TEAM", value: "team"},
-                    { text: "NUMBER", value: "number"},
-                    { text: "POSITION", value: "position"},
-                    { text: "HEIGHT", value: "indicator.height"},
-                    { text: "WEIGHT (lbs)", value: "indicator.weight", sortable: true},
-                    { text: "LAST ATTENDED", value: "lastAttended", width: 200},
-                    { text: "COUNTRY", value: "country"},
-                ],
-                items: [
-                    { player: "Stephen Curry", team: "GSW", number: 30, position: 'G', indicator: {"height": '6-2', "weight": 185}, lastAttended: "Davidson", country: "USA"},
-                    { player: "Lebron James", team: "LAL", number: 6, position: 'F', indicator: {"height": '6-9', "weight": 250}, lastAttended: "St. Vincent-St. Mary HS (OH)", country: "USA"},
-                    { player: "Kevin Durant", team: "BKN", number: 7, position: 'F', indicator: {"height": '6-10', "weight": 240}, lastAttended: "Texas-Austin", country: "USA"},
-                    { player: "Giannis Antetokounmpo", team: "MIL", number: 34, position: 'F', indicator: {"height": '6-11', "weight": 242}, lastAttended: "Filathlitikos", country: "Greece"},
-                ],
-
                 annotation_variables_clusters: [],
 
                 test_types: [{'label': 'Wilcoxon\'s test', 'value': 'wilcoxon'}, {'label': 'T-test', 'value': 't_test'}, {'label': 'Mixed models', 'value': 'mm'}],
 
                 stdiff_ns: ('stdiff_ns' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stdiff_ns) : {},
+                results: {},
 
                 processing: false,
 
@@ -205,6 +197,7 @@ import 'vue3-easy-data-table/dist/style.css';
 
         mounted() {
             //console.log(this.project.project_parameters.annotation_variables_clusters);
+            this.loadResults();
         },
 
         watch: {
@@ -268,8 +261,30 @@ import 'vue3-easy-data-table/dist/style.css';
                 //console.log(this.project.project_parameters);
                 this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
                 this.processing = false;
-                this.$enableWizardStep('differential-expression');
+                this.$enableWizardStep('stenrich');
+                this.loadResults();
             },
+
+            loadResults() {
+                if(!('base_url') in this.stdiff_ns)
+                    return;
+
+                this.stdiff_ns.samples.forEach( sample => {
+                    axios.get(this.stdiff_ns.base_url + 'stdiff_ns_' + sample + '.json')
+                        .then((response) => {
+                            this.results[sample] = {};
+                            this.results[sample].data = response.data;
+                            this.results[sample].loaded = true;
+                            console.log(this.results[sample].data);
+                        })
+                        .catch((error) => {
+                            this.results[sample] = {};
+                            this.results[sample].data = {};
+                            this.results[sample].loaded = false;
+                            console.log(error.message);
+                        })
+                });
+            }
         },
 
     }

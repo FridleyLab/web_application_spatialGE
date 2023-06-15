@@ -1440,10 +1440,16 @@ for(p in n_plots) {
 
 
         $files = ['stdiff_ns_results.xlsx'];
-        foreach($parameters['samples_array'] as $sample)
+        foreach($parameters['samples_array'] as $sample) {
             $files[] = 'stdiff_ns_' . $sample . '.csv';
+            $files[] = 'stdiff_ns_' . $sample . '.json';
+        }
         foreach($files as $file)
             if(Storage::fileExists($workingDir . $file)) {
+
+                if(explode('.', $file)[1] === 'csv')
+                    $this->csv2json($workingDir . $file);
+
                 $file_public = $workingDirPublic . $file;
                 $file_to_move = $workingDir . $file;
                 Storage::delete($file_public);
@@ -1513,15 +1519,22 @@ lapply(names(de_genes_results), function(i){
 
 
         $files = ['stenrich_results.xlsx'];
-        foreach($this->samples->pluck('name') as $sample)
+        foreach($this->samples->pluck('name') as $sample) {
             $files[] = 'stenrich_' . $sample . '.csv';
-        foreach($files as $file)
-            if(Storage::fileExists($workingDir . $file)) {
+            $files[] = 'stenrich_' . $sample . '.json';
+        }
+        foreach($files as $file) {
+            if (Storage::fileExists($workingDir . $file)) {
+
+                if(explode('.', $file)[1] === 'csv')
+                    $this->csv2json($workingDir . $file);
+
                 $file_public = $workingDirPublic . $file;
                 $file_to_move = $workingDir . $file;
                 Storage::delete($file_public);
                 Storage::move($file_to_move, $file_public);
             }
+        }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $this->samples->pluck('name')])]);
         return $output;
@@ -1648,6 +1661,37 @@ lapply(names(sp_enrichment), function(i){
 
         ProjectParameter::updateOrCreate(['parameter' => 'job.' . $command . '.email', 'project_id' => $this->id], ['type' => 'number', 'value' => $sendEmail ? 1 : 0]);
 
+    }
+
+    public function csv2json($file) {
+        $data = Storage::read($file);
+        $lines = explode("\n", $data);
+        $headers = [];
+        $body = [];
+        if (sizeof($lines) >= 2) {
+            //process the headers
+            $fields = explode(',', $lines[0]);
+            for ($i = 2; $i < sizeof($fields); $i++)
+                $headers[] = '{ "text": "' . $fields[$i] . '", "value": "' . $fields[$i] . '", "sortable": "true" }';
+
+            //process the body
+            for ($k = 1; $k < sizeof($lines); $k++) {
+                if(strlen($lines[$k])) {
+                    $body_line = '{';
+                    $body_items = explode(',', $lines[$k]);
+                    if (sizeof($fields) === sizeof($body_items))
+                        for ($i = 2; $i < sizeof($fields); $i++) {
+                            if (strlen($body_line) > 1) $body_line .= ',';
+                            $body_line .= '"' . $fields[$i] . '":' . (is_numeric($body_items[$i]) ? '' : '"') . $body_items[$i] . (is_numeric($body_items[$i]) ? '' : '"');
+                        }
+                    $body_line .= '}';
+                    $body[] = $body_line;
+                }
+            }
+        }
+        $contents = '{' . "\n" . '"headers": [' . "\n" . implode(",\n", $headers) . '],' . "\n" . '"items": [' . "\n" . implode(",\n", $body) . "\n" . ']' . "\n" . '}';
+        Log::info($contents);
+        Storage::put(explode('.',$file)[0] . '.json', $contents);
     }
 
     public function getJobPositionInQueue($jobId) : int {
