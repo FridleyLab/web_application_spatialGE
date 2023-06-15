@@ -97,10 +97,10 @@
             <send-job-button label="Run Non-Spatial tests" :disabled="processing || !this.params.samples.length || !this.params.test_type.length || !this.params.annotation.length || !this.params.clusters.length" :project-id="project.id" job-name="STDiffNonSpatial" @started="nonSpatial" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
-<!--        <vue3-easy-data-table-->
-<!--            :headers="headers"-->
-<!--            :items="items"-->
-<!--        />-->
+        <vue3-easy-data-table
+            :headers="headers"
+            :items="items"
+        />
 
 
         <div v-if="!processing && ('stdiff_ns' in project.project_parameters)" class="p-3 text-center mt-4">
@@ -140,8 +140,8 @@
 
 import Multiselect from '@vueform/multiselect';
 
-//import Vue3EasyDataTable from 'vue3-easy-data-table';
-//import 'vue3-easy-data-table/dist/style.css';
+import Vue3EasyDataTable from 'vue3-easy-data-table';
+import 'vue3-easy-data-table/dist/style.css';
 
 
     export default {
@@ -149,7 +149,7 @@ import Multiselect from '@vueform/multiselect';
 
         components: {
             Multiselect,
-            //Vue3EasyDataTable
+            Vue3EasyDataTable
         },
 
         props: {

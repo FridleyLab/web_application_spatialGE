@@ -361,7 +361,7 @@ class ProjectController extends Controller
     }
 
     public function spatial_gene_set_enrichment_stenrich(Project $project) {
-        $jobId = $project->createJob('Spatial gene set enrichment', 'STenrich', request()->all());
+        $jobId = $project->createJob('Spatial gene set enrichment', 'STEnrich', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 

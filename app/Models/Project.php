@@ -1498,6 +1498,113 @@ lapply(names(de_genes_results), function(i){
     }
 
 
+    public function STEnrich($parameters) {
+
+        $workingDir = $this->workingDir();
+        $workingDirPublic = $this->workingDirPublic();
+
+        $scriptName = 'STEnrich.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSTEnrichScript($parameters));
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
+
+
+        $files = ['stenrich_results.xlsx'];
+        foreach($this->samples->pluck('name') as $sample)
+            $files[] = 'stenrich_' . $sample . '.csv';
+        foreach($files as $file)
+            if(Storage::fileExists($workingDir . $file)) {
+                $file_public = $workingDirPublic . $file;
+                $file_to_move = $workingDir . $file;
+                Storage::delete($file_public);
+                Storage::move($file_to_move, $file_public);
+            }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $this->samples->pluck('name')])]);
+        return $output;
+    }
+
+
+    private function getSTEnrichScript($parameters) {
+
+        $gene_sets_file = 'common/stenrich/' . $parameters['gene_sets'] . '.gmt';
+        Log::info('source: ' . $gene_sets_file);
+        Log::info('destination: ' . $this->workingDir() . $parameters['gene_sets'] . '.gmt');
+
+        Storage::copy($gene_sets_file, $this->workingDir() . $parameters['gene_sets'] . '.gmt');
+        $gene_sets_file = $parameters['gene_sets'] . '.gmt';
+
+
+        $permutations = $parameters['permutations'];
+        $num_sds = $parameters['num_sds'];
+        $min_spots = $parameters['min_spots'];
+        $min_genes = $parameters['min_genes'];
+        $seed = $parameters['seed'];
+
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# This first part to parse the input files containing gene sets
+# These lines produce a named list to be passed to the `gene_sets` parameter
+# in the STenrich function
+fp = '$gene_sets_file'
+pws_raw = readLines(fp)
+pws = lapply(pws_raw, function(i){
+  pw_tmp = unlist(strsplit(i, split='\\t'))
+  pw_name_tmp = pw_tmp[1]
+  pw_genes_tmp = pw_tmp[-c(1:2)]
+  return(list(pw_name=pw_name_tmp,
+              pw_genes=pw_genes_tmp))
+})
+rm(pws_raw, fp)
+
+pws_names = c()
+for(i in 1:length(pws)){
+  pws_names = append(pws_names, pws[[i]][['pw_name']])
+  pws[[i]] = pws[[i]][['pw_genes']]
+}
+names(pws) = pws_names
+
+
+# Load normalized STList
+" .
+            $this->_loadStList('normalized_stlist')
+            . "
+#print(pws)
+
+# Run STenrich
+sp_enrichment = STenrich(normalized_stlist,
+                         gene_sets=pws,
+                         reps=$permutations,
+                         num_sds=$num_sds,
+                         min_units=$min_spots,
+                         min_genes=$min_genes,
+                         seed=$seed,
+                         cores=4)
+
+# Get workbook with results (samples in spreadsheets)
+# Similar output to STdiff
+openxlsx::write.xlsx(sp_enrichment, file='./stenrich_results.xlsx')
+
+# Each sample as a CSV
+lapply(names(sp_enrichment), function(i){
+  write.csv(sp_enrichment[[i]], paste0('./stenrich_', i, '.csv'), row.names=T, quote=F)
+})
+
+
+";
+
+        return $script;
+    }
+
+
 
     private function getExportFilesCommands($file, $plot) : string {
 
