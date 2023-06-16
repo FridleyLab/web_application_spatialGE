@@ -1333,7 +1333,7 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
     }
 
 
-    public function STclust($parameters) : string {
+    public function STclust($parameters) {
         $workingDir = $this->workingDir();
 
         $scriptName = 'STclust.R';
@@ -1368,7 +1368,7 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
         $this->current_step = 6;
         $this->save();
 
-        return $output;
+        return ['output' => $output];
     }
 
     public function getSTclustScript($parameters) : string {
@@ -1461,7 +1461,7 @@ for(p in n_plots) {
         $this->current_step = 7;
         $this->save();
 
-        return $output;
+        return ['output' => $output];
     }
 
 
@@ -1541,7 +1541,8 @@ lapply(names(de_genes_results), function(i){
         }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $this->samples->pluck('name')])]);
-        return $output;
+
+        return ['output' => $output];
     }
 
 
