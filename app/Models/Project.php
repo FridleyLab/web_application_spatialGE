@@ -1457,6 +1457,10 @@ for(p in n_plots) {
             }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stdiff_ns', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
+
+        $this->current_step = 7;
+        $this->save();
+
         return $output;
     }
 
