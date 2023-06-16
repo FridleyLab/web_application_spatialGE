@@ -71,7 +71,7 @@
                     <div>Cluster annotations to test</div>
                     <div>
                         <span>
-                            <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters" v-model="params.clusters"></Multiselect>
+                            <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters" v-model="params.clusters" @click="checkIfAllSelected"></Multiselect>
                         </span>
                     </div>
                 </div>
@@ -214,16 +214,23 @@ import 'vue3-easy-data-table/dist/style.css';
 
             },
 
-            'params.clusters'(newValue) {
+            /*'params.clusters'(newValue) {
                 let flag = false;
                 this.params.clusters.map(cluster => {if(cluster === 'NULL') flag = true;});
                 if(flag) this.params.clusters = ['NULL'];
                 //console.log(this.params.clusters);
-            },
+            },*/
 
         },
 
         methods: {
+
+            checkIfAllSelected() {
+                console.log(this.params.clusters);
+                let flag = false;
+                this.params.clusters.map(cluster => {if(cluster === 'NULL') flag = true;});
+                if(flag) this.params.clusters = ['NULL'];
+            },
 
             toggleSample(sampleName) {
 
