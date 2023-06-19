@@ -1695,7 +1695,6 @@ lapply(names(sp_enrichment), function(i){
             }
         }
         $contents = '{' . "\n" . '"headers": [' . "\n" . implode(",\n", $headers) . '],' . "\n" . '"items": [' . "\n" . implode(",\n", $body) . "\n" . ']' . "\n" . '}';
-        Log::info($contents);
         Storage::put(explode('.',$file)[0] . '.json', $contents);
     }
 

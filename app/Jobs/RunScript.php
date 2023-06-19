@@ -77,7 +77,7 @@ class RunScript implements ShouldQueue
             //Check if the user requested to be notified via email
             $key = "job.{$this->command}.email";
             if( array_key_exists($key, $this->project->project_parameters) && intval($this->project->project_parameters[$key]))
-                Mail::to($this->project->user->email)->send(new notifyProcessCompleted($this->project, $this->description, $result['output']));
+                Mail::to($this->project->user->email)->send(new notifyProcessCompleted($this->project, $this->description, $this->project->user->is_admin ? $result['output'] : ''));
         }
         catch (\Exception $e)
         {
