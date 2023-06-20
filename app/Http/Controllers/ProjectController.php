@@ -365,5 +365,15 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function spatial_gradients(Project $project) {
+        $samples = $project->samples;
+        return view('wizard.spatial-gradients')->with(compact('project', 'samples'));
+    }
+
+    public function spatial_gradients_stgradients(Project $project) {
+        $jobId = $project->createJob('Spatial gradients', 'STGradients', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
 
 }

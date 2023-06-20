@@ -22,8 +22,11 @@ import qcDtNormalize from "./components/wizard/components/qc-dt-normalize.vue";
 import qcDtPca from "./components/wizard/components/qc-dt-pca.vue";
 import qcDtQuilt from "./components/wizard/components/qc-dt-quilt.vue";
 import projectSummaryTable from "./components/wizard/components/project-summary-table.vue";
-// import numericSlider from "./components/common/numeric-slider.vue";
+import showPlot from "./components/common/show-plot.vue";
 import numericRange from "./components/common/numeric-range.vue";
+
+// import numericSlider from "./components/common/numeric-slider.vue";
+
 // import multiselect from "./components/common/multiselect.vue";
 
 import stplotVisualization from "./components/wizard/stplot-visualization.vue";
@@ -44,7 +47,10 @@ import stdeNonSpatial from "./components/wizard/components/stde-non-spatial.vue"
 import spatialGeneSetEnrichment from "./components/wizard/spatial-gene-set-enrichment.vue";
 import stenrich from "./components/wizard/components/stenrich.vue";
 
-import showPlot from "./components/common/show-plot.vue";
+import spatialGradients from "./components/wizard/spatial-gradients.vue";
+import stgradients from "./components/wizard/components/stgradients.vue";
+
+
 
 
 // Vuetify
@@ -89,6 +95,7 @@ app.component('qc-dt-normalize', qcDtNormalize);
 app.component('qc-dt-pca', qcDtPca);
 app.component('qc-dt-quilt', qcDtQuilt);
 app.component('project-summary-table', projectSummaryTable);
+app.component('show-plot', showPlot);
 
 app.component('stplot-visualization', stplotVisualization);
 app.component('stplot-quilt', stplotQuilt);
@@ -108,7 +115,10 @@ app.component('stde-non-spatial', stdeNonSpatial);
 app.component('spatial-gene-set-enrichment', spatialGeneSetEnrichment);
 app.component('stenrich', stenrich);
 
-app.component('show-plot', showPlot);
+app.component('spatial-gradients', spatialGradients);
+app.component('stgradients', stgradients);
+
+
 
 //Register the window as a global variable, so it can be accessed everywhere
 app.config.globalProperties.window = window;

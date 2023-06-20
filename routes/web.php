@@ -88,6 +88,9 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/spatial-gene-set-enrichment',[ProjectController::class, 'spatial_gene_set_enrichment'])->name('spatial-gene-set-enrichment')->middleware('project');
     Route::post('/projects/{project}/spatial-gene-set-enrichment/stenrich',[ProjectController::class, 'spatial_gene_set_enrichment_stenrich'])->name('spatial-gene-set-enrichment-stenrich')->middleware('project');
 
+    Route::get('/projects/{project}/spatial-gradients',[ProjectController::class, 'spatial_gradients'])->name('spatial-gradients')->middleware('project');
+    Route::post('/projects/{project}/spatial-gradients/stgradients',[ProjectController::class, 'spatial_gradients_stgradients'])->name('spatial-gradients-stgradients')->middleware('project');
+
 });
 
 Route::get('/login',[SecurityController::class, 'login'])->name('login')->middleware('guest');

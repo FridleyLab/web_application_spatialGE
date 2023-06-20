@@ -12,7 +12,7 @@
 
 
             <div class="accordion row justify-content-center text-center my-4 mx-3" id="accordionFilterTab" :class="processing ? 'disabled-clicks' : ''">
-                <div class="accordion-item w-100 w-md-80 w-lg-70 w-xxl-55">
+                <div class="accordion-item w-100 w-lg-80 w-xxl-70">
                     <h2 class="accordion-header" id="headingSelectSamples">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
                             <span class="me-3">Select samples to apply this filter</span>
@@ -273,7 +273,7 @@ import 'vue3-easy-data-table/dist/style.css';
             },
 
             loadResults() {
-                if(!('base_url') in this.stdiff_ns)
+                if(!('base_url' in this.stdiff_ns))
                     return;
 
                 this.stdiff_ns.samples.forEach( sample => {

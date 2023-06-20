@@ -1624,6 +1624,101 @@ lapply(names(sp_enrichment), function(i){
 
 
 
+    public function STGradients($parameters) {
+        $workingDir = $this->workingDir();
+        $workingDirPublic = $this->workingDirPublic();
+
+        $scriptName = 'STGradients.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSTGradientsScript($parameters));
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
+
+
+        $files = ['stgradients_results.xlsx'];
+        foreach($parameters['samples_array'] as $sample) {
+            $files[] = 'stgradients_' . $sample . '.csv';
+            $files[] = 'stgradients_' . $sample . '.json';
+        }
+        foreach($files as $file)
+            if(Storage::fileExists($workingDir . $file)) {
+
+                if(explode('.', $file)[1] === 'csv')
+                    $this->csv2json($workingDir . $file);
+
+                $file_public = $workingDirPublic . $file;
+                $file_to_move = $workingDir . $file;
+                Storage::delete($file_public);
+                Storage::move($file_to_move, $file_public);
+            }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stgradients', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
+
+        $this->current_step = 7;
+        $this->save();
+
+        return ['output' => $output];
+    }
+
+
+    private function getSTGradientsScript($parameters) {
+
+        $samples = $parameters['samples'];
+        $topgenes = $parameters['topgenes'];
+        $annot = $parameters['annot'];
+        $ref = $parameters['ref'];
+        $exclude = $parameters['exclude_string'];
+        $out_rm = $parameters['out_rm'] ? 'T' : 'F';
+        $limit = is_numeric($parameters['limit']) && floatval($parameters['limit']) > 0 ? $parameters['limit'] : 'NULL';
+        $distsumm = $parameters['distsumm'];
+        $min_nb = is_numeric($parameters['min_nb']) && intval($parameters['min_nb']) >= 0 ? intval($parameters['min_nb']) : '0';
+        $robust = $parameters['robust'] ? 'T' : 'F';
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load stclust STList
+" .
+            $this->_loadStList('stclust_stlist')
+            . "
+
+grad_res = STgradient(x=stclust_stlist, # STCLUST STLIST
+                      samples=$samples,
+                      topgenes=$topgenes,
+                      annot='$annot',
+                      ref=$ref,
+                      exclude=$exclude,
+                      out_rm=$out_rm,
+                      limit=$limit,
+                      distsumm='$distsumm',
+                      min_nb=$min_nb,
+                      robust=$robust,
+                      cores=4)
+
+# Get workbook with results (samples in spreadsheets)
+openxlsx::write.xlsx(grad_res, file='stgradients_results.xlsx')
+
+# Each sample as a CSV
+lapply(names(grad_res), function(i){
+  write.csv(grad_res[[i]], paste0('stgradients_', i, '.csv'), row.names=T, quote=F)
+})
+
+";
+
+        return $script;
+    }
+
+
+
+
+
+
+
     private function getExportFilesCommands($file, $plot) : string {
 
         $str = "if(!is.null($plot)){\n";
