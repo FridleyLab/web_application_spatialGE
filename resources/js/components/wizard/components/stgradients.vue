@@ -139,33 +139,31 @@
 
 
 
-        <!-- Create tabs for each sample-->
-<!--        <div v-if="!processing && ('stgradients' in project.project_parameters)">-->
-<!--            <div>-->
-<!--                <ul class="nav nav-tabs" id="myTab" role="tablist">-->
-<!--                    <li v-for="(sample, index) in stgradients.samples" class="nav-item" role="presentation">-->
-<!--                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample" type="button" role="tab" :aria-controls="sample" aria-selected="true">{{ sample }}</button>-->
-<!--                    </li>-->
-<!--                </ul>-->
+<!--         Create tabs for each sample-->
+        <div v-if="!processing && ('stgradients' in project.project_parameters)">
+            <div>
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li v-for="(sample, index) in stgradients.samples" class="nav-item" role="presentation">
+                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample" type="button" role="tab" :aria-controls="sample" aria-selected="true">{{ sample }}</button>
+                    </li>
+                </ul>
 
-<!--                <div class="tab-content" id="myTabContent">-->
-<!--                    <div v-for="(sample, index) in stgradients.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">-->
-<!--                        <div class="m-4">-->
-<!--&lt;!&ndash;                            <a :href="stgradients.base_url + 'stgradients_' + sample + '.csv'" class="btn btn-sm btn-outline-info my-3" download>CSV results</a>&ndash;&gt;-->
-
-<!--                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"-->
-<!--                                                  :headers="results[sample].data.headers"-->
-<!--                                                  :items="results[sample].data.items"-->
-<!--                                                  alternating-->
-<!--                                                  border-cell-->
-<!--                                                  body-text-direction="center"-->
-<!--                                                  header-text-direction="center"-->
-<!--                            />-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
+                <div class="tab-content" id="myTabContent">
+                    <div v-for="(sample, index) in stgradients.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
+                        <div class="m-4">
+                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"
+                                                  :headers="results[sample].data.headers"
+                                                  :items="results[sample].data.items"
+                                                  alternating
+                                                  border-cell
+                                                  body-text-direction="center"
+                                                  header-text-direction="center"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
 
@@ -230,7 +228,7 @@ import 'vue3-easy-data-table/dist/style.css';
 
         mounted() {
             //console.log(this.project.project_parameters.annotation_variables_clusters);
-            //this.loadResults();
+            this.loadResults();
         },
 
         watch: {

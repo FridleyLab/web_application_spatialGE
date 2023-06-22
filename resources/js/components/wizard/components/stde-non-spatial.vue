@@ -268,7 +268,7 @@ import 'vue3-easy-data-table/dist/style.css';
                 //console.log(this.project.project_parameters);
                 this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
                 this.processing = false;
-                this.$enableWizardStep('stenrich');
+                //this.$enableWizardStep('stenrich');
                 this.loadResults();
             },
 

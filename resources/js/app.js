@@ -52,6 +52,12 @@ import stgradients from "./components/wizard/components/stgradients.vue";
 
 
 
+//Global event emitter
+import mitt from 'mitt';
+const emitter = mitt();
+
+
+
 
 // Vuetify
 /*import 'vuetify/styles'
@@ -126,6 +132,24 @@ app.config.globalProperties.window = window;
 
 
 //Define helper functions
+
+const getProjectParameters = async (projectId) => {
+    /*if(this.project === null) {
+        this.$emit('completed');
+    }*/
+
+    const response = await  axios.get('/projects/' + projectId + '/get-project-parameters');
+        /*.then((response) => {
+            this.project.project_parameters = response.data;
+            this.$emit('completed');
+        })
+        .catch((error) => console.log(error));*/
+
+    return response.data;
+
+}
+app.config.globalProperties.$getProjectParameters = getProjectParameters;
+
 const getJobPositionInQueue = async (projectId, command) => {
     let position = 0;
     const response = await axios.get('/projects/' + projectId + '/get-job-position-in-queue', {params :{'command': command}});
@@ -141,6 +165,8 @@ const enableWizardStep = (step) => {
 }
 app.config.globalProperties.$enableWizardStep = enableWizardStep;
 
+//Register the global event emitter
+app.config.globalProperties.emitter = emitter;
 
 app.mount('#app');
 

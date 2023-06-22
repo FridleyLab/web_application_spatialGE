@@ -178,7 +178,7 @@ import Multiselect from '@vueform/multiselect';
                 method: 'ds',
                 dynamicTreeCuts: false,
                 params: {
-                    ws: 0.03,
+                    ws: 0.02,
                     number_of_domains_min: 2,
                     number_of_domains_max: 5,
                     deepSplit: 0,
@@ -253,6 +253,7 @@ import Multiselect from '@vueform/multiselect';
                 this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
                 this.processing = false;
                 this.$enableWizardStep('differential-expression');
+                this.$enableWizardStep('spatial-gradients');
             },
 
             generatePlots() {

@@ -13,6 +13,10 @@
                     </div>
 
                     <div class="card-body">
+
+                        <h3>Recommendations:</h3>
+                        <h4>Recommendation 1</h4>
+
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="true">Original Summary</button>
@@ -25,7 +29,7 @@
                             </li>
 
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="pca-tab" data-bs-toggle="tab" data-bs-target="#pca" type="button" role="tab" aria-controls="pca" aria-selected="false">Pseudo-bulk analysis</button>
+                                <button :disabled="allow_pca" class="nav-link" id="pca-tab" data-bs-toggle="tab" data-bs-target="#pca" type="button" role="tab" aria-controls="pca" aria-selected="false">Pseudo-bulk analysis</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="quilt-tab" data-bs-toggle="tab" data-bs-target="#quilt" type="button" role="tab" aria-controls="quilt" aria-selected="false">Quilt plot</button>
@@ -74,8 +78,16 @@
             quiltUrl: String,
         },
 
+        data() {
+            return {
+                pca_disabled: !('pca_max_var_genes' in this.project.project_parameters),
+            }
+        },
+
         mounted() {
-            //console.log(this.project);
+            this.emitter.on("allow-pca", allow_pca => {
+                this.pca_disabled = !allow_pca;
+            });
         }
 
     }

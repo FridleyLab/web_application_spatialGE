@@ -63,7 +63,7 @@ export default {
 
     watch: {
         queuePosition: {
-            handler: function (newValue, oldValue) {
+            handler: async function (newValue, oldValue) {
 
                 console.log('**', oldValue, newValue);
 
@@ -78,7 +78,15 @@ export default {
                     if(this.reload) window.document.location.href = window.document.location.href;
 
                     this.processing = false;
-                    this.updateProjectParameters();
+                    if(this.project === null)
+                        this.$emit('completed');
+                    else {
+                        console.log('init');
+                        this.project.project_parameters = await this.$getProjectParameters(this.projectId);
+                        console.log(this.project.project_parameters);
+                        this.$emit('completed');
+                    }
+
                 }
 
                 if(this.queuePosition !== null && this.queuePosition>0)
@@ -132,7 +140,7 @@ export default {
                 .catch((error) => console.log(error));
         }, 100),
 
-        updateProjectParameters: function() {
+        /*updateProjectParameters: function() {
             if(this.project === null) {
                 this.$emit('completed');
             }
@@ -144,7 +152,7 @@ export default {
                     })
                     .catch((error) => console.log(error));
             }
-        }
+        }*/
     },
 }
 </script>

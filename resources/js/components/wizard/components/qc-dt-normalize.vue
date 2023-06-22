@@ -253,8 +253,10 @@ import Multiselect from '@vueform/multiselect';
 
             processCompleted() {
                 this.processing = false;
+                this.emitter.emit('allow-pca', true);
                 this.$enableWizardStep('stplot-visualization');
                 this.$enableWizardStep('sthet-spatial-het');
+                this.$enableWizardStep('stenrich');
                 this.$enableWizardStep('spatial-domain-detection');
             },
 
