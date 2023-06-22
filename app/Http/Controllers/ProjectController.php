@@ -320,7 +320,7 @@ class ProjectController extends Controller
         return view('wizard.sthet-spatial-het')->with(compact('project', 'samples', 'color_palettes'));
     }
 
-    public function sthet_spatial_het_plot(Project $project) {
+    public function sthet_spatial_het_calculate(Project $project) {
 
         $parameters = [
             'genes' => request('genes'),
@@ -328,7 +328,19 @@ class ProjectController extends Controller
             'color_pal' => request('color_pal'),
             'plot_meta' => request('plot_meta')
         ];
-        $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThetPlot', $parameters, 'low');
+        $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThet', $parameters, 'low');
+        return $project->getJobPositionInQueue($jobId);
+
+    }
+
+    public function sthet_spatial_het_plot(Project $project) {
+
+        $parameters = [
+            'genes' => request('plot_genes'),
+            'color_pal' => request('color_pal'),
+            'plot_meta' => request('plot_meta')
+        ];
+        $jobId = $project->createJob('SThet - Spatial heterogeneity Plot', 'SThetPlot', $parameters);
         return $project->getJobPositionInQueue($jobId);
 
     }

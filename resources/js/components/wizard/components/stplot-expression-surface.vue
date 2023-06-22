@@ -54,7 +54,7 @@
 
         <div v-if="!processing" class="row mt-3">
             <div class="p-3 text-end">
-                <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @ongoing="processingPlots = true" @completed="processPlotsCompleted" :project="project" ></send-job-button>
+                <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length || !('STplotExpressionSurface.genes' in project.project_parameters)" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @ongoing="processingPlots = true" @completed="processPlotsCompleted" :project="project" ></send-job-button>
             </div>
         </div>
 

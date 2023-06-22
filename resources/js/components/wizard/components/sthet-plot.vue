@@ -38,7 +38,7 @@
 
                 <div class="row justify-content-center text-center m-3">
                     <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                        <div>Search and select genes</div>
+                        <div>Search and select genes to calculate SThet</div>
                         <div>
                             <Multiselect
                                 v-model="params.genes"
@@ -51,25 +51,6 @@
                                 :min-chars="1"
                                 :options="async (query) => { return await searchGenes(query) }"
                             />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row justify-content-center text-center m-3">
-                    <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                        <div>Color by</div>
-                        <div>
-                            <Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row justify-content-center text-center m-4">
-                    <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                        <div>Color palette</div>
-                        <div>
-                            <Multiselect :options="colorPalettes" v-model="params.color_pal"
-                                         :searchable="true"></Multiselect>
                         </div>
                     </div>
                 </div>
@@ -87,22 +68,62 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="row mt-3">
-
-                <div class="p-3 text-end">
-                    <send-job-button label="Generate plots"
-                                     :disabled="generating || !params.genes.length || !params.color_pal.length || !params.plot_meta.length"
-                                     :project-id="project.id" job-name="SThetPlot" @started="sthetPlot"
+                <div class="pe-3 text-end">
+                    <send-job-button label="Calculate Sthet"
+                                     :disabled="generating || !params.genes.length"
+                                     :project-id="project.id" job-name="SThet" @started="sthet"
                                      @ongoing="generating = true" @completed="processCompleted"
                                      :project="project"></send-job-button>
                 </div>
 
+
+
+                <template v-if="!generating && 'sthet_genes' in project.project_parameters">
+                    <div class="row justify-content-center text-center m-3">
+                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                            <div>Select genes to plot</div>
+                            <div>
+                                <Multiselect :multiple="true" mode="tags" :searchable="false" :options="sthet_genes" v-model="params.plot_genes"></Multiselect>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center text-center m-3">
+                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                            <div>Color by</div>
+                            <div>
+                                <Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center text-center m-4">
+                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                            <div>Color palette</div>
+                            <div>
+                                <Multiselect :options="colorPalettes" v-model="params.color_pal"
+                                             :searchable="true"></Multiselect>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pe-3 text-end">
+                        <send-job-button label="Generate plots"
+                                         :disabled="generating_plots || !params.plot_genes.length || !params.color_pal.length || !params.plot_meta.length"
+                                         :project-id="project.id" job-name="SThetPlot" @started="sthetPlot"
+                                         @ongoing="generating_plots = true" @completed="processCompletedPlots"
+                                         :project="project"></send-job-button>
+                    </div>
+                </template>
+
+
             </div>
 
 
-            <div class="mt-4" v-if="!generating && 'sthet_plot' in project.project_parameters">
+
+
+            <div class="mt-4" v-if="!generating_plots && 'sthet_plot' in project.project_parameters">
                 <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="nd-sthetplot-tab" data-bs-toggle="tab"
@@ -142,6 +163,7 @@ export default {
     props: {
         project: Object,
         samples: Object,
+        sthetUrl: String,
         sthetPlotUrl: String,
         colorPalettes: Object,
     },
@@ -149,16 +171,20 @@ export default {
     data() {
         return {
 
+            sthet_genes: 'sthet_genes' in this.project.project_parameters ? JSON.parse(this.project.project_parameters.sthet_genes) : [],
+
             params: {
                 color_pal: 'Spectral',
                 plot_meta: '',
                 method: ['moran'],
-                genes: []
+                genes: [],
+                plot_genes: [],
             },
 
             filter_variable: '',
 
             generating: false,
+            generating_plots: false,
 
             //plot_meta_options: ['race', 'therapy'],
             plot_meta_options: 'metadata_names' in this.project.project_parameters ? this.project.project_parameters.metadata_names : [],
@@ -174,25 +200,34 @@ export default {
         }
     },
 
-
     methods: {
 
-        sthetPlot() {
+        sthet() {
             this.generating = true;
-            axios.post(this.sthetPlotUrl, this.params)
+            axios.post(this.sthetUrl, this.params)
                 .then((response) => {
-                    //for(let property in response.data)
-                    //    this.project.project_parameters[property] = response.data[property];
-                    //this.generating = false;
                 })
                 .catch((error) => {
-                    //this.generating = false;
+                    console.log(error.message)
+                })
+        },
+
+        sthetPlot() {
+            this.generating_plots = true;
+            axios.post(this.sthetPlotUrl, this.params)
+                .then((response) => {
+                })
+                .catch((error) => {
                     console.log(error.message)
                 })
         },
 
         processCompleted() {
             this.generating = false;
+        },
+
+        processCompletedPlots() {
+            this.generating_plots = false;
         },
 
         searchGenes: async function (query) {

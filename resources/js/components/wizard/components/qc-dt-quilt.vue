@@ -52,13 +52,13 @@
             <div class="row mt-3">
 
                 <div class="p-3 text-end">
-                    <send-job-button label="Generate plots" :disabled="generating_quilt || !params.color_pal.length || !params.plot_meta.length || !params.sample1.length || !params.sample2.length || (params.sample1===params.sample2)" :project-id="project.id" job-name="quiltPlot" @started="quiltPlot" @ongoing="generating_quilt = true" @completed="processCompleted" :project="project" ></send-job-button>
+                    <send-job-button label="Generate plots" :disabled="generating_quilt || !params.color_pal.length || !params.plot_meta.length || !params.sample1.length || !params.sample2.length || (params.sample1===params.sample2 && samples.length!==1)" :project-id="project.id" job-name="quiltPlot" @started="quiltPlot" @ongoing="generating_quilt = true" @completed="processCompleted" :project="project" ></send-job-button>
                 </div>
 
             </div>
 
 
-            <div class="mt-4" v-if="!generating_quilt && 'quilt_plot_1' in project.project_parameters">
+            <div class="mt-4" v-if="!generating_quilt && 'quilt_plot_1_initial' in project.project_parameters">
                 <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="nd-boxplot-tab" data-bs-toggle="tab" data-bs-target="#nd-bloxplot" type="button" role="tab" aria-controls="nd-bloxplot" aria-selected="true">Quilt plot</button>
@@ -74,13 +74,14 @@
                             <show-plot :src="project.project_parameters.quilt_plot_2_initial" css-classes="w-xxl-50"></show-plot>
                         </div>
 
+                        <template v-if="'quilt_plot_1' in project.project_parameters">
+                            <div class="mb-3 mt-5 text-center"><h3>Filtered & Normalized data set</h3></div>
 
-                        <div class="mb-3 mt-5 text-center"><h3>Filtered & Normalized data set</h3></div>
-
-                        <div class="d-xxl-flex">
-                            <show-plot :src="project.project_parameters.quilt_plot_1" css-classes="w-xxl-50"></show-plot>
-                            <show-plot :src="project.project_parameters.quilt_plot_2" css-classes="w-xxl-50"></show-plot>
-                        </div>
+                            <div class="d-xxl-flex">
+                                <show-plot :src="project.project_parameters.quilt_plot_1" css-classes="w-xxl-50"></show-plot>
+                                <show-plot :src="project.project_parameters.quilt_plot_2" css-classes="w-xxl-50"></show-plot>
+                            </div>
+                        </template>
 
                     </div>
                 </div>
@@ -115,8 +116,8 @@ import Multiselect from '@vueform/multiselect';
                 params: {
                     color_pal: 'sunset',
                     plot_meta: '',
-                    sample1: '',
-                    sample2: '',
+                    sample1: this.samples.length === 1 ? this.samples[0].name : '',
+                    sample2: this.samples.length === 1 ? this.samples[0].name : '',
                 },
 
                 filter_variable: '',
