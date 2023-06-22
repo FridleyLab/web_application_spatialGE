@@ -275,7 +275,8 @@ class Project extends Model
         $sampleDirs = $this->samples()->pluck('samples.name')->join("/','");
         $sampleDirs = "'" . $sampleDirs . "/'";
 
-        $sampleNames = sizeof($this->getProjectParametersAttribute()['metadata_names']);
+        $params = $this->getProjectParametersAttribute();
+        $sampleNames = array_key_exists('metadata_names', $params) ? sizeof($params['metadata_names']) : 0;
         $sampleNames = $sampleNames ? "'clinical_data.csv'" : "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
 
         $script = "
