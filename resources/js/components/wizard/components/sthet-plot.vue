@@ -185,7 +185,6 @@ export default {
             generating: false,
             generating_plots: false,
 
-            //plot_meta_options: ['race', 'therapy'],
             plot_meta_options: 'metadata_names' in this.project.project_parameters ? this.project.project_parameters.metadata_names : [],
         }
     },
@@ -224,6 +223,7 @@ export default {
 
         processCompleted() {
             this.generating = false;
+            this.sthet_genes = 'sthet_genes' in this.project.project_parameters ? JSON.parse(this.project.project_parameters.sthet_genes) : [];
         },
 
         processCompletedPlots() {

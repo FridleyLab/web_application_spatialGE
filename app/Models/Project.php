@@ -1314,7 +1314,9 @@ $export_files
 
         $result = [];
 
-        ProjectParameter::updateOrCreate(['parameter' => 'sthet_genes', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($parameters['genes'])]);
+        $prevoius_genes = array_key_exists('sthet_genes', $this->project_parameters) ? json_decode($this->project_parameters['sthet_genes']) : [];
+        $new_genes = array_merge($parameters['genes'], $prevoius_genes);
+        ProjectParameter::updateOrCreate(['parameter' => 'sthet_genes', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($new_genes)]);
 
         $parameterNames = ['sthet_plot_table_results'];
         foreach($parameterNames as $parameterName) {
@@ -1338,6 +1340,9 @@ $export_files
 
     private function getSThetScript($parameters) {
 
+        $stlist = 'stlist_sthet';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
+
         $genes = $parameters['genes'];
         $method = $parameters['method'];
 
@@ -1352,9 +1357,9 @@ library('spatialGE')
 
 # Load normalized STList
 
-{$this->_loadStList('normalized_stlist')}
+{$this->_loadStList($stlist)}
 
-stlist_sthet = SThet(normalized_stlist, genes=$_genes, method=$_method)
+stlist_sthet = SThet($stlist, genes=$_genes, method=$_method)
 
 {$this->_saveStList('stlist_sthet')}
 
