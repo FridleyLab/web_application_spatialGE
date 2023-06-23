@@ -20,7 +20,7 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="stplot-quilt" role="tabpanel" aria-labelledby="stplot-quilt-tab">
-                                <sthet-plot :project="project" :samples="samples" :sthet-plot-url="sthetPlotUrl" :color-palettes="colorPalettes"></sthet-plot>
+                                <sthet-plot :project="project" :samples="samples" :sthet-plot-url="sthetPlotUrl" :sthet-url="sthetUrl" :color-palettes="colorPalettes"></sthet-plot>
                             </div>
                         </div>
                     </div>
@@ -39,12 +39,9 @@
             project: Object,
             samples: Object,
             colorPalettes: Object,
+            sthetUrl: String,
             sthetPlotUrl: String,
         },
-
-        mounted() {
-            console.log(this.project);
-        }
 
     }
 </script>

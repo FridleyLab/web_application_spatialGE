@@ -68,57 +68,56 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="pe-3 text-end">
-                    <send-job-button label="Calculate Sthet"
-                                     :disabled="generating || !params.genes.length"
-                                     :project-id="project.id" job-name="SThet" @started="sthet"
-                                     @ongoing="generating = true" @completed="processCompleted"
-                                     :project="project"></send-job-button>
+            <div class="pe-3 text-end">
+                <send-job-button label="Calculate Sthet"
+                                 :disabled="generating || !params.genes.length"
+                                 :project-id="project.id" job-name="SThet" @started="sthet"
+                                 @ongoing="generating = true" @completed="processCompleted"
+                                 :project="project"></send-job-button>
+            </div>
+
+
+            <div v-if="!generating && 'sthet_genes' in project.project_parameters" :class="generating_plots ? 'disabled-clicks' : ''">
+                <div class="row justify-content-center text-center m-3">
+                    <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                        <div>Select genes to plot</div>
+                        <div>
+                            <Multiselect :multiple="true" mode="tags" :searchable="false" :options="sthet_genes" v-model="params.plot_genes"></Multiselect>
+                        </div>
+                    </div>
                 </div>
 
-
-
-                <template v-if="!generating && 'sthet_genes' in project.project_parameters">
-                    <div class="row justify-content-center text-center m-3">
-                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                            <div>Select genes to plot</div>
-                            <div>
-                                <Multiselect :multiple="true" mode="tags" :searchable="false" :options="sthet_genes" v-model="params.plot_genes"></Multiselect>
-                            </div>
+                <div class="row justify-content-center text-center m-3">
+                    <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                        <div>Color by</div>
+                        <div>
+                            <Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect>
                         </div>
                     </div>
+                </div>
 
-                    <div class="row justify-content-center text-center m-3">
-                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                            <div>Color by</div>
-                            <div>
-                                <Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect>
-                            </div>
+                <div class="row justify-content-center text-center m-4">
+                    <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                        <div>Color palette</div>
+                        <div>
+                            <Multiselect :options="colorPalettes" v-model="params.color_pal"
+                                         :searchable="true"></Multiselect>
                         </div>
                     </div>
-
-                    <div class="row justify-content-center text-center m-4">
-                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                            <div>Color palette</div>
-                            <div>
-                                <Multiselect :options="colorPalettes" v-model="params.color_pal"
-                                             :searchable="true"></Multiselect>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pe-3 text-end">
-                        <send-job-button label="Generate plots"
-                                         :disabled="generating_plots || !params.plot_genes.length || !params.color_pal.length || !params.plot_meta.length"
-                                         :project-id="project.id" job-name="SThetPlot" @started="sthetPlot"
-                                         @ongoing="generating_plots = true" @completed="processCompletedPlots"
-                                         :project="project"></send-job-button>
-                    </div>
-                </template>
-
-
+                </div>
             </div>
+            <div class="pe-3 text-end">
+                <send-job-button label="Generate plots"
+                                 :disabled="generating_plots || !params.plot_genes.length || !params.color_pal.length || !params.plot_meta.length"
+                                 :project-id="project.id" job-name="SThetPlot" @started="sthetPlot"
+                                 @ongoing="generating_plots = true" @completed="processCompletedPlots"
+                                 :project="project"></send-job-button>
+            </div>
+
+
+
 
 
 
@@ -203,6 +202,7 @@ export default {
     methods: {
 
         sthet() {
+            console.log(this.sthetUrl);
             this.generating = true;
             axios.post(this.sthetUrl, this.params)
                 .then((response) => {

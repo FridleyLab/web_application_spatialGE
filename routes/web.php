@@ -77,8 +77,8 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects/{project}/stplot/expression-surface-plots', [ProjectController::class, 'stplot_expression_surface_plots'])->name('stplot-expression-surface-plots')->middleware('project');
 
     Route::get('/projects/{project}/sthet-spatial-het',[ProjectController::class, 'sthet_spatial_het'])->name('sthet-spatial-het')->middleware('project');
-    Route::post('/projects/{project}/sthet-spatial-het', [ProjectController::class, 'sthet_spatial_het_calculate'])->name('sthet-spatial-het-calculate')->middleware('project');
-    Route::post('/projects/{project}/sthet-spatial-het/plot', [ProjectController::class, 'sthet_spatial_het_plot'])->name('sthet-spatial-het-plot')->middleware('project');
+    Route::post('/projects/{project}/sthet-spatial-het-calculate', [ProjectController::class, 'sthet_spatial_het_calculate'])->name('sthet-spatial-het-calculate')->middleware('project');
+    Route::post('/projects/{project}/sthet-spatial-het-plot', [ProjectController::class, 'sthet_spatial_het_plot'])->name('sthet-spatial-het-plot')->middleware('project');
 
     Route::get('/projects/{project}/spatial-domain-detection',[ProjectController::class, 'spatial_domain_detection'])->name('spatial-domain-detection')->middleware('project');
     Route::post('/projects/{project}/sdd/stclust', [ProjectController::class, 'sdd_stclust'])->name('sdd-stclust')->middleware('project');

@@ -65,7 +65,7 @@ export default {
         queuePosition: {
             handler: async function (newValue, oldValue) {
 
-                console.log('**', oldValue, newValue);
+                //console.log('**', oldValue, newValue);
 
                 if(oldValue < 0) return;
 
@@ -81,9 +81,9 @@ export default {
                     if(this.project === null)
                         this.$emit('completed');
                     else {
-                        console.log('init');
+                        //console.log('init');
                         this.project.project_parameters = await this.$getProjectParameters(this.projectId);
-                        console.log(this.project.project_parameters);
+                        //console.log(this.project.project_parameters);
                         this.$emit('completed');
                     }
 
@@ -117,7 +117,7 @@ export default {
             //Create the interval to check queue position
             this.checkQueueIntervalId = setInterval(async () => {
                 this.queuePosition =  await this.$getJobPositionInQueue(this.projectId, this.jobName);
-                console.log('ASYNC --', this.jobName, this.queuePosition);
+                //console.log('ASYNC --', this.jobName, this.queuePosition);
                 if(!this.queuePosition) {
                     this.startButtonVisible = true;
                     clearInterval(this.checkQueueIntervalId);
@@ -132,10 +132,10 @@ export default {
 
         setEmailNofitication: _.debounce(function () {
             //this.sendEmail = this.sendEmail ? 0 : 1;
-            console.log('email: ' + this.sendEmail);
+            //console.log('email: ' + this.sendEmail);
             axios.get('/projects/' + this.projectId + '/set-job-email-notification', {params: {'command': this.jobName, 'sendemail': this.sendEmail}})
                 .then((response) => {
-                    console.log(response.data);
+                    //console.log(response.data);
                 })
                 .catch((error) => console.log(error));
         }, 100),
