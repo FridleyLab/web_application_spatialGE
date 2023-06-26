@@ -23,7 +23,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="">
+                    <div class="text-bg-light">
+                        <div>Coming soon...</div>
                         <label class="text-lg">
                             <input type="checkbox" v-model="params.average" disabled> Average
                         </label>

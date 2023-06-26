@@ -71,7 +71,7 @@
                     <div>Cluster annotations to test</div>
                     <div>
                         <span>
-                            <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters" v-model="params.clusters" @click="checkIfAllSelected"></Multiselect>
+                            <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters" v-model="params.clusters" @select="checkIfAllSelected"></Multiselect>
                         </span>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
 
 <!--                        <a :href="stdiff_ns.base_url + 'stdiff_ns_' + sample + '.csv'" class="btn btn-sm btn-outline-info m-6" download>CSV results</a>-->
 
-                        <div class="m-4">
+                        <div class="m-4" v-if="(sample in results) && results[sample].loaded">
 <!--                            <a :href="stdiff_ns.base_url + 'stdiff_ns_' + sample + '.csv'" class="btn btn-sm btn-outline-info my-3" download>CSV results</a>-->
 
                             <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"
@@ -214,22 +214,17 @@ import 'vue3-easy-data-table/dist/style.css';
 
             },
 
-            /*'params.clusters'(newValue) {
-                let flag = false;
-                this.params.clusters.map(cluster => {if(cluster === 'NULL') flag = true;});
-                if(flag) this.params.clusters = ['NULL'];
-                //console.log(this.params.clusters);
-            },*/
-
         },
 
         methods: {
 
-            checkIfAllSelected() {
-                console.log(this.params.clusters);
-                let flag = false;
-                this.params.clusters.map(cluster => {if(cluster === 'NULL') flag = true;});
-                if(flag) this.params.clusters = ['NULL'];
+            checkIfAllSelected(option) {
+
+                if(option === 'NULL')
+                    this.params.clusters = ['NULL'];
+                else
+                    if(this.params.clusters.includes('NULL'))
+                        this.params.clusters = [option];
             },
 
             toggleSample(sampleName) {
@@ -265,14 +260,16 @@ import 'vue3-easy-data-table/dist/style.css';
             },
 
             processCompleted() {
-                //console.log(this.project.project_parameters);
+                console.log('NS - inicio processCompleted');
                 this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
                 this.processing = false;
-                //this.$enableWizardStep('stenrich');
                 this.loadResults();
             },
 
             loadResults() {
+
+                this.stdiff_ns = ('stdiff_ns' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stdiff_ns) : {};
+
                 if(!('base_url' in this.stdiff_ns))
                     return;
 
@@ -282,7 +279,6 @@ import 'vue3-easy-data-table/dist/style.css';
                             this.results[sample] = {};
                             this.results[sample].data = response.data;
                             this.results[sample].loaded = true;
-                            console.log(this.results[sample].data);
                         })
                         .catch((error) => {
                             this.results[sample] = {};

@@ -17,7 +17,7 @@
                     </div>
 
                     <div v-if="samples.length" class="p-3">
-                        <input v-if="!uploading && !changingStep" type="button" class="btn" :class="showAddSample ? 'btn-outline-info' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Hide sample form' : 'Add sample'" />
+                        <input v-if="!uploading && !changingStep" type="button" class="btn" :class="showAddSample ? 'btn-outline-info' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Hide add new sample form' : 'Add new sample'" />
                     </div>
 
 

@@ -76,7 +76,7 @@
                     <div>Cluster(s) to exclude (optional)</div>
                     <div>
                         <span>
-                            <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters_exclude" v-model="params.exclude"></Multiselect>
+                            <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters_exclude" v-model="params.exclude" @select="checkNotAllSelected"></Multiselect>
                         </span>
                     </div>
                 </div>
@@ -227,7 +227,6 @@ import 'vue3-easy-data-table/dist/style.css';
         },
 
         mounted() {
-            //console.log(this.project.project_parameters.annotation_variables_clusters);
             this.loadResults();
         },
 
@@ -253,8 +252,6 @@ import 'vue3-easy-data-table/dist/style.css';
 
                 this.project.project_parameters.annotation_variables_clusters.map(annot => {if(annot.annotation === this.params.annot && annot.cluster !== this.params.ref) this.annotation_variables_clusters_exclude.push({'label': annot.cluster, 'value': annot.cluster})});
 
-                console.log(this.annotation_variables_clusters_exclude);
-
                 this.annotation_variables_clusters_exclude.sort((a,b) => a.value - b.value);
             },
 
@@ -276,6 +273,11 @@ import 'vue3-easy-data-table/dist/style.css';
 
         methods: {
 
+            checkNotAllSelected(option) {
+                if(this.params.exclude.length && this.params.exclude.length === this.annotation_variables_clusters_exclude.length)  //this.params.ref.length && (this.params.exclude.length - 1) === this.annotation_variables_clusters)
+                    this.params.exclude.pop();
+            },
+
             toggleSample(sampleName) {
 
                 const index = this.params.samples.indexOf(sampleName);
@@ -288,13 +290,15 @@ import 'vue3-easy-data-table/dist/style.css';
 
             STGradients() {
 
-                this.params.samples_array = this.params.samples;
-                this.params.samples = this.params.samples.length !== this.samples.length ? "c('" + this.params.samples.join("','") + "')" : 'NULL';
-                this.params.exclude_string = this.params.exclude.length ? "c(" + this.params.exclude.join(",") + ")" : 'NULL';
+                let data = JSON.parse(JSON.stringify(this.params));
+
+                data.samples_array = data.samples;
+                data.samples = data.samples.length !== this.samples.length ? "c('" + data.samples.join("','") + "')" : 'NULL';
+                data.exclude_string = data.exclude.length ? "c(" + data.exclude.join(",") + ")" : 'NULL';
 
                 this.processing = true;
 
-                axios.post(this.stgradientsUrl, this.params)
+                axios.post(this.stgradientsUrl, data)
                     .then((response) => {
                     })
                     .catch((error) => {
@@ -311,6 +315,8 @@ import 'vue3-easy-data-table/dist/style.css';
             },
 
             loadResults() {
+                this.stdiff_ns = ('stgradients' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stgradients) : {};
+
                 if(!('base_url' in this.stgradients))
                     return;
 

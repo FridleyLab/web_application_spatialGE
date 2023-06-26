@@ -81,9 +81,9 @@ export default {
                     if(this.project === null)
                         this.$emit('completed');
                     else {
-                        //console.log('init');
+                        console.log('job-button: before project parameters');
                         this.project.project_parameters = await this.$getProjectParameters(this.projectId);
-                        //console.log(this.project.project_parameters);
+                        console.log('job-button: after project parameters');
                         this.$emit('completed');
                     }
 

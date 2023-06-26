@@ -40,12 +40,31 @@
                 </template>
             </div>
 
-            <hr class="dark horizontal my-0">
+            <hr class="dark horizontal my-0" />
         </div>
 
 
         <div v-if="samples.length" class="table-responsive mt-5">
-            <div class="text-info text-bolder">Add relevant metadata for the samples</div>
+            <div class="text-secondary"><span class="text-bolder">Optional: Add sample-level metadata</span>
+                <ul class="mt-3">
+                    <li v-if="!addingMetadataManually">
+                        <button v-if="!disabled" class="btn btn-sm btn-outline-info" @click="addingMetadataFile = !addingMetadataFile">{{ addingMetadataFile ? 'Cancel metadata file upload' : 'Option 1: Upload metadata file (csv/excel)'}}</button>
+                        <div v-if="addingMetadataFile" class="mb-5 max-width-200">
+                            <file-upload-drag-drop code="metadata" :number-of-samples="samples.length" :project="project" caption="Metadata CSV" :required="true" @fileSelected="metadataFileAdded" @fileRemoved="metadataFileRemoved" tooltip="A CSV file containing a table with sample metadata"></file-upload-drag-drop>
+                        </div>
+                    </li>
+                    <li v-if="!addingMetadataFile">
+                        <button v-if="!disabled" class="btn btn-sm btn-outline-info" @click="addingMetadataManually = !addingMetadataManually">{{ addingMetadataManually ? 'metadata complete' : 'Option 2: Add metadata manually'}}</button>
+                        <div v-if="addingMetadataManually">
+                            <button v-if="!disabled" class="btn btn-sm btn-outline-info" @click="addMetadata">Add new metadata column</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+
+
+
             <table class="table table-striped">
                 <thead>
                 <tr>
@@ -78,7 +97,7 @@
                 </tr>
                 </tbody>
             </table>
-            <button v-if="!disabled" class="btn btn-sm btn-outline-secondary" @click="addMetadata">Add</button>
+
         </div>
 
         <div v-if="!samples.length">
@@ -103,6 +122,8 @@
                 deletingMetadata: 0,
                 //metadataCount: 0,
                 metadata: ('metadata' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.metadata) :  [],
+                addingMetadataFile: false,
+                addingMetadataManually: false,
 
                 activeColumn: -1,
                 //activeColumnHeader: -1,
@@ -143,7 +164,7 @@
 
             saveMetadata: _.debounce(function() {
                 axios.post('/projects/' + this.project.id + '/save-metadata', {metadata: this.metadata})
-                    .then((response) => {console.log(response.data);})
+                    //.then((response) => {console.log(response.data);})
                     .catch((error) => console.log(error));
 
             }, 1000),
@@ -177,6 +198,16 @@
                 axios.delete('/samples/' + sample.id)
                     .then((response) => {console.log(response.data); location.reload()})
                     .catch((error) => {console.log(error.message)});
+            },
+
+            metadataFileAdded(file, metadata) {
+                this.metadata = metadata;
+                this.saveMetadata();
+                this.addingMetadataFile = false;
+            },
+
+            metadataFileRemoved() {
+                console.log('metadataFileRemoved');
             },
 
         },

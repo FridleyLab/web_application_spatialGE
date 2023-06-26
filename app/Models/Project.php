@@ -1550,6 +1550,7 @@ for(p in n_plots) {
             'cluster_2' => 'Cluster 2',
             'wilcox_p_val' => 'Wilcoxon’s p-value',
             'ttest_p_val' => 'T-test p-value',
+            'mm_p_val' => 'Mixed model p-value',
             'adj_p_val' => 'Adjusted p-value'
         ];
 
@@ -1604,6 +1605,7 @@ de_genes_results = STdiff(stclust_stlist, #### NORMALIZED STList
                           samples=$samples,   #### Users should be able to select which samples to include in analysis
                           annot='$annotation',  #### Name of variable to use in analysis... Dropdown to select one of `annot_variables`
                           topgenes=$topgenes, #### !!! Defines a lot of the speed. 100 are too few genes. Minimally would like 5000 but is SLOW. Can be a slider as in pseudobulk
+                          sp_topgenes = 0,
                           test_type='$test_type', #### Other options are 't_test' and 'mm',
                           pairwise=$pairwise, #### Check box
                           clusters=$clusters, #### Need ideas for this one. Values in `cluster_values` and after user selected value in annot dropdown
@@ -1795,9 +1797,6 @@ lapply(names(sp_enrichment), function(i){
             }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stgradients', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
-
-        $this->current_step = 7;
-        $this->save();
 
         return ['output' => $output];
     }

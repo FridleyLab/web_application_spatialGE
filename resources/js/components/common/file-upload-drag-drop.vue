@@ -46,6 +46,7 @@ export default {
         required: {type: Boolean, default: false},
         code: String,
         tooltip: {type: String, default: ''},
+        numberOfSamples: {type: Number, default: 0},
     },
 
     data(){
@@ -67,7 +68,8 @@ export default {
                 'expression': ['h5', 'csv', 'tsv', 'txt'],
                 'coordinates': ['csv', 'tsv', 'txt'],
                 'image': ['jpeg', 'jpg', 'png', 'gif', 'tiff'],
-                'scale': ['json']
+                'scale': ['json'],
+                'metadata': ['csv', 'tsv', 'txt'],
             },
 
         }
@@ -132,6 +134,18 @@ export default {
             }
             else if (this.code === 'scale') {
                 this.$emit('fileSelected', this.file);
+            }
+            else if (this.code === 'metadata') {
+                let reader = new FileReader();
+                reader.addEventListener("load", (() => {
+                    let contents = reader.result;
+                    let metadata = this.checkMetadata(contents);
+                    if(typeof metadata === 'string' || this.errorMessage.length)
+                        this.file = null;
+                    else
+                        this.$emit('fileSelected', this.file, metadata);
+                }).bind(this), false);
+                reader.readAsText(this.file);
             }
 
             this.getImagePreviews();
@@ -260,6 +274,31 @@ export default {
 
         },
 
+        checkMetadata(data) {
+            let lines = data.split(/\r?\n|\r|\n/g);
+
+            //check the metadata file to see if it has a heading line and a line for each sample
+            if(!lines.length || lines.length < (this.numberOfSamples+1) || lines[0].split(/\t|,/g).length < 2) {
+                this.errorMessage = 'The file should have ' + (this.numberOfSamples+1) + ' lines and at least 2 columns';
+                return '';
+            }
+
+
+            let metadata = [];
+            let headings = lines[0].split(/\t|,/g);
+
+            for(let j = 1; j < headings.length; j++) {
+                metadata[j-1] = {"name": headings[j], "values": {}};
+
+                for(let i = 1; i < lines.length; i++) {
+                    let values = lines[i].split(/\t|,/g);
+                    if(lines[i].length && values.length === headings.length)
+                        metadata[j-1].values[values[0]] = values[j];
+                }
+            }
+
+            return metadata;
+        },
     }
 }
 </script>
