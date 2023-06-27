@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProjectController extends Controller
 {
@@ -92,6 +93,28 @@ class ProjectController extends Controller
 
         return view('wizard.import-data')->with(compact('project', 'samples'));
 
+    }
+
+    public function readExcelMetadataFile(Project $project)
+    {
+        if(request()->file('metadata')) {
+            $file = request()->file('metadata');
+
+            //Save a copy of the uploaded Excel file
+            $file->storeAs($project->workingDir(), 'uploaded_metadata_' . $file->getClientOriginalName());
+
+            //Read the first sheet and export it as CSV
+            $data = Excel::toArray([], $file);
+            $firstSheetData = $data[0];
+            $csvData = '';
+            foreach ($firstSheetData as $row) {
+                $csvData .= implode(',', $row) . "\n";
+            }
+
+            return $csvData;
+        }
+
+        return '';
     }
 
     public function save_metadata(Project $project) {
@@ -363,7 +386,12 @@ class ProjectController extends Controller
     }
 
     public function differential_expression_non_spatial(Project $project) {
-        $jobId = $project->createJob('Differential Expression - STDiff', 'STDiffNonSpatial', request()->all());
+        $jobId = $project->createJob('Differential Expression - STDiff Non-spatial tests', 'STDiffNonSpatial', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
+    public function differential_expression_spatial(Project $project) {
+        $jobId = $project->createJob('Differential Expression - STDiff Spatial tests', 'STDiffSpatial', request()->all(), 'low');
         return $project->getJobPositionInQueue($jobId);
     }
 

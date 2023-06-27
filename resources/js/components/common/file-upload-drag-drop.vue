@@ -47,6 +47,7 @@ export default {
         code: String,
         tooltip: {type: String, default: ''},
         numberOfSamples: {type: Number, default: 0},
+        excelMetadataUrl: {type: String, default: ''},
     },
 
     data(){
@@ -69,7 +70,7 @@ export default {
                 'coordinates': ['csv', 'tsv', 'txt'],
                 'image': ['jpeg', 'jpg', 'png', 'gif', 'tiff'],
                 'scale': ['json'],
-                'metadata': ['csv', 'tsv', 'txt'],
+                'metadata': ['csv', 'tsv', 'txt', 'xls', 'xlsx'],
             },
 
         }
@@ -136,16 +137,7 @@ export default {
                 this.$emit('fileSelected', this.file);
             }
             else if (this.code === 'metadata') {
-                let reader = new FileReader();
-                reader.addEventListener("load", (() => {
-                    let contents = reader.result;
-                    let metadata = this.checkMetadata(contents);
-                    if(typeof metadata === 'string' || this.errorMessage.length)
-                        this.file = null;
-                    else
-                        this.$emit('fileSelected', this.file, metadata);
-                }).bind(this), false);
-                reader.readAsText(this.file);
+                this.processMetadata();
             }
 
             this.getImagePreviews();
@@ -298,6 +290,39 @@ export default {
             }
 
             return metadata;
+        },
+
+        processMetadata() {
+            if(RegExp('\.(xls|xlsx)$', 'i').test(this.file.name)) {
+
+                let formData = new FormData();
+                formData.append('metadata', this.file);
+
+                axios.post(this.excelMetadataUrl, formData, {headers: {'Content-Type': 'multipart/form-data'}}
+                ).then((response) => {
+                        let metadata = this.checkMetadata(response.data);
+                        if (typeof metadata === 'string' || this.errorMessage.length)
+                            this.file = null;
+                        else
+                            this.$emit('fileSelected', this.file, metadata);
+                    }
+                ).catch((error) => {
+                    console.log('Error while processing Excel file with metadata: ', error.message);
+                });
+
+            }
+            else {
+                let reader = new FileReader();
+                reader.addEventListener("load", (() => {
+                    let contents = reader.result;
+                    let metadata = this.checkMetadata(contents);
+                    if (typeof metadata === 'string' || this.errorMessage.length)
+                        this.file = null;
+                    else
+                        this.$emit('fileSelected', this.file, metadata);
+                }).bind(this), false);
+                reader.readAsText(this.file);
+            }
         },
     }
 }

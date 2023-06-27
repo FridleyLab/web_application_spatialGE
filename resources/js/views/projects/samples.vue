@@ -1,60 +1,69 @@
 <template>
     <div class="px-3 pb-3">
-<!--        <h5>Samples in this project</h5>-->
 
-        <div v-if="samples.length" class="row text-bolder text-center">
-            <div class="col-2 text-start">Sample</div>
-            <div class="col-2">Expression</div>
-            <div class="col-2">Coordinates</div>
-            <div class="col-2">Scale factors</div>
-            <div class="col-2">Tissue image</div>
-            <div class="col-2"></div>
-        </div>
+        <div>
 
-        <div v-for="sample in samples" class="row">
-            <div class="col-2">
-                {{ sample.name ?? 'Sample ' + sample.id }}
+            <div v-if="samples.length" class="row text-bolder text-center">
+                <div class="col-2 text-start">Sample</div>
+                <div class="col-2">Expression</div>
+                <div class="col-2">Coordinates</div>
+                <div class="col-2">Scale factors</div>
+                <div class="col-2">Tissue image</div>
+                <div class="col-2"></div>
             </div>
 
-            <div class="col-2 text-center">
-                <i v-if="hasExpression(sample)" class="material-icons opacity-10 text-success">check</i>
+            <div v-for="sample in samples" class="row">
+                <div class="col-2">
+                    {{ sample.name ?? 'Sample ' + sample.id }}
+                </div>
+
+                <div class="col-2 text-center">
+                    <i v-if="hasExpression(sample)" class="material-icons opacity-10 text-success">check</i>
+                </div>
+
+                <div class="col-2 text-center">
+                    <i v-if="hasCoordinates(sample)" class="material-icons opacity-10 text-success">check</i>
+                </div>
+
+                <div class="col-2 text-center">
+                    <i v-if="hasScaleFactors(sample)" class="material-icons opacity-10 text-success">check</i>
+                </div>
+
+                <div class="col-2 text-center">
+                    <i v-if="hasImage(sample)" class="material-icons opacity-10 text-success">check</i>
+                </div>
+
+                <div class="col-2 text-center">
+                    <template v-if="!disabled">
+                        <i v-if="!deleting" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deleting = sample.id">delete</i>
+                        <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deleting = 0" title="Cancel deletion" />
+                        <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteSample(sample)" />
+                    </template>
+                </div>
+
+                <hr class="dark horizontal my-0" />
             </div>
 
-            <div class="col-2 text-center">
-                <i v-if="hasCoordinates(sample)" class="material-icons opacity-10 text-success">check</i>
-            </div>
-
-            <div class="col-2 text-center">
-                <i v-if="hasScaleFactors(sample)" class="material-icons opacity-10 text-success">check</i>
-            </div>
-
-            <div class="col-2 text-center">
-                <i v-if="hasImage(sample)" class="material-icons opacity-10 text-success">check</i>
-            </div>
-
-            <div class="col-2 text-center">
-                <template v-if="!disabled">
-                    <i v-if="!deleting" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deleting = sample.id">delete</i>
-                    <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deleting = 0" title="Cancel deletion" />
-                    <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteSample(sample)" />
-                </template>
-            </div>
-
-            <hr class="dark horizontal my-0" />
         </div>
 
 
         <div v-if="samples.length" class="table-responsive mt-5">
-            <div class="text-secondary"><span class="text-bolder">Optional: Add sample-level metadata</span>
+            <div>
+                <h5>Optional: Add sample-level metadata</h5>
                 <ul class="mt-3">
                     <li v-if="!addingMetadataManually">
-                        <button v-if="!disabled" class="btn btn-sm btn-outline-info" @click="addingMetadataFile = !addingMetadataFile">{{ addingMetadataFile ? 'Cancel metadata file upload' : 'Option 1: Upload metadata file (csv/excel)'}}</button>
-                        <div v-if="addingMetadataFile" class="mb-5 max-width-200">
-                            <file-upload-drag-drop code="metadata" :number-of-samples="samples.length" :project="project" caption="Metadata CSV" :required="true" @fileSelected="metadataFileAdded" @fileRemoved="metadataFileRemoved" tooltip="A CSV file containing a table with sample metadata"></file-upload-drag-drop>
+                        <button v-if="!disabled" class="btn btn-sm" :class="addingMetadataFile ? 'btn-outline-warning' : 'btn-outline-info'" @click="addingMetadataFile = !addingMetadataFile">{{ addingMetadataFile ? 'Cancel metadata file upload' : 'Option 1: Upload metadata file (csv/excel)'}}</button>
+                        <div v-if="addingMetadataFile" class="mb-5">
+                            <div class="max-width-300">
+                                <div class="mb-2 text-center">
+                                    <span class="text-warning">Warning:</span> Uploading a file will erase any manually added metadada
+                                </div>
+                                <file-upload-drag-drop code="metadata" :excel-metadata-url="excelMetadataUrl" :number-of-samples="samples.length" :project="project" caption="Metadata CSV" :required="true" @fileSelected="metadataFileAdded" @fileRemoved="metadataFileRemoved" tooltip="A CSV file containing a table with sample metadata"></file-upload-drag-drop>
+                            </div>
                         </div>
                     </li>
                     <li v-if="!addingMetadataFile">
-                        <button v-if="!disabled" class="btn btn-sm btn-outline-info" @click="addingMetadataManually = !addingMetadataManually">{{ addingMetadataManually ? 'metadata complete' : 'Option 2: Add metadata manually'}}</button>
+                        <button v-if="!disabled" class="btn btn-sm" :class="addingMetadataManually ? 'btn-outline-success' : 'btn-outline-info'" @click="addingMetadataManually = !addingMetadataManually">{{ addingMetadataManually ? 'metadata complete' : 'Option 2: Add metadata manually'}}</button>
                         <div v-if="addingMetadataManually">
                             <button v-if="!disabled" class="btn btn-sm btn-outline-info" @click="addMetadata">Add new metadata column</button>
                         </div>
@@ -113,12 +122,15 @@
         props: {
             samples: Object,
             project: Object,
-            disabled: {type: Boolean, default: false}
+            disabled: {type: Boolean, default: false},
+            excelMetadataUrl: String,
         },
 
         data() {
             return {
                 deleting: 0,
+                allSamplesUploaded: false,
+
                 deletingMetadata: 0,
                 //metadataCount: 0,
                 metadata: ('metadata' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.metadata) :  [],

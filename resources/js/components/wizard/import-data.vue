@@ -17,7 +17,7 @@
                     </div>
 
                     <div v-if="samples.length" class="p-3">
-                        <input v-if="!uploading && !changingStep" type="button" class="btn" :class="showAddSample ? 'btn-outline-info' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Hide add new sample form' : 'Add new sample'" />
+                        <input v-if="!uploading && !changingStep" type="button" class="btn" :class="showAddSample ? 'btn-outline-warning' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Cancel sample upload' : 'Add new sample'" />
                     </div>
 
 
@@ -65,7 +65,7 @@
                         </div>
                     </template>
 
-                    <project-samples v-if="!showAddSample" :samples="samples" :project="project" :disabled="uploading || changingStep"></project-samples>
+                    <project-samples v-if="!showAddSample" :samples="samples" :project="project" :disabled="uploading || changingStep" :excel-metadata-url="excelMetadataUrl"></project-samples>
 
 
                 </div>
@@ -93,6 +93,7 @@ import { getCurrentInstance } from 'vue';
             samples: Object,
             nexturl: String,
             qcDtUrl: String,
+            excelMetadataUrl: String,
         },
 
         data() {
@@ -227,11 +228,11 @@ import { getCurrentInstance } from 'vue';
                     console.log(response.data);
                     //this.nextStepLabel = 'Data import queued - wait for email notification';
                     location.reload();
-                })
-                    .catch((error) => {
+                }
+                ).catch((error) => {
                         console.log('FAILURE!!');
                         this.uploading = false;
-                    });
+                });
             },
 
 

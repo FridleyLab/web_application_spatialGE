@@ -43,6 +43,7 @@ import sddStclust from "./components/wizard/components/sdd-stclust.vue";
 
 import differentialExpression from "./components/wizard/differential-expression.vue";
 import stdeNonSpatial from "./components/wizard/components/stde-non-spatial.vue";
+import stdeSpatial from "./components/wizard/components/stde-spatial.vue";
 
 import spatialGeneSetEnrichment from "./components/wizard/spatial-gene-set-enrichment.vue";
 import stenrich from "./components/wizard/components/stenrich.vue";
@@ -117,6 +118,7 @@ app.component('sdd-stclust', sddStclust);
 
 app.component('differential-expression', differentialExpression);
 app.component('stde-non-spatial', stdeNonSpatial);
+app.component('stde-spatial', stdeSpatial);
 
 app.component('spatial-gene-set-enrichment', spatialGeneSetEnrichment);
 app.component('stenrich', stenrich);

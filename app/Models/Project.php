@@ -1574,9 +1574,6 @@ for(p in n_plots) {
 
         ProjectParameter::updateOrCreate(['parameter' => 'stdiff_ns', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
 
-        //$this->current_step = 7;
-        //$this->save();
-
         return ['output' => $output];
     }
 
@@ -1623,6 +1620,103 @@ lapply(names(de_genes_results), function(i){
 
         return $script;
     }
+
+
+
+
+
+    public function STDiffSpatial($parameters) {
+        $workingDir = $this->workingDir();
+        $workingDirPublic = $this->workingDirPublic();
+
+        $scriptName = 'STDiff_Spatial.R';
+
+        $script = $workingDir . $scriptName;
+
+        Storage::put($script, $this->getSTDiffSpatialScript($parameters));
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
+
+
+        $column_names = [
+            'gene' => 'Gene',
+            'avg_log2fc' => 'Average log-Fold Change',
+            'cluster_1' => 'Cluster 1',
+            'cluster_2' => 'Cluster 2',
+            'mm_p_val' => 'Mixed model p-value',
+            'adj_p_val' => 'Adjusted p-value',
+            'exp_p_val' => 'Spatial p-value',
+            'exp_adj_p_val' => 'Adjusted spatial p-value'
+        ];
+
+
+        $files = ['stdiff_s_results.xlsx'];
+        foreach($parameters['samples_array'] as $sample) {
+            $files[] = 'stdiff_s_' . $sample . '.csv';
+            $files[] = 'stdiff_s_' . $sample . '.json';
+        }
+        foreach($files as $file)
+            if(Storage::fileExists($workingDir . $file)) {
+
+                if(explode('.', $file)[1] === 'csv')
+                    $this->csv2json($workingDir . $file, 2, $column_names);
+
+                $file_public = $workingDirPublic . $file;
+                $file_to_move = $workingDir . $file;
+                Storage::delete($file_public);
+                Storage::move($file_to_move, $file_public);
+            }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stdiff_s', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
+
+        return ['output' => $output];
+    }
+
+
+
+    private function getSTDiffSpatialScript($parameters) {
+
+        $samples = $parameters['samples'];
+        $annotation = $parameters['annotation'];
+        $topgenes = $parameters['topgenes'];
+        $pairwise = $parameters['pairwise'];
+        $clusters = $parameters['clusters'];
+
+        $script = "
+
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList
+" .
+            $this->_loadStList('stclust_stlist')
+            . "
+
+spatial_de_genes_results = STdiff(stclust_stlist, #### NORMALIZED STList
+                          samples=$samples,   #### Users should be able to select which samples to include in analysis
+                          annot='$annotation',  #### Name of variable to use in analysis... Dropdown to select one of `annot_variables`
+                          topgenes=$topgenes, #### !!! Defines a lot of the speed. 100 are too few genes. Minimally would like 5000 but is SLOW. Can be a slider as in pseudobulk
+                          sp_topgenes = 0.2,
+                          test_type='mm', #### Other options are 't_test' and 'mm',
+                          pairwise=$pairwise, #### Check box
+                          clusters=$clusters, #### Need ideas for this one. Values in `cluster_values` and after user selected value in annot dropdown
+                          cores=4) #### You know, the more the merrier
+
+# Get workbook with results (samples in spreadsheets)
+openxlsx::write.xlsx(spatial_de_genes_results, file='stdiff_s_results.xlsx')
+
+# Each sample as a CSV
+lapply(names(spatial_de_genes_results), function(i){
+  write.csv(spatial_de_genes_results[[i]], paste0('stdiff_s_', i, '.csv'), row.names=T, quote=F)
+})
+
+";
+
+        return $script;
+    }
+
+
 
 
     public function STEnrich($parameters) {
@@ -1921,11 +2015,11 @@ lapply(names(grad_res), function(i){
                         $body_items = explode(',', $lines[$k]);
                         if (sizeof($fields) === sizeof($body_items))
                             for ($i = $column_offset; $i < sizeof($fields); $i++) {
-                                if (strlen($body_line) > 1) $body_line .= ',';
+                                if(strlen($body_line) > 1) $body_line .= ',';
 
                                 //if numeric value, round it up to 3 decimal places
                                 $value = $body_items[$i];
-                                if(is_numeric($value) && (stripos($value, 'e') || abs(floatval($value)) < 0.001))
+                                if(is_numeric($value) && (stripos($value, 'e') || (abs(floatval($value)) < 0.001 && abs(floatval($value)) > 0)))
                                     $value  = sprintf("%.3e", $value);
                                 elseif(is_numeric($value))
                                     $value = round($value, 3);

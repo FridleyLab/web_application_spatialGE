@@ -6,6 +6,7 @@
         :project="{{ json_encode($project) }}"
         :samples="{{ json_encode($samples) }}"
         non-spatial-url="{{ route('differential-expression-non-spatial', ['project' => $project->id]) }}"
+        spatial-url="{{ route('differential-expression-spatial', ['project' => $project->id]) }}"
     >
     </differential-expression>
 @endsection

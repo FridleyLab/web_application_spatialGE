@@ -40,6 +40,7 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/go-to-step/{step}',[ProjectController::class, 'go_to_step'])->name('go-to-step')->middleware('project');
 
     Route::get('/projects/{project}/import-data',[ProjectController::class, 'import_data'])->name('import-data')->middleware('project');
+    Route::post('/projects/{project}/read-metadata-from-excel-file',[ProjectController::class, 'readExcelMetadataFile'])->name('read-metadata-from-excel-file')->middleware('project');
     Route::post('/projects/{project}/save-metadata',[ProjectController::class, 'save_metadata'])->name('save-metadata')->middleware('project');
     Route::get('/projects/{project}/qc-data-transformation',[ProjectController::class, 'qc_data_transformation'])->name('qc-data-transformation')->middleware('project');
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('destroy-project')->middleware('project');
@@ -85,6 +86,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('/projects/{project}/differential-expression',[ProjectController::class, 'differential_expression'])->name('differential-expression')->middleware('project');
     Route::post('/projects/{project}/differential-expression/non-spatial', [ProjectController::class, 'differential_expression_non_spatial'])->name('differential-expression-non-spatial')->middleware('project');
+    Route::post('/projects/{project}/differential-expression/spatial', [ProjectController::class, 'differential_expression_spatial'])->name('differential-expression-spatial')->middleware('project');
 
     Route::get('/projects/{project}/spatial-gene-set-enrichment',[ProjectController::class, 'spatial_gene_set_enrichment'])->name('spatial-gene-set-enrichment')->middleware('project');
     Route::post('/projects/{project}/spatial-gene-set-enrichment/stenrich',[ProjectController::class, 'spatial_gene_set_enrichment_stenrich'])->name('spatial-gene-set-enrichment-stenrich')->middleware('project');
