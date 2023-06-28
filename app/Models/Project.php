@@ -1712,7 +1712,7 @@ spatial_de_genes_results = STdiff(stclust_stlist, #### NORMALIZED STList
                           test_type='mm', #### Other options are 't_test' and 'mm',
                           pairwise=$pairwise, #### Check box
                           clusters=$clusters, #### Need ideas for this one. Values in `cluster_values` and after user selected value in annot dropdown
-                          cores=4) #### You know, the more the merrier
+                          cores=1) #### You know, the more the merrier
 
 # Get workbook with results (samples in spreadsheets)
 openxlsx::write.xlsx(spatial_de_genes_results, file='stdiff_s_results.xlsx')
