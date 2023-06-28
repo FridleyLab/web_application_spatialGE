@@ -135,7 +135,7 @@ class spatialContainer {
     public function execute($docker_command) {
 
         //set the max execution time for the system call
-        $timeout = env('MAX_EXECUTION_TIME',10800);
+        $timeout = env('MAX_EXECUTION_TIME',259200);
 
         $image_name = env('DOCKER_IMAGE_NAME','spatialge');
 

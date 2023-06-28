@@ -138,7 +138,7 @@
                                 <template v-for="(image, sample, index) in samples">
                                     <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'quilt-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + sample + '-tab'">
                                         <div>
-                                            <show-plot :src="image"></show-plot>
+                                            <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)"></show-plot>
                                         </div>
                                     </div>
                                 </template>
@@ -211,6 +211,10 @@ import Multiselect from '@vueform/multiselect';
         },
 
         methods: {
+
+            getSampleByName(nameToFInd) {
+                return this.samples.find( sample => sample.name === nameToFInd);
+            },
 
             quiltPlot() {
                 this.generating_quilt = true;

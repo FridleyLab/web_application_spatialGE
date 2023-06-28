@@ -1,13 +1,19 @@
 <template>
     <div class="text-center m-4" :class="cssClasses">
-        <div>
-            <object class="img-fluid" :data="src + '.svg' + (autoReload ? '?' + Date.now() : '')" type="image/svg+xml" style="pointer-events: none;"></object>
+        <div :class="showImage && sample !== null ? 'd-xxl-flex' : ''">
+            <div :class="showImage && sample !== null ? 'w-50' : ''">
+                <object class="img-fluid" :data="src + '.svg' + (autoReload ? '?' + Date.now() : '')" type="image/svg+xml" style="pointer-events: none;"></object>
+            </div>
+            <div v-if="showImage && sample !== null" class="w-50">
+                <img class="img-fluid" :src="sample.image_file_url" alt="sample image" />
+            </div>
         </div>
-        <div v-if="downloadable">
+        <div v-if="downloadable" class="mt-2">
             <a :href="src + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
             <a :href="src + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
             <a :href="src + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
         </div>
+
     </div>
 </template>
 <script>
@@ -19,6 +25,8 @@
             autoReload: {type: Boolean, default: true},
             cssClasses: {type: String, default: ''},
             downloadable: {type: Boolean, default: true},
+            showImage: {type: Boolean, default: false},
+            sample: {type: Object, default: null},
         },
 
 

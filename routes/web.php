@@ -64,7 +64,9 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/files', [FileController::class, 'store'])->name('file-upload');
 
     Route::post('/samples', [SampleController::class, 'store'])->name('store-sample');
+    Route::get('/samples/{sample}/get-image', [SampleController::class, 'get_image'])->name('get-sample-image');
     Route::delete('/samples/{sample}', [SampleController::class, 'destroy'])->name('destroy-sample');
+
 
 
     Route::get('/projects/{project}/get-job-position-in-queue',[ProjectController::class, 'getJobPositionInQueue'])->name('get-job-position-in-queue')->middleware('project');

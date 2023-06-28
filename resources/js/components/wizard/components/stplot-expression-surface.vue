@@ -100,7 +100,7 @@
 
                                     <template v-for="(image, sample, index) in samples">
                                         <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'expression-surface-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'expression-surface-' + gene + '_' + sample + '-tab'">
-                                            <show-plot :src="image"></show-plot>
+                                            <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)"></show-plot>
                                         </div>
                                     </template>
                                 </div>
@@ -173,6 +173,10 @@ import Multiselect from '@vueform/multiselect';
         },
 
         methods: {
+
+            getSampleByName(nameToFInd) {
+                return this.samples.find( sample => sample.name === nameToFInd);
+            },
 
             estimateSurfaces() {
                 this.processing = true;

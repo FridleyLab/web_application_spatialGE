@@ -71,23 +71,6 @@ class SampleController extends Controller
 
         return response('Sample stored successfully');
 
-
-//        $fileIds = request('file_ids');
-//        $projectId = request('project_id');
-//
-//        $sample = new Sample();
-//        $sample->save();
-//        $sample->projects()->save(Project::findOrFail($projectId));
-//        $sample->save();
-//
-//        foreach($fileIds as $fileId) {
-//            if($fileId !== 0) {
-//                $file = File::findOrFail($fileId);
-//                $sample->files()->save($file);
-//            }
-//        }
-//
-//        return  $sample;
     }
 
 
@@ -97,6 +80,23 @@ class SampleController extends Controller
         $sample->delete();
 
         return 'OK';
+    }
+
+    public function get_image(Sample $sample) {
+
+        $filename = $sample->image_file_path();
+
+        if (!$sample->has_image || !Storage::fileExists($filename)) {
+            abort(404);
+        }
+
+        $file = Storage::get($filename);
+        $mimeType = Storage::mimeType($filename);
+
+        return response($file, 200, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $sample->name . '"',
+        ]);
     }
 
 
