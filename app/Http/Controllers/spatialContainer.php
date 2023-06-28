@@ -135,7 +135,7 @@ class spatialContainer {
     public function execute($docker_command) {
 
         //set the max execution time for the system call
-        $timeout = 1800;
+        $timeout = env('MAX_EXECUTION_TIME',10800);
 
         $image_name = env('DOCKER_IMAGE_NAME','spatialge');
 
@@ -171,7 +171,9 @@ class spatialContainer {
         catch(\Exception $e) {
             $errorMessage = 'spatialGE Error: Could not execute command: "' . $command . '" in container with id: ' . $container_id;
             Log::info("ERROR ***$$$ EXCEPTION: \n" . $errorMessage);
-            return throwException(new \Exception($errorMessage));
+            Log::info("ERROR ***$$$ EXCEPTION MESSAGE: \n" . $e->getMessage());
+            return $errorMessage . "\n ERROR ***$$$ EXCEPTION MESSAGE: \n" . $e->getMessage();
+            //return throwException(new \Exception($errorMessage));
         }
     }
 

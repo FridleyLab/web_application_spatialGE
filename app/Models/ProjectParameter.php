@@ -12,7 +12,7 @@ class ProjectParameter extends Model
 
     protected $table = 'project_parameters';
 
-    protected $fillable = ['parameter', 'type', 'value', 'project_id'];
+    protected $fillable = ['parameter', 'type', 'value', 'project_id', 'tag'];
 
     //Relations
     public function project(): BelongsTo

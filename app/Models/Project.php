@@ -182,7 +182,7 @@ class Project extends Model
         $file = $this->workingDir() . 'pca_max_var_genes.csv';
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            ProjectParameter::updateOrCreate(['parameter' => 'pca_max_var_genes', 'project_id' => $this->id], ['type' => 'number', 'value' => $data]);
+            ProjectParameter::updateOrCreate(['parameter' => 'pca_max_var_genes', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'number', 'value' => $data]);
             return intval($data);
         }
         return 0;
@@ -199,7 +199,7 @@ class Project extends Model
                 if(strlen($option))
                     $_options[] = ['label' => $option, 'value' => $option];
             $json = json_encode($_options);
-            ProjectParameter::updateOrCreate(['parameter' => 'filter_meta_options', 'project_id' => $this->id], ['type' => 'json', 'value' => $json]);
+            ProjectParameter::updateOrCreate(['parameter' => 'filter_meta_options', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'json', 'value' => $json]);
         }
 
         return $json;
@@ -243,7 +243,7 @@ class Project extends Model
         }
 
         //Delete previously generated parameters, if any
-        DB::delete("delete from project_parameters where parameter<>'metadata' and not(parameter like 'job.%') and project_id=" . $this->id);
+        DB::delete("delete from project_parameters where parameter<>'metadata' and not(parameter like 'job.createStList%') and project_id=" . $this->id);
 
         $this->pca_max_var_genes();
 
@@ -251,22 +251,22 @@ class Project extends Model
         $file = $workingDir . 'max_spot_counts.csv';
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            ProjectParameter::insert(['parameter' => 'max_spot_counts', 'type' => 'number', 'value' => $data, 'project_id' => $this->id]);
+            ProjectParameter::updateOrCreate(['parameter' => 'max_spot_counts', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'number', 'value' => $data]);
         }
         $file = $workingDir . 'max_gene_counts.csv';
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            ProjectParameter::insert(['parameter' => 'max_gene_counts', 'type' => 'number', 'value' => $data, 'project_id' => $this->id]);
+            ProjectParameter::updateOrCreate(['parameter' => 'max_gene_counts', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'number', 'value' => $data]);
         }
         $file = $workingDir . 'max_spots_number.csv';
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            ProjectParameter::insert(['parameter' => 'max_spots_number', 'type' => 'number', 'value' => $data, 'project_id' => $this->id]);
+            ProjectParameter::updateOrCreate(['parameter' => 'max_spots_number', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'number', 'value' => $data]);
         }
         $file = $workingDir . 'initial_stlist_summary.csv';
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            ProjectParameter::insert(['parameter' => 'initial_stlist_summary', 'type' => 'string', 'value' => $data, 'project_id' => $this->id]);
+            ProjectParameter::updateOrCreate(['parameter' => 'initial_stlist_summary', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'string', 'value' => $data]);
         }
 
         $this->filter_meta_options();
@@ -354,7 +354,19 @@ write.table(filter_meta_options, 'filter_meta_options.csv',sep=',', row.names = 
 
         Storage::put($script, $this->getFilterDataScript($parameters));
 
+        //delete all existing STlists except: initial_stlist
+        foreach(Storage::files($workingDir) as $file) {
+            if(stripos($file, '.rdata') && !stripos($file, 'initial_stlist.rdata'))
+                Storage::delete($file);
+        }
+
+        //Delete previously generated parameters, if any
+        DB::delete("delete from project_parameters where tag not in ('import','') and not(parameter like 'job.%') and project_id=" . $this->id);
+        //DB::delete("delete from project_parameters where parameter<>'metadata' and not(parameter like 'job.%') and project_id=" . $this->id);
+
         $output = $this->spatialExecute('Rscript ' . $scriptName);
+
+
 
         $result = [];
 
@@ -397,7 +409,7 @@ write.table(filter_meta_options, 'filter_meta_options.csv',sep=',', row.names = 
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
-                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'filter'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
                 }
             }
@@ -407,7 +419,7 @@ write.table(filter_meta_options, 'filter_meta_options.csv',sep=',', row.names = 
         $file = $workingDir . $parameterName .'.csv';
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $data]);
+            ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'filter'], ['type' => 'string', 'value' => $data]);
             $result[$parameterName] = $data;
 
         }
@@ -518,7 +530,7 @@ $plots
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
-                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'filter'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                 }
             }
         }
@@ -578,18 +590,16 @@ $plots
 
         Storage::put($script, $this->getNormalizationScript($parameters));
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        //Delete project parameters that need to be recreated
+        DB::delete("delete from project_parameters where tag not in ('import', 'filter','') and not(parameter like 'job.%') and project_id=" . $this->id);
 
-//        $file = $workingDir . 'filter_meta_options.csv';
-//        if(Storage::fileExists($file)) {
-//            $data = Storage::read($file);
-//            $options = explode("\n", $data);
-//            $_options = [];
-//            foreach ($options as $option)
-//                if(strlen($option))
-//                    $_options[] = ['label' => $option, 'value' => $option];
-//            ProjectParameter::updateOrCreate(['parameter' => 'filter_meta_options', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($_options)]);
-//        }
+        //delete all existing STlists except: initial_stlist, filtered_stlist
+        foreach(Storage::files($workingDir) as $file) {
+            if(stripos($file, '.rdata') && !stripos($file, 'initial_stlist.rdata') && !stripos($file, 'filtered_stlist.rdata'))
+                Storage::delete($file);
+        }
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName);
 
 
         //Load genes present in the normalized STlist into the DB
@@ -625,7 +635,7 @@ $plots
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
-                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
                 }
             }
@@ -633,7 +643,7 @@ $plots
 
         $result['pca_max_var_genes'] = $this->pca_max_var_genes();
 
-        //Delete (if any) previously generated normalized data
+        //Delete (if any) previously generated normalized data, the user has to generate it again from the interface
         ProjectParameter::where('parameter','normalizedData')->where('project_id', $this->id)->delete();
 
 
@@ -730,7 +740,7 @@ $plots
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
-                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                 }
             }
         }
@@ -801,7 +811,7 @@ $plots
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
-                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                 }
             }
         }
@@ -857,7 +867,7 @@ openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
         ProjectParameter::where('project_id', $this->id)->whereIn('parameter', ['pseudo_bulk_pca', 'pseudo_bulk_heatmap'])->delete();
 
         //To indicate that the PCA has been calculated
-        ProjectParameter::updateOrCreate(['parameter' => 'qc_pca', 'project_id' => $this->id], ['type' => 'number', 'value' => 1]);
+        ProjectParameter::updateOrCreate(['parameter' => 'qc_pca', 'project_id' => $this->id, 'tag' => 'pseudo_bulk_pca'], ['type' => 'number', 'value' => 1]);
 
         $result['output'] = $output;
         return $result;
@@ -923,7 +933,7 @@ pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes)
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
-                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'pseudo_bulk_pca'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
                 }
             }
@@ -996,7 +1006,7 @@ $plots
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
-                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+                    ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'quilt_plot'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
                 }
             }
@@ -1655,10 +1665,10 @@ lapply(names(de_genes_results), function(i){
             $files[] = 'stdiff_s_' . $sample . '.csv';
             $files[] = 'stdiff_s_' . $sample . '.json';
         }
-        foreach($files as $file)
-            if(Storage::fileExists($workingDir . $file)) {
+        foreach($files as $file) {
+            if (Storage::fileExists($workingDir . $file)) {
 
-                if(explode('.', $file)[1] === 'csv')
+                if (explode('.', $file)[1] === 'csv')
                     $this->csv2json($workingDir . $file, 2, $column_names);
 
                 $file_public = $workingDirPublic . $file;
@@ -1666,6 +1676,7 @@ lapply(names(de_genes_results), function(i){
                 Storage::delete($file_public);
                 Storage::move($file_to_move, $file_public);
             }
+        }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stdiff_s', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
 
