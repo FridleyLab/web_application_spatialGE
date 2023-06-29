@@ -275,6 +275,16 @@ class Project extends Model
         $this->current_step = 2;
         $this->save();
 
+
+        //Move tissue images to its respective sample folder
+        foreach($this->samples as $sample) {
+            $tissue_image = $workingDir . 'image_' . $sample->name . '.png';
+            $tissue_image_destination = $workingDir . '/' . $sample->name . '/spatial/image_' . $sample->name . '.png';
+            if(Storage::fileExists($tissue_image))
+                Storage::move($tissue_image, $tissue_image_destination);
+        }
+
+
         return ['output' => $output];
 
 
@@ -337,6 +347,16 @@ write.csv(df_summary, 'initial_stlist_summary.csv', row.names=FALSE, quote=FALSE
 # Options for quilt plot
 filter_meta_options = unique(unlist(lapply(initial_stlist@spatial_meta, function(i){ max_tmp = grep(paste0(c('libname', 'xpos', 'ypos'), collapse='|'), colnames(i), value=T, invert=T) })))
 write.table(filter_meta_options, 'filter_meta_options.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+
+# Prepare images
+example_stlist = initial_stlist
+tissues = plot_image(example_stlist)
+# Save images to PNG files
+lapply(names(tissues), function(i){
+  png(paste0(i, '.png'))
+  print(tissues[[i]])
+  dev.off()
+})
 
 ";
 
@@ -2036,6 +2056,9 @@ lapply(names(grad_res), function(i){
                                     $value  = sprintf("%.3e", $value);
                                 elseif(is_numeric($value))
                                     $value = round($value, 3);
+
+                                //if($fields[$i] === 'gene')
+                                //    $value = '<a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=' . $value . '" target="_blank">';
 
                                 //wrap everything in quotes to prevent javascript from auto-formatting scientific notation
                                 $value = '"' . $value . '"';

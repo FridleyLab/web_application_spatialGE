@@ -158,7 +158,11 @@
                                                   border-cell
                                                   body-text-direction="center"
                                                   header-text-direction="center"
-                            />
+                            >
+                                <template #item-gene="{ gene }">
+                                    <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" target="_blank" class="text-info">{{ gene }}</a>
+                                </template>
+                            </vue3-easy-data-table>
                         </div>
                     </div>
                 </div>
@@ -321,7 +325,7 @@ import 'vue3-easy-data-table/dist/style.css';
                     return;
 
                 this.stgradients.samples.forEach( sample => {
-                    axios.get(this.stgradients.base_url + 'stgradients_' + sample + '.json')
+                    axios.get(this.stgradients.base_url + 'stgradients_' + sample + '.json' + '?' + Date.now())
                         .then((response) => {
                             this.results[sample] = {};
                             this.results[sample].data = response.data;

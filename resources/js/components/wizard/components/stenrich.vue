@@ -151,7 +151,19 @@ import 'vue3-easy-data-table/dist/style.css';
         data() {
             return {
 
-                gene_sets_options: [{'label': 'KEGG', 'value': 'kegg'}, {'label': 'HALLMARK', 'value': 'hallmark'}],
+                gene_sets_options: [
+                    {'label': 'KEGG - human', 'value': 'kegg'},
+                    {'label': 'HALLMARK - human', 'value': 'hallmark'},
+                    {'label': 'HALLMARK - Mouse', 'value': 'mh.all.v2023.1.Mm.symbols'},
+                    {'label': 'REACTOME - Human', 'value': 'c2.cp.reactome.v2023.1.Hs.symbols'},
+                    {'label': 'REACTOME - Mouse', 'value': 'm2.cp.reactome.v2023.1.Mm.symbols'},
+                    {'label': 'GO - Biological process - Human', 'value': 'c5.go.bp.v2023.1.Hs.symbols'},
+                    {'label': 'GO - Cellular component - Human', 'value': 'c5.go.cc.v2023.1.Hs.symbols'},
+                    {'label': 'GO - Molecular function - Human', 'value': 'c5.go.mf.v2023.1.Hs.symbols'},
+                    {'label': 'GO - Biological process - Mouse', 'value': 'm5.go.bp.v2023.1.Mm.symbols'},
+                    {'label': 'GO - Cellular Component - Mouse', 'value': 'm5.go.cc.v2023.1.Mm.symbols'},
+                    {'label': 'GO - Molecular function - Mouse', 'value': 'm5.go.mf.v2023.1.Mm.symbols'}
+                ],
 
                 stenrich: ('stenrich' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stenrich) : {},
                 results: {},

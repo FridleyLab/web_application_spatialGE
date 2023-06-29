@@ -4,10 +4,10 @@
 
         <div :class="processing ? 'disabled-clicks' : ''">
             <div class="my-3 text-bold">
-                Spatial tests of differential gene expression ********************
+                Spatial tests of differential gene expression
             </div>
             <div>
-                *********************************************************************
+                Given the nature of spatial transcriptomics data, the expression in each spot/cell is not completely independent, and distance between them should be accounted. Mixed models are a traditional method for differential expression analysis), however, in spatialGE we have expanded the use of mixed models to incorporate spatial covariance structures, to account for the spatial dependency between spots or cells.
             </div>
 
 
@@ -137,7 +137,11 @@
                                                   border-cell
                                                   body-text-direction="center"
                                                   header-text-direction="center"
-                            />
+                            >
+                                <template #item-gene="{ gene }">
+                                    <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" target="_blank" class="text-info">{{ gene }}</a>
+                                </template>
+                            </vue3-easy-data-table>
                         </div>
 
                     </div>
@@ -211,9 +215,9 @@ import 'vue3-easy-data-table/dist/style.css';
 
             'params.annotation'(newValue) {
 
-                this.params.clusters = [];
-
                 this.annotation_variables_clusters = [{'label': 'ALL', 'value': 'NULL'}];
+
+                this.params.clusters = ['NULL'];
 
                 this.project.project_parameters.annotation_variables_clusters.map(annot => {if(annot.annotation === newValue) this.annotation_variables_clusters.push({'label': annot.cluster, 'value': annot.cluster})});
 
@@ -281,7 +285,7 @@ import 'vue3-easy-data-table/dist/style.css';
                     return;
 
                 this.stdiff_s.samples.forEach( sample => {
-                    axios.get(this.stdiff_s.base_url + 'stdiff_s_' + sample + '.json')
+                    axios.get(this.stdiff_s.base_url + 'stdiff_s_' + sample + '.json' + '?' + Date.now())
                         .then((response) => {
                             this.results[sample] = {};
                             this.results[sample].data = response.data;

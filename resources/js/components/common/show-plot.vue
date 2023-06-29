@@ -5,7 +5,7 @@
                 <object class="img-fluid" :data="src + '.svg' + (autoReload ? '?' + Date.now() : '')" type="image/svg+xml" style="pointer-events: none;"></object>
             </div>
             <div v-if="showImage && sample !== null" class="w-50">
-                <img class="img-fluid" :src="sample.image_file_url" alt="sample image" />
+                <img class="img-fluid" :src="sample.image_file_url" alt="Tissue image" @dblclick="window.open('/')" />
             </div>
         </div>
         <div v-if="downloadable" class="mt-2">

@@ -40,8 +40,12 @@ class Sample extends Model
 
     public function image_file_path() {
         try {
+            $sample_folder = $this->projects[0]->workingDir() . $this->name . '/spatial/';
             $image = $this->files()->where('type', 'imageFile')->firstOrFail();
-            return $this->projects[0]->workingDir() . $this->name . '/spatial/' . $image->filename;
+            $image_file = $sample_folder . $image->filename;
+            $tissue_file = $sample_folder . 'image_' . $this->name . '.png';
+
+            return Storage::fileExists($tissue_file) ? $tissue_file : $image_file;
 
         } catch (\Exception $e) {
             return '';

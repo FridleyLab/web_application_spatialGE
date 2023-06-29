@@ -15,7 +15,7 @@ class ProfileIndustrySeeder extends Seeder
     public function run(): void
     {
 
-        $industries = ['Biotech', 'Contract Research Organization', 'Government', 'Hospital/Medical Center', 'Institute', 'Pharma', 'Service', 'University', 'Vendor'];
+        $industries = ['Biotech', 'Non-Profit Organization', 'Contract Research Organization', 'Government', 'Hospital/Medical Center', 'Institute', 'Pharma', 'Service', 'University', 'Vendor'];
 
         foreach ($industries as $industry) {
             DB::table('profile_industries')->insert([

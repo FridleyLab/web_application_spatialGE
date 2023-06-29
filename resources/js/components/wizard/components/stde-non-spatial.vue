@@ -129,7 +129,11 @@
                                                   border-cell
                                                   body-text-direction="center"
                                                   header-text-direction="center"
-                            />
+                            >
+                                <template #item-gene="{ gene }">
+                                    <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" target="_blank" class="text-info">{{ gene }}</a>
+                                </template>
+                            </vue3-easy-data-table>
                         </div>
 
                     </div>
@@ -204,9 +208,9 @@ import 'vue3-easy-data-table/dist/style.css';
 
             'params.annotation'(newValue) {
 
-                this.params.clusters = [];
-
                 this.annotation_variables_clusters = [{'label': 'ALL', 'value': 'NULL'}];
+
+                this.params.clusters = ['NULL'];
 
                 this.project.project_parameters.annotation_variables_clusters.map(annot => {if(annot.annotation === newValue) this.annotation_variables_clusters.push({'label': annot.cluster, 'value': annot.cluster})});
 
@@ -274,7 +278,7 @@ import 'vue3-easy-data-table/dist/style.css';
                     return;
 
                 this.stdiff_ns.samples.forEach( sample => {
-                    axios.get(this.stdiff_ns.base_url + 'stdiff_ns_' + sample + '.json')
+                    axios.get(this.stdiff_ns.base_url + 'stdiff_ns_' + sample + '.json' + '?' + Date.now())
                         .then((response) => {
                             this.results[sample] = {};
                             this.results[sample].data = response.data;

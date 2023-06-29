@@ -59,7 +59,7 @@ class SampleController extends Controller
                     if($fileType === 'coordinatesFile')
                         $file->storeAs($sampleFolderSpatial, $file->getClientOriginalName());
                     if($fileType === 'scaleFile')
-                        $file->storeAs($sampleFolder, $file->getClientOriginalName());
+                        $file->storeAs($sampleFolderSpatial, $file->getClientOriginalName());
                     if($fileType === 'imageFile')
                         $file->storeAs($sampleFolderSpatial, $file->getClientOriginalName());
 
