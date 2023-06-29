@@ -1,4 +1,4 @@
 *
 !public/
-!common/
+!common/stenrich/*
 !.gitignore
