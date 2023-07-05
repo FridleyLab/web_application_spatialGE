@@ -24,6 +24,7 @@ import qcDtQuilt from "./components/wizard/components/qc-dt-quilt.vue";
 import projectSummaryTable from "./components/wizard/components/project-summary-table.vue";
 import showPlot from "./components/common/show-plot.vue";
 import numericRange from "./components/common/numeric-range.vue";
+import toolTip from "./components/common/tool-tip.vue";
 
 // import numericSlider from "./components/common/numeric-slider.vue";
 
@@ -103,6 +104,7 @@ app.component('qc-dt-pca', qcDtPca);
 app.component('qc-dt-quilt', qcDtQuilt);
 app.component('project-summary-table', projectSummaryTable);
 app.component('show-plot', showPlot);
+app.component('tool-tip', toolTip);
 
 app.component('stplot-visualization', stplotVisualization);
 app.component('stplot-quilt', stplotQuilt);

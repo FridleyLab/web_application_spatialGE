@@ -7,7 +7,7 @@
                 <th colspan="6" class="text-center">per spot/cell metrics</th>
             </tr>
             <tr>
-                <th v-for="header in main_data.headers" scope="col">{{ header.replace('_per_spotcell', '').replace('_', ' ') }}</th>
+                <th v-for="header in main_data.headers" scope="col">{{ header.replace('_per_spotcell', '').replace('_', ' ').replace('mean', 'average') }}</th>
             </tr>
             </thead>
             <tbody>

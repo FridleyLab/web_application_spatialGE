@@ -1,5 +1,4 @@
 <template>
-<!--        <input v-if="!processing" type="button" class="btn btn-outline-success" :class="(processing || disabled) ? 'disabled' : ''" @click="sendStartSignal" :value="label" />-->
         <input v-if="startButtonVisible && !processing" type="button" class="btn btn-lg mt-2 mb-0" :class="((processing || disabled) ? 'disabled' : '') + (!secondary ? ' bg-gradient-info' : ' btn-sm btn-outline-info')" @click="sendStartSignal" :value="label" />
         <div v-if="processing" :class="processing ? 'popup-center' : ''" class="border border-1 rounded rounded-2 bg-gray-400 p-4">
             <div class="text-info text-bold">
@@ -8,9 +7,6 @@
                 </div>
                 <div class="py-2 justify-content-center align-items-center text-center">
                     <span class="text-lg me-2">Send email when completed?</span>
-<!--                    <button type="button" @click="setEmailNofitication" class="btn btn-sm text-sm" :class="sendEmail ? 'btn-outline-success' : 'btn-outline-secondary'">-->
-<!--                        {{ sendEmail ? 'YES' : 'NO' }}-->
-<!--                    </button>-->
                     <div>
                         <label class="me-3">
                             <input type="radio" :value="0" v-model="sendEmail" @click="setEmailNofitication"> No
@@ -117,7 +113,6 @@ export default {
             //Create the interval to check queue position
             this.checkQueueIntervalId = setInterval(async () => {
                 this.queuePosition =  await this.$getJobPositionInQueue(this.projectId, this.jobName);
-                //console.log('ASYNC --', this.jobName, this.queuePosition);
                 if(!this.queuePosition) {
                     this.startButtonVisible = true;
                     clearInterval(this.checkQueueIntervalId);
@@ -131,8 +126,6 @@ export default {
         },
 
         setEmailNofitication: _.debounce(function () {
-            //this.sendEmail = this.sendEmail ? 0 : 1;
-            //console.log('email: ' + this.sendEmail);
             axios.get('/projects/' + this.projectId + '/set-job-email-notification', {params: {'command': this.jobName, 'sendemail': this.sendEmail}})
                 .then((response) => {
                     //console.log(response.data);

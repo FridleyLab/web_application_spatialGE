@@ -100,9 +100,9 @@
 
 
                     </div>
-                    <div class="card-footer p-3">
-                        <p class="mb-0"><span class="text-success text-sm font-weight-bolder">footer</span></p>
-                    </div>
+{{--                    <div class="card-footer p-3">--}}
+{{--                        <p class="mb-0"><span class="text-success text-sm font-weight-bolder">footer</span></p>--}}
+{{--                    </div>--}}
                 </div>
             </div>
 

@@ -63,10 +63,11 @@
                         </div>
                     </li>
                     <li v-if="!addingMetadataFile">
+
+                        <button v-if="!disabled && addingMetadataManually" class="btn btn-sm btn-outline-info me-3" @click="addMetadata">Add new metadata column</button>
+
                         <button v-if="!disabled" class="btn btn-sm" :class="addingMetadataManually ? 'btn-outline-success' : 'btn-outline-info'" @click="addingMetadataManually = !addingMetadataManually">{{ addingMetadataManually ? 'metadata complete' : 'Option 2: Add metadata manually'}}</button>
-                        <div v-if="addingMetadataManually">
-                            <button v-if="!disabled" class="btn btn-sm btn-outline-info" @click="addMetadata">Add new metadata column</button>
-                        </div>
+
                     </li>
                 </ul>
             </div>
