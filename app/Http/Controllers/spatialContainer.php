@@ -150,7 +150,8 @@ class spatialContainer {
             $workingDir = str_replace('\\', '/', $workingDir);
             $workingDir = '/' . $workingDir;
 
-            $exe = $this->exe;
+            //$exe = $this->exe;
+            $exe = '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
             $command = "$exe container run -i -v $workingDir:/spatialGE --rm --name $container_id $image_name $docker_command";
 
             Log::info("\nCOMMAND TO EXECUTE: " . $command . "\n");
