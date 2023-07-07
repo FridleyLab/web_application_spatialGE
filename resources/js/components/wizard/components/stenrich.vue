@@ -225,7 +225,7 @@ import 'vue3-easy-data-table/dist/style.css';
                     return;
 
                 this.stenrich.samples?.forEach( sample => {
-                    axios.get(this.stenrich.base_url + 'stenrich_' + sample + '.json')
+                    axios.get(this.stenrich.base_url + 'stenrich_' + sample + '.json' + '?' + Date.now())
                         .then((response) => {
                             this.results[sample] = {};
                             this.results[sample].data = response.data;

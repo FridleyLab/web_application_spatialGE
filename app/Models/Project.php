@@ -263,10 +263,14 @@ class Project extends Model
             $data = trim(Storage::read($file));
             ProjectParameter::updateOrCreate(['parameter' => 'max_spots_number', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'number', 'value' => $data]);
         }
+
         $file = $workingDir . 'initial_stlist_summary.csv';
+        $file_public = $this->workingDirPublic() . 'initial_stlist_summary.csv';
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
             ProjectParameter::updateOrCreate(['parameter' => 'initial_stlist_summary', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'string', 'value' => $data]);
+            Storage::copy($file, $file_public);
+            ProjectParameter::updateOrCreate(['parameter' => 'initial_stlist_summary_url', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . 'initial_stlist_summary.csv']);
         }
 
         $this->filter_meta_options();
@@ -795,10 +799,9 @@ library('spatialGE')
 {$this->_loadStList($stlist)}
 
 #### Violin plot
-vp = violin_plots($stlist, color_pal='$color_palette', data_type='tr', genes='$gene')
-
+vp = distribution_plots($stlist, color_pal='$color_palette', data_type='tr', genes='$gene')
 #### Box plot
-bp = violin_plots($stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene')
+bp = distribution_plots($stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene')
 
 $plots
 

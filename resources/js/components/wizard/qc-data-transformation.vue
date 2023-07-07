@@ -41,7 +41,7 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="summary" role="tabpanel" aria-labelledby="summary-tab">
-                                <project-summary-table :data="project.project_parameters.initial_stlist_summary"></project-summary-table>
+                                <project-summary-table :data="project.project_parameters.initial_stlist_summary" :url="project.project_parameters.initial_stlist_summary_url"></project-summary-table>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="filter" role="tabpanel" aria-labelledby="filter-tab">
                                 <qc-dt-filter :project="project" :samples="samples" :color-palettes="colorPalettes" :filter-url="filterUrl" :filter-url-plots="filterUrlPlots"></qc-dt-filter>

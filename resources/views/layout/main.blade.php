@@ -57,19 +57,25 @@
 <body class="g-sidenav-show  bg-gray-200">
 <section id="app">
 
+    <div id="_body">
 
-    <side-menu></side-menu>
+        <side-menu></side-menu>
 
 
-    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+        <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
 
-        @include('layout.partials.side-bar')
+            @include('layout.partials.side-bar')
 
-        @include('layout.partials.nav-bar')
+            @include('layout.partials.nav-bar')
 
-        @yield('content')
+            @yield('content')
 
-    </main>
+        </main>
+    </div>
+
+
+    <show-modal-content></show-modal-content>
+
 
 {{--    @include('layout.partials.ui-settings')--}}
 

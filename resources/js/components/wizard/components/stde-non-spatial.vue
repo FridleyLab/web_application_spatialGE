@@ -15,10 +15,10 @@
                 <div class="accordion-item w-100 w-lg-80 w-xxl-70">
                     <h2 class="accordion-header" id="headingSelectSamples">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
-                            <span class="me-3">Select samples to apply this filter</span>
+                            <span class="me-3">Select sample(s) to run this test</span>
                             <span class="text-success text-lg text-center" v-if="params.samples.length === samples.length">All samples selected</span>
                             <span class="text-danger text-lg text-center" v-if="!params.samples.length">At least one sample must be selected</span>
-                            <span class="text-warning text-lg text-center" v-if="params.samples.length && params.samples.length < samples.length">{{ params.samples.length }} samples selected</span>
+                            <span class="text-warning text-lg text-center" v-if="params.samples.length && params.samples.length < samples.length">{{ params.samples.length }} sample(s) selected</span>
                         </button>
                     </h2>
                     <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">

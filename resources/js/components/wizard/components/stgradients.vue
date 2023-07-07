@@ -10,41 +10,51 @@
                 STgradient finds genes for which there is evidence of gene expression gradients with respect to a tissue niche/domain. The method calculates distances from each spot/cell to a “reference” tissue niche/domain (e.g., cluster defined via STclust) and correlates those distances with gene expression values from top variable genes. The distances to reference niche can be summarized using the average or the minimum value. Generally the minimum distances capture gradients at short ranges, while average distances capture whole-tissue gradients. Users can use robust regression to reduce (albeit not eliminate) the effect of zero inflation in spatial transcriptomics data.
             </div>
 
+            <div class="d-flex justify-content-center text-center">
+                <div class="w-100 w-lg-80 w-xxl-80">
+                    <div class="accordion row mt-4 mx-2" id="accordionFilterTab" :class="processing ? 'disabled-clicks' : ''">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingSelectSamples">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
+                                    <span class="me-3">Select sample(s) to run this test</span>
+                                    <span class="text-success text-lg text-center" v-if="params.samples.length === samples.length">All samples selected</span>
+                                    <span class="text-danger text-lg text-center" v-if="!params.samples.length">At least one sample must be selected</span>
+                                    <span class="text-warning text-lg text-center" v-if="params.samples.length && params.samples.length < samples.length">{{ params.samples.length }} sample(s) selected</span>
+                                </button>
+                            </h2>
+                            <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
 
-            <div class="accordion row justify-content-center text-center mt-4 mx-2" id="accordionFilterTab" :class="processing ? 'disabled-clicks' : ''">
-                <div class="accordion-item w-100 w-lg-80 w-xxl-80">
-                    <h2 class="accordion-header" id="headingSelectSamples">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
-                            <span class="me-3">Select samples to apply this filter</span>
-                            <span class="text-success text-lg text-center" v-if="params.samples.length === samples.length">All samples selected</span>
-                            <span class="text-danger text-lg text-center" v-if="!params.samples.length">At least one sample must be selected</span>
-                            <span class="text-warning text-lg text-center" v-if="params.samples.length && params.samples.length < samples.length">{{ params.samples.length }} samples selected</span>
-                        </button>
-                    </h2>
-                    <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
-
-                        <div class="text-center justify-content-center w-100">
-                            <div class="m-4 gap-4">
-                                <div class="text-info text-lg text-bolder text-center mb-2">Click to add/remove a sample</div>
-                                <div class="container-fluid" v-for="sample in samples">
-                                    <button type="button" class="btn btn-lg" :class="params.samples.includes(sample.name) ? 'bg-gradient-info' : 'btn-outline-info'" @click="toggleSample(sample.name)">
-                                        {{ sample.name }}
-                                    </button>
+                                <div class="text-center justify-content-center w-100">
+                                    <div class="m-4 gap-4">
+                                        <div class="text-info text-lg text-bolder text-center mb-2">Click to add/remove a sample</div>
+                                        <div class="container-fluid" v-for="sample in samples">
+                                            <button type="button" class="btn btn-lg" :class="params.samples.includes(sample.name) ? 'bg-gradient-info' : 'btn-outline-info'" @click="toggleSample(sample.name)">
+                                                {{ sample.name }}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
-
                     </div>
                 </div>
-                <tool-tip></tool-tip>
+                <div class="float-start">
+                    <show-modal tag="stgradient_samples"></show-modal>
+                </div>
             </div>
 
 
+
+
             <div class="row justify-content-center text-center m-4">
-                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                <div class="w-100 w-md-80 w-lg-70 w-xxl-80">
                     <div class="row justify-content-center text-center">
                         <div class="">
-                            <div class="me-3">Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.topgenes"></div>
+                            <div class="me-3 d-block">
+                                Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.topgenes">
+                                <show-modal tag="stgradient_genes"></show-modal>
+                            </div>
                             <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="w-100" v-model="params.topgenes">
                         </div>
                     </div>

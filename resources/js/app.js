@@ -1,7 +1,6 @@
 import './bootstrap';
 import '../css/app.css';
 
-
 //Modules
 import sideMenu from "./components/ui/side-menu.vue";
 import navbar from "./components/ui/navbar.vue";
@@ -24,11 +23,9 @@ import qcDtQuilt from "./components/wizard/components/qc-dt-quilt.vue";
 import projectSummaryTable from "./components/wizard/components/project-summary-table.vue";
 import showPlot from "./components/common/show-plot.vue";
 import numericRange from "./components/common/numeric-range.vue";
-import toolTip from "./components/common/tool-tip.vue";
+import showModal from "./components/common/show-modal.vue";
+import showModalContent from "./components/common/show-modal-content.vue";
 
-// import numericSlider from "./components/common/numeric-slider.vue";
-
-// import multiselect from "./components/common/multiselect.vue";
 
 import stplotVisualization from "./components/wizard/stplot-visualization.vue";
 import stplotQuilt from "./components/wizard/components/stplot-quilt.vue";
@@ -104,7 +101,9 @@ app.component('qc-dt-pca', qcDtPca);
 app.component('qc-dt-quilt', qcDtQuilt);
 app.component('project-summary-table', projectSummaryTable);
 app.component('show-plot', showPlot);
-app.component('tool-tip', toolTip);
+app.component('show-modal', showModal);
+app.component('show-modal-content', showModalContent);
+
 
 app.component('stplot-visualization', stplotVisualization);
 app.component('stplot-quilt', stplotQuilt);
