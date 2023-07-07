@@ -24,7 +24,7 @@ class spatialContainer {
     public function __construct(Project $project)
     {
 
-        $this->exe = '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : '')) . '"';
+        $this->exe = '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
 
         $this->project = $project;
 
