@@ -7,9 +7,9 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="font-weight-bolder">Sign Up</h4>
-                                <p class="mb-0">Please complete the form to register</p>
                             </div>
                             <div class="card-body">
+                                <p class="mb-3">Please complete the form to register. All fields are required <span class="text-danger">*</span></p>
                                 <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST" autocomplete="off">
 
                                     <input type="hidden" name="_token" :value="window._token">
@@ -17,7 +17,7 @@
                                     <div class="row row-cols-2">
                                         <div class="w-50">
                                             <div class="input-group input-group-outline mb-3 col" :class="first_name.length >= 1 ? 'is-valid' : ''">
-                                                <label class="form-label">First name</label>
+                                                <label class="form-label">First name (required)</label>
                                                 <input required type="text" class="form-control" name="first_name" v-model="first_name">
                                             </div>
                                         </div>
@@ -37,7 +37,7 @@
                                             </div>
                                         </div>
                                         <div class="w-50">
-                                            <div class="input-group input-group-outline mb-3" :class="(validEmailAddress && email === emailConfirmation) ? 'is-valid' : ''">
+                                            <div class="input-group input-group-outline mb-3" :class="(validEmailAddress && email === emailConfirmation) ? 'is-valid' : email.length || emailConfirmation.length ? 'is-invalid' : ''">
                                                 <label class="form-label">Email confirmation </label>
                                                 <input required type="email" class="form-control" name="emailConfirmation" v-model="emailConfirmation">
                                             </div>
@@ -52,7 +52,7 @@
                                             </div>
                                         </div>
                                         <div class="w-50">
-                                            <div class="input-group input-group-outline mb-3" :class="passwordConfirmation.length && !errorMessagePassword.length && passwordConfirmed ? 'is-valid' : ''">
+                                            <div class="input-group input-group-outline mb-3" :class="passwordConfirmation.length && !errorMessagePassword.length && passwordConfirmed ? 'is-valid' : password.length || passwordConfirmation.length ? 'is-invalid' : ''">
                                                 <label class="form-label">Pwd confirmation</label>
                                                 <input required type="password" class="form-control" name="passwordConfirmation" v-model="passwordConfirmation">
                                             </div>
@@ -62,7 +62,7 @@
 
                                     <div class="mb-3">
                                         <div>Please select the main sector you work with</div>
-                                        <select class="form-select bg-white border border-1 p-2" name="industry" v-model="industry">
+                                        <select class="form-select bg-white border border-1 p-2" name="industry" v-model="industry" :class="industry.length ? 'is-valid' : 'is-invalid'">
                                             <option value=""></option>
                                             <option v-for="industry in industries" :value="industry">{{ industry }}</option>
                                         </select>
@@ -70,7 +70,7 @@
 
                                     <div class="mb-3">
                                         <div>Please select your position</div>
-                                        <select class="form-select bg-white border border-1 p-2"  name="job" v-model="job">
+                                        <select class="form-select bg-white border border-1 p-2"  name="job" v-model="job" :class="job.length ? 'is-valid' : 'is-invalid'">
                                             <option value=""></option>
                                             <option v-for="job in jobs" :value="job">{{ job }}</option>
                                         </select>
@@ -78,7 +78,7 @@
 
                                     <div class="mb-3">
                                         <div>Please select your main area of interest</div>
-                                        <select class="form-select bg-white border border-1 p-2"  name="interest" v-model="interest">
+                                        <select class="form-select bg-white border border-1 p-2"  name="interest" v-model="interest" :class="interest.length ? 'is-valid' : 'is-invalid'">
                                             <option value=""></option>
                                             <option v-for="area in areas_of_interest" :value="area">{{ area }}</option>
                                         </select>
@@ -103,7 +103,7 @@
                                     <div class="form-check form-check-info text-start ps-0">
                                         <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="terms_and_conditions">
                                         <label class="form-check-label" for="flexCheckDefault">
-                                            I agree the <a href="https://moffitt.org/legal-statements-and-policies/terms-conditions/" target="_blank" class="text-info font-weight-bolder">Terms and Conditions</a>
+                                            I agree to the <a href="https://moffitt.org/legal-statements-and-policies/terms-conditions/" target="_blank" class="text-info font-weight-bolder">Terms and Conditions</a>
                                         </label>
                                     </div>
 
@@ -113,8 +113,11 @@
 <!--                                        <div class="g-recaptcha" data-sitekey="6Lf1JIkkAAAAAEyfq5XDevFmu98B4K052NZi7z4K"></div>-->
 <!--                                    </div>-->
 
-                                    <div class="text-center">
+                                    <div class="text-center" v-if="formCompleted">
                                         <button type="submit" class="btn btn-lg bg-gradient-info btn-lg w-100 w-md-50 mt-4 mb-0" :class="processing ? 'disabled' : ''">Sign Up</button>
+                                    </div>
+                                    <div v-else class="text-center text-warning my-4">
+                                        Please complete the form to sign up!
                                     </div>
                                 </form>
                             </div>
@@ -204,14 +207,21 @@
                     .match(
                         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
                     );
-            }
+            },
+
+            formCompleted() {
+                return !(!this.first_name.trim().length || !this.last_name.trim().length || !this.email.trim().length || (this.email !== this.emailConfirmation) || !this.password.trim().length || !this.passwordStrength || !this.passwordConfirmed || !this.terms_and_conditions || !this.job.trim().length || !this.industry.trim().length  || !this.interest.trim().length);
+            },
+
+
         },
 
         methods: {
             checkCredentials: function(e) {
                 this.errorMessage = '';
-                if(!this.first_name.trim().length || !this.last_name.trim().length || !this.email.trim().length || (this.email !== this.emailConfirmation) || !this.password.trim().length || !this.passwordStrength || !this.passwordConfirmed || !this.terms_and_conditions || !this.job.trim().length || !this.industry.trim().length  || !this.interest.trim().length) {
-                    this.errorMessage = "You must complete all the fields!";
+                //if(!this.first_name.trim().length || !this.last_name.trim().length || !this.email.trim().length || (this.email !== this.emailConfirmation) || !this.password.trim().length || !this.passwordStrength || !this.passwordConfirmed || !this.terms_and_conditions || !this.job.trim().length || !this.industry.trim().length  || !this.interest.trim().length) {
+                if(!this.formCompleted) {
+                    this.errorMessage = "You must complete all fields!";
                     //e.preventDefault();
                     return;
                 }

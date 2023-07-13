@@ -212,7 +212,8 @@ class Project extends Model
         $scriptName = 'STList.R';
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getStListScript());
+        $scriptContents = $this->getStListScript();
+        Storage::put($script, $scriptContents);
 
         //delete all existing STlists
         foreach(Storage::files($workingDir) as $file) {
@@ -289,7 +290,7 @@ class Project extends Model
         }
 
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
 
 
     }
@@ -376,7 +377,8 @@ lapply(names(tissues), function(i){
         $scriptName = 'Filter.R';
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getFilterDataScript($parameters));
+        $scriptContents = $this->getFilterDataScript($parameters);
+        Storage::put($script, $scriptContents);
 
         //delete all existing STlists except: initial_stlist
         foreach(Storage::files($workingDir) as $file) {
@@ -449,6 +451,7 @@ lapply(names(tissues), function(i){
         }
 
         $result['output'] = $output;
+        $result['script'] = $scriptContents;
 
         return $result;
 
@@ -539,7 +542,8 @@ $plots
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getFilterPlotsScript($parameters));
+        $scriptContents = $this->getFilterPlotsScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -559,7 +563,7 @@ $plots
             }
         }
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
 
     }
 
@@ -612,7 +616,8 @@ $plots
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getNormalizationScript($parameters));
+        $scriptContents = $this->getNormalizationScript($parameters);
+        Storage::put($script, $scriptContents);
 
         //Delete project parameters that need to be recreated
         DB::delete("delete from project_parameters where tag not in ('import', 'filter','') and not(parameter like 'job.%') and project_id=" . $this->id);
@@ -675,6 +680,7 @@ $plots
         $this->save();
 
         $result['output'] = $output;
+        $result['script'] = $scriptContents;
         return $result;
 
     }
@@ -750,7 +756,8 @@ $plots
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getNormalizedPlotsScript($parameters));
+        $scriptContents = $this->getNormalizedPlotsScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -769,7 +776,7 @@ $plots
             }
         }
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
 
     }
 
@@ -820,7 +827,8 @@ $plots
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getNormalizedDataScript($parameters));
+        $scriptContents = $this->getNormalizedDataScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -839,7 +847,7 @@ $plots
             }
         }
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
 
     }
 
@@ -880,7 +888,8 @@ openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getPcaScript($parameters));
+        $scriptContents  =$this->getPcaScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -893,6 +902,7 @@ openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
         ProjectParameter::updateOrCreate(['parameter' => 'qc_pca', 'project_id' => $this->id, 'tag' => 'pseudo_bulk_pca'], ['type' => 'number', 'value' => 1]);
 
         $result['output'] = $output;
+        $result['script'] = $scriptContents;
         return $result;
 
     }
@@ -939,7 +949,8 @@ pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes)
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getPcaPlotsScript($parameters));
+        $scriptContents = $this->getPcaPlotsScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -963,6 +974,7 @@ pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes)
         }
 
         $result['output'] = $output;
+        $result['script'] = $scriptContents;
         return $result;
 
     }
@@ -1010,7 +1022,8 @@ $plots
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getQuiltPlotScript($parameters));
+        $scriptContents = $this->getQuiltPlotScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1036,6 +1049,7 @@ $plots
         }
 
         $result['output'] = $output;
+        $result['script'] = $scriptContents;
         return $result;
 
     }
@@ -1101,7 +1115,8 @@ $plots_initial
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTplotQuiltScript($parameters));
+        $scriptContents = $this->getSTplotQuiltScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1129,8 +1144,7 @@ $plots_initial
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_quilt', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
 
-        return ['output' => $output];
-        //return json_encode($result);
+        return ['output' => $output, 'script' => $scriptContents];
     }
 
     public function getSTplotQuiltScript($parameters) : string {
@@ -1183,7 +1197,8 @@ $export_files
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTplotExpressionSurfaceScript($parameters));
+        $scriptContents = $this->getSTplotExpressionSurfaceScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1211,7 +1226,7 @@ $export_files
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_expression_surface', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
         //return json_encode($result);
     }
 
@@ -1261,7 +1276,8 @@ $export_files
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTplotExpressionSurfacePlotsScript($parameters));
+        $scriptContents = $this->getSTplotExpressionSurfacePlotsScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1289,7 +1305,7 @@ $export_files
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_expression_surface', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
         //return json_encode($result);
     }
 
@@ -1341,7 +1357,8 @@ $export_files
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSThetScript($parameters));
+        $scriptContents = $this->getSThetScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1368,6 +1385,7 @@ $export_files
         }
 
         $result['output'] = $output;
+        $result['script'] = $scriptContents;
         return $result;
     }
 
@@ -1413,7 +1431,8 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSThetPlotScript($parameters));
+        $scriptContents = $this->getSThetPlotScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1436,6 +1455,7 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
         }
 
         $result['output'] = $output;
+        $result['script'] = $scriptContents;
         return $result;
     }
 
@@ -1477,7 +1497,8 @@ $export_files
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTclustScript($parameters));
+        $scriptContents = $this->getSTclustScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1505,7 +1526,7 @@ $export_files
         $this->current_step = 8;
         $this->save();
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
     }
 
     public function getSTclustScript($parameters) : string {
@@ -1571,7 +1592,8 @@ for(p in n_plots) {
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTDiffNonSpatialScript($parameters));
+        $scriptContents = $this->getSTDiffNonSpatialScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1607,7 +1629,7 @@ for(p in n_plots) {
 
         ProjectParameter::updateOrCreate(['parameter' => 'stdiff_ns', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
     }
 
 
@@ -1666,7 +1688,8 @@ lapply(names(de_genes_results), function(i){
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTDiffSpatialScript($parameters));
+        $scriptContents = $this->getSTDiffSpatialScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1703,7 +1726,7 @@ lapply(names(de_genes_results), function(i){
 
         ProjectParameter::updateOrCreate(['parameter' => 'stdiff_s', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
     }
 
 
@@ -1764,7 +1787,8 @@ lapply(names(spatial_de_genes_results), function(i){
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTEnrichScript($parameters));
+        $scriptContents = $this->getSTEnrichScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1798,7 +1822,7 @@ lapply(names(spatial_de_genes_results), function(i){
 
         ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $this->samples->pluck('name')])]);
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
     }
 
 
@@ -1888,7 +1912,8 @@ lapply(names(sp_enrichment), function(i){
 
         $script = $workingDir . $scriptName;
 
-        Storage::put($script, $this->getSTGradientsScript($parameters));
+        $scriptContents = $this->getSTGradientsScript($parameters);
+        Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName);
 
@@ -1928,7 +1953,7 @@ lapply(names(sp_enrichment), function(i){
 
         ProjectParameter::updateOrCreate(['parameter' => 'stgradients', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
 
-        return ['output' => $output];
+        return ['output' => $output, 'script' => $scriptContents];
     }
 
 

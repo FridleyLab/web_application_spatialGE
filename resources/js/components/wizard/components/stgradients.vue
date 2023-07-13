@@ -8,6 +8,10 @@
             </div>
             <div class="text-justify">
                 STgradient finds genes for which there is evidence of gene expression gradients with respect to a tissue niche/domain. The method calculates distances from each spot/cell to a “reference” tissue niche/domain (e.g., cluster defined via STclust) and correlates those distances with gene expression values from top variable genes. The distances to reference niche can be summarized using the average or the minimum value. Generally the minimum distances capture gradients at short ranges, while average distances capture whole-tissue gradients. Users can use robust regression to reduce (albeit not eliminate) the effect of zero inflation in spatial transcriptomics data.
+                <br /><br />
+                Spearman correlation coefficients are calculated using the ‘cor.test’ R function.
+                <br /><br />
+                The most variable genes to be tested are identified <i>before</i> removal of outliers.
             </div>
 
             <div class="d-flex justify-content-center text-center">
@@ -143,7 +147,22 @@
 
 
 
+
         <div v-if="!processing && ('stgradients' in project.project_parameters)" class="p-3 text-center mt-4">
+
+            <div class="text-justify">
+                <div class="fs-5">Explanation of results:</div>
+                <ul>
+                    <li>Gene: The name of gene being tested with STgradient</li>
+                    <li>Linear model slope: The coefficient from the linear model fit between the gene expression and distance from reference cluster. This coefficient is also known as the “slope” of the regression line</li>
+                    <li>Linear model p-value: The p-value resulting from the test on the linear model slope. Tests whether the slope is significantly different from zero</li>
+                    <li>Spearman’s coefficient: The value of the Spearman’s rank correlation coefficient (rho). This coefficient is a measure of the strength of the relationship between gene expression and distance from reference</li>
+                    <li>Spearman’s p-value: The p-value resulting from the test of significant correlation between gene expression and distance. The p-value can be used as a metric of statistical significance for the Spearman’s coefficient. Since the data is likely to contain “ties” (i.e., same distance and expression values for two or more spots/cells), the p-values are approximated</li>
+                    <li>Spearman’s adjusted p-value: The Benjamini-Hochberg correction for multiple testing on the Spearman’s coefficient p-values</li>
+                    <li>Warning: If a test is labeled as “zero_st_deviation”, it likely means that the expression data has the same value for all spots (likely “0”). The lack of variation is likely the result of outlier removal or exclusion of clusters/domains</li>
+                </ul>
+            </div>
+
             <a :href="stgradients.base_url + 'stgradients_results.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Excel results - All samples</a>
         </div>
 

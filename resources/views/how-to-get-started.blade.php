@@ -8,11 +8,11 @@
             <div class="col-xl-9 col-lg-10 col-sm-12 mb-xl-0 mb-4">
                 <div class="card">
                     <div class="card-header p-3 pt-2">
-                        <div class="icon icon-lg icon-shape bg-gradient-primary shadow-primary text-center border-radius-xl mt-n4 position-absolute">
-                            <i class="material-icons opacity-10">flight</i>
+                        <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+                            <i class="material-icons opacity-10">map</i>
                         </div>
                         <div class="text-end pt-1">
-                            <h2 class="mb-0 text-info">spatial<span class="moffitt-text-blue">GE</span></h2>
+                            <img src="/images/spatialge-logo.png" class="img-fluid max-height-100">
                         </div>
                     </div>
                     <hr class="dark horizontal my-0">
@@ -109,19 +109,8 @@
         </div>
 
 
+        @include('layout.partials.footer')
 
-
-        <footer class="footer py-4  ">
-            <div class="container-fluid">
-                <div class="row align-items-center justify-content-lg-between">
-                    <div class="col-lg-6 mb-lg-0 mb-4">
-                        <div class="copyright text-center text-sm text-muted text-lg-start">
-                            © 2023
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </footer>
     </div>
 
 

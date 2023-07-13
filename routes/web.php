@@ -122,3 +122,14 @@ Route::name('faq')->get('/faq', function () {
 Route::name('home')->get('/', function () {
     return view('home');
 });
+
+
+Route::name('zxc')->get('/zxc', function () {
+    $project = new stdClass();
+    $project->name = "Project's name";
+    $project->id = 1;
+    $output = 'Command output';
+    $description = 'Description';
+    return view('mail.test', compact('project', 'output', 'description'));
+});
+

@@ -1,4 +1,4 @@
-<h1>spatialGE</h1>
+@include('mail.partials.header')
 
 <h2>This is a notification about your project: {{ $project->name  }}</h2>
 
