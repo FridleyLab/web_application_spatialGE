@@ -56,7 +56,7 @@
 
 
             <div class="row justify-content-center text-center m-3">
-                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                <div class="w-100 w-md-90 w-lg-80 w-xxl-65">
                     <div>Annotation to test</div>
                     <div>
                         <span>
@@ -110,30 +110,49 @@
             <div>
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li v-for="(sample, index) in stdiff_ns.samples" class="nav-item" role="presentation">
-                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample" type="button" role="tab" :aria-controls="sample" aria-selected="true">{{ sample }}</button>
+                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample" type="button" role="tab" :aria-controls="sample" :aria-selected="index === 0">{{ sample }}</button>
                     </li>
                 </ul>
 
-                <div class="tab-content" id="myTabContent">
+                <div class="tab-content mx-3" id="myTabContent">
                     <div v-for="(sample, index) in stdiff_ns.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
 
-<!--                        <a :href="stdiff_ns.base_url + 'stdiff_ns_' + sample + '.csv'" class="btn btn-sm btn-outline-info m-6" download>CSV results</a>-->
+                        <div class="mt-4">
+                            <ul class="nav nav-tabs" id="stdiff_ns_tabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" :id="'stdiff_ns_' + sample + 'table' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#stdiff_ns_' + sample + 'table'" type="button" role="tab" :aria-controls="'stdiff_ns_' + sample + 'table'" aria-selected="true">Table</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" :id="'stdiff_ns' + sample + 'volcano' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#stdiff_ns' + sample + 'volcano'" type="button" role="tab" :aria-controls="'stdiff_ns' + sample + 'volcano'" aria-selected="false">Volcano</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="stdiff_ns_tabsContent">
 
-                        <div class="m-4" v-if="(sample in results) && results[sample].loaded">
-<!--                            <a :href="stdiff_ns.base_url + 'stdiff_ns_' + sample + '.csv'" class="btn btn-sm btn-outline-info my-3" download>CSV results</a>-->
+                                <div class="tab-pane fade show active" :id="'stdiff_ns_' + sample + 'table'" role="tabpanel" :aria-labelledby="'stdiff_ns_' + sample + 'table' + '-tab'">
+                                    <div class="m-4" v-if="(sample in results) && results[sample].loaded">
 
-                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"
-                                                  :headers="results[sample].data.headers"
-                                                  :items="results[sample].data.items"
-                                                  alternating
-                                                  border-cell
-                                                  body-text-direction="center"
-                                                  header-text-direction="center"
-                            >
-                                <template #item-gene="{ gene }">
-                                    <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" target="_blank" class="text-info">{{ gene }}</a>
-                                </template>
-                            </vue3-easy-data-table>
+                                        <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"
+                                                              :headers="results[sample].data.headers"
+                                                              :items="results[sample].data.items"
+                                                              alternating
+                                                              border-cell
+                                                              body-text-direction="center"
+                                                              header-text-direction="center"
+                                        >
+                                            <template #item-gene="{ gene }">
+                                                <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" target="_blank" class="text-info">{{ gene }}</a>
+                                            </template>
+                                        </vue3-easy-data-table>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" :id="'stdiff_ns' + sample + 'volcano'" role="tabpanel" :aria-labelledby="'stdiff_ns' + sample + 'volcano' + '-tab'">
+                                    <div v-for="vp in volcano_plots(sample)">
+                                        <show-plot :src="vp"></show-plot>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
 
                     </div>
@@ -291,6 +310,11 @@ import 'vue3-easy-data-table/dist/style.css';
                             console.log(error.message);
                         })
                 });
+            },
+
+            volcano_plots(sample) {
+                if(!this.stdiff_ns.volcano_plots.length) return [];
+                return this.stdiff_ns.volcano_plots.filter(p => {return p.includes(sample)});
             }
         },
 

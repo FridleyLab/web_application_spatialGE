@@ -115,16 +115,18 @@
         <div v-if="!processing && ('stclust' in project.project_parameters) && !stclust.parameters.ks.includes('dtc')">
 
             <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <template v-for="index in stclust.parameters.number_of_domains_max">
-                    <li v-if="index >= stclust.parameters.number_of_domains_min" class="nav-item" role="presentation">
-                        <button class="nav-link" :class="index === stclust.parameters.number_of_domains_min ? 'active' : ''" :id="'K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + 'K_' + index" type="button" role="tab" :aria-controls="'K_' + index" aria-selected="true">{{ 'K=' + index }}</button>
-                    </li>
+                <template v-for="index in parseInt(stclust.parameters.number_of_domains_max)">
+                    <template v-if="index >= parseInt(stclust.parameters.number_of_domains_min)">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" :class="index === parseInt(stclust.parameters.number_of_domains_min) ? 'active' : ''" :id="'K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + 'K_' + index" type="button" role="tab" :aria-controls="'K_' + index" aria-selected="true">{{ 'K=' + index }}</button>
+                        </li>
+                    </template>
                 </template>
             </ul>
 
             <div class="tab-content m-4" id="myTabContent">
 
-                <div v-for="k in stclust.parameters.number_of_domains_max" class="tab-pane fade min-vh-50" :class="k === stclust.parameters.number_of_domains_min ? 'show active' : ''" :id="'K_' + k" role="tabpanel" :aria-labelledby="'K_' + k + '-tab'">
+                <div v-for="k in parseInt(stclust.parameters.number_of_domains_max)" class="tab-pane fade min-vh-50" :class="k === parseInt(stclust.parameters.number_of_domains_min) ? 'show active' : ''" :id="'K_' + k" role="tabpanel" :aria-labelledby="'K_' + k + '-tab'">
 
                     <ul class="nav nav-tabs" :id="'myTab' + k" role="tablist">
                         <li v-for="(sample, index) in samples" class="nav-item" role="presentation">

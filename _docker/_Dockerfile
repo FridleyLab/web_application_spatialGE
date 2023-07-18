@@ -42,25 +42,29 @@ RUN apt-get update -qq && \
 #########END CERTS##############
 
 
-
-RUN apt-get -y update && apt-get -y install libhdf5-dev libudunits2-dev libv8-dev libgdal-dev cmake libfftw3-dev libfontconfig1-dev
+#Install required system libraries
+RUN apt-get -y update && apt-get -y install libhdf5-dev libudunits2-dev libv8-dev libgdal-dev cmake libfftw3-dev libfontconfig1-dev libcurl4-openssl-dev libglpk-dev libgsl-dev libmagick++-dev
 
 RUN mkdir /spatialGE
 WORKDIR /spatialGE
 
-COPY init1.R init1.R
-RUN Rscript init1.R
+#Install libraries required by spatialGE
+RUN Rscript -e "install.packages('systemfonts', dependencies = TRUE)"
+RUN Rscript -e "install.packages('ggforce')"
+RUN Rscript -e "install.packages('ggpubr')"
+RUN Rscript -e "install.packages('BiocManager')"
+RUN Rscript -e "BiocManager::install('EBImage', update = TRUE, ask = FALSE)"
+RUN Rscript -e "BiocManager::install('ComplexHeatmap', update = TRUE, ask = FALSE)"
+RUN Rscript -e "install.packages('rgeos')"
+RUN Rscript -e "install.packages('hdf5r')"
+RUN Rscript -e "install.packages('remotes')"
 
-RUN apt-get -y install libcurl4-openssl-dev
-
-COPY init2.R init2.R
-RUN Rscript init2.R
-
+#Install support libraries ro work with Excel files and images
 RUN Rscript -e "install.packages('openxlsx')"
+RUN Rscript -e "install.packages('svglite')"
+RUN Rscript -e "install.packages('rdist')"
+RUN Rscript -e "install.packages('magick')"
 
-RUN apt-get -y update && apt-get -y install libglpk-dev libgsl-dev
 
 #Install spatialGE library
-RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')   "
-
-RUN Rscript -e "install.packages('svglite')"
+RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')"

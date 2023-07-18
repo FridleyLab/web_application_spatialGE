@@ -75,8 +75,27 @@ class Project extends Model
             $lines = explode("\n", $data);
             $annotations = [];
             foreach($lines as $annotation)
-                if(strlen(trim($annotation)))
-                    $annotations[] = ['label' =>$annotation, 'value' => $annotation];
+                if(strlen(trim($annotation))) {
+                    $label = '';
+                    $parts = explode('_', $annotation);
+                    if(sizeof($parts) > 2) {
+
+                        if($parts[0] === 'stclust') $label .= 'STclust; ';
+
+                        if(str_starts_with($parts[2], 'k'))
+                            $label .= 'Domains (k): ' . substr($parts[2],1) . '; ';
+
+                        if($parts[1] === 'spw0')
+                            $label .= 'No spatial weight';
+                        elseif(str_starts_with($parts[1], 'spw'))
+                            $label .= 'spatial weight:' . substr($parts[1], 3);
+
+                        if(str_starts_with($parts[2], 'dspl'))
+                            $label .= '; DeepSplit=' . substr($parts[2], 4) . '; Automatic mode (DynamicTreeCut)';
+                    }
+
+                    $annotations[] = ['label' => $label, 'value' => $annotation];
+                }
             $params['annotation_variables'] = $annotations;
         }
 
@@ -1591,7 +1610,7 @@ n_plots = names(ps)
 write.table(n_plots, 'stclust_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 library('svglite')
 for(p in n_plots) {
-    print(p)
+    #print(p)
     ggpubr::ggexport(filename = paste(p,'.png', sep=''), ps[[p]], width = 800, height = 600)
     ggpubr::ggexport(filename = paste(p,'.pdf', sep=''), ps[[p]], width = 8, height = 6)
     svglite(paste(p,'.svg', sep=''), width = 8, height = 6)
@@ -1657,7 +1676,29 @@ for(p in n_plots) {
                 Storage::move($file_to_move, $file_public);
             }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'stdiff_ns', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
+
+        $file = $workingDir . 'stdiff_ns_volcano_plots.csv';
+        $vps = [];
+        if(Storage::fileExists($file)) {
+            $data = trim(Storage::read($file));
+            foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $_plot) {
+                $plot = 'stdiff_ns_vp_' . $_plot;
+                $vps[] = $this->workingDirPublicURL() . $plot;
+                $file_extensions = ['svg', 'pdf', 'png'];
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $plot . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                    }
+                }
+
+            }
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stdiff_ns', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'samples' => $parameters['samples_array'], 'volcano_plots' => $vps])]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -1699,6 +1740,17 @@ openxlsx::write.xlsx(de_genes_results, file='stdiff_ns_results.xlsx')
 # Each sample as a CSV
 lapply(names(de_genes_results), function(i){
   write.csv(de_genes_results[[i]], paste0('stdiff_ns_', i, '.csv'), row.names=T, quote=F)
+})
+
+
+# Create volcano plots
+ps = STdiff_volcano(de_genes_results, samples=$samples, clusters=$clusters, pval_thr=0.05, color_pal=NULL)
+
+#save file with plots names list
+write.table(names(ps), 'stdiff_ns_volcano_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+# Save plots to file
+lapply(names(ps), function(i){
+  {$this->getExportFilesCommands('paste0(\'stdiff_ns_vp_\', i)', 'ps[[i]]')}
 })
 
 ";
@@ -1755,7 +1807,31 @@ lapply(names(de_genes_results), function(i){
             }
         }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'stdiff_s', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
+
+        $file = $workingDir . 'stdiff_s_volcano_plots.csv';
+        $vps = [];
+        if(Storage::fileExists($file)) {
+            $data = trim(Storage::read($file));
+            foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $_plot) {
+                $plot = 'stdiff_s_vp_' . $_plot;
+                $vps[] = $this->workingDirPublicURL() . $plot;
+                $file_extensions = ['svg', 'pdf', 'png'];
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $plot . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                    }
+                }
+
+            }
+        }
+
+
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stdiff_s', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array'], 'volcano_plots' => $vps])]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -1799,6 +1875,16 @@ openxlsx::write.xlsx(spatial_de_genes_results, file='stdiff_s_results.xlsx')
 # Each sample as a CSV
 lapply(names(spatial_de_genes_results), function(i){
   write.csv(spatial_de_genes_results[[i]], paste0('stdiff_s_', i, '.csv'), row.names=T, quote=F)
+})
+
+# Create volcano plots
+ps = STdiff_volcano(spatial_de_genes_results, samples=$samples, clusters=$clusters, pval_thr=0.05, color_pal=NULL)
+
+#save file with plots names list
+write.table(names(ps), 'stdiff_s_volcano_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+# Save plots to file
+lapply(names(ps), function(i){
+  {$this->getExportFilesCommands('paste0(\'stdiff_s_vp_\', i)', 'ps[[i]]')}
 })
 
 ";
