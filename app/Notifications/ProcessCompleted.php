@@ -42,11 +42,12 @@ class ProcessCompleted extends Notification
                     ->line("This is a notification about your project: " . $this->project->name)
                     ->line("The process: '$this->processName' has completed")
                     ->action('View Project', route('open-project', ['project' => $this->project]))
-                    ->lineIf($notifiable->is_admin && strlen($this->output), 'Script output:')
+                    ->lineIf($notifiable->is_admin && strlen($this->output), 'Process output:')
                     ->lineIf($notifiable->is_admin && strlen($this->output), new HtmlString('<pre>' . $this->output . '</pre>'))
                     ->lineIf($notifiable->is_admin && strlen($this->script), 'Script executed:')
                     ->lineIf($notifiable->is_admin && strlen($this->script), new HtmlString('<pre>Script executed:' . "\n" . $this->script . '</pre>'))
-                    ->line('Thank you for using ' . env('APP_NAME') . '!');
+                    ->line('Thanks for using our application.')
+                    ->salutation(new HtmlString('Regards, <br />The ' . env('APP_NAME') . ' team!'));
     }
 
     /**

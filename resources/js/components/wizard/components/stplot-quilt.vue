@@ -138,7 +138,7 @@
                                 <template v-for="(image, sample, index) in samples">
                                     <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'quilt-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + sample + '-tab'">
                                         <div>
-                                            <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)"></show-plot>
+                                            <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true"></show-plot>
                                         </div>
                                     </div>
                                 </template>

@@ -37,7 +37,7 @@
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingSpotCell">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpotCell" aria-expanded="false" aria-controls="collapseSpotCell">
-                        Filter Spots/Cells
+                        Filter spots/cells
                     </button>
                 </h2>
                 <div id="collapseSpotCell" class="accordion-collapse collapse" aria-labelledby="headingSpotCell" data-bs-parent="#accordionFilterTab">

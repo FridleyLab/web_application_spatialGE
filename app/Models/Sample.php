@@ -38,14 +38,20 @@ class Sample extends Model
         return $this->files()->where('type', 'imageFile')->count();
     }
 
-    public function image_file_path() {
+    public function image_file_path($relative_path = false) {
         try {
-            $sample_folder = $this->projects[0]->workingDir() . $this->name . '/spatial/';
-            $image = $this->files()->where('type', 'imageFile')->firstOrFail();
-            $image_file = $sample_folder . $image->filename;
-            $tissue_file = $sample_folder . 'image_' . $this->name . '.png';
 
-            return Storage::fileExists($tissue_file) ? $tissue_file : $image_file;
+            $sample_folder = $this->projects[0]->workingDir() . $this->name . '/spatial/';
+            $path_to_return = ($relative_path ? '' : $this->projects[0]->workingDir()) . $this->name . '/spatial/';
+
+            $image = $this->files()->where('type', 'imageFile')->firstOrFail();
+
+            $tissue_filename = 'image_' . $this->name . '.png';
+
+            //$image_file = $sample_folder . $image->filename;
+            $tissue_file = $sample_folder . $tissue_filename;
+
+            return $path_to_return . (Storage::fileExists($tissue_file) ? $tissue_filename : $image->filename);
 
         } catch (\Exception $e) {
             return '';

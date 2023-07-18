@@ -103,7 +103,7 @@
                 <div class="tab-content" id="myTabContent">
                     <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">
                         <div v-for="image in stclust.plots">
-                            <show-plot v-if="image.includes(sample.name)" :src="image"></show-plot>
+                            <show-plot v-if="image.includes(sample.name)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                     <div class="tab-content" :id="'myTabContent' + k">
                         <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'K_' + k + '-tab'">
                             <div v-for="image in stclust.plots">
-                                <show-plot v-if="image.includes(sample.name) && image.includes('k' + k)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample"></show-plot>
+                                <show-plot v-if="image.includes(sample.name) && image.includes('k' + k)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
                             </div>
                         </div>
                     </div>

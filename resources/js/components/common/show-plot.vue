@@ -9,9 +9,10 @@
             </div>
         </div>
         <div v-if="downloadable" class="mt-2">
-            <a :href="src + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
-            <a :href="src + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
-            <a :href="src + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+            <a :href="srcName + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
+            <a :href="srcName + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
+            <a :href="srcName + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
+            <label v-if="sideBySide" class="ms-3"><input type="checkbox" v-model="sbs"> side-by-side</label>
         </div>
 
     </div>
@@ -27,6 +28,19 @@
             downloadable: {type: Boolean, default: true},
             showImage: {type: Boolean, default: false},
             sample: {type: Object, default: null},
+            sideBySide: {type: Boolean, default: false},
+        },
+
+        data(){
+            return {
+                sbs: false
+            }
+        },
+
+        computed: {
+            srcName() {
+                return this.src + (this.sbs ? '-sbs' : '');
+            }
         },
 
 

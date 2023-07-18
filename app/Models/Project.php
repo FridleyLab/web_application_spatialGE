@@ -1124,18 +1124,23 @@ $plots_initial
         foreach($parameters['genes'] as $gene) {
             $result[$gene] = [];
             foreach ($this->samples as $sample) {
-                $parameterName = 'stplot-quilt-' . $gene . '-' . $sample->name;
 
-                $file_extensions = ['svg', 'pdf', 'png'];
+                $baseName = 'stplot-quilt-' . $gene . '-' . $sample->name;
+                $parameterNames = [$baseName, $baseName . '-sbs'];
 
-                foreach ($file_extensions as $file_extension) {
-                    $fileName = $parameterName . '.' . $file_extension;
-                    $file = $workingDir . $fileName;
-                    $file_public = $this->workingDirPublic() . $fileName;
-                    if (Storage::fileExists($file)) {
-                        Storage::delete($file_public);
-                        Storage::move($file, $file_public);
-                        $result[$gene][$sample->name] = $this->workingDirPublicURL() . $parameterName; // $fileName;
+                foreach ($parameterNames as $parameterName) {
+
+                    $file_extensions = ['svg', 'pdf', 'png'];
+
+                    foreach ($file_extensions as $file_extension) {
+                        $fileName = $parameterName . '.' . $file_extension;
+                        $file = $workingDir . $fileName;
+                        $file_public = $this->workingDirPublic() . $fileName;
+                        if (Storage::fileExists($file)) {
+                            Storage::delete($file_public);
+                            Storage::move($file, $file_public);
+                            $result[$gene][$sample->name] = $this->workingDirPublicURL() . $baseName; // $fileName;
+                        }
                     }
                 }
 
@@ -1157,9 +1162,16 @@ $plots_initial
         $_genes = "c('" . join("','", $genes) . "')";
 
         $export_files = '';
+        $export_files_side_by_side = '';
         foreach ($genes as $gene)
-            foreach ($this->samples as $sample)
+            foreach ($this->samples as $sample) {
                 $export_files .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name, "qp\$" . $gene . "_" . $sample->name);
+                if($sample->has_image) {
+                    $export_files_side_by_side .= "tp = cowplot::ggdraw() + cowplot::draw_image('{$sample->image_file_path(true)}')" . PHP_EOL;
+                    $export_files_side_by_side .= "qptp = ggpubr::ggarrange(qp\${$gene}_$sample->name, tp, ncol=2)" . PHP_EOL;
+                    $export_files_side_by_side .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name . '-sbs', 'qptp', 1400, 600) . PHP_EOL;
+                }
+            }
 
         $script = "
 
@@ -1176,10 +1188,7 @@ qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pa
 
 $export_files
 
-#/* TODO: *******///
-#stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
-#krp = STplot_interpolation(stlist_expression_surface, genes=$_genes)
-
+$export_files_side_by_side
 
 ";
 
@@ -1507,16 +1516,20 @@ $export_files
         if(Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
             $plots = [];
-            foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot){
+            foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
                 $plots[] = $this->workingDirPublicURL() . $plot;
                 $file_extensions = ['svg', 'pdf', 'png'];
-                foreach ($file_extensions as $file_extension) {
-                    $fileName = $plot . '.' . $file_extension;
-                    $file = $workingDir . $fileName;
-                    $file_public = $this->workingDirPublic() . $fileName;
-                    if (Storage::fileExists($file)) {
-                        Storage::delete($file_public);
-                        Storage::move($file, $file_public);
+
+                $plot_files = [$plot, "$plot-sbs"];
+                foreach ($plot_files as $plot_file) {
+                    foreach ($file_extensions as $file_extension) {
+                        $fileName = $plot_file . '.' . $file_extension;
+                        $file = $workingDir . $fileName;
+                        $file_public = $this->workingDirPublic() . $fileName;
+                        if (Storage::fileExists($file)) {
+                            Storage::delete($file_public);
+                            Storage::move($file, $file_public);
+                        }
                     }
                 }
             }
@@ -1530,6 +1543,14 @@ $export_files
     }
 
     public function getSTclustScript($parameters) : string {
+
+        $samples_with_tissue = '';
+        foreach($this->samples as $sample)
+            if($sample->has_image) {
+                if(strlen($samples_with_tissue)) $samples_with_tissue .= ',';
+                $samples_with_tissue .= "'" . $sample->name . "'";
+            }
+
 
         $script = "
 
@@ -1576,6 +1597,15 @@ for(p in n_plots) {
     svglite(paste(p,'.svg', sep=''), width = 8, height = 6)
     print(ps[[p]])
     dev.off()
+
+    #generate side-by-side for samples with tissue image
+    for(sample in list($samples_with_tissue)) {
+        if(grepl(sample, p, fixed=TRUE)) {
+            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample, '/spatial/image_', sample, '.png'))
+            ptp = ggpubr::ggarrange(ps[[p]], tp, ncol=2)
+            {$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
+        }
+    }
 }
 ";
 
@@ -1702,7 +1732,8 @@ lapply(names(de_genes_results), function(i){
             'mm_p_val' => 'Mixed model p-value',
             'adj_p_val' => 'Adjusted p-value',
             'exp_p_val' => 'Spatial p-value',
-            'exp_adj_p_val' => 'Adjusted spatial p-value'
+            'exp_adj_p_val' => 'Adjusted spatial p-value',
+            'comments' => 'Comments'
         ];
 
 
@@ -2013,23 +2044,27 @@ lapply(names(grad_res), function(i){
 
 
 
-    private function getExportFilesCommands($file, $plot) : string {
+    private function getExportFilesCommands($file, $plot, $width = 800, $height = 600) : string {
 
-        $str = "if(!is.null($plot)){\n";
+        //if $fileName doesn't seem to contain R code, add quotes, so it can be treated as a string
+        if(!preg_match('/[\(\)\[\]]/', $file))
+            $file = "'" . $file . "'";
+
+        $str = "if(!is.null($plot)){" . PHP_EOL;
 
         //PNG
-        $str .= "ggpubr::ggexport(filename = '$file.png', $plot, width = 800, height = 600)\n";
+        $str .= "ggpubr::ggexport(filename = paste0($file,'.png'), $plot, width = $width, height = $height)" . PHP_EOL;
 
         //PDF
-        $str .= "ggpubr::ggexport(filename = '$file.pdf', $plot, width = 8, height = 6)\n";
+        $str .= "ggpubr::ggexport(filename = paste0($file,'.pdf'), $plot, width = " . intval($width/100) . ", height = " . intval($height/100) . ")" . PHP_EOL;
 
         //SVG
-        $str .= "library('svglite')\n";
-        $str .= "svglite('$file.svg', width = 8, height = 6)\n";
-        $str .= "print($plot)\n";
-        $str .= "dev.off()\n";
+        $str .= "library('svglite')" . PHP_EOL;
+        $str .= "svglite(paste0($file,'.svg'), width = " . intval($width/100) . ", height = " . intval($height/100) . ")" . PHP_EOL;
+        $str .= "print($plot)" . PHP_EOL;
+        $str .= "dev.off()" . PHP_EOL;
 
-        $str .= "}\n\n";
+        $str .= "}" . PHP_EOL . PHP_EOL;
 
         return $str;
     }

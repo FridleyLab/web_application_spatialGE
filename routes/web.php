@@ -124,12 +124,9 @@ Route::name('home')->get('/', function () {
 });
 
 
-Route::name('zxc')->get('/zxc', function () {
-    $project = new stdClass();
-    $project->name = "Project's name";
-    $project->id = 1;
-    $output = 'Command output';
-    $description = 'Description';
-    return view('mail.test', compact('project', 'output', 'description'));
-});
+Route::get('/zxc', function () {
+    $project = \App\Models\Project::find(1);
 
+    return (new \App\Notifications\ProcessCompleted($project, 'Templates testing', 'output generated', 'Script source code'))
+        ->toMail($project->user);
+});
