@@ -313,7 +313,7 @@ import 'vue3-easy-data-table/dist/style.css';
             },
 
             volcano_plots(sample) {
-                if(!this.stdiff_ns.volcano_plots.length) return [];
+                if(!('volcano_plots' in this.stdiff_ns) || !this.stdiff_ns.volcano_plots.length) return [];
                 return this.stdiff_ns.volcano_plots.filter(p => {return p.includes(sample)});
             }
         },
