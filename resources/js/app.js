@@ -25,6 +25,7 @@ import showPlot from "./components/common/show-plot.vue";
 import numericRange from "./components/common/numeric-range.vue";
 import showModal from "./components/common/show-modal.vue";
 import showModalContent from "./components/common/show-modal-content.vue";
+import showVignette from "./components/common/show-vignette.vue";
 
 
 import stplotVisualization from "./components/wizard/stplot-visualization.vue";
@@ -103,6 +104,7 @@ app.component('project-summary-table', projectSummaryTable);
 app.component('show-plot', showPlot);
 app.component('show-modal', showModal);
 app.component('show-modal-content', showModalContent);
+app.component('show-vignette', showVignette);
 
 
 app.component('stplot-visualization', stplotVisualization);

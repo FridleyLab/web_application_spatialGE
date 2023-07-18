@@ -9,6 +9,9 @@
                         </div>
                         <div class="text-end pt-1">
                             <h6 class="mb-0 text-capitalize">Importing data</h6>
+                            <div>
+                                <show-vignette url="/documentation/vignettes/import_data.pdf"></show-vignette>
+                            </div>
                         </div>
                     </div>
 

@@ -9,6 +9,7 @@
                         </div>
                         <div class="text-end pt-1">
                             <h6 class="mb-0 text-capitalize">QC & Data Transformation</h6>
+                            <show-vignette url="/documentation/vignettes/qc_data_transformation.pdf"></show-vignette>
                         </div>
                     </div>
 
