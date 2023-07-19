@@ -530,11 +530,11 @@ write.csv(df_summary, 'filtered_stlist_summary.csv', row.names=FALSE, quote=FALS
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='Spectral')
+vp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='Spectral')
 #ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
-bp = violin_plots(filtered_stlist, plot_meta='total_counts', color_pal='Spectral', plot_type='box')
+bp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='Spectral', plot_type='box')
 #ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 #### Save plots to file
@@ -610,11 +610,11 @@ $this->_loadStList('filtered_stlist')
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = violin_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette')
+vp = distribution_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette')
 #ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
-bp = violin_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette', plot_type='box')
+bp = distribution_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette', plot_type='box')
 #ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 #### save plots to file
@@ -749,14 +749,9 @@ write.table(gene_names, 'genesNormalized.csv',sep=',', row.names = FALSE, col.na
 pca_max_var_genes = min(unlist(lapply(normalized_stlist@counts, nrow)))
 write.table(pca_max_var_genes, 'pca_max_var_genes.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
-#### Violin plot
-#vp = violin_plots(normalized_stlist, color_pal='Spectral', data_type='tr', genes='RPL22')
-
-#### Box plot
-#bp = violin_plots(normalized_stlist, color_pal='Spectral', plot_type='box', data_type='tr', genes='RPL22')
-
-den_raw = count_distribution(normalized_stlist, distrib_subset=0.01, data_type='raw', plot_type=c('density', 'violin', 'box'))
-den_tr = count_distribution(normalized_stlist, distrib_subset=0.01, plot_type=c('density', 'violin', 'box'))
+#### Violin & Box plots
+den_raw = plot_counts(normalized_stlist, distrib_subset=0.01, data_type='raw', plot_type=c('density', 'violin', 'box'))
+den_tr = plot_counts(normalized_stlist, distrib_subset=0.01, plot_type=c('density', 'violin', 'box'))
 
 $plots
 
