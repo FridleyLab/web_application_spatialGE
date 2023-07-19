@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-if="title.length" class="d-flex mb-4" :class="titleClass">
-            {{ title }}
+            {{ title }} <show-modal v-if="showToolTip.length" :tag="showToolTip"></show-modal>
         </div>
         <div class="d-flex">
             <div :class="showPercentages ? 'w-15' : 'w-10'">
@@ -36,7 +36,8 @@ import Slider from '@vueform/slider'
             step: {type: Number, default: 1},
             showPercentages: {type: Boolean, default: false},
             defaultMin: {type: Number, default: -1},
-            defaultMax: {type: Number, default: -1}
+            defaultMax: {type: Number, default: -1},
+            showToolTip: {type: String, default: ''},
         },
 
         data() {

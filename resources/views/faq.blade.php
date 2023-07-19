@@ -2,10 +2,9 @@
 
 @section('content')
 
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-center">
-
-            <div class="col-xl-9 col-lg-10 col-sm-12 mb-xl-0 mb-4">
+    <div class="container-fluid py-4 col-xl-11 col-md-12 col-sm-12">
+        <div class="row justify-content-center">
+            <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4 mt-4">
                 <div class="card">
                     <div class="card-header p-3 pt-2">
                         <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">

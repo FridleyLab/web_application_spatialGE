@@ -1,6 +1,6 @@
 <template>
-    <a href="#" @click="showContent" class="ms-1">
-        <i class="material-icons fs-5 text-info opacity-20">help</i>
+    <a href="#" v-on:click.stop.prevent="showContent" class="ms-1">
+        <i class="material-icons text-secondary fs-5 opacity-20">help</i>
     </a>
 </template>
 
@@ -19,7 +19,8 @@ export default {
     },
 
     methods: {
-        showContent() {
+        showContent(event) {
+            event.stopPropagation();
             this.emitter.emit('show-tooltip', this.tag);
         },
     },

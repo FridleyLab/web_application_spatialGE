@@ -6,12 +6,13 @@
 <!--            <multiselect></multiselect>-->
 <!--        </div>-->
 
-        <div class="accordion" id="accordionFilterTab" :class="processing || generating_plots ? 'disabled-clicks' : ''">
+        <div class="accordion row" id="accordionFilterTab" :class="processing || generating_plots ? 'disabled-clicks' : ''">
             <div class="accordion-item">
-                <h2 class="accordion-header" id="headingSelectSamples">
+                <h2 class="accordion-header d-flex" id="headingSelectSamples">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
                         Select samples to apply this filter
                     </button>
+                    <show-modal tag="qcfilter_samples"></show-modal>
                 </h2>
                 <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
 
@@ -35,10 +36,11 @@
 
 
             <div class="accordion-item">
-                <h2 class="accordion-header" id="headingSpotCell">
+                <h2 class="accordion-header d-flex" id="headingSpotCell">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpotCell" aria-expanded="false" aria-controls="collapseSpotCell">
                         Filter spots/cells
                     </button>
+                    <show-modal tag="qcfilter_spots_cells"></show-modal>
                 </h2>
                 <div id="collapseSpotCell" class="accordion-collapse collapse" aria-labelledby="headingSpotCell" data-bs-parent="#accordionFilterTab">
 
@@ -48,16 +50,16 @@
                             <div class="row">
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep spots/cells with this number of counts:" title-class="text-bold" :min="0" :max="project.project_parameters.max_spot_counts" :step="500" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
+                                    <numeric-range title="Keep spots/cells with this number of counts:" show-tool-tip="qcfilter_spots_cells_number_counts" title-class="text-bold" :min="0" :max="project.project_parameters.max_spot_counts" :step="500" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
                                 </div>
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep spots/cells with this number of expressed genes:" :show-percentages="true" title-class="text-bold" :min="0" :max="project.project_parameters.total_genes" :step="500" @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
+                                    <numeric-range title="Keep spots/cells with this number of expressed genes:" show-tool-tip="qcfilter_spots_cells_number_expressed_counts" :show-percentages="true" title-class="text-bold" :min="0" :max="project.project_parameters.total_genes" :step="500" @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
                                 </div>
 
                                 <div class="mt-4">
 
-                                    <div class="text-start text-bold mt-2">Keep spots/cells by percentage of counts:</div>
+                                    <div class="text-start text-bold mt-2">Keep spots/cells by percentage of counts: <show-modal tag="qcfilter_spots_cells_percentage_counts"></show-modal></div>
                                     <div class="mt-2 justify-content-center row row-cols-2">
                                         <div class=" col my-2 justify-content-center">
                                             <div class="form-check">
@@ -75,12 +77,13 @@
                                             </div>
                                         </div>
                                         <div class="col mt-3">
-                                        <div class="accordion w-100 w-xl-70" id="accordionRegExFilterSpots">
+                                        <div class="accordion row w-100 w-xl-90" id="accordionRegExFilterSpots">
                                             <div class="accordion-item">
-                                                <h2 class="accordion-header" id="headingRegExFilterSpots">
+                                                <h2 class="accordion-header d-flex" id="headingRegExFilterSpots">
                                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRegExFilterSpots" aria-expanded="false" aria-controls="collapseRegExFilterSpots">
                                                         Regular expression (advanced users)
                                                     </button>
+                                                    <show-modal tag="qcfilter_spots_cells_percentage_counts_regexp"></show-modal>
                                                 </h2>
                                                 <div id="collapseRegExFilterSpots" class="accordion-collapse collapse" aria-labelledby="headingRegExFilterSpots" data-bs-parent="#accordionRegExFilterSpots">
 
@@ -119,10 +122,11 @@
             </div>
 
             <div class="accordion-item">
-                <h2 class="accordion-header" id="headingRemoveGenes">
+                <h2 class="accordion-header d-flex" id="headingRemoveGenes">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRemoveGenes" aria-expanded="false" aria-controls="collapseRemoveGenes">
                         Filter genes
                     </button>
+                    <show-modal tag="qcfilter_genes"></show-modal>
                 </h2>
                 <div id="collapseRemoveGenes" class="accordion-collapse collapse" aria-labelledby="headingRemoveGenes" data-bs-parent="#accordionFilterTab">
 
@@ -135,7 +139,7 @@
                                 </select>
                             </div>
                             <div class="col align">
-                                <label for="genesExcluded" class="form-label">Excluded genes:</label>
+                                <label for="genesExcluded" class="form-label">Excluded genes:</label><show-modal tag="qcfilter_genes_excluded"></show-modal>
                                 <select ref="genesExcluded" id="genesExcluded" multiple class="p-2 form-select w-100 border border-1" @click="removeFilterGene" title="Click to add sample">
                                     <option v-for="gene in filter_genes_selected" :value="gene">{{ gene }}</option>
                                 </select>
@@ -157,14 +161,16 @@
                                     Remove ribosomal genes (^RP[L|S])
                                 </label>
                             </div>
+                            <show-modal tag="qcfilter_genes_remove_mito_ribo"></show-modal>
                         </div>
 
-                        <div class="accordion w-100 w-xxl-60" id="accordionRegExFilterGenes">
+                        <div class="accordion row w-100 w-xxl-60" id="accordionRegExFilterGenes">
                             <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingRegExFilterGenes">
+                                <h2 class="accordion-header d-flex" id="headingRegExFilterGenes">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRegExFilterGenes" aria-expanded="false" aria-controls="collapseRegExFilterGenes">
                                         Remove genes using regular expression (advanced users)
                                     </button>
+                                    <show-modal tag="qcfilter_genes_remove_regexp"></show-modal>
                                 </h2>
                                 <div id="collapseRegExFilterGenes" class="accordion-collapse collapse" aria-labelledby="headingRegExFilterGenes" data-bs-parent="#accordionRegExFilterGenes">
 
@@ -190,10 +196,10 @@
                         <div class="m-4 gap-1">
                             <div class="row">
                                 <div class="pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep genes with counts between:" title-class="text-bold" :min="0" :max="project.project_parameters.max_gene_counts" :step="500" @updated="(min,max) => {params.gene_minreads = min; params.gene_maxreads = max}"></numeric-range>
+                                    <numeric-range title="Keep genes with counts between:" show-tool-tip="qcfilter_genes_counts_between" title-class="text-bold" :min="0" :max="project.project_parameters.max_gene_counts" :step="500" @updated="(min,max) => {params.gene_minreads = min; params.gene_maxreads = max}"></numeric-range>
                                 </div>
                                 <div class="mt-4">
-                                    <div class="text-start text-bold">Keep genes expressed in:</div>
+                                    <div class="text-start text-bold">Keep genes expressed in: <show-modal tag="qcfilter_genes_expressed_in"></show-modal></div>
                                     <div class="mt-2">
                                         <!--                                        TODO: script maximum number of spots  -->
                                         <numeric-range title="Number of spots:" :show-percentages="true" :min="0" :max="project.project_parameters.max_spots_number" :step="50" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>

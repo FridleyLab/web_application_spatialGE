@@ -73,7 +73,7 @@
                 description: this.project ? this.project.description : '',
                 errorMessage: '',
 
-                platforms: ['Visium', 'GeoMx', 'CosMx/SMI', 'MERFISH/MERSCOPE', 'Molecular Cartography', 'Slide-seq', 'STARmap', 'Spatial Transcriptomics (Pre-Visium)', 'Multiple platforms', 'Other'],
+                platforms: ['Visium', 'GeoMx', 'CosMx/SMI', 'MERFISH/MERSCOPE', 'Molecular Cartography', 'STARmap', 'Spatial Transcriptomics (Pre-Visium)', 'Generic'],
             }
         },
 

@@ -2,10 +2,9 @@
 
 
 @section('content')
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-center">
-
-            <div class="col-xl-9 col-lg-10 col-sm-12 mb-xl-0 mb-4">
+    <div class="container-fluid py-4 col-xl-11 col-md-12 col-sm-12">
+        <div class="row justify-content-center">
+            <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4 mt-4">
                 <div class="card">
                     <div class="card-header p-3 pt-2">
                         <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">
@@ -22,9 +21,9 @@
 
                         <h2 class="my-3 text-center">Methods for the study of the tissue microenvironment using spatial statistics</h2>
 
-                        <p class="fs-4">Welcome to the spatialGE web application, a user friendly, point-and-click implementation of the spatialGE R package. This application contains a collection of methods for visualization and spatial statistics analysis of the tissue microenvironment and heterogeneity using spatial transcriptomics (ST) experiments. For a technical description of the methods, please see our publications at the bottom of this page.</p>
+                        <p class="fs-5">Welcome to the spatialGE web application, a user friendly, point-and-click implementation of the <a href="https://github.com/FridleyLab/spatialGE" target="_blank" class="text-info">spatialGE R package</a>. This application contains a collection of methods for visualization and spatial statistics analysis of the tissue microenvironment and heterogeneity using spatial transcriptomics (ST) experiments. For a technical description of the methods, please see our publications at the bottom of this page.</p>
 
-                        <p class="fs-4">For tutorials and guides on how to use spatialGE, please refer to the “How to get started” section, or click <a href="{{ route('login') }}" class="">here</a> to log in your account.</p>
+                        <p class="fs-5">For tutorials and guides on how to use spatialGE, please refer to the “How to get started” section, or click <a href="{{ route('login') }}" class="text-info">here</a> to log in your account.</p>
 
 
                         <div id="carouselAboutSpatialGE" class="py-4 carousel carousel-dark slide" data-bs-ride="carousel">
@@ -127,14 +126,14 @@
 
                         <h3>Publications</h3>
 
-                        <p class="fs-4">If you use spatialGE to generate figures or conduct analysis for your publications, please cite the following papers:</p>
+                        <p class="fs-5">If you use spatialGE to generate figures or conduct analysis for your publications, please cite the following papers:</p>
 
                         <ul class="fs-5">
                             <li>Ospina, O. E., Wilson, C. M., Soupir, A. C., Berglund, A., Smalley, I., Tsai, K. Y., Fridley, B. L. 2022. spatialGE: Quantification and visualization of the tumor microenvironment heterogeneity using spatial transcriptomics. Bioinformatics 38: 2645–2647. <a href="https://doi.org/10.1093/bioinformatics/btac145" target="_blank">https://doi.org/10.1093/bioinformatics/btac145</a></li>
                             <li>Ospina, O. E., Fridley, B. L. 2023. A spatially-informed framework to differential gene expression analysis for spatial transcriptomics experiments. (In Prep)</li>
                         </ul>
 
-                        <p class="fs-4">Some scientific articles using sptialGE methods:</p>
+                        <p class="fs-5">Some scientific articles using sptialGE methods:</p>
                         <ul class="fs-5">
                             <li>Ospina, O., Soupir, A., Fridley, B.L. 2023. A primer on preprocessing, visualization, clustering, and phenotyping of barcode-based spatial transcriptomics data. In: Fridley, B. L., Wang, X. (eds) Statistical Genomics. Methods in Molecular Biology, vol 2629. New York, NY, USA. <a href="https://doi.org/10.1007/978-1-0716-2986-4_7" target="_blank">https://doi.org/10.1007/978-1-0716-2986-4_7</a></li>
                             <li>Alhaddad, H., Ospina, O. E., Khaled, M., Fridley, B. L., Smalley, I. Spatial multi-omics identifies unique tumor-stroma interactions mediating therapy resistance in leptomeningeal melanoma metastasis. (In Prep)</li>

@@ -5,15 +5,15 @@
 
             <div v-if="samples.length" class="row text-bolder text-center">
                 <div class="col-2 text-start">Sample</div>
-                <div class="col-2">Expression</div>
-                <div class="col-2">Coordinates</div>
-                <div class="col-2">Scale factors</div>
-                <div class="col-2">Tissue image</div>
+                <div class="col-2">Expr<span class="d-none d-lg-inline">ession</span></div>
+                <div class="col-2">Coord<span class="d-none d-lg-inline">inates</span></div>
+                <div class="col-2">Scaling<span class="d-none d-lg-inline"> factors</span></div>
+                <div class="col-2">Tissue<span class="d-none d-lg-inline"> image</span></div>
                 <div class="col-2"></div>
             </div>
 
             <div v-for="sample in samples" class="row">
-                <div class="col-2">
+                <div class="col-2 text-truncate" :title="sample.name ?? 'Sample ' + sample.id">
                     {{ sample.name ?? 'Sample ' + sample.id }}
                 </div>
 
@@ -52,7 +52,7 @@
                 <h5>Optional: Add sample-level metadata</h5>
                 <ul class="mt-3">
                     <li v-if="!addingMetadataManually">
-                        <button v-if="!disabled" class="btn btn-sm" :class="addingMetadataFile ? 'btn-outline-warning' : 'btn-outline-info'" @click="addingMetadataFile = !addingMetadataFile">{{ addingMetadataFile ? 'Cancel metadata file upload' : 'Option 1: Upload metadata file (csv/excel)'}}</button>
+                        <button v-if="!disabled" class="btn btn-sm" :class="addingMetadataFile ? 'btn-outline-warning' : 'btn-outline-info'" @click="addingMetadataFile = !addingMetadataFile">{{ addingMetadataFile ? 'Cancel metadata file upload' : 'Option 1: Upload metadata file (csv/excel)'}}</button><show-modal tag="importdata_metadata_file"></show-modal>
                         <div v-if="addingMetadataFile" class="mb-5">
                             <div class="max-width-300">
                                 <div class="mb-2 text-center">
@@ -66,7 +66,7 @@
 
                         <button v-if="!disabled && addingMetadataManually" class="btn btn-sm btn-outline-info me-3" @click="addMetadata">Add new metadata column</button>
 
-                        <button v-if="!disabled" class="btn btn-sm" :class="addingMetadataManually ? 'btn-outline-success' : 'btn-outline-info'" @click="addingMetadataManually = !addingMetadataManually">{{ addingMetadataManually ? 'metadata complete' : 'Option 2: Add metadata manually'}}</button>
+                        <button v-if="!disabled" class="btn btn-sm" :class="addingMetadataManually ? 'btn-outline-success' : 'btn-outline-info'" @click="addingMetadataManually = !addingMetadataManually">{{ addingMetadataManually ? 'metadata complete' : 'Option 2: Add metadata manually'}}</button><show-modal tag="importdata_metadata_manually"></show-modal>
 
                     </li>
                 </ul>
@@ -88,7 +88,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>Sample/Metadata</th>
+                    <th title="Sample/Metadata"><span class="d-none d-md-inline">Sample/Metadata</span><span class="d-inline d-md-none">S/M</span></th>
                     <td v-for="index in metadata.length" class="text-center">
                         <input :disabled="disabled" type="text" class="border border-info border-1 rounded rounded-2 px-2" :style="'width:' + (activeColumn===index ? '180' : '120') + 'px'" :value="('name' in metadata[index-1]) ? metadata[index-1].name : ''" @input="setMetadataName($event, index - 1 )" @focus="activeColumn = index" @focusout="activeColumn = -1" />
 <!--                        <a v-if="activeColumnHeader !== index" class="btn btn-outline-info" @click="activeColumnHeader = index">{{ metadata[index-1].name }}</a>-->
@@ -97,7 +97,7 @@
                 </thead>
                 <tbody>
                 <tr v-for="sample in samples" :key="sample.id">
-                    <th>
+                    <th class="text-truncate">
                         {{ sample.name ?? 'Sample ' + sample.id }}
 <!--                        <input type="text" class="border border-info border-1 rounded rounded-2 px-2" :value="sample.name ?? 'Sample ' + sample.id" @input="" />-->
                     </th>
