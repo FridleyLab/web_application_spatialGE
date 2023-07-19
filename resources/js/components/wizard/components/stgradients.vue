@@ -63,7 +63,10 @@
 
             <div class="row justify-content-center text-center m-3">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div>Annotation to test</div>
+                    <div>
+                        Annotation to test
+                        <show-modal tag="stgradient_annotation_to_test"></show-modal>
+                    </div>
                     <div>
                         <span>
                             <Multiselect :options="project.project_parameters.annotation_variables" v-model="params.annot"></Multiselect>
@@ -75,7 +78,7 @@
 
             <div class="d-flex justify-content-center text-center m-3">
                 <div class="justify-content-center text-center m-3">
-                    <div>Reference cluster</div>
+                    <div>Reference cluster <show-modal tag="stgradient_reference_cluster"></show-modal></div>
                     <div>
                         <span>
                             <Multiselect :options="annotation_variables_clusters" v-model="params.ref"></Multiselect>
@@ -84,7 +87,7 @@
                 </div>
 
                 <div class="justify-content-center text-center m-3">
-                    <div>Cluster(s) to exclude (optional)</div>
+                    <div>Cluster(s) to exclude (optional) <show-modal tag="stgradient_clusters_to_exclude"></show-modal></div>
                     <div>
                         <span>
                             <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters_exclude" v-model="params.exclude" @select="checkNotAllSelected"></Multiselect>
@@ -96,24 +99,24 @@
             <div class="row text-center m-3">
                     <div class="d-flex justify-content-center">
                         <label>
-                            <input type="checkbox" value="moran" v-model="params.robust"> Robust regression?
+                            <input type="checkbox" value="moran" v-model="params.robust"> Robust regression?<show-modal tag="stgradient_robust_regression"></show-modal>
                         </label>
                         <label class="ms-4">
-                            <input :disabled="params.robust" type="checkbox" value="moran" v-model="params.out_rm"> Ignore outliers?
+                            <input :disabled="params.robust" type="checkbox" value="moran" v-model="params.out_rm"> Ignore outliers?<show-modal tag="stgradient_ignore_outliers"></show-modal>
                         </label>
                     </div>
             </div>
 
             <div class="row m-3">
                 <div class="d-flex justify-content-center text-center">
-                    <div class="me-3">Restrict correlation to this limit: <input type="number" class="text-end text-sm border border-1 rounded" v-model="params.limit"></div>
-                    <div class="me-3">Minimum number of neighbors: <input type="number" class="text-end text-sm border border-1 rounded" v-model="params.min_nb"></div>
+                    <div class="me-3">Restrict correlation to this limit: <input type="number" class="text-end text-sm border border-1 rounded" v-model="params.limit"> <show-modal tag="stgradient_restrict_correlation_to_this_limit"></show-modal></div>
+                    <div class="me-3">Minimum number of neighbors: <input type="number" class="text-end text-sm border border-1 rounded" v-model="params.min_nb"><show-modal tag="stgradient_minimum_number_of_neighbors"></show-modal></div>
                 </div>
             </div>
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-80 w-md-50 w-lg-50 w-xxl-30">
-                    <div>Distance summary metric</div>
+                    <div>Distance summary metric <show-modal tag="stgradient_distance_summary_metric"></show-modal></div>
                     <div>
                         <Multiselect :options="distsumm_options" v-model="params.distsumm"></Multiselect>
                     </div>

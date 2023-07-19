@@ -1,7 +1,7 @@
 <template>
-    <button type="button" class="btn btn-lg" @click="showContent">
-        <i class="material-icons text-info opacity-20">help</i>
-    </button>
+    <a href="#" @click="showContent" class="ms-1">
+        <i class="material-icons fs-5 text-info opacity-20">help</i>
+    </a>
 </template>
 
 <script>

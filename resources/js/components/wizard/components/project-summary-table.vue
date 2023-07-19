@@ -20,7 +20,7 @@
 
             </tbody>
         </table>
-        <div class="float-end"><a class="text-info" :href="url" download>Download summary</a></div>
+        <div v-if="url.length" class="float-end"><a class="text-info" :href="url" download>Download summary</a></div>
     </div>
 </template>
 
@@ -31,7 +31,7 @@
         props: {
             data: String,
             reference: {type: String, default: ''},
-            url: String
+            url: {type: String, default: ''}
         },
 
         data() {
