@@ -7,7 +7,17 @@
                 Spatial gradients with STgradient
             </div>
             <div class="text-justify">
-                STgradient finds genes for which there is evidence of gene expression gradients with respect to a tissue niche/domain. The method calculates distances from each spot/cell to a “reference” tissue niche/domain (e.g., cluster defined via STclust) and correlates those distances with gene expression values from top variable genes. The distances to reference niche can be summarized using the average or the minimum value. Generally the minimum distances capture gradients at short ranges, while average distances capture whole-tissue gradients. Users can use robust regression to reduce (albeit not eliminate) the effect of zero inflation in spatial transcriptomics data. Spearman correlation coefficients are calculated using the ‘cor.test’ R function. The most variable genes to be tested are identified <i>before</i> removal of outliers.
+                STgradient tests for genes for which there is evidence of expression spatial gradients with respect to a
+                “reference” tissue niche/domain (e.g., higher expression closer to reference tissue niche, lower
+                expression as farther from reference tissue niche). The method calculates distances from each spot/cell
+                to the reference tissue niche/domain (e.g., a cluster defined via STclust – See “Spatial domain
+                detection”) and correlates those distances with gene expression values from top variable genes (defined
+                by standard deviation across ROIs/spots/cells). The distances to reference niche can be summarized using
+                the average or the minimum value. Generally, the minimum distances might be better to capture gradients
+                at short ranges, while average distances capture whole-tissue gradients. The use of robust regression to
+                reduce (albeit not eliminate) the effect of zero inflation in spatial transcriptomics data. Spearman
+                correlation coefficients are calculated using the ‘cor.test’ R function. The most variable genes to be tested are identified <i>before</i>
+                removal of outliers.
             </div>
 
             <div class="d-flex justify-content-center text-center">

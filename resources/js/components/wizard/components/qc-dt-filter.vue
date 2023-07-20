@@ -123,10 +123,11 @@
 
             <div class="accordion-item">
                 <h2 class="accordion-header d-flex" id="headingRemoveGenes">
+                    <show-modal tag="qcfilter_genes"></show-modal>
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRemoveGenes" aria-expanded="false" aria-controls="collapseRemoveGenes">
                         Filter genes
                     </button>
-                    <show-modal tag="qcfilter_genes"></show-modal>
+
                 </h2>
                 <div id="collapseRemoveGenes" class="accordion-collapse collapse" aria-labelledby="headingRemoveGenes" data-bs-parent="#accordionFilterTab">
 
