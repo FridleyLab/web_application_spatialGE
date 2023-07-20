@@ -5,25 +5,14 @@
         <div class="card" style="width: 36rem;">
             <div class="card-body">
                 <h5 class="card-title text-muted">{{ title() }}</h5>
-    <!--            <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>-->
                 <p class="card-text">{{ toolTip() }}</p>
-                <a href="#" class="card-link float-end text-info" @click="hideContent">Close</a>
-    <!--            <a href="#" class="card-link">Another link</a>-->
+                <div class="text-center">
+                    <a href="#" class="card-link text-info" @click="hideContent">Close</a>
+                </div>
             </div>
         </div>
     </div>
 
-
-<!--    <div v-if="visible" :class="visible ? 'popup-center' : ''" class="border border-1 rounded rounded-xl p-4 z-index-0 bg-gradient-info max-width-500">-->
-<!--            <div class="">-->
-<!--                <div class="py-2 justify-content-center align-items-center text-center text-white">-->
-<!--                    {{ toolTip() }}-->
-<!--                </div>-->
-<!--                <div>-->
-<!--                    <input type="button" class="btn btn-sm btn-info mt-2 mb-0 text-white float-end" @click="hideContent" value="close" />-->
-<!--                </div>-->
-<!--            </div>-->
-<!--    </div>-->
 </template>
 
 <script>

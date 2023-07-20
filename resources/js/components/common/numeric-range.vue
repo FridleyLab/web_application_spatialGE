@@ -13,7 +13,7 @@
             </div>
             <div :class="showPercentages ? 'w-15' : 'w-10'">
                 <span v-if="showPercentages" class="text-info me-2 w-35">{{ Math.round(value[1]/max*100) }}%</span>
-                <input class="text-end border border-info border-2 rounded px-1" :class="showPercentages ? 'w-65' : 'w-100'" type="text" v-model="value[1]">
+                <input :id="showToolTip" class="text-end border border-info border-2 rounded px-1" :class="showPercentages ? 'w-65' : 'w-100'" type="text" v-model="value[1]">
             </div>
         </div>
     </div>

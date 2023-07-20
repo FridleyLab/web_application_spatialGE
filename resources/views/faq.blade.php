@@ -15,7 +15,7 @@
                         </div>
                     </div>
                     <hr class="dark horizontal my-0">
-                    <div class="card-body px-6 text-justify text-dark">
+                    <div class="card-body px-2 px-md-3 px-lg-6 text-justify text-dark">
 
 
                         <h4 class="my-3 text-center">Frequently Asked Questions</h4>

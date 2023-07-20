@@ -16,7 +16,7 @@
                         </div>
                     </div>
                     <hr class="dark horizontal my-0">
-                    <div class="card-body px-6 text-justify text-dark">
+                    <div class="card-body px-2 px-md-3 px-lg-6 text-justify text-dark">
 {{--                        <h2 class="m-4">spatialGE</h2>--}}
 
                         <h2 class="my-3 text-center">Methods for the study of the tissue microenvironment using spatial statistics</h2>
