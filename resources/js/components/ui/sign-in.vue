@@ -16,18 +16,24 @@
                             </div>
                             <div v-if="!recoveryEmailSentMessage.length" class="card-body">
 
-                                <div class="input-group input-group-outline mb-3" :class="(validEmailAddress ? 'is-valid' : '') + (this.overrideValidations ? 'focused is-focused is-valid' : '')">
-                                    <label class="form-label">Email</label>
-                                    <input ref="email" required type="email" class="form-control" name="email" v-model="email" @dblclick="testUser">
-                                </div>
-                                <div v-if="!recoveringPassword" class="input-group input-group-outline mb-3" :class="(this.overrideValidations ? 'focused is-focused' : '')">
-                                    <label class="form-label">Password</label>
-                                    <input ref="password" required type="password" class="form-control" name="password" v-model="password">
-                                </div>
-                                <show-message :message="errorMessage" role="danger"></show-message>
-                                <div class="text-center">
-                                    <button type="button" @click="checkCredentials" :class="processing ? 'disabled' : ''" class="btn btn-lg bg-gradient-info btn-lg w-100 mt-4 mb-0">{{ buttonLabel }}</button>
-                                </div>
+                                <form role="form" @submit.prevent="checkCredentials" method="POST" autocomplete="off">
+
+                                    <template v-if="!processing">
+                                        <div class="input-group input-group-outline mb-3" :class="(validEmailAddress ? 'is-valid' : '') + (this.overrideValidations ? 'focused is-focused is-valid' : '')">
+                                            <label class="form-label">Email</label>
+                                            <input ref="email" required type="email" class="form-control" name="email" v-model="email" @dblclick="testUser">
+                                        </div>
+                                        <div v-if="!recoveringPassword" class="input-group input-group-outline mb-3" :class="(this.overrideValidations ? 'focused is-focused' : '')">
+                                            <label class="form-label">Password</label>
+                                            <input ref="password" required type="password" class="form-control" name="password" v-model="password">
+                                        </div>
+                                        <show-message :message="errorMessage" role="danger"></show-message>
+                                    </template>
+                                    <div class="text-center">
+                                        <button type="submit" :class="processing ? 'disabled' : ''" class="btn btn-lg bg-gradient-info btn-lg w-100 mt-4 mb-0">{{ buttonLabel }}</button>
+                                    </div>
+                                </form>
+
                             </div>
                             <div v-if="!recoveryEmailSentMessage.length" class="card-footer text-center pt-0 px-lg-2 px-1">
                                 <p class="mb-2 text-sm mx-auto">
