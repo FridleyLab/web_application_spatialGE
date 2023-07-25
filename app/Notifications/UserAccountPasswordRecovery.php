@@ -35,7 +35,7 @@ class UserAccountPasswordRecovery extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(env('APP_NAME') . ': ' . ' - Password recovery')
+            ->subject(env('APP_NAME') . ' - Password recovery')
             ->greeting('Hello ' . $notifiable->first_name . '!')
             ->line("You have requested to change your password")
             ->action('Click here to change your password', route('password-recovery-form', ['code' => $notifiable->email_verification_code]))
