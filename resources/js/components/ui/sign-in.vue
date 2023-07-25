@@ -106,7 +106,7 @@
                             this.errorMessage = error.response.data;
                             this.processing = false;
                         });
-                    return;
+                    return false;
                 }
 
                 if(!this.password.trim().length) {
