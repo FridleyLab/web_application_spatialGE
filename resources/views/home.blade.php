@@ -133,7 +133,7 @@
                             <li>Ospina, O. E., Fridley, B. L. 2023. A spatially-informed framework to differential gene expression analysis for spatial transcriptomics experiments. (In Prep)</li>
                         </ul>
 
-                        <p class="fs-5">Some scientific articles using sptialGE methods:</p>
+                        <p class="fs-5">Some scientific articles using spatialGE methods:</p>
                         <ul class="fs-5">
                             <li>Ospina, O., Soupir, A., Fridley, B.L. 2023. A primer on preprocessing, visualization, clustering, and phenotyping of barcode-based spatial transcriptomics data. In: Fridley, B. L., Wang, X. (eds) Statistical Genomics. Methods in Molecular Biology, vol 2629. New York, NY, USA. <a href="https://doi.org/10.1007/978-1-0716-2986-4_7" target="_blank">https://doi.org/10.1007/978-1-0716-2986-4_7</a></li>
                             <li>Alhaddad, H., Ospina, O. E., Khaled, M., Fridley, B. L., Smalley, I. Spatial multi-omics identifies unique tumor-stroma interactions mediating therapy resistance in leptomeningeal melanoma metastasis. (In Prep)</li>

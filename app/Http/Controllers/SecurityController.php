@@ -7,6 +7,7 @@ use App\Models\ProfileIndustry;
 use App\Models\ProfileInterest;
 use App\Models\ProfileJob;
 use App\Models\User;
+use App\Notifications\userAccountPasswordRecovery;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -100,12 +101,13 @@ class SecurityController extends Controller
         try {
             $user = User::create(['first_name' => $first_name, 'last_name' => $last_name, 'email' => $email, 'email_verification_code' => '', 'password' => Hash::make($password), 'industry' => $industry, 'interest' => $interest, 'job' => $job]);
             //create hashed value based on the user's email to use as activation code
-            $user->email_verification_code = $user->id . '__||__' . str_replace('/', '', Hash::make($user->email));
+            $user->email_verification_code = $user->id . '__||__' . str_replace('/', '', Hash::make($user->email . now()->timestamp));
             $user->save();
+
             Mail::to($email)->send(new userAccountActivation($user));
 
             //TODO: configure to only execute in a local environment
-            return response(route('account-activation-dev', ['user' => $user->id]), 200);
+            return response(route('account-activation', ['code' => $user->email_verification_code]), 200);
             //return response('<p>Account created, please check your email to activate your account.</p><p>Please activate your account <a href="' . route('account-activation', ['code' => $user->email_verification_code]) . '">here</a></p>', 200);
         }
         catch(\Exception $e) {
@@ -153,7 +155,13 @@ class SecurityController extends Controller
         try {
             $user = User::where('email', $email)->firstOrFail();
 
-            //TODO: send email
+            $user->email_verification_code = $user->id . '__||__' . str_replace('/', '', Hash::make($user->email . now()->timestamp));
+            $user->save();
+
+            //Mail::to($email)->send(new userAccountPasswordRecovery($user));
+            $user->notify(new UserAccountPasswordRecovery());
+
+            return response('Recovery email sent, please check your inbox');
 
         }
         catch (\Exception $e) {
@@ -185,6 +193,35 @@ class SecurityController extends Controller
         catch(\Exception $e) {
             return response('Something went wrong!', 500);
         }
+    }
+
+    public function changeUserPassword(User $user) {
+
+        try {
+            $code = request('code');
+
+            $user = User::where('email_verification_code', $code)->firstOrFail();
+
+            $password = request('password');
+            //$passwordConfirmation = request('passwordConfirmation');
+
+            //if($password !== !$passwordConfirmation)
+            //    return response('Password does not match the password confirmation!', 400);
+
+            if(!$this->checkPasswordRules($password)) {
+                return response('Password should be at least 8 characters long!', 400);
+            }
+
+            $user->password = Hash::make($password);
+            $user->email_verification_code = '';
+            $user->save();
+
+            return response('Your password was successfully changed!');
+        }
+        catch(\Exception $e) {
+            return response('Something went wrong!', 500);
+        }
+
     }
 
 }

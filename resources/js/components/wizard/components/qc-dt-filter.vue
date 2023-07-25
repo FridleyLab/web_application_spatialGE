@@ -9,10 +9,10 @@
         <div class="accordion row" id="accordionFilterTab" :class="processing || generating_plots ? 'disabled-clicks' : ''">
             <div class="accordion-item">
                 <h2 class="accordion-header d-flex" id="headingSelectSamples">
+                    <show-modal tag="qcfilter_samples"></show-modal>
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
                         Select samples to apply this filter
                     </button>
-                    <show-modal tag="qcfilter_samples"></show-modal>
                 </h2>
                 <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
 
@@ -37,10 +37,10 @@
 
             <div class="accordion-item">
                 <h2 class="accordion-header d-flex" id="headingSpotCell">
+                    <show-modal tag="qcfilter_spots_cells"></show-modal>
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpotCell" aria-expanded="false" aria-controls="collapseSpotCell">
                         Filter spots/cells
                     </button>
-                    <show-modal tag="qcfilter_spots_cells"></show-modal>
                 </h2>
                 <div id="collapseSpotCell" class="accordion-collapse collapse" aria-labelledby="headingSpotCell" data-bs-parent="#accordionFilterTab">
 
@@ -127,7 +127,6 @@
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRemoveGenes" aria-expanded="false" aria-controls="collapseRemoveGenes">
                         Filter genes
                     </button>
-
                 </h2>
                 <div id="collapseRemoveGenes" class="accordion-collapse collapse" aria-labelledby="headingRemoveGenes" data-bs-parent="#accordionFilterTab">
 

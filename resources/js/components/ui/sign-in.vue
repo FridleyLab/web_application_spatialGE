@@ -21,7 +21,7 @@
                                     </div>
                                     <show-message :message="errorMessage" role="danger"></show-message>
                                     <div class="text-center">
-                                        <button type="submit" class="btn btn-lg bg-gradient-info btn-lg w-100 mt-4 mb-0">{{ recoveringPassword ? 'Send recovery email' : 'Sign In' }}</button>
+                                        <button type="submit" :class="processing ? 'disabled' : ''" class="btn btn-lg bg-gradient-info btn-lg w-100 mt-4 mb-0">{{ buttonLabel }}</button>
                                     </div>
                                 </form>
                             </div>
@@ -65,6 +65,8 @@
                 defaultHeader: 'Enter your email and password to sign in',
 
                 currentHeader: 'Enter your email and password to sign in',
+
+                processing: false,
             }
         },
 
@@ -75,19 +77,23 @@
                     .match(
                         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
                     );
+            },
+
+            buttonLabel() {
+                if(this.recoveringPassword) return 'Send recovery email';
+                if(this.processing) return 'Please wait...';
+                return 'Sign In';
             }
         },
 
         methods: {
             checkCredentials: function(e) {
+
+                this.processing = true;
+
                 this.errorMessage = '';
 
                 if(!this.email.trim().length) {
-                    this.errorMessage = "You must complete all the fields!";
-                    return;
-                }
-
-                if(!this.password.trim().length) {
                     this.errorMessage = "You must complete all the fields!";
                     return;
                 }
@@ -96,7 +102,15 @@
                 {
                     axios.get(this.resetPasswordUrl, {params: {'email' : this.email}})
                         .then((response) => { location.href = this.resetPasswordUrl + '?email=' + this.email })
-                        .catch((error) => { this.errorMessage = error.response.data});
+                        .catch((error) => {
+                            this.errorMessage = error.response.data;
+                            this.processing = false;
+                        });
+                    return;
+                }
+
+                if(!this.password.trim().length) {
+                    this.errorMessage = "You must complete all the fields!";
                     return;
                 }
 
@@ -107,6 +121,7 @@
                     .catch((error) => {
                         console.log(error.message);
                         this.errorMessage = error.response.data;
+                        this.processing = false;
                     });
             },
 

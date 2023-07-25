@@ -104,9 +104,13 @@ Route::get('/signup',[SecurityController::class, 'signup'])->name('signup')->mid
 Route::post('/signup',[SecurityController::class, 'create'])->middleware('guest');
 Route::get('/activate/{code}',[SecurityController::class, 'activate'])->middleware('guest')->name('account-activation');
 Route::get('/activate/{user}/dev',[SecurityController::class, 'activateDev'])->middleware('guest')->name('account-activation-dev');
-Route::get('/recover-password-email',[SecurityController::class, 'sendPasswordRecoveryEmail'])->middleware('guest')->name('send-password-recovery-email');
+
 Route::get('/recover-password-email/dev',[SecurityController::class, 'sendPasswordRecoveryEmailDev'])->middleware('guest')->name('send-password-recovery-email-dev');
+
+Route::get('/recover-password-email',[SecurityController::class, 'sendPasswordRecoveryEmail'])->middleware('guest')->name('send-password-recovery-email');
 Route::get('/recover-password/{code}',[SecurityController::class, 'resetPasswordForm'])->middleware('guest')->name('password-recovery-form');
+Route::post('/recover-password/{user}',[SecurityController::class, 'changeUserPassword'])->middleware('guest')->name('change-user-password');
+
 
 //Route::get('/test-login',[SecurityController::class, 'testLogIn'])->name('test-login')->middleware('guest');
 

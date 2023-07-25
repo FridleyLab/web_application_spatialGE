@@ -2037,13 +2037,13 @@ lapply(names(sp_enrichment), function(i){
             'min_spearman_r' => 'Spearman’s coefficient',
             'min_spearman_r_pval' => 'Spearman’s p-value',
             'min_spearman_r_pval_adj' => 'Spearman’s adjusted p-value',
-            'min_pval_warning' => 'Warning',
+            'min_pval_comment' => 'Comment',
             'avg_lm_coef' => 'Linear model slope',
             'avg_lm_pval' => 'Linear model p-value',
             'avg_spearman_r' => 'Spearman’s coefficient',
             'avg_spearman_r_pval' => 'Spearman’s p-value',
             'avg_spearman_r_pval_adj' => 'Spearman’s adjusted p-value',
-            'avg_pval_warning' => 'Warning'
+            'avg_pval_comment' => 'Comment'
         ];
 
         $files = ['stgradients_results.xlsx'];

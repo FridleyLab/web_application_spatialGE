@@ -170,7 +170,7 @@
                     <li><strong>Spearman’s coefficient:</strong> The value of the Spearman’s rank correlation coefficient (rho). This coefficient is a measure of the strength of the relationship between gene expression and distance from reference</li>
                     <li><strong>Spearman’s p-value:</strong> The p-value resulting from the test of significant correlation between gene expression and distance. The p-value can be used as a metric of statistical significance for the Spearman’s coefficient. Since the data is likely to contain “ties” (i.e., same distance and expression values for two or more spots/cells), the p-values are approximated</li>
                     <li><strong>Spearman’s adjusted p-value:</strong> The Benjamini-Hochberg correction for multiple testing on the Spearman’s coefficient p-values</li>
-                    <li><strong>Warning:</strong> If a test is labeled as “zero_st_deviation”, it likely means that the expression data has the same value for all spots (likely “0”). The lack of variation is likely the result of outlier removal or exclusion of clusters/domains</li>
+                    <li><strong>Comment:</strong> If a test is labeled as “zero_st_deviation”, it likely means that the expression data has the same value for all spots (likely “0”). The lack of variation is likely the result of outlier removal or exclusion of clusters/domains. If “rob_regr_no_convergence” it means that robust regression did not converge.</li>
                 </ul>
             </div>
 
