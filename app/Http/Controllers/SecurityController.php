@@ -7,7 +7,7 @@ use App\Models\ProfileIndustry;
 use App\Models\ProfileInterest;
 use App\Models\ProfileJob;
 use App\Models\User;
-use App\Notifications\userAccountPasswordRecovery;
+use App\Notifications\UserAccountPasswordRecovery;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
