@@ -9,7 +9,7 @@
                                 <p class="mb-0">{{ currentHeader }}</p>
                             </div>
                             <div class="card-body">
-                                <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST" autocomplete="off">
+                                <form role="form" @submit.prevent="checkCredentials" method="POST" autocomplete="off">
 
                                     <div class="input-group input-group-outline mb-3" :class="(validEmailAddress ? 'is-valid' : '') + (this.overrideValidations ? 'focused is-focused is-valid' : '')">
                                         <label class="form-label">Email</label>
