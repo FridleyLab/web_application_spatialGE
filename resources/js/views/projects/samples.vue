@@ -14,6 +14,9 @@
 
             <div v-for="sample in samples" class="row">
                 <div class="col-2 text-truncate" :title="sample.name ?? 'Sample ' + sample.id">
+                    <a v-if="false" href="#" v-on:click.stop.prevent="" class="ms-1">
+                        <i class="material-icons text-secondary fs-5 opacity-20">edit</i>
+                    </a>
                     {{ sample.name ?? 'Sample ' + sample.id }}
                 </div>
 
@@ -34,7 +37,7 @@
                 </div>
 
                 <div class="col-2 text-center">
-                    <template v-if="!disabled">
+                    <template v-if="!disabled && project.current_step === 1">
                         <i v-if="!deleting" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deleting = sample.id">delete</i>
                         <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deleting = 0" title="Cancel deletion" />
                         <input v-if="deleting === sample.id" type="button" class="btn btn-sm btn-outline-danger text-xxs ms-2" value="Delete" title="Confirm deletion of this sample" @click="deleteSample(sample)" />

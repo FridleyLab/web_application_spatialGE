@@ -249,6 +249,7 @@ class Project extends Model
         if(Storage::fileExists($genes_file)) {
             $data = Storage::read($genes_file);
             $genes = explode("\n", $data);
+            $genes = array_unique($genes);
             $_genes = [];
             foreach ($genes as $gene)
                 if(strlen($gene))

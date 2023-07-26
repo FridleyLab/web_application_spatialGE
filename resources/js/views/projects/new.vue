@@ -30,12 +30,12 @@
 
                             <div class="input-group input-group-outline mb-3" :class="(validName ? 'is-valid' : '') + (project ? ' focused is-focused' : '')">
                                 <label class="form-label">Project Name</label>
-                                <input required type="text" class="form-control" name="name" v-model="name">
+                                <input required type="text" class="form-control" name="name" v-model="name" maxlength="100">
                             </div>
 
                             <div class="input-group input-group-outline mb-3" :class="(project ? 'focused is-focused' : '')">
                                 <label class="form-label">Description</label>
-                                <input type="text" class="form-control" name="description" v-model="description">
+                                <input type="text" class="form-control" name="description" v-model="description" maxlength="1000">
                             </div>
 
                             <show-message :message="errorMessage"></show-message>
