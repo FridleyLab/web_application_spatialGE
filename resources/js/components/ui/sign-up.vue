@@ -87,21 +87,6 @@
                                     </div>
 
 
-
-
-
-
-<!--                                    <div>-->
-<!--                                        <input type="button" class="cursor-pointer btn btn-outline-info" @click="showTechnologies = !showTechnologies" value="Please, tell us a little about you">-->
-<!--                                        <div>-->
-<!--                                            <div v-if="showTechnologies" v-for="technology in technologies">-->
-<!--                                                <label>-->
-<!--                                                    <input type="checkbox" /> {{ technology }}-->
-<!--                                                </label>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
-
                                     <div class="form-check form-check-info text-start ps-0">
                                         <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="terms_and_conditions">
                                         <label class="form-check-label" for="flexCheckDefault">

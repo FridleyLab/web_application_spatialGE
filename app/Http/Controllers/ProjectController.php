@@ -156,6 +156,8 @@ class ProjectController extends Controller
 
         $project->delete();
 
+        session()->forget('project_id');
+
         return 'OK';
     }
 

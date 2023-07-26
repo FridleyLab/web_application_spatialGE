@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\userAccountActivation;
 use App\Models\ProfileIndustry;
 use App\Models\ProfileInterest;
 use App\Models\ProfileJob;
 use App\Models\User;
+use App\Notifications\UserAccountActivation;
 use App\Notifications\UserAccountPasswordRecovery;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
 class SecurityController extends Controller
 {
@@ -104,11 +103,10 @@ class SecurityController extends Controller
             $user->email_verification_code = $user->id . '__||__' . str_replace('/', '', Hash::make($user->email . now()->timestamp));
             $user->save();
 
-            Mail::to($email)->send(new userAccountActivation($user));
+            //Mail::to($email)->send(new userAccountActivation($user));
+            $user->notify(new UserAccountActivation());
 
-            //TODO: configure to only execute in a local environment
-            return response(route('account-activation', ['code' => $user->email_verification_code]), 200);
-            //return response('<p>Account created, please check your email to activate your account.</p><p>Please activate your account <a href="' . route('account-activation', ['code' => $user->email_verification_code]) . '">here</a></p>', 200);
+            return response('User account created, please check your inbox for the activation email');
         }
         catch(\Exception $e) {
             return response('Something went wrong!. ' . $e->getMessage(), 400);

@@ -36,7 +36,7 @@ class UserAccountActivation extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(env('APP_NAME') . ' - Account activation')
+            ->subject(env('APP_NAME') . ' - User account created')
             ->greeting('Hello ' . $notifiable->first_name . '!')
             ->line("You have registered to use the spatialGE web application")
             ->action('Click here to activate your account', route('account-activation', ['code' => $notifiable->email_verification_code]))
