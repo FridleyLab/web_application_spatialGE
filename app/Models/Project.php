@@ -21,7 +21,7 @@ class Project extends Model
 
     protected $table = 'projects';
 
-    protected $fillable = ['name', 'description', 'user_id'];
+    protected $fillable = ['name', 'description', 'user_id', 'project_platform_id'];
 
     protected $appends = ['url', 'project_parameters'];
 

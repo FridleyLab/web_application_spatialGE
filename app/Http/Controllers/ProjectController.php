@@ -7,6 +7,7 @@ use App\Models\ColorPalette;
 use App\Models\Project;
 use App\Models\ProjectGene;
 use App\Models\ProjectParameter;
+use App\Models\ProjectPlatform;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -35,7 +36,7 @@ class ProjectController extends Controller
     public function create(): View
     {
 
-        return view('wizard.new-project');
+        return view('wizard.new-project', ['platforms' => ProjectPlatform::all()]);
 
     }
 
@@ -43,12 +44,13 @@ class ProjectController extends Controller
 
         $name = request('name');
         $description = request('description');
+        $project_platform_id = request('project_platform_id');
 
         if(strlen(trim($name)) < 4)
             return response('Name has to be at least 4 characters long', 400);
 
         try {
-            $project = Project::create(['name' => $name, 'description' => $description, 'user_id' => auth()->id()]);
+            $project = Project::create(['name' => $name, 'description' => $description, 'project_platform_id' => $project_platform_id, 'user_id' => auth()->id()]);
 
             setActiveProject($project);
 
@@ -61,19 +63,23 @@ class ProjectController extends Controller
 
     public function edit(Project $project) {
 
-        return view('wizard.edit-project', compact(['project']));
+        $platforms = ProjectPlatform::all();
+
+        return view('wizard.edit-project', compact(['project', 'platforms']));
 
     }
 
     public function update(Project $project) {
         $name = request('name');
         $description = request('description');
+        $project_platform_id = request('project_platform_id');
 
         if(strlen(trim($name)) < 4)
             return response('Name has to be at least 4 characters long', 400);
 
         $project->name = $name;
         $project->description = $description;
+        $project->project_platform_id = $project_platform_id;
 
         $project->save();
 

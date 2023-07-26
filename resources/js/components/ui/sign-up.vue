@@ -6,9 +6,11 @@
                     <div class="col-xl-5 col-lg-8 col-md-9 d-flex flex-column ms-auto me-auto">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="font-weight-bolder">Sign Up</h4>
+                                <h4 v-if="!registrationEmailSentMessage.length" class="font-weight-bolder">Sign Up</h4>
+                                <h4 v-if="registrationEmailSentMessage.length" class="font-weight-bolder">Activation email sent</h4>
+                                <p v-if="registrationEmailSentMessage.length">Please check your inbox</p>
                             </div>
-                            <div class="card-body">
+                            <div v-if="!registrationEmailSentMessage.length" class="card-body">
                                 <p class="mb-3">Please complete the form to register. All fields are required <span class="text-danger">*</span></p>
                                 <form role="form" :action="targetUrl" @submit.prevent="checkCredentials" method="POST" autocomplete="off">
 
@@ -121,7 +123,7 @@
                                     </div>
                                 </form>
                             </div>
-                            <div v-if="!processing" class="card-footer text-center pt-0 px-lg-2 px-1">
+                            <div v-if="!processing && !registrationEmailSentMessage.length" class="card-footer text-center pt-0 px-lg-2 px-1">
                                 <p class="mb-2 text-sm mx-auto">
                                     Already have an account?
                                     <a :href="signInUrl" class="text-info text-gradient font-weight-bold">Sign in</a>
@@ -158,6 +160,8 @@
                 terms_and_conditions: false,
                 errorMessage: '',
                 errorMessagePassword: '',
+
+                registrationEmailSentMessage: '',
 
                 job: '',
                 interest: '',
@@ -230,8 +234,8 @@
 
                 axios.post(this.targetUrl , {'first_name' : this.first_name, 'last_name' : this.last_name, 'email' : this.email, 'password': this.password, 'job': this.job, 'interest': this.interest, 'industry': this.industry})
                     .then((response) => {
-                        //this.errorMessage = response.data;
-                        window.location.href = response.data;
+                        this.registrationEmailSentMessage = response.data;
+                        //window.location.href = response.data;
                     })
                     .catch((error) => {
                         this.processing = false;

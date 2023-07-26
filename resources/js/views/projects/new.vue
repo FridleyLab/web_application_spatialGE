@@ -20,9 +20,11 @@
 
                             <div class="mb-3 w-100 w-lg-50">
                                 <div>What spatial transcriptomics platform are you using for this project?</div>
-                                <select class="form-select bg-white border border-1 p-2" required>
+                                <select class="form-select bg-white border border-1 p-2" required v-model="project_platform_id">
                                     <option value=""></option>
-                                    <option v-for="platform in platforms" :value="platform">{{ platform }}</option>
+                                    <template v-for="platform in platforms">
+                                        <option :value="platform.id" :selected="project !==null && project.project_platform_id === platform.id">{{ platform.name }}</option>
+                                    </template>
                                 </select>
                             </div>
 
@@ -64,16 +66,19 @@
 
         props: {
             targetUrl: String,
-            project: {type: Object, default: null}
+            project: {type: Object, default: null},
+            platforms: {type: Object, default: null},
         },
 
         data() {
             return {
+                project_platform_id: this.project ? this.project.project_platform_id : 0,
                 name: this.project ? this.project.name : '',
                 description: this.project ? this.project.description : '',
+
                 errorMessage: '',
 
-                platforms: ['Visium', 'GeoMx', 'CosMx/SMI', 'MERFISH/MERSCOPE', 'Molecular Cartography', 'STARmap', 'Spatial Transcriptomics (Pre-Visium)', 'Generic'],
+                //platforms: ['Visium', 'GeoMx', 'CosMx/SMI', 'MERFISH/MERSCOPE', 'Molecular Cartography', 'STARmap', 'Spatial Transcriptomics (Pre-Visium)', 'Generic'],
             }
         },
 
@@ -95,7 +100,7 @@
                 else
                 {
                     if(this.project) {
-                        axios.patch(this.targetUrl, {name: this.name, description: this.description})
+                        axios.patch(this.targetUrl, {name: this.name, description: this.description, project_platform_id: this.project_platform_id})
                             .then((response) => {
                                 console.log(response.data);
                                 location.href = response.data;
@@ -107,7 +112,7 @@
                     }
                     else
                     {
-                        axios.post(this.targetUrl, {name: this.name, description: this.description})
+                        axios.post(this.targetUrl, {name: this.name, description: this.description, project_platform_id: this.project_platform_id})
                             .then((response) => {
                                 console.log(response.data);
                                 location.href = response.data;
