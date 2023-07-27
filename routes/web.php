@@ -66,6 +66,7 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/samples', [SampleController::class, 'store'])->name('store-sample');
     Route::get('/samples/{sample}/get-image', [SampleController::class, 'get_image'])->name('get-sample-image');
     Route::delete('/samples/{sample}', [SampleController::class, 'destroy'])->name('destroy-sample');
+    Route::post('/samples/{sample}/rename', [SampleController::class, 'rename'])->name('rename-sample');
 
 
 
@@ -126,6 +127,10 @@ Route::name('faq')->get('/faq', function () {
 Route::name('home')->get('/', function () {
     return view('home');
 });
+Route::name('contact-us')->get('/contact-us', function () {
+    return view('contact-us');
+});
+Route::post('/contact-us',[HomeController::class, 'contactUs']);
 
 
 Route::get('/zxc', function () {

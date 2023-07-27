@@ -23,7 +23,7 @@
                         <input type="button" class="btn" :class="showAddSample ? 'btn-outline-warning' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Cancel sample upload' : 'Add new sample'" />
                     </div>
                     <div v-if="project.current_step !== 1" class="p-3">
-                        <p>You already imported your samples, if you want to add/remove samples the import process would need to run again and you'll have to run the analyses again</p>
+                        <p>You already imported your samples, if you want to add/remove samples the import process would need to be executed again and you'll have to run the analyses again</p>
                     </div>
 
 

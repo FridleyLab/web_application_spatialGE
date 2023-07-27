@@ -33,6 +33,14 @@
                     <span class="nav-link-text ms-1">FAQ</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link text-white @if(url()->current() === route('contact-us')) active bg-gradient-info @endif" href="{{ route('contact-us') }}">
+                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="material-icons opacity-10">contact_mail</i>
+                    </div>
+                    <span class="nav-link-text ms-1">Contact us</span>
+                </a>
+            </li>
             @auth
                 <li class="nav-item">
                     <a class="nav-link text-white @if(url()->current() === route('my-projects')) active bg-gradient-info @endif" href="{{ route('my-projects') }}">

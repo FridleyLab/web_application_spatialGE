@@ -26,6 +26,7 @@ import numericRange from "./components/common/numeric-range.vue";
 import showModal from "./components/common/show-modal.vue";
 import showModalContent from "./components/common/show-modal-content.vue";
 import showVignette from "./components/common/show-vignette.vue";
+import contactUs from "./components/ui/contact-us.vue";
 
 
 import stplotVisualization from "./components/wizard/stplot-visualization.vue";
@@ -105,6 +106,7 @@ app.component('show-plot', showPlot);
 app.component('show-modal', showModal);
 app.component('show-modal-content', showModalContent);
 app.component('show-vignette', showVignette);
+app.component('contact-us', contactUs);
 
 
 app.component('stplot-visualization', stplotVisualization);
