@@ -84,7 +84,7 @@
 
         <div :class="processing || generating_plots ? 'disabled-clicks' : ''" id="accordionExample">
             <div class="mt-4" v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
-                <h5 class="mt-4">Count distribution by sample</h5>
+                <h5 class="mt-4">Raw (left) and normalized (right) expression values across all ROIs/spots/cells and genes</h5>
                 <ul class="nav nav-tabs" id="logNormalizedDiagrams" role="tablist">
 
                     <li class="nav-item" role="presentation">
@@ -159,6 +159,7 @@
                 <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
 
                     <div class="mt-4" v-if="!generating_plots">
+                        <h5 class="mt-4">Normalized expression of a gene per ROI/spot/cell</h5>
                         <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>

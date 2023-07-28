@@ -16,10 +16,11 @@
                     <div class="card-body">
 
                         <ul class="text-justify text-sm">
-                            <li><strong>Filter data</strong>: Remove spots or genes from the data set. The filter can be executed on all samples or a subset.</li>
-                            <li><strong>Normalize data</strong>: Transform gene expression counts, with log-normal or SCTransfom as options. The normalization procedure does not require filtering, but removal of low-count spots/cells or low count genes is recommended.</li>
-                            <li><strong>Pseudobulk analysis</strong>: Explore sample-level gene expression. Pseudobulk analysis combines gene counts across all spots/cells and produce pseudo-RNAseq samples. This analysis allows exploration of sample-level transcriptional patterns. Does not require execution of the Filter Data or Normalize Data sections.</li>
-                            <li><strong>Quilt plot</strong>: Generates spatial (quilt) plots showing spot/cell-level metadata. Users can assess QC metrics such as gene counts per spot or total counts per spot and detect potential technical artifacts.</li>
+                            <li><strong>Original summary:</strong> A table displaying the minimum, average, and maximum number of counts per ROI/spot/cell, as well as the minimum, average, and maximum number of genes per ROI/spot/cell. Genes count as expressed if at least one count was detected in at least one ROI/spot/cell.</li>
+                            <li><strong>Filter data:</strong> Remove ROIs/spots/cells or genes from the data set. The filter can be executed on all samples or a subset. Internally, spatialGE executes the filter in the following order: 1. Samples specified in “Select samples to apply this filter”, 2. Genes specified by name in “Filter genes”, 3. ROIs/spots/cells and/or genes based on min and max counts.</li>
+                            <li><strong>Normalize data:</strong> Transform gene expression counts, with log-normal or SCTransfom as options. The normalization procedure does not require filtering, but removal of low-count spots/cells or low count genes is recommended.</li>
+                            <li><strong>Pseudobulk analysis:</strong> Explore sample-level gene expression. Pseudobulk analysis combines gene counts across all spots/cells and produce pseudo-RNAseq samples. This analysis allows exploration of sample-level transcriptional patterns. Does not require execution of the Filter Data or Normalize Data sections.</li>
+                            <li><strong>Quilt plot:</strong> Generates spatial (quilt) plots showing spot/cell-level metadata. Users can assess QC metrics such as gene counts per spot or total counts per spot and detect potential technical artifacts.</li>
                         </ul>
 
                         <ul class="nav nav-tabs" id="myTab" role="tablist">

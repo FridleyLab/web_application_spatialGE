@@ -192,18 +192,23 @@
                 <div class="tab-content" id="myTabContent">
                     <div v-for="(sample, index) in stgradients.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
                         <div class="m-4">
-                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"
-                                                  :headers="results[sample].data.headers"
-                                                  :items="results[sample].data.items"
-                                                  alternating
-                                                  border-cell
-                                                  body-text-direction="center"
-                                                  header-text-direction="center"
-                            >
-                                <template #item-gene="{ gene }">
-                                    <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" target="_blank" class="text-info">{{ gene }}</a>
-                                </template>
-                            </vue3-easy-data-table>
+
+
+                            <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers.map(a => a.value)" :data="results[sample].data.items"></data-grid>
+
+
+<!--                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"-->
+<!--                                                  :headers="results[sample].data.headers"-->
+<!--                                                  :items="results[sample].data.items"-->
+<!--                                                  alternating-->
+<!--                                                  border-cell-->
+<!--                                                  body-text-direction="center"-->
+<!--                                                  header-text-direction="center"-->
+<!--                            >-->
+<!--                                <template #item-gene="{ gene }">-->
+<!--                                    <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" target="_blank" class="text-info">{{ gene }}</a>-->
+<!--                                </template>-->
+<!--                            </vue3-easy-data-table>-->
                         </div>
                     </div>
                 </div>

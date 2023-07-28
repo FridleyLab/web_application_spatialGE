@@ -12,7 +12,7 @@
             <a :href="srcName + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
             <a :href="srcName + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
             <a :href="srcName + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-            <label v-if="sideBySide" class="ms-3"><input type="checkbox" v-model="sbs"> side-by-side</label>
+            <label v-if="sideBySide" class="ms-3"><input type="checkbox" v-model="sbs"> Quilt plot with H&E image</label>
         </div>
 
     </div>
