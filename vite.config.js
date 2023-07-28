@@ -34,6 +34,8 @@ export default defineConfig({
         alias: {
             vue: "vue/dist/vue.esm-bundler.js",
             'inferno': 'inferno/dist/index.dev.esm.js',
+            "devextreme/ui": 'devextreme/esm/ui'
         },
     },
+
 });
