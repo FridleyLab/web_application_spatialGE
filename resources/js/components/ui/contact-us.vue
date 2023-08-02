@@ -5,7 +5,7 @@
                 <div class="card">
                     <div class="card-header p-3 pt-2">
                         <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">
-                            <i class="material-icons opacity-10">help</i>
+                            <i class="material-icons opacity-10">contact_mail</i>
                         </div>
                         <div class="text-end pt-1">
                             <img src="/images/spatialge-logo.png" class="img-fluid max-height-100">
