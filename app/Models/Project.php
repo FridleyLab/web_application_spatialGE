@@ -2238,6 +2238,7 @@ lapply(names(grad_res), function(i){
             $queuePosition = DB::table('jobs')
                 ->where('queue', $queueName)
                 ->where('id', '<=', $jobId)
+                ->whereNotNull('reserved_at')
                 ->count();
         }
         catch(\Exception $e) {}
