@@ -41,6 +41,7 @@
                         <div>Search and select genes to calculate SThet</div>
                         <div>
                             <Multiselect
+                                id="sthet-gene-list"
                                 v-model="params.genes"
                                 mode="tags"
                                 placeholder="Select options"
