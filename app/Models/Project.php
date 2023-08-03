@@ -2233,12 +2233,15 @@ lapply(names(grad_res), function(i){
             if(!$jobInfo->count())
                 return $queuePosition;
 
+            if($jobInfo[0]->attempts)
+                return 1;
+
             $queueName = $jobInfo[0]->queue;
 
             $queuePosition = DB::table('jobs')
                 ->where('queue', $queueName)
                 ->where('id', '<=', $jobId)
-                //->whereNull('reserved_at')
+                ->where('attempts', 0)
                 ->count();
         }
         catch(\Exception $e) {}
