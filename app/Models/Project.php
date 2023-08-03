@@ -531,7 +531,7 @@ write.csv(df_summary, 'filtered_stlist_summary.csv', row.names=FALSE, quote=FALS
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='Spectral')
+vp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='" . ($this->samples->count() < 12 ? "Spectral" : "smoothrainbow") . "')
 #ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
