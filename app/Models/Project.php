@@ -2242,7 +2242,7 @@ lapply(names(grad_res), function(i){
                 ->where('queue', $queueName)
                 ->where('id', '<=', $jobId)
                 ->where('attempts', 0)
-                ->count();
+                ->count() + 1;
         }
         catch(\Exception $e) {}
 
