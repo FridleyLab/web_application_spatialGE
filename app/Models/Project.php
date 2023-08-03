@@ -535,7 +535,7 @@ vp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='Sp
 #ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
-bp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='Spectral', plot_type='box')
+bp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='" . ($this->samples->count() < 12 ? "Spectral" : "smoothrainbow") . "', plot_type='box')
 #ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 #### Save plots to file
