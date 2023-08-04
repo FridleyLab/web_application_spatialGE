@@ -19,6 +19,7 @@
                         </div>
                         <div class="my-3">
                             <label class="form-label">Scaling factor:</label> <input type="number" class="text-end text-sm border border-1 rounded w-10" v-model="params.scale_f">
+                            <show-modal tag="qcnormalization_log_scaling_factor"></show-modal>
                         </div>
                         <div class="mt-3">
                             <label class="text-lg">
@@ -129,14 +130,13 @@
 
                 <div class="row mt-5 row-cols-2" :class="generating_plots ? 'disabled-clicks' : ''">
                     <div class="col">
-                        <div>Color palette</div>
+                        <div>Color palette <show-modal tag="qcnormalization_color_palette"></show-modal></div>
                         <div><Multiselect :options="colorPalettes" v-model="filter_color_palette" :close-on-select="true" :searchable="true"></Multiselect></div>
                     </div>
                     <div class="col">
-                        <div>Gene</div>
+                        <div>Gene <show-modal tag="qcnormalization_gene_selection"></show-modal></div>
                         <div>
                             <Multiselect
-
                                 v-model="selected_gene"
                                 placeholder="Select options"
                                 :close-on-select="true"

@@ -20,22 +20,31 @@
 
                             <div class="mb-3 w-100 w-lg-50">
                                 <div>What spatial transcriptomics platform are you using for this project?</div>
-                                <select class="form-select bg-white border border-1 p-2" required v-model="project_platform_id">
-                                    <option value=""></option>
-                                    <template v-for="platform in platforms">
-                                        <option :value="platform.id" :selected="project !==null && project.project_platform_id === platform.id">{{ platform.name }}</option>
-                                    </template>
-                                </select>
+                                <div class="d-flex">
+                                    <show-modal tag="new_project_platform"></show-modal>
+                                    <select class="ms-2 form-select bg-white border border-1 p-2" required v-model="project_platform_id">
+                                        <option value=""></option>
+                                        <template v-for="platform in platforms">
+                                            <option :value="platform.id" :selected="project !==null && project.project_platform_id === platform.id">{{ platform.name }}</option>
+                                        </template>
+                                    </select>
+                                </div>
                             </div>
 
-                            <div class="input-group input-group-outline mb-3" :class="(validName ? 'is-valid' : '') + (project ? ' focused is-focused' : '')">
-                                <label class="form-label">Project Name</label>
-                                <input required type="text" class="form-control" name="name" v-model="name" maxlength="100">
+                            <div class="d-flex">
+                                <show-modal tag="new_project_name"></show-modal>
+                                <div class="ms-2 input-group input-group-outline w-100 w-md-50 w-lg-40 w-xl-30 mb-3" :class="(validName ? 'is-valid' : '') + (project ? ' focused is-focused' : '')">
+                                    <label class="form-label">Project Name</label>
+                                    <input required type="text" class="form-control" name="name" v-model="name" maxlength="100">
+                                </div>
                             </div>
 
-                            <div class="input-group input-group-outline mb-3" :class="(project ? 'focused is-focused' : '')">
-                                <label class="form-label">Description</label>
-                                <input type="text" class="form-control" name="description" v-model="description" maxlength="1000">
+                            <div class="d-flex">
+                                <show-modal tag="new_project_description"></show-modal>
+                                <div class="ms-2 input-group input-group-outline mb-3" :class="(project ? 'focused is-focused' : '')">
+                                    <label class="form-label">Description</label>
+                                    <input type="text" class="form-control" name="description" v-model="description" maxlength="1000">
+                                </div>
                             </div>
 
                             <show-message :message="errorMessage"></show-message>

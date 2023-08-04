@@ -66,7 +66,7 @@ class RunScript implements ShouldQueue
 
         //Notify the user if requested
         try {
-            //Load the project again because this class instance was loaded when the process started and the user could've changed their mind
+            //Load the project again because this class instance was loaded when the process started and the user could've changed their mind about being notified via email
             $this->project->fresh();
 
             //Check if the user requested to be notified via email

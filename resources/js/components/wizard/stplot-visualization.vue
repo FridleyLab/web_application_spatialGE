@@ -9,6 +9,7 @@
                         </div>
                         <div class="text-end pt-1">
                             <h6 class="mb-0 text-capitalize">STplot - Visualization</h6>
+                            <show-vignette url="/documentation/vignettes/visualization.pdf"></show-vignette>
                         </div>
                     </div>
 

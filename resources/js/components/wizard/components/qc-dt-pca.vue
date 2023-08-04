@@ -15,7 +15,7 @@
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div class="me-3">Number of most variable genes to calculate PCA: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"></div>
+                    <div class="me-3">Number of most variable genes to calculate PCA: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"><show-modal tag="qcpca_number_variable_genes"></show-modal></div>
                     <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="100" class="w-100" v-model="params.n_genes">
                 </div>
             </div>
@@ -32,19 +32,21 @@
 
 
         <template v-if="!generating_pca && !generating_plots && 'qc_pca' in project.project_parameters">
-            <div class="mt-4 row justify-content-center text-center">
-                <label class="form-label">Number of genes to display on heatmap:</label> <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.hm_display_genes">
+            <div class="mt-4 justify-content-center text-center">
+                <label class="form-label">Number of genes to display on heatmap:</label>
+                <input type="number" class="ms-1 text-end text-sm border border-1 rounded w-25 w-md-20 w-lg-15 w-xxl-10" v-model="params.hm_display_genes">
+                <show-modal tag="qcpca_number_genes_display_heatmap"></show-modal>
             </div>
 
 
             <div class="row mt-5 row-cols-2">
                 <div class="col">
-                    <div>Color palette</div>
+                    <div>Color palette <show-modal tag="qcpca_color_palette"></show-modal></div>
                     <div><Multiselect :options="colorPalettes" v-model="params.color_pal" :close-on-select="true" :searchable="true"></Multiselect></div>
                 </div>
 
                 <div class="col">
-                    <div>Color by</div>
+                    <div>Color by <show-modal tag="qcpca_color_by"></show-modal></div>
                     <div><Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect></div>
                 </div>
 
@@ -69,9 +71,15 @@
             </ul>
             <div class="tab-content" id="filterDiagramsContent">
                 <div class="tab-pane fade show active" id="pcaplot" role="tabpanel" aria-labelledby="pcaplot-tab">
+                    <div class="m-4">
+                        <p><strong>Pseudo-bulk samples in a principal component analysis (PCA) plot.</strong> This analysis is intended to help users detect samples with unexpected gene expression patterns.</p>
+                    </div>
                     <show-plot :src="project.project_parameters.pseudo_bulk_pca"></show-plot>
                 </div>
                 <div class="tab-pane fade" id="heatmap" role="tabpanel" aria-labelledby="heatmap-tab">
+                    <div class="m-4">
+                        <p><strong>Heatmap of expression of top variable genes (rows) across pseudo-bulk samples (columns).</strong> This plot is intended to help users detect samples with unexpected gene expression patterns.</p>
+                    </div>
                     <show-plot :src="project.project_parameters.pseudo_bulk_heatmap"></show-plot>
                 </div>
             </div>

@@ -30,7 +30,18 @@ export default {
 
             tag: '',
             tool_tips: {
+                //New project
+                "new_project_platform": {"title": "Platform selection", "text": "The spatial transcriptomics platform used to generate the data. Currently only one platform can be used per project."},
+                "new_project_name": {"title": "Project name", "text": "Required. The name of the project."},
+                "new_project_description": {"title": "Project description", "text": "Optional. A short description of the project."},
+
+
                 //Import data
+                "importdata_sample_name": {"title": "Sample name", "text": "The name of the sample. Names without spaces are preferred, or with spaces replaced by underscores (“_”). If no sample name is provided, the name “SampleXX” will be automatically used, with “XX” being a consecutive number."},
+                "importdata_gene_expression_file": {"title": "Gene expression file", "text": "Required. Gene expression file. The file containing the gene counts for the samples. Different files are accepted depending on the spatial transcriptomics platform used. For example, for Visium samples, an .h5 file could be provided."},
+                "importdata_coordinates_file": {"title": "Coordinates file", "text": "Required. Coordinates file. The file containing the ROI/spot/cell coordinates for the same sample as in “Gene expression”."},
+                "importdata_tissue_image_file": {"title": "Tissue image file", "text": "Optional. An image of the tissue profiled with spatial transcriptomics. If Visium, please make sure the “hires” (high resolution) image is used."},
+                "importdata_scale_factor_file": {"title": "Scale factor file", "text": "Required if image input. For Visium, a JSON file resulting from Space Ranger that contains the image scaling factor."},
                 "importdata_metadata_file": {"title": "Upload metadata file (csv/excel)", "text": "Upload an Excel or text file (comma- or tab-separated) containing sample-level data such as therapy, tissue type, age of donor. Please refer to “How to get started” for information on the required format of this file."},
                 "importdata_metadata_manually": {"title": "Add metadata manually", "text": "Add sample-level metadata manually. Once this option is selected, click on “ADD NEW METADATA COLUMN” and provide a name for the metadata column in the table displayed below."},
 
@@ -47,6 +58,15 @@ export default {
                 "qcfilter_genes_remove_regexp": {"title": "Remove genes using a regular expression", "text": "Remove all the counts originating from gene with names matching a token (or regular expression). This is a rarely used filter. One example of its use is when a user wishes to remove all long non-coding RNA counts, which can be done by entering the token “^LNC”."},
                 "qcfilter_genes_counts_between": {"title": "Keep genes with counts between", "text": "Keep genes with total counts (across all ROIs/spots/cells) within the specified range. The use of this filter will depend on the read/count depth of the experiment. A very conservative suggestion is to keep genes with at least 20 counts across all ROIs/spots/cells."},
                 "qcfilter_genes_expressed_in": {"title": "Keep genes expressed in", "text": "Keep genes expressed in the specified percentage of ROIs/spots/cells. A gene is considered expressed if at least one count was recorded. Although not a commonly used filter, users with low read/count depth might want to remove genes poorly detected (e.g. keep genes detected in at least 10% of all ROIs/spots/cells)."},
+                //QC & data transformation - normalization
+                "qcnormalization_log_scaling_factor": {"title": "Scaling factor", "text": "The scaling factor used in the normalization procedure. Roughly, should be set to a value representing the expected number of counts in each ROI/spot/cell. As an example, for Visium 10000 is a reasonable value, but for single cell spatial transcriptomics, lower values should be specified due to less counts per cell."},
+                "qcnormalization_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html)"},
+                "qcnormalization_gene_selection": {"title": "Gene selection", "text": "Specify the name of a single gene to visualize the distribution of counts per spot."},
+                //QC & data transformation - PCA
+                "qcpca_number_variable_genes": {"title": "Number of variable genes", "text": "Number of genes used in the calculation of PCs. The most variable genes are selected using the standard deviation across samples as criterion. Values between 3000 and 5000 should be appropriate for most studies."},
+                "qcpca_number_genes_display_heatmap": {"title": "Number of genes for heatmap", "text": "The number of genes (rows) to show in the heatmap. The genes are selected using the standard deviation across samples as criterion. No differential expression analysis is involved here."},
+                "qcpca_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html)"},
+                "qcpca_color_by": {"title": "Metadata selection", "text": "Optional. Name of a sample-level metadata variable. Points in the PCA plot will be colored according to this variable. If no variable is selected, points are colored according to the sample names."},
 
                 //STgradient
                 "stgradient_samples": {"title": "Sample selection", "text": "Select the samples to run STgradient"},
