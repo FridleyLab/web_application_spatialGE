@@ -154,12 +154,21 @@ class Project extends Model
         return $workingDir;
     }
 
-    public function spatialExecute($command) {
+    public function spatialExecute($command, $task_id) {
 
         if(is_null($this->_container))
             $this->_container = new spatialContainer($this);
 
-        return $this->_container->execute($command);
+        $task = Task::where('task', $task_id)->firstOrFail();
+        $task->started_at = DB::raw('CURRENT_TIMESTAMP');
+        $task->save();
+
+        $output = $this->_container->execute($command, $task_id);
+
+        $task->finished_at = DB::raw('CURRENT_TIMESTAMP');
+        $task->save();
+
+        return $output;
 
     }
 
@@ -241,7 +250,7 @@ class Project extends Model
         }
 
         //Create the initial_stlist
-        $output = $this->spatialExecute("Rscript $scriptName");
+        $output = $this->spatialExecute("Rscript $scriptName", $parameters['__task']);
 
 
         //Load genes present in samples into the DB
@@ -410,7 +419,7 @@ lapply(names(tissues), function(i){
         DB::delete("delete from project_parameters where tag not in ('import','') and not(parameter like 'job.%') and project_id=" . $this->id);
         //DB::delete("delete from project_parameters where parameter<>'metadata' and not(parameter like 'job.%') and project_id=" . $this->id);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
 
@@ -565,7 +574,7 @@ $plots
         $scriptContents = $this->getFilterPlotsScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $parameterNames = ['filter_violin', 'filter_boxplot'];
         foreach($parameterNames as $parameterName) {
@@ -648,7 +657,7 @@ $plots
                 Storage::delete($file);
         }
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
         //Load genes present in the normalized STlist into the DB
@@ -774,7 +783,7 @@ $plots
         $scriptContents = $this->getNormalizedPlotsScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $parameterNames = ['normalized_violin', 'normalized_boxplot'];
         foreach($parameterNames as $parameterName) {
@@ -845,7 +854,7 @@ $plots
         $scriptContents = $this->getNormalizedDataScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $parameterNames = ['normalizedData'];
         foreach($parameterNames as $parameterName) {
@@ -906,7 +915,7 @@ openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
         $scriptContents  =$this->getPcaScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $result = [];
 
@@ -967,7 +976,7 @@ pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes)
         $scriptContents = $this->getPcaPlotsScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $result = [];
 
@@ -1040,7 +1049,7 @@ $plots
         $scriptContents = $this->getQuiltPlotScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $result = [];
 
@@ -1133,7 +1142,7 @@ $plots_initial
         $scriptContents = $this->getSTplotQuiltScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $result = [];
         foreach($parameters['genes'] as $gene) {
@@ -1224,7 +1233,7 @@ $export_files_side_by_side
         $scriptContents = $this->getSTplotExpressionSurfaceScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $result = [];
         foreach($parameters['genes'] as $gene) {
@@ -1303,7 +1312,7 @@ $export_files
         $scriptContents = $this->getSTplotExpressionSurfacePlotsScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $result = [];
         foreach($parameters['genes'] as $gene) {
@@ -1384,7 +1393,7 @@ $export_files
         $scriptContents = $this->getSThetScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $result = [];
 
@@ -1458,7 +1467,7 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
         $scriptContents = $this->getSThetPlotScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $result = [];
 
@@ -1524,7 +1533,7 @@ $export_files
         $scriptContents = $this->getSTclustScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
         $file = $workingDir . 'stclust_plots.csv';
@@ -1640,7 +1649,7 @@ for(p in n_plots) {
         $scriptContents = $this->getSTDiffNonSpatialScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
         $column_names = [
@@ -1769,7 +1778,7 @@ lapply(names(ps), function(i){
         $scriptContents = $this->getSTDiffSpatialScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
         $column_names = [
@@ -1903,7 +1912,7 @@ lapply(names(ps), function(i){
         $scriptContents = $this->getSTEnrichScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
         $column_names = [
@@ -2028,7 +2037,7 @@ lapply(names(sp_enrichment), function(i){
         $scriptContents = $this->getSTGradientsScript($parameters);
         Storage::put($script, $scriptContents);
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $column_names = [
             'gene' => 'Gene',
@@ -2153,6 +2162,9 @@ lapply(names(grad_res), function(i){
 
 
     public function createJob($description, $command, $parameters, $queue = 'default') : int {
+
+        $parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . substr(microtime(true) * 1000, 0, 13);
+        Task::create(['task' => $parameters['__task'], 'project_id' => $this->id, 'user_id' => $this->user->id]);
 
         //create the job instance
         $job = new RunScript($description, $this, $command, $parameters);

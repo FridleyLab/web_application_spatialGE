@@ -132,15 +132,15 @@ class spatialContainer {
 
 
 
-    public function execute($docker_command) {
+    public function execute($docker_command, $task_id = '') {
 
         //set the max execution time for the system call
         $timeout = env('MAX_EXECUTION_TIME',259200);
 
         $image_name = env('DOCKER_IMAGE_NAME','spatialge');
 
-        //$container_id = 'spatial_' . $this->project->id;
-        $container_id = 'spatialGE_' . $this->project->user->id . '_' . $this->project->id . '_' . substr(microtime(true) * 1000, 0, 13);
+        $container_id = $task_id;
+        if(!strlen($container_id)) $container_id = 'spatialGE_' . $this->project->user->id . '_' . $this->project->id . '_' . substr(microtime(true) * 1000, 0, 13);
 
         $command = '';
         try {
@@ -163,8 +163,6 @@ class spatialContainer {
             $output .= "\n++++++++++++++++OUTPUT END++++++++++++++++++\n";
 
             Log::info($output);
-
-
 
             return $output;
 
