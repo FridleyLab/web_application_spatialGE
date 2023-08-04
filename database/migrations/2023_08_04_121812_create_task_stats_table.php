@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('task_stats', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('task')->index();
-            $table->longText('cpu');
-            $table->unsignedTinyInteger('memory');
+            $table->float('cpu');
+            $table->float('memory');
             $table->timestamp('timestamp');
         });
     }

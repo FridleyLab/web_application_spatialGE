@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load variables from .env file to get DB credentials
-source .env
+source ./.env
 
 # Enable nocasematch option for case-insensitive comparison
 shopt -s nocasematch
