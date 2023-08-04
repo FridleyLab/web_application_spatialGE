@@ -2164,7 +2164,7 @@ lapply(names(grad_res), function(i){
     public function createJob($description, $command, $parameters, $queue = 'default') : int {
 
         $parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . substr(microtime(true) * 1000, 0, 13);
-        Task::create(['task' => $parameters['__task'], 'project_id' => $this->id, 'user_id' => $this->user->id]);
+        Task::create(['task' => $parameters['__task'], 'project_id' => $this->id, 'user_id' => $this->user->id, 'process' => $command]);
 
         //create the job instance
         $job = new RunScript($description, $this, $command, $parameters);
