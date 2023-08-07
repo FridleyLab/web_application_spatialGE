@@ -723,7 +723,7 @@ $plots
 
         $str_params = '';
         foreach ($parameters as $key => $value) {
-            if(strlen($value)) {
+            if(strlen($value) && $key !== '__task') {
                 $str_params .= strlen($str_params) ? ', ' : '';
                 $quote = in_array($key, ['method']) ? "'" : '';
                 $str_params .= $key . '=' . $quote . $value . $quote;
