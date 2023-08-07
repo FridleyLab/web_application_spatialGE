@@ -491,7 +491,7 @@ lapply(names(tissues), function(i){
 
         $str_params = '';
         foreach ($parameters as $key => $value) {
-            if(strlen($value)) {
+            if(strlen($value) && $key !== '__task') {
                 $str_params .= strlen($str_params) ? ', ' : '';
                 $quote = in_array($key, ['rm_genes_expr', 'spot_pct_expr']) ? "'" : '';
                 $str_params .= $key . '=' . $quote . $value . $quote;

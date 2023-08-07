@@ -76,6 +76,9 @@ class HomeController extends Controller
 
     public function create_test_users($prefix, $n_users, $n_samples) {
 
+        if(!auth()->user()->is_admin)
+            return response('Forbidden', '403');
+
         if(!(is_numeric($n_users) && is_numeric($n_samples) && $n_users > 0 && $n_samples > 0 && $n_users <= 20 & $n_samples <= 14))
             return response('Wrong parameter values');
 
