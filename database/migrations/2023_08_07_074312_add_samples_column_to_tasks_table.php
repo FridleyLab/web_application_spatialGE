@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        if (!Schema::hasColumn('tasks', 'process')) {
+        if (!Schema::hasColumn('tasks', 'samples')) {
             Schema::table('tasks', function (Blueprint $table) {
-                $table->string('process', 255)->after('project_id');
+                $table->integer('samples')->after('project_id');
             });
         }
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropColumns('tasks',['process']);
+        Schema::dropColumns('tasks',['samples']);
     }
 };

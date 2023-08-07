@@ -22,6 +22,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function() {
 
+    Route::get('/stats',[HomeController::class, 'download_statistics'])->name('stats');
+    Route::get('/create-test-users/prefix/{prefix}/n_users/{n_users}/n_samples/{n_samples}',[HomeController::class, 'create_test_users'])->name('create-test-users');
+
+
     Route::get('/logout',[SecurityController::class, 'destroy'])->name('logout');
 
     Route::get('/dashboard',[HomeController::class, 'dashboard'])->name('dashboard');
