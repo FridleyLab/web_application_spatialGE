@@ -54,10 +54,10 @@ class HomeController extends Controller
             $data = DB::table('tasks')
                 ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
                 ->join('users', 'tasks.user_id', '=', 'users.id')
-                ->select('task.id', 'users.email', 'tasks.project_id', 'tasks.samples', 'tasks.process',
+                ->select('tasks.id', 'users.email', 'tasks.project_id', 'tasks.samples', 'tasks.process',
                     'tasks.scheduled_at', 'tasks.started_at', 'tasks.finished_at', 'task_stats.cpu',
                     'task_stats.memory', 'task_stats.timestamp')
-                ->orderBy('task.id', 'desc')
+                ->orderBy('tasks.id', 'desc')
                 ->orderBy('task_stats.timestamp')
                 ->get();
 
