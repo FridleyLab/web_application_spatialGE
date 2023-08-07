@@ -166,6 +166,7 @@ class Project extends Model
         $output = $this->_container->execute($command, $task_id);
 
         $task->finished_at = DB::raw('CURRENT_TIMESTAMP');
+        $task->output = $output;
         $task->save();
 
         return $output;
