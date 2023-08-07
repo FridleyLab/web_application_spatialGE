@@ -49,28 +49,35 @@ class HomeController extends Controller
 
         //$data = DB::table('tasks')->select('tasks.*')->get();
 
-        $data = DB::table('tasks')
-                    ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
-                    ->join('users', 'tasks.user_id', '=', 'users.id')
-                    ->select('users.id', 'users.email', 'tasks.project_id', 'tasks.samples', 'tasks.process',
-                        'tasks.scheduled_at', 'tasks.started_at', 'tasks.finished_at', 'task_stats.cpu', 'task_stats.memory', 'task_stats.timestamp')
-                    ->get();
+        try {
 
-        $filename = 'stats_' . substr(microtime(true) * 1000, 0, 13) . '.csv';
-        $handle = fopen($filename, 'w');
+            $data = DB::table('tasks')
+                ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
+                ->join('users', 'tasks.user_id', '=', 'users.id')
+                ->select('users.id', 'users.email', 'tasks.project_id', 'tasks.samples', 'tasks.process',
+                    'tasks.scheduled_at', 'tasks.started_at', 'tasks.finished_at', 'task_stats.cpu',
+                    'task_stats.memory', 'task_stats.timestamp')
+                ->get();
 
-        if (!empty($data)) {
-            $columnNames = array_keys((array) $data[0]);
-            fputcsv($handle, $columnNames);
+            $filename = 'stats_' . substr(microtime(true) * 1000, 0, 13) . '.csv';
+            $handle = fopen($filename, 'w');
+
+            if (!empty($data)) {
+                $columnNames = array_keys((array)$data[0]);
+                fputcsv($handle, $columnNames);
+            }
+
+            foreach ($data as $row) {
+                fputcsv($handle, json_decode(json_encode($row), true));
+            }
+
+            fclose($handle);
+
+            return response()->download($filename);
         }
-
-        foreach ($data as $row) {
-            fputcsv($handle, json_decode(json_encode($row), true));
+        catch(\Exception $e) {
+            return response($e->getMessage());
         }
-
-        fclose($handle);
-
-        return response()->download($filename);
 
     }
 
