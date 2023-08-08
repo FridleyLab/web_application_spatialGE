@@ -135,7 +135,7 @@ class HomeController extends Controller
             //Import samples
             $project->createJob('Data import', 'createStList', []);
 
-            $users[] = [$user->email, 'M0ff1ttT3stUs3r.*+', '"' . $project->id . '"', 'PROCESS'];
+            $users[] = [$user->email, 'M0ff1ttT3stUs3r.*+', 'PID_' . $project->id, 'PROCESS'];
         }
 
         return $users;
