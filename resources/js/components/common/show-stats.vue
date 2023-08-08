@@ -159,6 +159,10 @@ export default {
     methods: {
         onCellPrepared(cell) {
 
+            if(cell.rowType === 'data' && cell.column.dataField === 'completed' && parseInt(cell.value) === 0) {
+                cell.cellElement.style.cssText = "color:white; background-color: #FF0000";
+            }
+
             /*if(['process_time', 'wait_time', 'total_time'].includes(cell.column.dataField)) {
                 cell.displayValue = cell.value / 60;
                 console.log(cell);

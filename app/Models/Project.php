@@ -166,7 +166,7 @@ class Project extends Model
         $output = $this->_container->execute($command, $task_id);
 
         $task->finished_at = DB::raw('CURRENT_TIMESTAMP');
-        $task->completed = strpos($output, 'spatialGE_PROCESS_COMPLETED') ? 1 : 0;
+        $task->completed = !strpos($output, 'spatialGE_PROCESS_COMPLETED') || strpos($output, 'Killed')  ? 0 : 1;
         $task->output = $output;
         $task->save();
 
