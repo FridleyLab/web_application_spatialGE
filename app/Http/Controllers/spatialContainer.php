@@ -160,24 +160,32 @@ class spatialContainer {
             $workingDir = str_replace('\\', '/', $workingDir);
             $workingDir = '/' . $workingDir;
 
-            //$exe = $this->exe;
-            $exe = '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
-            $command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name $docker_command > \"$log_file\" 2>&1 & R --quiet -e \"print('$container_id - spatialGE_PROCESS_COMPLETED')\" >> \"$log_file\" 2>&1";
 
-            $log_contents = Storage::get("$storage_path$container_id.log");
+            $script = 'cd /spatialGE' . "\n";
+            $script .= $docker_command . "\n";
+            $script .= 'R --quiet -e "print(\'$container_id - spatialGE_PROCESS_COMPLETED\')"';
+            $script_file = "$task_id.sh";
+            Storage::put($storage_path . $script_file, $script);
+
+
+            $exe = '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
+            //$command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name $docker_command > \"$log_file\" 2>&1 & R --quiet -e \"print('$container_id - spatialGE_PROCESS_COMPLETED')\" >> \"$log_file\" 2>&1";
+            $command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name sh $script_file";
+
+            //$log_contents = Storage::get("$storage_path$container_id.log");
 
             Log::info("\nCOMMAND TO EXECUTE: " . $command . "\n");
 
             $process = Process::timeout($timeout)->run($command);
 
             $output = "\n+++++++++++++++++OUTPUT START+++++++++++++++++\n";
-            $output .= $log_contents;
-            //$output .= trim($process->output() . "\n" . $process->errorOutput());
+            //$output .= $log_contents;
+            $output .= trim($process->output() . "\n" . $process->errorOutput());
             $output .= "\n++++++++++++++++OUTPUT END++++++++++++++++++\n";
 
             Log::info($output);
 
-            return $log_contents;
+            return $output;
 
         }
         catch(\Exception $e) {
