@@ -133,9 +133,9 @@ class Project extends Model
         return '/';
     }
 
-    public function workingDir() : string {
+    public function workingDir($replace_backslashes = true) : string {
         $workingDir = '/users/' . $this->user_id . '/' . $this->id . '/';
-        $workingDir = str_replace('\\', '/', $workingDir);
+        //if($replace_backslashes) $workingDir = str_replace('\\', '/', $workingDir);
         return $workingDir;
     }
 
@@ -166,6 +166,7 @@ class Project extends Model
         $output = $this->_container->execute($command, $task_id);
 
         $task->finished_at = DB::raw('CURRENT_TIMESTAMP');
+        $task->completed = strpos($output, 'spatialGE_PROCESS_COMPLETED') ? 1 : 0;
         $task->output = $output;
         $task->save();
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class TaskStat extends Model
 {
 
-    protected $table = 'tasks_stats';
+    protected $table = 'task_stats';
 
     public $timestamps = false;
 

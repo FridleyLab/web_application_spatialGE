@@ -140,4 +140,48 @@ class HomeController extends Controller
     }
 
 
+    public function show_statistics() {
+
+        if(!auth()->user()->is_admin)
+            return response('Forbidden', '401');
+
+        try {
+
+            $data = DB::table('tasks')
+                ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
+                ->select('tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at', DB::raw('max(task_stats.memory) as max_ram'))
+                ->groupBy('tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at')
+                ->orderBy('tasks.id', 'desc')
+                ->get();
+
+            foreach ($data as $key => $row) {
+                $scheduled = Carbon::parse($row->scheduled_at);
+                $started = Carbon::parse($row->started_at);
+                $finished = Carbon::parse($row->finished_at);
+
+                $row->process_time = round($started->diffInSeconds($finished)/60, 1);
+                $row->wait_time = round($scheduled->diffInSeconds($started)/60, 1);
+                $row->total_time = round($scheduled->diffInSeconds($finished)/60, 1);
+
+                $row->stats = TaskStat::where('task', $row->task)->orderBy('timestamp')->get();
+
+            }
+
+            if (empty($data)) {
+                return response('No data available');
+            }
+
+            $headers = array_keys((array)$data[0]);
+            $columns_to_remove = ['output', 'task', 'stats'];
+            $headers = array_diff($headers, $columns_to_remove);
+
+            return view('stats.summary' , compact('headers', 'data'));
+        }
+        catch(\Exception $e) {
+            return response($e->getMessage());
+        }
+
+    }
+
+
 }

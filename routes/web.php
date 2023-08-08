@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->group(function() {
 
     Route::get('/stats',[HomeController::class, 'download_statistics'])->name('stats');
+    Route::get('/show-stats',[HomeController::class, 'show_statistics'])->name('show-stats');
     Route::get('/create-test-users/prefix/{prefix}/n_users/{n_users}/n_samples/{n_samples}',[HomeController::class, 'create_test_users'])->name('create-test-users');
 
 
