@@ -165,8 +165,23 @@ class Project extends Model
 
         $output = $this->_container->execute($command, $task_id);
 
+        //Check output for possible errors
+        $error_strings_to_look_for = [
+            'Execution halted',
+            'Cannot allocate memory',
+            'Error in',
+            'Killed'
+        ];
+        $error_found = false;
+        foreach ($error_strings_to_look_for as $item) {
+            if(strpos(strtolower($output), strtolower($item))) {
+                $error_found = true;
+                break;
+            }
+        }
+
         $task->finished_at = DB::raw('CURRENT_TIMESTAMP');
-        $task->completed = !strpos($output, 'spatialGE_PROCESS_COMPLETED') || strpos($output, 'Killed')  ? 0 : 1;
+        $task->completed = !strpos($output, 'spatialGE_PROCESS_COMPLETED') || $error_found  ? 0 : 1;
         $task->output = $output;
         $task->save();
 
