@@ -103,13 +103,14 @@ class HomeController extends Controller
 
         $users = [];
         for($x = 1; $x <= $n_users; $x++) {
+
             //Create the new user
             $user = User::create(['first_name' => "test first name $x", 'last_name' => "test lastname $x",
                 'email' => "$prefix$suffix$x@moffitt.org", 'email_verification_code' => '',
                 'password' => Hash::make('M0ff1ttT3stUs3r.*+'), 'industry' => 1, 'interest' => 1, 'job' => 1,
                 'email_verified_at' => Carbon::now()]
             );
-            $users[] = $user;
+
             $userFolder = $user->getuserFolder();
 
             //Create a new project for the user
@@ -133,6 +134,8 @@ class HomeController extends Controller
 
             //Import samples
             $project->createJob('Data import', 'createStList', []);
+
+            $users[] = [$user->email, 'M0ff1ttT3stUs3r.*+', $project->id, 'PROCESS'];
         }
 
         return $users;
@@ -146,6 +149,7 @@ class HomeController extends Controller
             return response('Forbidden', '401');
 
         try {
+
 
             $data = DB::table('tasks')
                 ->join('users', 'tasks.user_id', '=', 'users.id')
