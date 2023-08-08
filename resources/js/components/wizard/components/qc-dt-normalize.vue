@@ -43,7 +43,7 @@
                         </div>
                         <div class="mt-3">
                             <label class="text-lg">
-                                <input type="radio" name="method" value="log" @click="params.method = 'sct'"> Use SCTransform
+                                <input id="normalization_method_sct" type="radio" name="method" value="log" @click="params.method = 'sct'"> Use SCTransform
                             </label>
                         </div>
                     </div>
