@@ -150,8 +150,8 @@ class HomeController extends Controller
             $data = DB::table('tasks')
                 ->join('users', 'tasks.user_id', '=', 'users.id')
                 ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
-                ->select('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at', DB::raw('max(task_stats.memory) as max_ram'))
-                ->groupBy('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at')
+                ->select('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.completed','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at', DB::raw('max(task_stats.memory) as max_ram'))
+                ->groupBy('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.completed','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at')
                 ->orderBy('tasks.id', 'desc')
                 ->get();
 

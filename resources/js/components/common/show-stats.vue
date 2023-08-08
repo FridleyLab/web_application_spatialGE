@@ -26,6 +26,8 @@
                           @cell-prepared="onCellPrepared"
 
                           @selection-changed="onSelectionChanged"
+
+                          @exporting="onExporting"
             >
                 <DxSelection
                     mode="single"
@@ -42,6 +44,9 @@
         <!--            <DxItem template="scrollingModeTemplate" location="before" />-->
         <!--            <DxItem name="columnChooserButton" />-->
         <!--        </DxToolbar>-->
+
+
+                <DxExport :enabled="true" :formats="['pdf', 'xlsx']" :allow-export-selected-data="false" />
 
                 <DxFilterRow :visible="true" />
                 <DxHeaderFilter :visible="true" />
@@ -77,6 +82,12 @@
 
 //Style to apply to the DataGrid
 import 'devextreme/dist/css/dx.light.css';
+
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
+import { jsPDF } from 'jspdf';
+import { exportDataGrid as exportDataGridPdf } from 'devextreme/pdf_exporter';
 
 //Import the components to be used in the DataGrid
 import DxDataGrid, {
@@ -160,6 +171,49 @@ export default {
 
             console.log(row);
         },
+
+
+        onExportingToExcel(e) {
+
+            const workbook = new Workbook();
+            const worksheet = workbook.addWorksheet('spatialGE statistics');
+            exportDataGrid({
+                component: e.component,
+                worksheet: worksheet,
+                customizeCell: function(options) {
+                    options.excelCell.font = { name: 'Arial', size: 12 };
+                    options.excelCell.alignment = { horizontal: 'left' };
+                }
+            }).then(function() {
+                workbook.xlsx.writeBuffer()
+                    .then(function(buffer) {
+                        saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'spatialGE_' + Date.now() + '.xlsx');
+                    });
+            });
+        },
+
+        onExportingToPdf(e) {
+
+            const doc = new jsPDF(
+                {
+                    orientation: "l"
+                }
+            );
+            exportDataGridPdf({
+                jsPDFDocument: doc,
+                component: e.component,
+                indent: 5
+            }).then(() => {
+                doc.save('spatialGE_' + Date.now() + '.pdf');
+            });
+        },
+
+        onExporting(e) {
+            console.log(e);
+            if(e.format === 'xlsx') return this.onExportingToExcel(e);
+            if(e.format === 'pdf') return this.onExportingToPdf(e);
+        },
+
     },
 
 }
