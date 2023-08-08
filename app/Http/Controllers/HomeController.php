@@ -148,9 +148,10 @@ class HomeController extends Controller
         try {
 
             $data = DB::table('tasks')
+                ->join('users', 'tasks.user_id', '=', 'users.id')
                 ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
-                ->select('tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at', DB::raw('max(task_stats.memory) as max_ram'))
-                ->groupBy('tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at')
+                ->select('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at', DB::raw('max(task_stats.memory) as max_ram'))
+                ->groupBy('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at')
                 ->orderBy('tasks.id', 'desc')
                 ->get();
 
@@ -163,6 +164,8 @@ class HomeController extends Controller
                 $row->wait_time = round($scheduled->diffInSeconds($started)/60, 1);
                 $row->total_time = round($scheduled->diffInSeconds($finished)/60, 1);
 
+                $row->user = explode('@', $row->email)[0];
+
                 $row->stats = TaskStat::where('task', $row->task)->orderBy('timestamp')->get();
 
             }
@@ -172,7 +175,7 @@ class HomeController extends Controller
             }
 
             $headers = array_keys((array)$data[0]);
-            $columns_to_remove = ['output', 'task', 'stats'];
+            $columns_to_remove = ['output', 'task', 'stats', 'email'];
             $headers = array_diff($headers, $columns_to_remove);
 
             return view('stats.summary' , compact('headers', 'data'));
