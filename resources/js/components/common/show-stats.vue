@@ -77,6 +77,10 @@
         </div>
     </div>
 
+    <div class="my-6">
+        <show-stats-plot :plot-data="plotData"></show-stats-plot>
+    </div>
+
 </template>
 <script>
 
@@ -108,7 +112,13 @@ import DxDataGrid, {
     DxToolbar,
     DxItem,
     DxButton,
+
 } from "devextreme-vue/data-grid";
+
+import {
+    DxBarGauge, DxLabel, DxTitle, DxFont,
+} from 'devextreme-vue/bar-gauge';
+
 
 
 export default {
@@ -140,6 +150,7 @@ export default {
     props: {
         headers: Object,
         data: Array,
+        plotData: Array,
     },
 
     data() {
@@ -149,7 +160,7 @@ export default {
     },
 
     mounted() {
-
+        
     },
 
     watch: {

@@ -170,7 +170,12 @@ class HomeController extends Controller
 
                 $row->user = explode('@', $row->email)[0];
 
-                $row->stats = TaskStat::where('task', $row->task)->orderBy('timestamp')->get();
+                $stats = TaskStat::where('task', $row->task)->orderBy('timestamp')->get();
+                foreach ($stats as $stat) {
+                    $timestamp = Carbon::parse($stat->timestamp);
+                    $stat->time = round($started->diffInSeconds($timestamp)/60, 1);
+                }
+                $row->stats = $stats;
 
             }
 
@@ -182,7 +187,42 @@ class HomeController extends Controller
             $columns_to_remove = ['output', 'task', 'stats', 'email'];
             $headers = array_diff($headers, $columns_to_remove);
 
-            return view('stats.summary' , compact('headers', 'data'));
+            $plot_data = [];
+            $processes = DB::table('tasks')
+                ->select('process')
+                ->distinct()
+                ->where('samples', '>', 0)
+                ->where('completed', 1)
+                ->get();
+
+            $samples = DB::table('tasks')
+                ->select('samples')
+                ->distinct()
+                ->where('samples', '>', 0)
+                ->where('completed', 1)
+                ->orderBy('samples')
+                ->get();
+
+            foreach ($processes as $process) {
+                $item['process'] = $process->process;
+
+                foreach ($samples as $sample) {
+                    $_data = DB::table('tasks')
+                        ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
+                        ->select(DB::raw('avg(task_stats.memory) as ram'))
+                        ->where('samples', $sample->samples)
+                        ->where('completed', 1)
+                        ->where('process', $process->process)
+                        ->get();
+
+                    $item['samples_' . $sample->samples] = round($_data[0]->ram);
+                }
+
+                $plot_data[] = $item;
+            }
+
+
+            return view('stats.summary' , compact('headers', 'data', 'plot_data'));
         }
         catch(\Exception $e) {
             return response($e->getMessage());

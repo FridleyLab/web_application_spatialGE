@@ -29,6 +29,7 @@ import showVignette from "./components/common/show-vignette.vue";
 import contactUs from "./components/ui/contact-us.vue";
 import dataGrid from "./components/common/data-grid.vue";
 import showStats from "./components/common/show-stats.vue";
+import showStatsPlot from "./components/common/show-stats-plot.vue";
 
 
 import stplotVisualization from "./components/wizard/stplot-visualization.vue";
@@ -111,6 +112,7 @@ app.component('show-vignette', showVignette);
 app.component('contact-us', contactUs);
 app.component('data-grid', dataGrid);
 app.component('show-stats', showStats);
+app.component('show-stats-plot', showStatsPlot);
 
 
 app.component('stplot-visualization', stplotVisualization);
