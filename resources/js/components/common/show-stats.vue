@@ -73,6 +73,18 @@
                     />
                 </template>
 
+                <DxMasterDetail
+                    :enabled="true"
+                    template="masterDetailTemplate"
+                />
+                <template #masterDetailTemplate="{ data: process }">
+                    <div>
+                        <pre>
+                            {{ process.data.output }}
+                        </pre>
+                    </div>
+                </template>
+
             </dx-data-grid>
         </div>
     </div>
@@ -112,13 +124,9 @@ import DxDataGrid, {
     DxToolbar,
     DxItem,
     DxButton,
+    DxMasterDetail,
 
 } from "devextreme-vue/data-grid";
-
-import {
-    DxBarGauge, DxLabel, DxTitle, DxFont,
-} from 'devextreme-vue/bar-gauge';
-
 
 
 export default {
@@ -144,7 +152,7 @@ export default {
         DxToolbar,
         DxItem,
         DxButton,
-
+        DxMasterDetail,
     },
 
     props: {
@@ -160,7 +168,7 @@ export default {
     },
 
     mounted() {
-        
+
     },
 
     watch: {
@@ -182,9 +190,8 @@ export default {
         },
 
         onSelectionChanged(selectedRowsData) {
-            const row = selectedRowsData['selectedRowsData'][0];
-
-            console.log(row);
+            //const row = selectedRowsData['selectedRowsData'][0];
+            //console.log(row);
         },
 
 
