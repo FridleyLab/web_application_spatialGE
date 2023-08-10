@@ -450,7 +450,7 @@ lapply(names(tissues), function(i){
 
 
         //Load genes present in the filtered STlist into the DB
-        $genes_file = $workingDir . 'genesFiltered.csv';
+        /*$genes_file = $workingDir . 'genesFiltered.csv';
         if(Storage::fileExists($genes_file)) {
             $data = Storage::read($genes_file);
             $genes = explode("\n", $data);
@@ -466,7 +466,7 @@ lapply(names(tissues), function(i){
                 //DB::table('table_name')->insert($t);
                 ProjectGene::insert($chunk);
             }
-        }
+        }*/
 
 
         $parameterNames = ['filter_violin', 'filter_boxplot'];
@@ -1515,7 +1515,10 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
 
         $genes = $parameters['genes'];
         $color_pal = $parameters['color_pal'];
+
+        //$plot_meta = $parameters['plot_meta'];
         $plot_meta = $parameters['plot_meta'];
+        $plot_meta = strlen($plot_meta) ? "'$plot_meta'" : "NULL";
 
         $_genes = "c('" . join("','", $genes) . "')";
 
@@ -1530,7 +1533,7 @@ library('spatialGE')
 # Load STList
 {$this->_loadStList('stlist_sthet')}
 
-sthet_plot = compare_SThet(stlist_sthet, samplemeta='$plot_meta', genes=$_genes, color_pal='$color_pal')
+sthet_plot = compare_SThet(stlist_sthet, samplemeta=$plot_meta, genes=$_genes, color_pal='$color_pal')
 
 $export_files
 

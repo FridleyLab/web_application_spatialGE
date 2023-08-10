@@ -79,6 +79,11 @@
                 />
                 <template #masterDetailTemplate="{ data: process }">
                     <div>
+
+<!--                        <div class="my-6">-->
+<!--                            <show-stats-plot-detail :plot-data="process.data.stats.map(obj => ({ time: obj.time, memory: obj.memory }))"></show-stats-plot-detail>-->
+<!--                        </div>-->
+
                         <pre>
                             {{ process.data.output }}
                         </pre>
@@ -190,8 +195,8 @@ export default {
         },
 
         onSelectionChanged(selectedRowsData) {
-            //const row = selectedRowsData['selectedRowsData'][0];
-            //console.log(row);
+            const row = selectedRowsData['selectedRowsData'][0];
+            console.log(row);
         },
 
 

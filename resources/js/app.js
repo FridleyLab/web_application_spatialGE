@@ -30,6 +30,7 @@ import contactUs from "./components/ui/contact-us.vue";
 import dataGrid from "./components/common/data-grid.vue";
 import showStats from "./components/common/show-stats.vue";
 import showStatsPlot from "./components/common/show-stats-plot.vue";
+import showStatsPlotDetail from "./components/common/show-stats-plot-detail.vue";
 
 
 import stplotVisualization from "./components/wizard/stplot-visualization.vue";
@@ -113,6 +114,7 @@ app.component('contact-us', contactUs);
 app.component('data-grid', dataGrid);
 app.component('show-stats', showStats);
 app.component('show-stats-plot', showStatsPlot);
+app.component('show-stats-plot-detail', showStatsPlot);
 
 
 app.component('stplot-visualization', stplotVisualization);

@@ -111,7 +111,7 @@
             </div>
             <div class="pe-3 text-end">
                 <send-job-button label="Generate plots"
-                                 :disabled="generating_plots || !params.plot_genes.length || !params.color_pal.length || !params.plot_meta.length"
+                                 :disabled="generating_plots || !params.plot_genes.length || !params.color_pal.length /*|| !params.plot_meta.length*/"
                                  :project-id="project.id" job-name="SThetPlot" @started="sthetPlot"
                                  @ongoing="generating_plots = true" @completed="processCompletedPlots"
                                  :project="project"></send-job-button>
@@ -186,7 +186,8 @@ export default {
             generating: false,
             generating_plots: false,
 
-            plot_meta_options: 'metadata_names' in this.project.project_parameters ? this.project.project_parameters.metadata_names : [],
+            plot_meta_options: 'metadata_names' in this.project.project_parameters ? [{'label': 'select a metadata (optional)', 'value': ''} ,...this.project.project_parameters.metadata_names] : [{'label': 'select a metadata (optional)', 'value': ''}],
+            //plot_meta_options: 'metadata_names' in this.project.project_parameters ? this.project.project_parameters.metadata_names : [],
         }
     },
 
