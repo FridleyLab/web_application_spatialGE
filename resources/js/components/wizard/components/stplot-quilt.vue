@@ -253,7 +253,7 @@ import Multiselect from '@vueform/multiselect';
             searchGenes: async function(query) {
 
                 const response = await fetch(
-                    '/projects/' + this.project.id + '/search-genes?context=normalized&query=' + query
+                    '/projects/' + this.project.id + '/search-genes?context=N&query=' + query
                 );
 
                 const data = await response.json(); // Here you have the data that you need

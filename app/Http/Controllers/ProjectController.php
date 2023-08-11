@@ -198,17 +198,11 @@ class ProjectController extends Controller
     public function searchGenes(Project $project) {
         $query = request('query');
 
-        $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'initial';
+        $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'I';
 
         if(strlen($query)) {
-
-            $genes = ProjectGene::where('project_id', $project->id)->where('context', $context)->where('gene', 'LIKE', $query . '%')->orderBy('gene')->limit(100);
-
-            //$sql_with_bindings = Str::replaceArray('?', $genes->getBindings(), $genes->toSql());
-            //dd($sql_with_bindings);
-
-            return $genes->pluck('gene');
-
+            $genes = $project->genes($context)->where('name', 'LIKE', $query . '%')->orderBy('name')->limit(100);
+            return $genes->pluck('name');
         }
 
         return [];
@@ -217,15 +211,11 @@ class ProjectController extends Controller
     public function searchGenesRegexp(Project $project) {
         $query = request('query');
 
-        $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'initial';
+        $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'I';
 
         if(strlen($query)) {
-            $genes = ProjectGene::where('context', $context)->where('gene', 'REGEXP', $query)->orderBy('gene')->limit(100);
-
-            //$sql_with_bindings = Str::replaceArray('?', $genes->getBindings(), $genes->toSql());
-            //dd($sql_with_bindings);
-
-            return $genes->pluck('gene');
+            $genes = $project->genes($context)->where('name', 'REGEXP', $query)->orderBy('name')->limit(100);
+            return $genes->pluck('name');
         }
 
         return [];

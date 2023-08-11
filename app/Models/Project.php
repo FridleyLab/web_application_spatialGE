@@ -43,9 +43,14 @@ class Project extends Model
         return $this->hasMany(ProjectParameter::class);
     }
 
-    public function genes(): HasMany
+    /*public function genes(): HasMany
     {
         return $this->hasMany(ProjectGene::class);
+    }*/
+
+    public function genes($context = 'I'): BelongsToMany
+    {
+        return $this->belongsToMany(Gene::class, 'project_gene')->where('context', $context);
     }
 
     //Attributes
@@ -250,6 +255,28 @@ class Project extends Model
         return $json;
     }
 
+    private function createGeneList($genes_file, $context) {
+        if(Storage::fileExists($genes_file)) {
+            $data = Storage::read($genes_file);
+            $genes = explode("\n", $data);
+            $genes = array_unique($genes);
+
+            $__genes = [];
+            foreach ($genes as $gene) {
+                if (strlen($gene)) {
+                    $__genes[] = ['name' => $gene];
+                }
+            }
+
+            //Insert whatever new genes have been detected applying this process in the table that contains all genes
+            DB::table('genes')->insertOrIgnore($__genes);
+            //Delete previously stored genes for this project
+            DB::delete("delete from project_gene where context='$context' and project_id=" . $this->id);
+            //Associate the genes in this project with the general gene list
+            DB::insert("INSERT INTO project_gene(context, project_id, gene_id) select '$context',{$this->id}, id FROM genes WHERE name IN('" . implode("','", $genes) . "')");
+        }
+    }
+
     public function createStList($parameters) {
 
         $workingDir = $this->workingDir();
@@ -272,22 +299,7 @@ class Project extends Model
 
         //Load genes present in samples into the DB
         $genes_file = $workingDir . 'genes.csv';
-        if(Storage::fileExists($genes_file)) {
-            $data = Storage::read($genes_file);
-            $genes = explode("\n", $data);
-            $genes = array_unique($genes);
-            $_genes = [];
-            foreach ($genes as $gene)
-                if(strlen($gene))
-                    $_genes[] = ['gene' => $gene, 'project_id' => $this->id, 'context' => 'initial'];
-                //ProjectGene::create(['gene' => $gene, 'project_id' => $this->id]);
-            DB::delete("delete from project_genes where context='initial' and project_id=" . $this->id);
-            foreach (array_chunk($_genes,1000) as $chunk)
-            {
-                //DB::table('table_name')->insert($t);
-                ProjectGene::insert($chunk);
-            }
-        }
+        $this->createGeneList($genes_file, 'I');
 
         //Delete previously generated parameters, if any
         DB::delete("delete from project_parameters where parameter<>'metadata' and not(parameter like 'job.createStList%') and project_id=" . $this->id);
@@ -447,27 +459,6 @@ lapply(names(tissues), function(i){
 
 
         $result['pca_max_var_genes'] = $this->pca_max_var_genes();
-
-
-        //Load genes present in the filtered STlist into the DB
-        /*$genes_file = $workingDir . 'genesFiltered.csv';
-        if(Storage::fileExists($genes_file)) {
-            $data = Storage::read($genes_file);
-            $genes = explode("\n", $data);
-            $_genes = [];
-            foreach ($genes as $gene)
-                if(strlen($gene))
-                    $_genes[] = ['gene' => $gene, 'project_id' => $this->id, 'context' => 'filtered'];
-            //ProjectGene::create(['gene' => $gene, 'project_id' => $this->id]);
-            DB::delete("delete from project_genes where context='filtered' and project_id=" . $this->id);
-
-            foreach (array_chunk($_genes,1000) as $chunk)
-            {
-                //DB::table('table_name')->insert($t);
-                ProjectGene::insert($chunk);
-            }
-        }*/
-
 
         $parameterNames = ['filter_violin', 'filter_boxplot'];
         foreach($parameterNames as $parameterName) {
@@ -679,23 +670,7 @@ $plots
 
         //Load genes present in the normalized STlist into the DB
         $genes_file = $workingDir . 'genesNormalized.csv';
-        if(Storage::fileExists($genes_file)) {
-            $data = Storage::read($genes_file);
-            $genes = explode("\n", $data);
-            $_genes = [];
-            foreach ($genes as $gene)
-                if(strlen($gene))
-                    $_genes[] = ['gene' => $gene, 'project_id' => $this->id, 'context' => 'normalized'];
-            //ProjectGene::create(['gene' => $gene, 'project_id' => $this->id]);
-            DB::delete("delete from project_genes where context='normalized' and project_id=" . $this->id);
-
-            foreach (array_chunk($_genes,1000) as $chunk)
-            {
-                //DB::table('table_name')->insert($t);
-                ProjectGene::insert($chunk);
-            }
-        }
-
+        $this->createGeneList($genes_file, 'N');
 
         $result = [];
 
