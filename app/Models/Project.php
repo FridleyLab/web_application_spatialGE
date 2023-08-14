@@ -187,7 +187,7 @@ class Project extends Model
 
         $task->finished_at = DB::raw('CURRENT_TIMESTAMP');
         $task->completed = !strpos($output, 'spatialGE_PROCESS_COMPLETED') || $error_found  ? 0 : 1;
-        $task->output = $output;
+        $task->output = ($task->attempts > 1 ? $task->output . "\n\nATTEMPT $this->attempts:\n" : '' ) . $output;
         $task->save();
 
         return $output;
