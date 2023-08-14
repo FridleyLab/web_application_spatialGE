@@ -2178,7 +2178,7 @@ lapply(names(grad_res), function(i){
             $task->attempts++;
             $task->save();
 
-            $startAt = now()->addMinutes(rand(10,25));
+            $startAt = now()->addMinutes(rand(10,20) * ($task->attempts - 1));
         }
 
         //create the job instance
@@ -2255,33 +2255,18 @@ lapply(names(grad_res), function(i){
 
     public function getJobPositionInQueue($jobId) : int {
 
-        //$queueName = env('QUEUE_DEFAULT_NAME', 'default');
-
-        $queuePosition = 0;
-
         try {
-            $jobInfo = DB::table('jobs')
-                ->where('id', $jobId)
-                ->get();
-            if(!$jobInfo->count())
-                return $queuePosition;
 
-            if($jobInfo[0]->attempts)
-                return 1;
+            $job = Job::findOrFail($jobId);
 
-            $queueName = $jobInfo[0]->queue;
+            if($job->isRunning()) return 1; //Job running, return 1 to indicate that it is first in line and being run
 
-            $queuePosition = DB::table('jobs')
-                ->where('queue', $queueName)
-                ->where('id', '<=', $jobId)
-                ->where('attempts', 0)
-                ->count() + 1;
+            return $job->currentPosition();
         }
-        catch(\Exception $e) {}
-
-        return $queuePosition;
+        catch(\Exception $e) {
+            return 0;
+        }
     }
-
 
 }
 
