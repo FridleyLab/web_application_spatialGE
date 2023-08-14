@@ -349,7 +349,7 @@ class ProjectController extends Controller
             'color_pal' => request('color_pal'),
             'plot_meta' => request('plot_meta')
         ];
-        $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThet', $parameters, 'low');
+        $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThet', $parameters);
         return $project->getJobPositionInQueue($jobId);
 
     }
@@ -389,7 +389,7 @@ class ProjectController extends Controller
     }
 
     public function differential_expression_spatial(Project $project) {
-        $jobId = $project->createJob('Differential Expression - STDiff Spatial tests', 'STDiffSpatial', request()->all(), 'low');
+        $jobId = $project->createJob('Differential Expression - STDiff Spatial tests', 'STDiffSpatial', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
