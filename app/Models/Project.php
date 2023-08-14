@@ -170,7 +170,7 @@ class Project extends Model
 
         $output = $this->_container->execute($command, $task_id);
 
-        //Check output for possible errors
+        //Check output for possible strings that indicate an error during execution
         $error_strings_to_look_for = [
             'Execution halted',
             'Cannot allocate memory',
@@ -2158,25 +2158,50 @@ lapply(names(grad_res), function(i){
 
     public function createJob($description, $command, $parameters, $queue = 'default') : int {
 
-        //insert record in Tasks table to gather statistics
-        $parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . substr(microtime(true) * 1000, 0, 13);
-        Task::create(['task' => $parameters['__task'], 'project_id' => $this->id, 'samples' => $this->samples->count(), 'user_id' => $this->user->id, 'process' => $command]);
+        $startAt = now()->addSeconds(rand(1,15));
+
+        if(!isset($parameters['__task'])) {
+
+            $project_id = $this->id;
+
+            //Create a unique name or id for the task
+            $parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . substr(microtime(true) * 1000, 0, 13);
+
+            //Information necessary to run the job again in case it fails
+            $payload = json_encode(compact('description', 'project_id', 'command', 'parameters', 'queue'));
+
+            //insert record in Tasks table to gather statistics
+            Task::create(['task' => $parameters['__task'], 'project_id' => $this->id, 'samples' => $this->samples->count(), 'user_id' => $this->user->id, 'process' => $command, 'payload' => $payload]);
+        }
+        else {
+            $task = Task::where('task', $parameters['__task'])->firstOrFail();
+            $task->attempts++;
+            $task->save();
+
+            $startAt = now()->addMinutes(rand(10,25));
+        }
 
         //create the job instance
         $job = new RunScript($description, $this, $command, $parameters);
+
         //push the job to que queue and get the jobId
-        $jobId = Queue::connection()->pushOn($queue, $job);
+        $jobId = Queue::connection()->laterOn($queue, $startAt, $job);   //$jobId = Queue::connection()->pushOn($queue, $job);
 
         //save the jobId to the project parameters table
         ProjectParameter::updateOrCreate(['parameter' => 'job.' . $command, 'project_id' => $this->id], ['type' => 'number', 'value' => $jobId]);
-        //Set the email notification off by default
-        $this->setJobEmailNotification($command, 0);
+        //Set the email notification to off by default
+        $this->setJobEmailNotification($command, -1);
 
         return $jobId;
 
     }
 
     public function setJobEmailNotification($command, $sendEmail) {
+
+        if($sendEmail === -1) {
+            $param = ProjectParameter::where('parameter',  'job.' . $command . '.email')->where('project_id', $this->id)->get();
+            $sendEmail = $param->count() ? $param[0]->value : 0;
+        }
 
         ProjectParameter::updateOrCreate(['parameter' => 'job.' . $command . '.email', 'project_id' => $this->id], ['type' => 'number', 'value' => $sendEmail ? 1 : 0]);
 

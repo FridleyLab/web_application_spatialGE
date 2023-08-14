@@ -2,18 +2,15 @@
 
 namespace App\Jobs;
 
-use App\Mail\notifyProcessCompleted;
 use App\Models\Project;
-use App\Models\ProjectParameter;
+use App\Models\Task;
 use App\Notifications\ProcessCompleted;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 
@@ -64,20 +61,37 @@ class RunScript implements ShouldQueue
         }
 
 
-        //Notify the user if requested
-        try {
-            //Load the project again because this class instance was loaded when the process started and the user could've changed their mind about being notified via email
-            $this->project->fresh();
 
-            //Check if the user requested to be notified via email
-            $key = "job.{$this->command}.email";
-            if( array_key_exists($key, $this->project->project_parameters) && intval($this->project->project_parameters[$key]))
-                $this->project->user->notify(new ProcessCompleted($this->project, $this->description, $result['output'], array_key_exists('script', $result) ? $result['script'] : ''));
-                //Mail::to($this->project->user->email)->send(new notifyProcessCompleted($this->project, $this->description, $this->project->user->is_admin ? $result['output'] : ''));
+        //check if the task completed correctly
+        if(isset($this->parameters['__task'])) {
+            $task = Task::where('task', $this->parameters['__task'])->firstOrFail();
+            if($task->completed) {
+                //Notify the user if requested
+                try {
+                    //Load the project again because this class instance was loaded when the process started and the user could've changed their mind about being notified via email
+                    $this->project->fresh();
+
+                    //Check if the user requested to be notified via email
+                    $key = "job.{$this->command}.email";
+                    if( array_key_exists($key, $this->project->project_parameters) && intval($this->project->project_parameters[$key]))
+                        $this->project->user->notify(new ProcessCompleted($this->project, $this->description, $result['output'], array_key_exists('script', $result) ? $result['script'] : ''));
+                }
+                catch (\Exception $e)
+                {
+                    Log::error('ERROR notifying user ' . $this->project->user->email . ' of process "' . $this->description . '", MESSAGE:' . $e->getMessage());
+                }
+            }
+            else { //job failed, try again in max attempts not reached yet
+                if($task->attempts < 3) { //TODO: create env variable for MAX_JOB_ATTEMPTS
+                    $payload = json_decode($task->payload);
+                    $this->project->createJob($payload->description, $payload->command, get_object_vars($payload->parameters), $payload->queue);
+                }
+                else { //TODO: send notification about process failed to the user and copy to TWO app admins
+                    null;
+                }
+            }
         }
-        catch (\Exception $e)
-        {
-            Log::error('ERROR notifying user ' . $this->project->user->email . ' of process "' . $this->description . '", MESSAGE:' . $e->getMessage());
-        }
+
+
     }
 }

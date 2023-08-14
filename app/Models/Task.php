@@ -12,7 +12,7 @@ class Task extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['task', 'project_id', 'samples', 'process', 'user_id', 'scheduled_at', 'started_at', 'finished_at'];
+    protected $fillable = ['task', 'project_id', 'samples', 'process', 'completed', 'payload', 'attempts',  'user_id', 'scheduled_at', 'started_at', 'finished_at'];
 
     //Relations
     public function user(): BelongsTo
