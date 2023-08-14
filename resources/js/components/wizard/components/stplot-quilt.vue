@@ -21,6 +21,7 @@
                         <div>Search and select genes</div>
                         <div>
                             <Multiselect
+                                id="quilt-plot-gene-list"
                                 v-model="params.genes"
                                 mode="tags"
                                 placeholder="Select options"
