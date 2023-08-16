@@ -15,7 +15,7 @@
                 <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
 
                     <div>
-                        <div>Search and select genes</div>
+                        <div>Search and select genes <show-modal tag="vis_expr_surf_genes"></show-modal></div>
                         <div>
                             <Multiselect
                                 id="expression-surface-gene-list"
@@ -37,6 +37,7 @@
 
         <div class="p-3 text-center">
             <send-job-button label="Estimate surfaces" :disabled="processing || processingPlots || !params.genes.length" :project-id="project.id" job-name="STplotExpressionSurface" @started="estimateSurfaces" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <show-modal tag="vis_expr_surf_estimate"></show-modal>
         </div>
 
 
@@ -46,7 +47,7 @@
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div>Color palette</div>
+                    <div>Color palette <show-modal tag="vis_expr_surf_color_palette"></show-modal></div>
                     <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
                 </div>
             </div>
@@ -56,6 +57,7 @@
         <div v-if="!processing" class="row mt-3">
             <div class="p-3 text-end">
                 <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length || !('STplotExpressionSurface.genes' in project.project_parameters)" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @ongoing="processingPlots = true" @completed="processPlotsCompleted" :project="project" ></send-job-button>
+                <show-modal tag="vis_expr_surf_generate"></show-modal>
             </div>
         </div>
 

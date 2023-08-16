@@ -42,7 +42,7 @@ class ContactUs extends Notification
                     ->line("Following is the information sent by the user:")
                     ->line(new HtmlString('<strong>Name: </strong>' . $this->first_name . ' ' . $this->last_name))
                     ->line(new HtmlString('<strong>Subject: </strong>' . $this->subject))
-                    ->line(new HtmlString('<strong>Description: </strong>' . $this->description))
+                    ->line(new HtmlString('<strong>Description: </strong><pre>' . $this->description . '</pre>'))
                     ->line(new HtmlString('<strong>User email address: </strong>' . $this->email))
                     ->action('Reply to user', 'mailto:' . $this->email)
                     ->line('Thanks for using our application.')

@@ -98,7 +98,7 @@ export default {
     methods: {
         submitData(e) {
             this.sendingMessage = true;
-            axios.post(this.url, {subject: this.subject, description: this.description, email: this.email})
+            axios.post(this.url, {subject: this.subject, description: this.description, email: this.email, first_name: this.first_name, last_name: this.last_name})
                 .then((response) => {
                     console.log(response.data);
                     this.sendingMessage = false;

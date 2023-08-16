@@ -73,6 +73,18 @@ export default {
                 "qcquilt_first_sample": {"title": "First sample", "text": "Select a sample to generate a quilt plot."},
                 "qcquilt_second_sample": {"title": "Second sample", "text": "Select a sample to generate a quilt plot. It must be a different sample."},
 
+                //Visualization
+                "vis_quilt_plot_genes": {"title": "Search and select genes", "text": "Enter one or more genes to generate quilt plots. The textbox has auto-complete capabilities. Gene names in spatialGE are case-sensitive."},
+                "vis_quilt_plot_point_size": {"title": "Point size", "text": "The size of the point in the plots representing each Region of Interest (ROI), spot, or cell. The default (2) works for most situations."},
+                "vis_quilt_plot_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html). Diverging and sequential palettes are recommended (see Khroma and RColorBrewer documentation)."},
+                "vis_quilt_plot_data_type": {"title": "Data type", "text": "Whether to plot the raw or normalized expression."},
+                "vis_quilt_plot_side_by_side": {"title": "Side by side", "text": "Whether to add the tissue image next to the quilt plot in the downloadable files."},
+                "vis_expr_surf_genes": {"title": "Search and select genes", "text": "Enter one or more genes to estimate expression surfaces. The textbox has auto-complete capabilities. Gene names in spatialGE are case-sensitive. Spatial interpolation via “kriging” is computationally intensive, hence the more genes to be interpolated, the more time it takes to complete."},
+                "vis_expr_surf_estimate": {"title": "Estimate button", "text": "Click this button to estimate expression surfaces. This button starts the estimation of expression surfaces which is a necessary step prior to the plotting of expression surfaces."},
+                "vis_expr_surf_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html). Diverging and sequential palettes are recommended (see Khroma and RColorBrewer documentation)."},
+                "vis_expr_surf_generate": {"title": "Generate plots button", "text": "Once expression surfaces have been estimated, this button allows to re-plot expression surfaces if a different color palette is desired."},
+
+
                 //Spatial Domain Detection
                 "sdd_stclust_spatial_weight": {"title": "Spatial weight", "text": "Select a spatial weight to use in “shrinkage” of gene expression differences among ROIs/spots/cells. Spatial weights larger than 0.1 often result in non-informative clusters."},
                 "sdd_stclust_range_of_ks": {"title": "Range of Ks", "text": "Define domains over a range of K values. STclust will assign ROIs/spots/cells to as many domains as each of the K in the selected range. This option allows for deeper exploration of data as users can select the K value that better explains differences among domains."},

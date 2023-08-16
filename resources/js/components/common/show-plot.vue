@@ -12,7 +12,7 @@
             <a :href="srcName + '.pdf'" class="btn btn-sm btn-outline-info me-2" download>PDF</a>
             <a :href="srcName + '.png'" class="btn btn-sm btn-outline-info me-2" download>PNG</a>
             <a :href="srcName + '.svg'" class="btn btn-sm btn-outline-info" download>SVG</a>
-            <label v-if="sideBySide" class="ms-3"><input type="checkbox" v-model="sbs"> Quilt plot with H&E image</label>
+            <label v-if="sideBySide" class="ms-3"><input type="checkbox" v-model="sbs"> Quilt plot with H&E image <show-modal v-if="sideBySideToolTip.length" :tag="sideBySideToolTip"></show-modal></label>
         </div>
 
     </div>
@@ -29,6 +29,7 @@
             showImage: {type: Boolean, default: false},
             sample: {type: Object, default: null},
             sideBySide: {type: Boolean, default: false},
+            sideBySideToolTip: {type: String, default: ''},
         },
 
         data(){

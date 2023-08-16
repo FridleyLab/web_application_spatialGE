@@ -18,7 +18,7 @@
                 <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
 
                     <div>
-                        <div>Search and select genes</div>
+                        <div>Search and select genes <show-modal tag="vis_quilt_plot_genes"></show-modal></div>
                         <div>
                             <Multiselect
                                 id="quilt-plot-gene-list"
@@ -40,21 +40,21 @@
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div class="me-3">Point size: <span class="text-lg text-bold text-primary">{{ params.ptsize }}</span></div>
+                    <div class="me-3">Point size: <span class="text-lg text-bold text-primary">{{ params.ptsize }}</span> <show-modal tag="vis_quilt_plot_point_size"></show-modal></div>
                     <input type="range" min="0" max="5" step="0.1" class="w-100" v-model="params.ptsize">
                 </div>
             </div>
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div>Color palette</div>
+                    <div>Color palette <show-modal tag="vis_quilt_plot_color_palette"></show-modal></div>
                     <div><Multiselect :options="colorPalettes" v-model="params.col_pal" :searchable="true"></Multiselect></div>
                 </div>
             </div>
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div>Data type</div>
+                    <div>Data type <show-modal tag="vis_quilt_plot_data_type"></show-modal></div>
                     <div>
                         <label class="me-3">
                             <input type="radio" value="tr" v-model="params.data_type"> Normalized expression
@@ -139,7 +139,7 @@
                                 <template v-for="(image, sample, index) in samples">
                                     <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'quilt-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + sample + '-tab'">
                                         <div>
-                                            <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true"></show-plot>
+                                            <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true" side-by-side-tool-tip="vis_quilt_plot_side_by_side"></show-plot>
                                         </div>
                                     </div>
                                 </template>
