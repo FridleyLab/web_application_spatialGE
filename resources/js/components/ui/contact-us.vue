@@ -4,7 +4,7 @@
             <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4 mt-4">
                 <div class="card">
                     <div class="card-header p-3 pt-2">
-                        <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+                        <div class="icon icon-lg icon-shape bg-gradient-info shadow-dark text-center border-radius-xl mt-n4 position-absolute">
                             <i class="material-icons opacity-10">contact_mail</i>
                         </div>
                         <div class="text-end pt-1">
@@ -25,6 +25,21 @@
                             <div class="w-90 w-md-70 w-lg-60 content-center">
                                 <form method="post" autocomplete="off" @submit.prevent="submitData" ref="contactForm" :class="sendingMessage || messageSent ? 'disabled-clicks' : ''">
                                     <div class="p-4">
+                                        <div class="text-sm text-secondary py-3 text-info">All fields are required *</div>
+                                        <div class="mb-3 d-flex">
+                                            <div class="w-45">
+                                                <label class="form-label">First name</label>
+                                                <input required type="text" class="form-control border border-1 p-2" name="first_name" v-model="first_name" maxlength="30">
+                                            </div>
+                                            <div class="w-45 ms-3">
+                                                <label class="form-label">Last name</label>
+                                                <input required type="text" class="form-control border border-1 p-2" name="last_name" v-model="last_name" maxlength="30">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 w-70">
+                                            <label class="form-label">Email address where we can reach you</label>
+                                            <input required type="email" class="form-control border border-1 p-2" name="email" v-model="email" maxlength="255">
+                                        </div>
                                         <div class="mb-3">
                                             <label class="form-label">Short description or subject</label>
                                             <input required type="text" class="form-control border border-1 p-2" name="subject" v-model="subject" maxlength="255">
@@ -32,10 +47,6 @@
                                         <div class="mb-3">
                                             <label class="form-label">Additional information or comments</label>
                                             <textarea required class="form-control border border-1 p-2" name="description" v-model="description" maxlength="255" rows="6"></textarea>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Email address where we can reach you</label>
-                                            <input required type="email" class="form-control border border-1 p-2" name="email" v-model="email" maxlength="255">
                                         </div>
                                         <div>
                                             <button type="submit" class="btn btn-info float-end">{{ sendingMessage ? 'Sending' : messageSent ? 'Sent' : 'Send' }}</button>
@@ -66,6 +77,7 @@ export default {
 
     props: {
         url: String,
+
     },
 
     data() {
@@ -73,6 +85,8 @@ export default {
             subject: '',
             description: '',
             email: '',
+            first_name: '',
+            last_name: '',
 
             messageSent:false,
             sendingMessage: false

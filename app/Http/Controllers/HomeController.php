@@ -32,7 +32,7 @@ class HomeController extends Controller
 
             $spatialGE = User::findOrFail(0);
 
-            $spatialGE->notify(new ContactUs(request('subject'), request('description'), request('email')));
+            $spatialGE->notify(new ContactUs(request('subject'), request('description'), request('email'), request('first_name'), request('last_name')));
 
             return 'message sent';
         }

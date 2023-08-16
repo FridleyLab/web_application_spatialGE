@@ -16,7 +16,7 @@ class ContactUs extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public string $subject, public string $description, public string $email)
+    public function __construct(public string $subject, public string $description, public string $email, public string $first_name, public string $last_name)
     {
         //
     }
@@ -40,6 +40,7 @@ class ContactUs extends Notification
                     ->subject(env('APP_NAME') . ' - [Contact us] form submitted')
                     ->greeting('Hello ' . $notifiable->first_name . '!')
                     ->line("Following is the information sent by the user:")
+                    ->line(new HtmlString('<strong>Name: </strong>' . $this->first_name . ' ' . $this->last_name))
                     ->line(new HtmlString('<strong>Subject: </strong>' . $this->subject))
                     ->line(new HtmlString('<strong>Description: </strong>' . $this->description))
                     ->line(new HtmlString('<strong>User email address: </strong>' . $this->email))

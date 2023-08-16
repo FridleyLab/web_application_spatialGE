@@ -7,7 +7,7 @@
             <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4 mt-4">
                 <div class="card">
                     <div class="card-header p-3 pt-2">
-                        <div class="icon icon-lg icon-shape bg-gradient-info shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+                        <div class="icon icon-lg icon-shape bg-gradient-info shadow-dark text-center border-radius-xl mt-n4 position-absolute">
                             <i class="material-icons opacity-10">help</i>
                         </div>
                         <div class="text-end pt-1">
