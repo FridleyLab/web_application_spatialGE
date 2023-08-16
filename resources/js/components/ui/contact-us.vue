@@ -77,16 +77,18 @@ export default {
 
     props: {
         url: String,
-
+        userFirstName: {type: String, default: ''},
+        userLastName: {type: String, default: ''},
+        userEmail: {type: String, default: ''},
     },
 
     data() {
         return {
             subject: '',
             description: '',
-            email: '',
-            first_name: '',
-            last_name: '',
+            email: this.userEmail,
+            first_name: this.userFirstName,
+            last_name: this.userLastName,
 
             messageSent:false,
             sendingMessage: false
