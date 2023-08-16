@@ -4,10 +4,14 @@
 
         <div :class="processing ? 'disabled-clicks' : ''">
             <div class="my-3 text-bold">
-                STenrich - Gene level
+                Spatial gene set enrichment with STenrich
             </div>
             <div>
-                Detect genes showing spatial expression patterns (e.g., hotspots). This method tests if spots/cells with high average expression (or enrichment score) of a gene set, shows evidence of spatial aggregation. High expression/score spots or cells are identified using a threshold (average expression/score + X standard deviations).
+                Detect genes showing spatial expression patterns (e.g., hotspots). This method tests if spots/cells with
+                high average expression (or enrichment score) of a gene set, shows evidence of spatial aggregation. High
+                expression/score spots or cells are identified using a threshold (average expression/score + X standard
+                deviations). Currently, the expression of a gene set is calculated as the average of the genes within a
+                set. In the future, an option to run STenrich on enrichment scores will be provided.
             </div>
 
 
@@ -15,7 +19,7 @@
                 <div class="w-70 w-md-50 w-lg-40 w-xxl-30">
                     <div class="">
                         <div class="">
-                            <div>Input gene sets</div>
+                            <div>Select a gene set database <show-modal tag="stenrich_select_gene_set"></show-modal></div>
                             <div>
                                 <span>
                                     <Multiselect :options="gene_sets_options" v-model="params.gene_sets"></Multiselect>
@@ -24,7 +28,7 @@
                         </div>
                     </div>
                     <div class="text-bg-light">
-                        <div>Coming soon...</div>
+                        <div>Coming soon... <show-modal tag="stenrich_select_measure"></show-modal></div>
                         <label class="text-lg">
                             <input type="checkbox" v-model="params.average" disabled> Average
                         </label>
@@ -40,9 +44,9 @@
                 <div class="w-100 w-xxl-95">
                     <div class="row justify-content-center text-center">
                         <div class="">
-                            <div class="me-3">Permutations: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.permutations"></div>
+                            <div class="me-3">Permutations: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.permutations"> <show-modal tag="stenrich_permutations"></show-modal></div>
                             <input type="range" min="100" :max="1000000" step="1000" class="w-100" v-model="params.permutations">
-                            <div class="me-3">Seed number (permutation): <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.seed"></div>
+                            <div class="me-3">Seed number (permutation): <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.seed"> <show-modal tag="stenrich_seed_number"></show-modal></div>
                         </div>
                     </div>
                 </div>
@@ -52,8 +56,8 @@
                 <div class="w-100 w-xxl-95">
                     <div class="row justify-content-center text-center">
 
-                            <div class="w-30">Minimum number of spots: <input type="number" class="text-end text-sm border border-1 rounded" v-model="params.min_spots"></div>
-                            <div class="w-30">Minimum number of genes: <input type="number" class="text-end text-sm border border-1 rounded" v-model="params.min_genes"></div>
+                            <div class="w-30">Minimum number of spots: <input type="number" class="text-end text-sm border border-1 rounded" v-model="params.min_spots"> <show-modal tag="stenrich_minimum_spots"></show-modal></div>
+                            <div class="w-30">Minimum number of genes: <input type="number" class="text-end text-sm border border-1 rounded" v-model="params.min_genes"> <show-modal tag="stenrich_minimum_genes"></show-modal></div>
 
                     </div>
                 </div>
@@ -64,7 +68,7 @@
                 <div class="w-100 w-xxl-95">
                     <div class="row justify-content-center text-center">
                         <div class="">
-                            <div class="me-3">Standard deviations: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.num_sds"></div>
+                            <div class="me-3">Standard deviations: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.num_sds"> <show-modal tag="stenrich_standard_deviations"></show-modal></div>
                             <input type="range" min="1" :max="3" step="0.5" class="w-50" v-model="params.num_sds">
                         </div>
                     </div>
@@ -86,7 +90,19 @@
 
 
         <div v-if="!processing && ('stenrich' in project.project_parameters)" class="p-3 text-center mt-4">
-            <a :href="stenrich.base_url + 'stenrich_results.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Excel results - All samples</a>
+
+            <div class="text-justify">
+                <div class="fs-5">Explanation of results:</div>
+                <ul>
+                    <li><strong>Gene set:</strong> The name of the gene set/pathway tested</li>
+                    <li><strong>Size test:</strong> The number of genes in the sample that belong to a given gene set/pathway. If this value falls below the set value in “Minimum number of genes”, the gene set was not tested</li>
+                    <li><strong>Size gene set:</strong> The total number of genes belonging to a gene set</li>
+                    <li><strong>p-value:</strong> The nominal p-value resulting from the permutation procedure</li>
+                    <li><strong>Adj. p-value:</strong> The FDR-adjusted (a.k.a Benjamini-Hochberg) p-values. These values are the recommended values to decide if gene set presents spatial patterns</li>
+                </ul>
+            </div>
+
+            <a :href="stenrich.base_url + 'stenrich_results.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Download results (Excel)</a>
         </div>
 
 

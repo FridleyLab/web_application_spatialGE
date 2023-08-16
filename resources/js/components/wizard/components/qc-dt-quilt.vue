@@ -17,12 +17,12 @@
                 <div class="row justify-content-center text-center m-3">
                     <div class="w-100 w-md-80 w-lg-70  w-xxl-55 row row-cols-2">
                     <div class="col">
-                        <div>Color palette</div>
+                        <div>Color palette <show-modal tag="qcquilt_color_palette"></show-modal></div>
                         <div><Multiselect :options="colorPalettes" v-model="params.color_pal" :close-on-select="true" :searchable="true"></Multiselect></div>
                     </div>
 
                     <div class="col">
-                        <div>Variable</div>
+                        <div>Variable <show-modal tag="qcquilt_variable"></show-modal></div>
                         <div><Multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" v-model="params.plot_meta"></Multiselect></div>
                     </div>
                     </div>
@@ -32,14 +32,14 @@
                 <div class="row justify-content-center text-center m-3">
                     <div class="w-100 w-md-80 w-lg-70  w-xxl-55 row row-cols-2">
                         <div class="col">
-                            <label for="sampleList2" class="form-label text-lg">First sample:</label>
+                            <label for="sampleList2" class="form-label text-lg">First sample: <show-modal tag="qcquilt_first_sample"></show-modal></label>
                             <select id="sampleList2" class="p-2 form-select w-100 border border-1" v-model="params.sample1">
                                 <option value="">-- select a sample --</option>
                                 <option v-for="sample in samples" :value="sample.name">{{ sample.name }}</option>
                             </select>
                         </div>
                         <div class="col">
-                            <label for="sampleList1" class="form-label text-lg">Second sample:</label>
+                            <label for="sampleList1" class="form-label text-lg">Second sample: <show-modal tag="qcquilt_second_sample"></show-modal></label>
                             <select id="sampleList2" class="p-2 form-select w-100 border border-1" v-model="params.sample2">
                                 <option value="">-- select a sample --</option>
                                 <option v-for="sample in samples" :value="sample.name">{{ sample.name }}</option>

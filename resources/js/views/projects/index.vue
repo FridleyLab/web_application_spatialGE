@@ -10,6 +10,9 @@
                         </div>
                         <div class="text-end pt-1">
                             <h6 class="mb-0 text-capitalize">My projects</h6>
+                            <div>
+                                <show-vignette url="/documentation/vignettes/my_projects.pdf"></show-vignette>
+                            </div>
                         </div>
                     </div>
 

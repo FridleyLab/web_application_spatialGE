@@ -20,7 +20,7 @@
                     <div class="row justify-content-center text-center mt-4">
                         <div class="">
                             <div class="me-3">
-                                Spatial weight: <span class="text-lg text-bold text-primary">{{ params.ws }}</span>
+                                Spatial weight: <span class="text-lg text-bold text-primary">{{ params.ws }}</span> <show-modal tag="sdd_stclust_spatial_weight"></show-modal>
                             </div>
                             <input type="range" min="0" max="0.1" step="0.01" class="w-100" v-model="params.ws">
                         </div>
@@ -32,11 +32,11 @@
 <!--                            DynamicTreeCuts - using {{dynamicTreeCuts ? 'deep split' : 'number of domains'}}-->
 <!--                        </label>-->
                         <label class="text-lg">
-                            <input type="radio" name="method" value="ds" v-model="method"> Select a range of Ks
+                            <input type="radio" name="method" value="ds" v-model="method"> Select a range of Ks <show-modal tag="sdd_stclust_range_of_ks"></show-modal>
                         </label>
 
-                        <label class="text-lg ms-4">
-                            <input type="radio" name="method" value="dtc" v-model="method"> Use DynamicTreeCuts
+                        <label class="text-lg ms-5">
+                            <input type="radio" name="method" value="dtc" v-model="method"> Use DynamicTreeCuts <show-modal tag="sdd_stclust_dynamicTreeCuts"></show-modal>
                         </label>
                     </div>
 
@@ -44,7 +44,7 @@
                     <div v-if="method === 'dtc'" class="row justify-content-center text-center mt-4">
                         <div class="">
                             <div class="me-3">
-                                DeepSplit: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.deepSplit">
+                                DeepSplit: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.deepSplit"> <show-modal tag="sdd_stclust_deepsplit"></show-modal>
                                 <!--                                DeepSplit: <span class="text-lg text-bold text-primary">{{ params.deepSplit }}</span>-->
                             </div>
                             <input type="range" min="0" max="4" step="0.5" class="w-100" v-model="params.deepSplit">
@@ -53,14 +53,14 @@
 
 <!--                    <div :class="method === 'ds' ? '' : 'disabled-clicks'" class="mt-4">-->
                     <div v-if="method === 'ds'" class="mt-4">
-                        <numeric-range title="Number of domains:" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
+                        <numeric-range title="Number of domains:" show-tool-tip="sdd_stclust_number_of_domains" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
                     </div>
 
 
 
                     <div class="row justify-content-center text-center mt-5">
                         <div class="">
-                            <div class="me-3">Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"></div>
+                            <div class="me-3">Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"> <show-modal tag="sdd_stclust_number_genes"></show-modal></div>
                             <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="w-100" v-model="params.n_genes">
                         </div>
                     </div>

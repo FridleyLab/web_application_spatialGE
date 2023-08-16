@@ -9,6 +9,9 @@
                         </div>
                         <div class="text-end pt-1">
                             <h6 class="mb-0 text-capitalize">Spatial domain detection</h6>
+                            <div>
+                                <show-vignette url="/documentation/vignettes/spatial_domain_detection.pdf"></show-vignette>
+                            </div>
                         </div>
                     </div>
 

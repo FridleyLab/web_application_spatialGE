@@ -67,6 +67,28 @@ export default {
                 "qcpca_number_genes_display_heatmap": {"title": "Number of genes for heatmap", "text": "The number of genes (rows) to show in the heatmap. The genes are selected using the standard deviation across samples as criterion. No differential expression analysis is involved here."},
                 "qcpca_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html)"},
                 "qcpca_color_by": {"title": "Metadata selection", "text": "Optional. Name of a sample-level metadata variable. Points in the PCA plot will be colored according to this variable. If no variable is selected, points are colored according to the sample names."},
+                //QC & data transformation - Quilt
+                "qcquilt_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html)"},
+                "qcquilt_variable": {"title": "Variable", "text": "The ROI/spot/cell-level variable to plot. Currently, only total_counts and total_genes are available."},
+                "qcquilt_first_sample": {"title": "First sample", "text": "Select a sample to generate a quilt plot."},
+                "qcquilt_second_sample": {"title": "Second sample", "text": "Select a sample to generate a quilt plot. It must be a different sample."},
+
+                //Spatial Domain Detection
+                "sdd_stclust_spatial_weight": {"title": "Spatial weight", "text": "Select a spatial weight to use in “shrinkage” of gene expression differences among ROIs/spots/cells. Spatial weights larger than 0.1 often result in non-informative clusters."},
+                "sdd_stclust_range_of_ks": {"title": "Range of Ks", "text": "Define domains over a range of K values. STclust will assign ROIs/spots/cells to as many domains as each of the K in the selected range. This option allows for deeper exploration of data as users can select the K value that better explains differences among domains."},
+                "sdd_stclust_dynamicTreeCuts": {"title": "DynamicTreeCuts", "text": "Allow the number of domains per sample to be automatically detected via DynamicTreeCuts. The algorithm uses an iterative approach looking for the most stable number of domains."},
+                "sdd_stclust_number_of_domains": {"title": "Number of domains", "text": "Select a range of K values to define domains in each sample. STclust will define as many domains in the samples as each of the values in the range."},
+                "sdd_stclust_deepsplit": {"title": "DeepSplit", "text": "The DeepSplit parameter allows rough control over the number of detected domains when using DynamicTreeCuts. The larger DeepSplit is, the more domains are detected in each sample."},
+                "sdd_stclust_number_genes": {"title": "Number of most variable genes to use", "text": "Use this many high-variance genes to estimate gene expression differences among ROIs/spots/cells. The genes are selected using the vst function from the R package Seurat. In spatial transcriptomics data, more than 5000 genes often do not result in better defined clusters due to zero-inflation."},
+
+                //STenrich
+                "stenrich_select_gene_set": {"title": "Select a gene set database", "text": "Select a gene set database to test for spatial enrichment. Future implementations will allow input of custom gene sets."},
+                "stenrich_select_measure": {"title": "Measure of gene set expression", "text": "Currently disabled. Select the measure of gene set expression. Either the average gene set expression or GSEA score. The calculation of GSEA scores is currently not supported."},
+                "stenrich_permutations": {"title": "Number of permutations", "text": "The number of permutations to estimate the null distribution (no-spatial pattern). The more permutations, the longer STenrich takes to complete, but p-values will be more accurate."},
+                "stenrich_seed_number": {"title": "Seed number", "text": "A seed number to replicate results. It is advisable to run STenrich with different seed values to check for consistency. Different seed values could yield slightly different p-values."},
+                "stenrich_minimum_spots": {"title": "Minimum number of spots", "text": "The minimum number of high expression ROIs/spots/cells required for a gene set to be tested. If a sample has less than this number of high expression ROIs/spots/cells, the gene set is not tested in that sample."},
+                "stenrich_minimum_genes": {"title": "Minimum number of genes", "text": "The minimum number of genes of a set required to be present in a sample, for that gene set to be tested in that sample. If a sample has less genes of a set than this number, the gene set is ignored in that sample."},
+                "stenrich_standard_deviations": {"title": "Number of standard deviations", "text": "The number of standard deviations to define the high expression threshold. If an ROI/spot/cell has average gene set expression larger than the entire sample average plus this many standard deviations, it will be considered a high-expression ROI/spot/cell."},
 
                 //STgradient
                 "stgradient_samples": {"title": "Sample selection", "text": "Select the samples to run STgradient"},
