@@ -412,8 +412,7 @@ filter_meta_options = unique(unlist(lapply(initial_stlist@spatial_meta, function
 write.table(filter_meta_options, 'filter_meta_options.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 # Prepare images
-example_stlist = initial_stlist
-tissues = plot_image(example_stlist)
+tissues = plot_image(initial_stlist)
 # Save images to PNG files
 lapply(names(tissues), function(i){
   png(paste0(i, '.png'))

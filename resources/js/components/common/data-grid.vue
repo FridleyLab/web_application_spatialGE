@@ -27,6 +27,7 @@
                  :show-info="true"
                  :allowed-page-sizes="[10, 15, 20, 25, 30, 40, 50, 100]"
                  :show-navigation-buttons="true"
+
         />
 
 <!--        <DxToolbar>-->
@@ -45,7 +46,12 @@
         <DxScrolling :mode="scrollingMode"/>
 
         <DxColumn v-for="(column, index) in headers"
-                  :data-field="column" :cell-template="column === 'gene' ? (column + '-cell') : ''"></DxColumn>
+                  :data-field="column"
+                  :cell-template="column === 'gene' ? (column + '-cell') : ''"
+                  :data-type="is_numeric_column(column) ? 'number' : ''"
+                  :alignment="is_numeric_column(column) ? 'right' : ''"
+        >
+        </DxColumn>
 
         <template #gene-cell="{ data }">
             <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data.text" class="text-info" target="_blank">{{ data.text }}</a>
@@ -140,6 +146,14 @@ export default {
                 console.log()
                 //cell.cellElement.href  = '<a href="https://google.com" target="_blank">Goo</a>';
         },
+
+        is_numeric_column(column) {
+            return ['size_test', 'size_gene_set', 'p_value', 'adj_p_value', 'avg_log2fc', 'cluster_1', 'cluster_2',
+                'wilcox_p_val', 'ttest_p_val', 'mm_p_val', 'adj_p_val', 'exp_p_val', 'exp_adj_p_val',
+                'min_lm_coef', 'min_lm_pval', 'min_spearman_r', 'min_spearman_r_pval', 'min_spearman_r_pval_adj',
+                'avg_lm_coef', 'avg_lm_pval', 'avg_spearman_r', 'avg_spearman_r_pval', 'avg_spearman_r_pval_adj'
+            ].includes(column);
+        }
     },
 
 }

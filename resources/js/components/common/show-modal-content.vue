@@ -84,6 +84,13 @@ export default {
                 "vis_expr_surf_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html). Diverging and sequential palettes are recommended (see Khroma and RColorBrewer documentation)."},
                 "vis_expr_surf_generate": {"title": "Generate plots button", "text": "Once expression surfaces have been estimated, this button allows to re-plot expression surfaces if a different color palette is desired."},
 
+                //Spatial heterogeneity
+                "sthet_plot_genes": {"title": "Search and select genes", "text": "Enter one or more genes to calculate spatial heterogeneity/autocorrelation statistics. This textbox features autocomplete. By typing the initial letters of a gene name, matching gene names appear in the list. Click on the matching genes to calculate statistics. Gene names are case-sensitive."},
+                "sthet_plot_methods": {"title": "Methods", "text": "The statistics to be calculated. One of Moran’s I, Geary’s C, or both can be requested."},
+                "sthet_plot_genes_plot": {"title": "Genes to plot", "text": "Select one or more genes to generate comparative plots. Only genes for which spatial statistics have been calculated have been calculated will appear here."},
+                "sthet_plot_color_by": {"title": "Color by metadata", "text": "One of the sample metadata columns input during data import. Each point in the plot (samples) will be colored according to the selected metadata variable."},
+                "sthet_plot_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html). Qualitative and some of the sequential palettes are recommended (see Khroma and RColorBrewer documentation)."},
+                "sthet_plot_download_stats": {"title": "Download statistics", "text": "Click this button to download a file containing a table with the calculated spatial statistics. Useful for plotting with other software or reporting in scientific articles."},
 
                 //Spatial Domain Detection
                 "sdd_stclust_spatial_weight": {"title": "Spatial weight", "text": "Select a spatial weight to use in “shrinkage” of gene expression differences among ROIs/spots/cells. Spatial weights larger than 0.1 often result in non-informative clusters."},

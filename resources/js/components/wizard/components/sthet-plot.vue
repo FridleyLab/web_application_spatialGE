@@ -12,10 +12,10 @@
 
             <div :class="generating ? 'disabled-clicks' : ''">
                 <div class="my-3 text-bold">
-                    SThet
+                    Spatial heterogeneity with SThet
                 </div>
                 <div>
-                    <p class="text-bold">Select one or more genes to calculate spatial autocorrelation statistics for
+                    <p class="">Select one or more genes to calculate spatial autocorrelation statistics for
                         those genes in each sample. Currently supports Moran’s I and Geary’s C statistics, which measure
                         the tendency of gene expression to show “hot spots” within a tissue. The resulting statistics
                         are displayed in a plot along with sample-level variables if available (i.e., overall survival,
@@ -31,6 +31,10 @@
                             closer to 0, the cells/spots with high expression of a given gene tend to be close or
                             aggregated (“hot-spot”). The Geary’s C statistic tends to be more sensitive to small-scale
                             changes in expression compared to Moran’s I.
+                            <br /><br />
+                            To use this module, first spatial statistics need to be calculated (RUN STHET button), and
+                            then comparative plots can be generated (GENERATE PLOTS). In the comparative plots, each
+                            point represents a sample. Click on to Documentation for further details.
                         </li>
                     </ul>
                 </div>
@@ -38,7 +42,7 @@
 
                 <div class="row justify-content-center text-center m-3">
                     <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                        <div>Search and select genes to calculate SThet</div>
+                        <div>Search and select genes to calculate SThet <show-modal tag="sthet_plot_genes"></show-modal></div>
                         <div>
                             <Multiselect
                                 id="sthet-gene-list"
@@ -58,7 +62,7 @@
 
                 <div class="row justify-content-center text-center m-4">
                     <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                        <div>Methods</div>
+                        <div>Methods <show-modal tag="sthet_plot_methods"></show-modal></div>
                         <div>
                             <label class="me-3">
                                 <input type="checkbox" value="moran" v-model="params.method"> Moran's I
@@ -72,7 +76,7 @@
             </div>
 
             <div class="pe-3 text-end">
-                <send-job-button label="Calculate Sthet"
+                <send-job-button label="Run Sthet"
                                  :disabled="generating || !params.genes.length"
                                  :project-id="project.id" job-name="SThet" @started="sthet"
                                  @ongoing="generating = true" @completed="processCompleted"
@@ -83,7 +87,7 @@
             <div v-if="!generating && 'sthet_genes' in project.project_parameters" :class="generating_plots ? 'disabled-clicks' : ''">
                 <div class="row justify-content-center text-center m-3">
                     <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                        <div>Select genes to plot</div>
+                        <div>Select genes to plot <show-modal tag="sthet_plot_genes_plot"></show-modal></div>
                         <div>
                             <Multiselect :multiple="true" mode="tags" :searchable="false" :options="sthet_genes" v-model="params.plot_genes"></Multiselect>
                         </div>
@@ -92,7 +96,7 @@
 
                 <div class="row justify-content-center text-center m-3">
                     <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                        <div>Color by</div>
+                        <div>Color by <show-modal tag="sthet_plot_color_by"></show-modal></div>
                         <div>
                             <Multiselect :options="plot_meta_options" v-model="params.plot_meta"></Multiselect>
                         </div>
@@ -101,7 +105,7 @@
 
                 <div class="row justify-content-center text-center m-4">
                     <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                        <div>Color palette</div>
+                        <div>Color palette <show-modal tag="sthet_plot_color_palette"></show-modal></div>
                         <div>
                             <Multiselect :options="colorPalettes" v-model="params.color_pal"
                                          :searchable="true"></Multiselect>
@@ -140,6 +144,7 @@
                             <a v-if="'sthet_plot_table_results' in project.project_parameters"
                                :href="project.project_parameters.sthet_plot_table_results + '.xlsx'"
                                class="btn btn-sm btn-outline-info" download>Download spatial statistics</a>
+                            <show-modal tag="sthet_plot_download_stats"></show-modal>
                         </div>
                     </div>
                 </div>
