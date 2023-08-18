@@ -152,7 +152,7 @@
         </div>
 
         <div class="p-3 text-center mt-4">
-            <send-job-button label="Run STgradient" :disabled="processing || !this.params.samples.length" :project-id="project.id" job-name="STGradients" @started="STGradients" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button label="Run STgradient" :disabled="processing || !this.params.samples.length || !params.annot.length || !params.ref.length" :project-id="project.id" job-name="STGradients" @started="STGradients" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 

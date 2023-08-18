@@ -167,14 +167,23 @@ class ProjectController extends Controller
 
         return route('qc-data-transformation', ['project' => $project->id]);
 
-        if($step === 2)
-            return redirect()->route('qc-data-transformation', ['project' => $project->id]);
+        /*if($step === 2)
+            return redirect()->route('qc-data-transformation', ['project' => $project->id]);*/
     }
 
 
     public function getJobPositionInQueue(Project $project) {
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
         return $jobId ? $project->getJobPositionInQueue($jobId) : 0;
+    }
+
+    public function cancelJobInQueue(Project $project) {
+        $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
+        return $jobId ? $project->cancelJobInQueue($jobId) : 0;
+    }
+
+    public function getJobsInQueue(Project $project) {
+        return $project->getJobsInQueue(request('command'));
     }
 
     public function setJobEmailNotification(Project $project) {

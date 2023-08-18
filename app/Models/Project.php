@@ -2157,7 +2157,10 @@ lapply(names(grad_res), function(i){
 
     public function createJob($description, $command, $parameters, $queue = 'default') : int {
 
-        $startAt = now()->addSeconds(rand(1,15));
+        $min_delay = env('QUEUE_INITIAL_DELAY_SECONDS_MIN', 5);
+        $max_delay = env('QUEUE_INITIAL_DELAY_SECONDS_MAX', 7);
+
+        $startAt = now()->addSeconds(rand($min_delay, $max_delay));
 
         if(!isset($parameters['__task'])) {
 
@@ -2177,7 +2180,9 @@ lapply(names(grad_res), function(i){
             $task->attempts++;
             $task->save();
 
-            $startAt = now()->addMinutes(rand(10,20) * ($task->attempts - 1));
+            $min_delay = env('QUEUE_FAILED_JOB_DELAY_MINUTES_MIN', 12);
+            $max_delay = env('QUEUE_FAILED_JOB_DELAY_MINUTES_MAX', 16);
+            $startAt = now()->addMinutes(rand($min_delay, $max_delay) * ($task->attempts - 1));
         }
 
         //create the job instance
@@ -2267,6 +2272,31 @@ lapply(names(grad_res), function(i){
         }
     }
 
+    public function cancelJobInQueue($jobId) : int {
+        try {
+            $job = Job::findOrFail($jobId);
+            if($job->isRunning()) return 0;
+            $job->delete();
+            return 1;
+        }
+        catch(\Exception $e) {
+            return 0;
+        }
+    }
+
+    public function getJobsInQueue($except = '') {
+        try {
+
+            $projectIds = $this->user->projects->pluck('id');
+
+            $jobIds = ProjectParameter::whereIn('project_id', $projectIds)->where('parameter', 'REGEXP', '^job\.[a-zA-Z0-9_]+$');
+            if(strlen($except))
+                $jobIds = $jobIds->whereNot('parameter', 'job.' . $except);
+            $jobIds = $jobIds->get()->pluck('value');
+            return Job::whereIn('id', $jobIds)->get()->count();
+        } catch(\Exception $e) {
+            return [];
+        }
+    }
+
 }
-
-
