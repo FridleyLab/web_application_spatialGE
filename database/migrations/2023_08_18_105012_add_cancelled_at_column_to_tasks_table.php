@@ -15,7 +15,7 @@ return new class extends Migration
     {
         if (!Schema::hasColumn('tasks', 'cancelled_at')) {
             Schema::table('tasks', function (Blueprint $table) {
-                $table->smallInteger('cancelled_at')->nullable()->after('finished_at');
+                $table->timestamp('cancelled_at')->nullable()->after('finished_at');
             });
         }
     }

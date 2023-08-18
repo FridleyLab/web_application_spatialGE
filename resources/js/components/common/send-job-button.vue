@@ -129,7 +129,7 @@ export default {
 
 
         getIntervalWaitTime() {
-            if(!this.initialCheck) return 2000;
+            if(!this.initialCheck) return 1100;
             this.initialCheck = false;
             return 500;
         },

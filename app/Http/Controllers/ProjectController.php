@@ -8,7 +8,9 @@ use App\Models\Project;
 use App\Models\ProjectGene;
 use App\Models\ProjectParameter;
 use App\Models\ProjectPlatform;
+use App\Models\Task;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -179,6 +181,17 @@ class ProjectController extends Controller
 
     public function cancelJobInQueue(Project $project) {
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
+
+        $tasks = Task::where('user_id', auth()->id())->where('project_id', $project->id)->where('process', request('command'))->whereNull('finished_at')->orderByDesc('scheduled_at')->get();
+
+        if($tasks->count()) {
+            $task = $tasks[0];
+            $task->cancelled_at = now();
+            $task->save();
+
+            Log::info('Cancelling task ' . $task->id . ' on ' . $task->cancelled_at);
+        }
+
         return $jobId ? $project->cancelJobInQueue($jobId) : 0;
     }
 
