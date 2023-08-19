@@ -184,6 +184,7 @@ class ProjectController extends Controller
 
         $tasks = Task::where('user_id', auth()->id())->where('project_id', $project->id)->where('process', request('command'))->whereNull('finished_at')->orderByDesc('scheduled_at')->get();
 
+        $task = null;
         if($tasks->count()) {
             $task = $tasks[0];
             $task->cancelled_at = now();
@@ -192,7 +193,7 @@ class ProjectController extends Controller
             Log::info('Cancelling task ' . $task->id . ' on ' . $task->cancelled_at);
         }
 
-        return $jobId ? $project->cancelJobInQueue($jobId) : 0;
+        return $jobId ? $project->cancelJobInQueue($jobId, $task) : 0;
     }
 
     public function getJobsInQueue(Project $project) {

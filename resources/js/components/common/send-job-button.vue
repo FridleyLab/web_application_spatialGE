@@ -24,10 +24,10 @@
                     <img src="/images/loading-circular.gif" class="" style="width:100px" />
                 </div>
 
-                <div class="mt-3 text-center" v-if="queuePosition > 1">
+                <div class="mt-3 text-center" v-if="queuePosition >= 1">
                     <div v-if="!cancellingJob" class="">
                         <button class="btn btn-sm btn-danger mb-1" @click="cancellingJob = true">Cancel process</button>
-                        <div class="text-info text-xxs">Only if not started yet</div>
+<!--                        <div class="text-info text-xxs">Only if not started yet</div>-->
                     </div>
                     <div v-if="cancellingJob" class="">
                         <div class="text-danger">Are you sure?</div>

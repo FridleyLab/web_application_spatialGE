@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Monolog\Logger;
@@ -2272,14 +2273,25 @@ lapply(names(grad_res), function(i){
         }
     }
 
-    public function cancelJobInQueue($jobId) : int {
+    public function cancelJobInQueue($jobId, $task) : int {
+
+        $job = null;
+
         try {
             $job = Job::findOrFail($jobId);
-            if($job->isRunning()) return 0;
-            $job->delete();
+
+            if(!$job->isRunning()) {
+                $job->delete();
+            }
+            else {
+                $spatial = new spatialContainer($this);
+                $spatial->killProcess($task->task);
+            }
+
             return 1;
         }
         catch(\Exception $e) {
+            Log::error('Cancelling job with id: ' . $jobId . (!is_null($task) ? ' - container id: ' . $task->id : ''));
             return 0;
         }
     }

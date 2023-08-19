@@ -82,7 +82,7 @@ class RunScript implements ShouldQueue
                 }
             }
             else { //job failed, try again in max attempts not reached yet
-                if($task->attempts < 3) { //TODO: create env variable for MAX_JOB_ATTEMPTS
+                if($task->attempts < 3 && is_null($task->cancelled_at)) { //TODO: create env variable for MAX_JOB_ATTEMPTS
                     $payload = json_decode($task->payload);
                     $this->project->createJob($payload->description, $payload->command, get_object_vars($payload->parameters), $payload->queue);
                 }

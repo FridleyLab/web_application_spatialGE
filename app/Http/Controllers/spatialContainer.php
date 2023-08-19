@@ -24,7 +24,7 @@ class spatialContainer {
     public function __construct(Project $project)
     {
 
-        $this->exe = '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
+        $this->exe = $this->getDockerExecutable(); //'"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
 
         $this->project = $project;
 
@@ -131,6 +131,9 @@ class spatialContainer {
     }*/
 
 
+    public function getDockerExecutable() {
+        return '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
+    }
 
     public function execute($docker_command, $task_id = '') {
 
@@ -168,7 +171,7 @@ class spatialContainer {
             Storage::put($storage_path . $script_file, $script);
 
 
-            $exe = '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
+            $exe = $this->getDockerExecutable();
             //$command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name $docker_command > \"$log_file\" 2>&1 & R --quiet -e \"print('$container_id - spatialGE_PROCESS_COMPLETED')\" >> \"$log_file\" 2>&1";
             $command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name sh $script_file";
 
@@ -194,6 +197,21 @@ class spatialContainer {
             Log::info("ERROR ***$$$ EXCEPTION MESSAGE: \n" . $e->getMessage());
             return $errorMessage . "\n ERROR ***$$$ EXCEPTION MESSAGE: \n" . $e->getMessage();
             //return throwException(new \Exception($errorMessage));
+        }
+    }
+
+    public function killProcess($task_id): bool
+    {
+        $exe = $this->getDockerExecutable();
+        $command = "$exe kill $task_id";
+        try {
+            $process = Process::timeout(60)->run($command);
+            Log::warning("Process $task_id killed [$command], output: {$process->output()}");
+            return true;
+        } catch (\Exception $e)
+        {
+            Log::error("Error killing process $task_id: {$e->getMessage()}");
+            return false;
         }
     }
 
