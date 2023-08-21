@@ -180,6 +180,7 @@ class ProjectController extends Controller
     }
 
     public function cancelJobInQueue(Project $project) {
+
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
 
         $tasks = Task::where('user_id', auth()->id())->where('project_id', $project->id)->where('process', request('command'))->whereNull('finished_at')->orderByDesc('scheduled_at')->get();
@@ -190,8 +191,10 @@ class ProjectController extends Controller
             $task->cancelled_at = now();
             $task->save();
 
-            Log::info('Cancelling task ' . $task->id . ' on ' . $task->cancelled_at);
+            Log::info('ProjectController- Cancelling task ' . $task->id . ' on ' . $task->cancelled_at);
         }
+
+        Log::info('ProjectController-Cancelling job with id: ' . $jobId);
 
         return $jobId ? $project->cancelJobInQueue($jobId, $task) : 0;
     }

@@ -32,8 +32,8 @@
                     <div v-if="cancellingJob" class="">
                         <div class="text-danger">Are you sure?</div>
                         <div>
-                            <button class="btn btn-sm btn-danger" @click="cancelJobInQueue">Yes</button>
-                            <button class="btn btn-sm btn-outline-primary ms-2" @click="cancellingJob = false">No</button>
+                            <button type="button" class="btn btn-sm btn-danger" @click="cancelJobInQueue">Yes</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" @click="cancellingJob = false">No</button>
                         </div>
                     </div>
                 </div>
