@@ -164,9 +164,14 @@ class HomeController extends Controller
                 $started = Carbon::parse($row->started_at);
                 $finished = Carbon::parse($row->finished_at);
 
-                $row->process_time = round($started->diffInSeconds($finished)/60, 1);
-                $row->wait_time = round($scheduled->diffInSeconds($started)/60, 1);
-                $row->total_time = round($scheduled->diffInSeconds($finished)/60, 1);
+                $row->process_time = null;
+                $row->wait_time = null;
+                $row->total_time = null;
+                if(is_null($row->cancelled_at)) {
+                    $row->process_time = round($started->diffInSeconds($finished) / 60, 1);
+                    $row->wait_time = round($scheduled->diffInSeconds($started) / 60, 1);
+                    $row->total_time = round($scheduled->diffInSeconds($finished) / 60, 1);
+                }
 
                 $row->user = explode('@', $row->email)[0];
 
