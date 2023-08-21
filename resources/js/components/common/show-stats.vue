@@ -183,8 +183,30 @@ export default {
     methods: {
         onCellPrepared(cell) {
 
-            if(cell.rowType === 'data' && cell.column.dataField === 'completed' && parseInt(cell.value) === 0) {
-                cell.cellElement.style.cssText = "color:white; background-color: #FF0000";
+
+            if(cell.rowType === 'data' && cell.column.dataField === 'completed') {
+
+                if(parseInt(cell.value) === 0 && cell.data.cancelled_at !== null) {
+                    cell.cellElement.innerText = 'Cancelled';
+                    cell.cellElement.style.cssText = "color:white; background-color: orange";
+                }
+                else if(cell.data.finished_at === null) {
+                    cell.cellElement.innerText = 'Running';
+                    cell.cellElement.style.cssText = "color:white; background-color: green";
+                }
+                else if(cell.data.started_at === null) {
+                    cell.cellElement.innerText = 'Scheduled';
+                    cell.cellElement.style.cssText = "color:white; background-color: green";
+                }
+                else if(parseInt(cell.value) === 1) {
+                    cell.cellElement.innerText = 'OK';
+                    cell.cellElement.style.cssText = "color:green;";
+                }
+                else if(parseInt(cell.value) === 0 && cell.data.finished_at !== null) {
+                    cell.cellElement.innerText = 'Failed';
+                    cell.cellElement.style.cssText = "color:white; background-color: red";
+                }
+
             }
 
             /*if(['process_time', 'wait_time', 'total_time'].includes(cell.column.dataField)) {

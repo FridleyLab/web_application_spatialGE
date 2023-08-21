@@ -190,13 +190,13 @@ class ProjectController extends Controller
             $task = $tasks[0];
             $task->cancelled_at = now();
             $task->save();
-
-            Log::info('ProjectController- Cancelling task ' . $task->id . ' on ' . $task->cancelled_at);
         }
 
-        Log::info('ProjectController-Cancelling job with id: ' . $jobId);
+        $result = $project->cancelJobInQueue($jobId, $task);
 
-        return $jobId ? $project->cancelJobInQueue($jobId, $task) : 0;
+        Log::info('ProjectController- Cancelling task ' . $task->id . ' on ' . $task->cancelled_at . ' - job with id: ' . $jobId);
+
+        return $jobId ? $result : 0;
     }
 
     public function getJobsInQueue(Project $project) {
