@@ -123,7 +123,7 @@
 <!--                            <a :href="stenrich.base_url + 'stenrich_' + sample + '.csv'" class="btn btn-sm btn-outline-info my-3" download>CSV results</a>-->
 
 
-                            <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers.map(a => a.value)" :data="results[sample].data.items"></data-grid>
+                            <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
 
 <!--                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"-->
 <!--                                                  :headers="results[sample].data.headers"-->

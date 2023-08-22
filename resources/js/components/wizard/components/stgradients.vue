@@ -194,7 +194,7 @@
                         <div class="m-4">
 
 
-                            <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers.map(a => a.value)" :data="results[sample].data.items"></data-grid>
+                            <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
 
 
 <!--                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"-->
@@ -376,6 +376,7 @@ import 'vue3-easy-data-table/dist/style.css';
                             this.results[sample] = {};
                             this.results[sample].data = response.data;
                             this.results[sample].loaded = true;
+                            console.log(response.data);
                         })
                         .catch((error) => {
                             this.results[sample] = {};

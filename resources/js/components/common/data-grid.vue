@@ -36,8 +36,8 @@
 <!--        </DxToolbar>-->
 
         <DxFilterRow :visible="true" />
-        <DxHeaderFilter :visible="true" />
-        <DxFilterPanel :visible="true" />
+<!--        <DxHeaderFilter :visible="true" />-->
+<!--        <DxFilterPanel :visible="true" />-->
 
         <DxColumnChooser :enabled="true" />
         <DxSearchPanel :visible="true" />
@@ -46,10 +46,12 @@
         <DxScrolling :mode="scrollingMode"/>
 
         <DxColumn v-for="(column, index) in headers"
-                  :data-field="column"
-                  :cell-template="column === 'gene' ? (column + '-cell') : ''"
-                  :data-type="is_numeric_column(column) ? 'number' : ''"
-                  :alignment="is_numeric_column(column) ? 'right' : ''"
+                  :data-field="column.value"
+                  :cell-template="column.value === 'gene' ? (column.value + '-cell') : ''"
+                  :data-type="is_numeric_column(column.value) ? 'number' : ''"
+                  :alignment="is_numeric_column(column.value) ? 'right' : ''"
+
+                  :caption="column.text"
         >
         </DxColumn>
 

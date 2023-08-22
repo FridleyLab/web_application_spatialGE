@@ -140,7 +140,7 @@
                                     <div class="m-4" v-if="(sample in results) && results[sample].loaded">
 
 
-                                        <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers.map(a => a.value)" :data="results[sample].data.items"></data-grid>
+                                        <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
 
 <!--                                        <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"-->
 <!--                                                              :headers="results[sample].data.headers"-->
