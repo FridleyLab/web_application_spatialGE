@@ -190,7 +190,7 @@ export default {
                     cell.cellElement.innerText = 'Cancelled';
                     cell.cellElement.style.cssText = "color:white; background-color: orange";
                 }
-                else if(cell.data.finished_at === null) {
+                else if(cell.data.started_at !== null && cell.data.finished_at === null) {
                     cell.cellElement.innerText = 'Running';
                     cell.cellElement.style.cssText = "color:white; background-color: green";
                 }

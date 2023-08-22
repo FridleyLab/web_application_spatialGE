@@ -1,6 +1,5 @@
 <template>
 
-
     <div v-if="visible" :class="visible ? 'popup-center' : ''">
         <div class="card" style="width: 36rem;">
             <div class="card-body">
@@ -30,11 +29,14 @@ export default {
 
             tag: '',
             tool_tips: {
+
+
+                "running_other_process": {"title": "Running other process", "text": "There's a process currently queued/running. When completed you will be able to submit another."},
+
                 //New project
                 "new_project_platform": {"title": "Platform selection", "text": "The spatial transcriptomics platform used to generate the data. Currently only one platform can be used per project."},
                 "new_project_name": {"title": "Project name", "text": "Required. The name of the project."},
                 "new_project_description": {"title": "Project description", "text": "Optional. A short description of the project."},
-
 
                 //Import data
                 "importdata_sample_name": {"title": "Sample name", "text": "The name of the sample. Names without spaces are preferred, or with spaces replaced by underscores (“_”). If no sample name is provided, the name “SampleXX” will be automatically used, with “XX” being a consecutive number."},

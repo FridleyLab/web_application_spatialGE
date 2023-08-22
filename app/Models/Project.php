@@ -2299,12 +2299,16 @@ lapply(names(grad_res), function(i){
     public function getJobsInQueue($except = '') {
         try {
 
+            //Get all projectIds for the current user
             $projectIds = $this->user->projects->pluck('id');
 
+            //Get jobIds for all the user's processes
             $jobIds = ProjectParameter::whereIn('project_id', $projectIds)->where('parameter', 'REGEXP', '^job\.[a-zA-Z0-9_]+$');
             if(strlen($except))
                 $jobIds = $jobIds->whereNot('parameter', 'job.' . $except);
+
             $jobIds = $jobIds->get()->pluck('value');
+
             return Job::whereIn('id', $jobIds)->get()->count();
         } catch(\Exception $e) {
             return [];
