@@ -9,6 +9,9 @@
                         </div>
                         <div class="text-end pt-1">
                             <h6 class="mb-0 text-capitalize">Differential expression</h6>
+                            <div>
+                                <show-vignette url="/documentation/vignettes/differential_expression.pdf"></show-vignette>
+                            </div>
                         </div>
                     </div>
 
@@ -26,7 +29,8 @@
                                 <stde-non-spatial :project="project" :samples="samples" :non-spatial-url="nonSpatialUrl" :color-palettes="colorPalettes"></stde-non-spatial>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-spagcn" role="tabpanel" aria-labelledby="sdd-spagcn-tab">
-                                <stde-spatial :project="project" :samples="samples" :spatial-url="spatialUrl" :color-palettes="colorPalettes"></stde-spatial>
+                                Coming soon
+<!--                                <stde-spatial :project="project" :samples="samples" :spatial-url="spatialUrl" :color-palettes="colorPalettes"></stde-spatial>-->
                             </div>
                         </div>
                     </div>

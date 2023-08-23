@@ -24,7 +24,7 @@
                                 spatialGE?</b></p>
 
                         <p>Yes, you can. spatialGE can be applied to any spatially-resolved transcriptomics experiment
-                            as long as gene counts are associated to x and y coordinates within a tissue sample. Some of
+                            as long as gene counts are associated with x and y coordinates within a tissue sample. Some of
                             the methods in spatialGE have been designed to analyze spatial data that is densely sampled,
                             and most GeoMx experiments are characterized by ROI-based sampling that often is sparse and
                             targeting tissue compartments. As a result, some methods would not yield insightful results.
@@ -51,17 +51,30 @@
 
                         <p>Some methods implemented in spatialGE are memory and computing intensive (e.g., spatial
                             differential expression, gene expression surface generation). The methods in spatialGE use R
-                            code to conduct analyses (code available here), which could be downloaded and installed to
+                            code to conduct analyses (code available <a class="text-info"
+                                                                        href="https://github.com/FridleyLab/spatialGE"
+                                                                        target="_blank">here</a>), which could be
+                            downloaded and installed to
                             use via command-line requiring basic knowledge of R programming. Should the user choose to
                             use the spatialGE web app, when running an analysis, the user is prompted to select to
                             receive an email notifying when an analysis is complete. Once the analysis is started and an
                             email notification selected, the user can close spatialGE and them process will keep
                             running.</p>
 
+                        <p><b>What is the maximum number of samples per project?</b></p>
+
+                        <p>While there is not a maximum number of samples per project, the spatialGE web application has
+                            been designed as an exploratory tool and projects with more than 10 samples are not
+                            recommended. Projects with more than 10 samples might experience long queue and execution
+                            times. For analysis of larger projects, the use of the spatialGE R package (MAKE HYPERLINK)
+                            is recommended, installed in either a personal laptop or a high-performance computing
+                            (HPC/cluster) environment.</p>
 
                         <p><b>How many analyses can I run at the same time?</b></p>
 
-                        <p>Because spatialGE is a free tool open to the public, you can only run one analysis at a time. A maximum number of users can run analyses concurrently, when that number is reached, any additional analyses will be queued until enough resources are available</p>
+                        <p>Because spatialGE is a free tool open to the public, you can only run one analysis at a time.
+                            A maximum number of users can run analyses concurrently, when that number is reached, any
+                            additional analyses will be queued until enough resources are available</p>
 
 
                     </div>

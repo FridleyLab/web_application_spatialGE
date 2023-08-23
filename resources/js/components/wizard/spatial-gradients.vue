@@ -9,6 +9,9 @@
                         </div>
                         <div class="text-end pt-1">
                             <h6 class="mb-0 text-capitalize">Spatial gradients</h6>
+                            <div>
+                                <show-vignette url="/documentation/vignettes/spatial_gradients.pdf"></show-vignette>
+                            </div>
                         </div>
                     </div>
 

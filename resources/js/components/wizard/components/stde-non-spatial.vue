@@ -13,13 +13,14 @@
 
             <div class="accordion row justify-content-center text-center my-4 mx-3" id="accordionFilterTab" :class="processing ? 'disabled-clicks' : ''">
                 <div class="accordion-item w-100 w-lg-80 w-xxl-70">
-                    <h2 class="accordion-header" id="headingSelectSamples">
+                    <h2 class="accordion-header d-flex" id="headingSelectSamples">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
                             <span class="me-3">Select sample(s) to run this test</span>
                             <span class="text-success text-lg text-center" v-if="params.samples.length === samples.length">All samples selected</span>
                             <span class="text-danger text-lg text-center" v-if="!params.samples.length">At least one sample must be selected</span>
                             <span class="text-warning text-lg text-center" v-if="params.samples.length && params.samples.length < samples.length">{{ params.samples.length }} sample(s) selected</span>
                         </button>
+                        <show-modal tag="stdiff_non_spatial_samples"></show-modal>
                     </h2>
                     <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
 
@@ -42,14 +43,15 @@
 
             <div class="row justify-content-center text-center m-3">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div>Type of test</div>
                     <div class="d-flex">
                         <span class="w-40">
+                            <div>Type of test <show-modal tag="stdiff_non_spatial_type_of_test"></show-modal></div>
                             <Multiselect :options="test_types" v-model="params.test_type"></Multiselect>
                         </span>
-                        <label class="w-60 text-lg">
+                        <label class="w-60 text-lg ms-3">
                             <input type="checkbox" value="moran" v-model="params.pairwise"> All pairwise comparisons between the tissue domains?
                         </label>
+                        <show-modal tag="stdiff_non_spatial_pairwise"></show-modal>
                     </div>
                 </div>
             </div>
@@ -57,7 +59,7 @@
 
             <div class="row justify-content-center text-center m-3">
                 <div class="w-100 w-md-90 w-lg-80 w-xxl-65">
-                    <div>Annotation to test</div>
+                    <div>Annotation to test <show-modal tag="stdiff_non_spatial_annotation"></show-modal></div>
                     <div>
                         <span>
                             <Multiselect :options="project.project_parameters.annotation_variables" v-model="params.annotation"></Multiselect>
@@ -68,7 +70,7 @@
 
             <div class="row justify-content-center text-center m-3">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div>Cluster annotations to test</div>
+                    <div>Cluster annotations to test <show-modal tag="stdiff_non_spatial_cluster"></show-modal></div>
                     <div>
                         <span>
                             <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters" v-model="params.clusters" @select="checkIfAllSelected"></Multiselect>
@@ -82,7 +84,7 @@
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                     <div class="row justify-content-center text-center mt-5">
                         <div class="">
-                            <div class="me-3">Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"></div>
+                            <div class="me-3">Number of most variable genes to use: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"> <show-modal tag="stdiff_non_spatial_genes"></show-modal></div>
                             <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="500" class="w-100" v-model="params.n_genes">
                         </div>
                     </div>
@@ -99,10 +101,21 @@
 
 
         <div v-if="!processing && ('stdiff_ns' in project.project_parameters)" class="p-3 text-center mt-4">
+
+
+            <div class="text-justify">
+                <div class="fs-5">Explanation of results:</div>
+                <ul>
+                    <li><strong>Gene:</strong> The name of the gene tested. If the gene name is clicked, the corresponding GeneCards record is opened.</li>
+                    <li><strong>Avg log2(FC):</strong> The average log2 fold-change between the expression of the domain in the Cluster 1 column and the rest of the sample, or Cluster 1 and Cluster 2 if pairwise testing was requested.</li>
+                    <li><strong>Wilcoxon/T-test/Mixed Model p-value:</strong> The nominal p-value resulting from the Wilcoxon’s Rank Test, the T-test, or mixed model fit.</li>
+                    <li><strong>Adjusted p-value:</strong> The False Discovery Rate (FDR) adjusted p-value. These adjusted p-values can be used to decide whether a gene is differentially expressed.</li>
+                </ul>
+            </div>
+
+
             <a :href="stdiff_ns.base_url + 'stdiff_ns_results.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Excel results - All samples</a>
         </div>
-
-
 
 
         <!-- Create tabs for each sample-->
