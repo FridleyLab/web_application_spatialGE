@@ -24,6 +24,10 @@
                         <div class="row">
                             <div class="w-90 w-md-70 w-lg-60 content-center">
                                 <form method="post" autocomplete="off" @submit.prevent="submitData" ref="contactForm" :class="sendingMessage || messageSent ? 'disabled-clicks' : ''">
+
+                                    <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                                    <input type="hidden" name="action" value="validate_captcha">
+
                                     <div class="p-4">
                                         <div class="text-sm text-secondary py-3 text-info">All fields are required *</div>
                                         <div class="mb-3 d-flex">

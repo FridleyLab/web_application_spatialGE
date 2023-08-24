@@ -16,6 +16,9 @@
 
                                     <input type="hidden" name="_token" :value="window._token">
 
+                                    <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                                    <input type="hidden" name="action" value="validate_captcha">
+
                                     <div class="row row-cols-2">
                                         <div class="w-50">
                                             <div class="input-group input-group-outline mb-3 col" :class="first_name.length >= 1 ? 'is-valid' : ''">

@@ -2201,6 +2201,46 @@ lapply(names(grad_res), function(i){
 
     }
 
+
+
+    private function getMemoryLoad() : float {
+
+        $latestTimestamp = TaskStat::max('timestamp');
+
+        $latestJobs = TaskStat::where('timestamp', $latestTimestamp)->get();
+
+        if(!$latestJobs->count()) return 0;
+
+        $taskIds = $latestJobs->pluck('task');
+
+        $stillRunningJobs = Task::whereIn('task', $taskIds)->whereNull('finished_at')->whereNull('cancelled_at')->where('completed', 0);
+
+        if(!$stillRunningJobs->count()) return 0;
+
+        $memoryUsage = array_sum($latestJobs->pluck('memory')->toArray());
+
+        $memoryThreshold = intval(env('MEMORY_THRESHOLD', 28*1024));
+
+        return round($memoryUsage/$memoryThreshold, 1);
+
+    }
+
+
+    private function getJobClassification($command, $parameters) {
+
+        $lightJobs = [
+            'generateFilterPlots',
+            'generateNormalizationPlots',
+            'pcaPlots',
+            'quiltPlot',
+            'STplotQuilt',
+            'STplotExpressionSurfacePlots',
+            'SThetPlot',
+        ];
+
+
+    }
+
     public function setJobEmailNotification($command, $sendEmail) {
 
         if($sendEmail === -1) {
