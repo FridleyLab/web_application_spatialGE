@@ -227,7 +227,7 @@ class ProjectController extends Controller
         $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'I';
 
         if(strlen($query)) {
-            $genes = $project->genes($context)->where('name', 'LIKE', $query . '%')->orderBy('name')->limit(100);
+            $genes = $project->genes($context)->where('name', 'LIKE BINARY', $query . '%')->orderBy('name')->limit(100);
             return $genes->pluck('name');
         }
 
