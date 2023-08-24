@@ -8,11 +8,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\HtmlString;
 
-class ContactUs extends Notification
+class ContactUsCopyToUser extends Notification
 {
     use Queueable;
 
@@ -31,7 +30,7 @@ class ContactUs extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['mail'];
     }
 
     /**
@@ -39,19 +38,16 @@ class ContactUs extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-
-        NotificationFacade::route('mail', [$this->email => $this->first_name . ' ' . $this->last_name])->notify(new ContactUsCopyToUser($this->subject, $this->description, $this->email, $this->first_name, $this->last_name));
-
+        //message for the team
         return (new MailMessage)
-                    ->subject(env('APP_NAME') . ' - [Contact us] form submitted')
-                    ->greeting('Hello ' . $notifiable->first_name . '!')
-                    ->line("Following is the information sent by the user:")
+                    ->subject(env('APP_NAME') . ' - We got your message')
+                    ->greeting('Hello ' . $this->first_name . '!')
+                    ->line("We received the following message sent by you:")
                     ->line(new HtmlString('<strong>Name: </strong>' . $this->first_name . ' ' . $this->last_name))
                     ->line(new HtmlString('<strong>Subject: </strong>' . $this->subject))
                     ->line(new HtmlString('<strong>Description: </strong><pre>' . $this->description . '</pre>'))
                     ->line(new HtmlString('<strong>User email address: </strong>' . $this->email))
-                    ->action('Reply to user', 'mailto:' . $this->email)
-                    ->line('Thanks for using our application.')
+                    ->line('Thanks for your feedback, please wait to hear back from us.')
                     ->salutation(new HtmlString('Regards, <br />The ' . env('APP_NAME') . ' team!'));
     }
 

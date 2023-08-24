@@ -66,7 +66,7 @@
 
 
                         <p>
-                            If the user has data associated to each sample (e.g., therapy, overall survival, type of
+                            If the user has data associated with each sample (e.g., therapy, overall survival, type of
                             tissue, age of tissue donor, etc), this information can be uploaded in the form of an Excel
                             file or a comma/tab separated file. This file should have the sample names/IDs in the first
                             column, and sample-level information in the subsequent columns (see figure below). This
