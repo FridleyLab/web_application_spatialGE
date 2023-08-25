@@ -356,33 +356,73 @@ class Project extends Model
 
     public function getStListScript() : string {
 
-        $sampleDirs = $this->samples()->pluck('samples.name')->join("/','");
-        $sampleDirs = "'" . $sampleDirs . "/'";
-
         $params = $this->getProjectParametersAttribute();
         $sampleNames = array_key_exists('metadata_names', $params) ? sizeof($params['metadata_names']) : 0;
         $sampleNames = $sampleNames ? "'clinical_data.csv'" : "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
+
+        $countFiles = "''";
+        $coordinateFiles = "''";
+        $createSTlistCommand = '';
+        $loadImagesCommand = '';
+
+        $expressionFileExtension = $this->samples[0]->expression_file->extension;
+
+        if($expressionFileExtension === 'h5') {
+
+            $countFiles = $this->samples()->pluck('samples.name')->join("/','");
+            $countFiles = "'" . $countFiles . "/'";
+
+            $createSTlistCommand = 'initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)';
+        }
+        else if(in_array($expressionFileExtension, ['csv', 'txt', 'tsv'])) {
+
+            $countFiles = [];
+            $coordinateFiles = [];
+            $imageFiles = [];
+            foreach ($this->samples as $sample) {
+                $countFiles[] = $sample->name . '/' . $sample->expression_file->filename;
+                $coordinateFiles[] = $sample->name . '/spatial/' . $sample->coordinates_file->filename;
+                if($sample->has_image) {
+                    $imageFiles[] = $sample->name . '/spatial/' . $sample->image_file->filename;
+                }
+            }
+
+            $countFiles = "'" . join("','", $countFiles) . "'";
+            $coordinateFiles = "'" . join("','", $coordinateFiles) . "'";
+            $createSTlistCommand = 'initial_stlist <- STlist(rnacounts=count_files, samples=samplenames, spotcoords=coords_files, cores=1)';
+
+            if(count($imageFiles)) {
+                $loadImagesCommand = "
+
+                image_files = c('" . join("','", $imageFiles) . "')
+                initial_stlist = load_images(initial_stlist, image_files)
+
+                ";
+            }
+
+        }
 
         $script = "
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
 
-# Specify paths to directories containing data
-count_files = c($sampleDirs)
+# Specify paths to files/directories containing counts data
+count_files = c($countFiles)
+
+# Specify paths to files containing coordinates data
+coords_files = c($coordinateFiles)
 
 # Specify sample names
 samplenames = $sampleNames
 
 
 # Create STlist
-initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)
-#initial_stlist <- STlist(rnacounts=count_files, samples=samplenames, spotcoords='segundo archivo csv')
+$createSTlistCommand
+$loadImagesCommand
 
 #Save the STList
-" .
-$this->_saveStList("initial_stlist")
-. "
+{$this->_saveStList("initial_stlist")}
 
 #max_var_genes PCA
 pca_max_var_genes = min(unlist(lapply(initial_stlist@counts, nrow)))

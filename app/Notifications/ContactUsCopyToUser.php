@@ -47,7 +47,7 @@ class ContactUsCopyToUser extends Notification
                     ->line(new HtmlString('<strong>Subject: </strong>' . $this->subject))
                     ->line(new HtmlString('<strong>Description: </strong><pre>' . $this->description . '</pre>'))
                     ->line(new HtmlString('<strong>User email address: </strong>' . $this->email))
-                    ->line('Thanks for your feedback, please wait to hear back from us.')
+                    ->line('Thank you for your comment/question. We will get back to you in a few business days.')
                     ->salutation(new HtmlString('Regards, <br />The ' . env('APP_NAME') . ' team!'));
     }
 

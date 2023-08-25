@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('genes', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name')->collation('utf16_bin')->unique();
         });
     }
 

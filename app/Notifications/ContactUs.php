@@ -65,7 +65,9 @@ class ContactUs extends Notification
         return [
             'subject' => $this->subject,
             'description' => $this->description,
-            'email' => $this->email
+            'email' => $this->email,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
         ];
     }
 }

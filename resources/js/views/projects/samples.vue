@@ -222,7 +222,7 @@
             },
 
             hasExpression(sample) {
-                return this.hasFileType(sample,'h5');
+                return this.hasFileType(sample,'h5') || this.hasFileType(sample,'csv') || this.hasFileType(sample,'tsv') || this.hasFileType(sample,'txt');
             },
 
             hasCoordinates(sample) {

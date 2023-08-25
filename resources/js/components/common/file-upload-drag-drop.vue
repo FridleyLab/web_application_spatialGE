@@ -42,6 +42,7 @@ export default {
 
     props: {
         project: Object,
+        samples: Object,
         caption: {type: String, default: 'select or drop file'},
         required: {type: Boolean, default: false},
         code: String,
@@ -88,6 +89,7 @@ export default {
         if( this.dragAndDropCapable ){
             this.bindEvents();
         }
+
     },
 
     computed: {
@@ -115,6 +117,23 @@ export default {
             }
 
             if(this.code === 'expression') {
+
+                if(this.samples.length && this.samples[0].files.length) {
+
+                    let thefile = this.file;
+
+                    this.samples[0].files.map(
+                        file => {
+                            let parts = thefile.name.toLowerCase().split('.');
+                            if(file.type === 'expressionFile' && file.extension.toLowerCase() !== parts[parts.length-1]) {
+                                this.errorMessage = 'File type must be of type: ' + file.extension + ', as the other samples!';
+                                this.file = null;
+                            }
+                        });
+
+                    if(this.errorMessage.length) return;
+                }
+
                 this.$emit('fileSelected', this.file);
             }
             else if(this.code === 'coordinates') {

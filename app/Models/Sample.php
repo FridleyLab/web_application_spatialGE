@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class Sample extends Model
@@ -15,7 +16,7 @@ class Sample extends Model
 
     protected $fillable = ['name'];
 
-    protected $appends = ['file_list', 'has_image', 'image_file_url'];
+    protected $appends = ['file_list', 'has_image', 'image_file_url', 'expression_file', 'coordinates_file', 'image_file'];
 
 
 
@@ -30,11 +31,24 @@ class Sample extends Model
         return $this->belongsToMany(File::class);
     }
 
+    public function getExpressionFileAttribute() {
+        return $this->files()->where('type', 'expressionFile')->firstOrFail();
+    }
+
+    public function getCoordinatesFileAttribute() {
+        return $this->files()->where('type', 'coordinatesFile')->firstOrFail();
+    }
+
+    public function getImageFileAttribute() {
+        $images = $this->files()->where('type', 'imageFile')->get();
+        return $images->count() ? $images[0] : null;
+    }
+
     public function getFileListAttribute() {
         return $this->files;
     }
 
-    public function getHasImageAttribute() {
+    public function getHasImageAttribute() : int {
         return $this->files()->where('type', 'imageFile')->count();
     }
 

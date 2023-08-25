@@ -14,10 +14,20 @@ class File extends Model
 
     protected $fillable = ['filename', 'type'];
 
+    protected $appends = ['extension'];
+
     //Relations
     public function samples(): BelongsToMany
     {
         return $this->belongsToMany(Sample::class);
+    }
+
+    public function getExtensionAttribute() {
+
+        $parts = explode('.', $this->filename);
+
+        return $parts[count($parts)-1];
+
     }
 
 
