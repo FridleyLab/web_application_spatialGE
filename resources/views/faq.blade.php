@@ -61,6 +61,19 @@
                             email notification selected, the user can close spatialGE and them process will keep
                             running.</p>
 
+
+                        <p><b>Which spatial transcriptomics formats can I analyze in spatialGE?</b></p>
+
+                        <p>The spatialGE web application currently supports Visium data sets. Many more formats will be
+                            available soon (see table below). If you would like to analyze other spatial
+                            transcriptiomics data formats, please use the command-line R package (LINK TO SPATIALGE R
+                            PACKAGE).</p>
+
+                        <div class="text-center">
+                            <img class="img-fluid pt-2 pb-4 w-80 w-md-70 w-xl-60 w-xxl-50" src="/images/faq/supported_formats.png">
+                        </div>
+
+
                         <p><b>What is the maximum number of samples per project?</b></p>
 
                         <p>While there is not a maximum number of samples per project, the spatialGE web application has

@@ -62,7 +62,7 @@
                     <div>Annotation to test <show-modal tag="stdiff_non_spatial_annotation"></show-modal></div>
                     <div>
                         <span>
-                            <Multiselect :options="project.project_parameters.annotation_variables" v-model="params.annotation"></Multiselect>
+                            <Multiselect id="multiselect_annotation_variables" :options="project.project_parameters.annotation_variables" v-model="params.annotation"></Multiselect>
                         </span>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                     <div>Cluster annotations to test <show-modal tag="stdiff_non_spatial_cluster"></show-modal></div>
                     <div>
                         <span>
-                            <Multiselect :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters" v-model="params.clusters" @select="checkIfAllSelected"></Multiselect>
+                            <Multiselect id="multiselect_annotation_variables_clusters" :multiple="true" mode="tags" :searchable="true" :options="annotation_variables_clusters" v-model="params.clusters" @select="checkIfAllSelected"></Multiselect>
                         </span>
                     </div>
                 </div>
