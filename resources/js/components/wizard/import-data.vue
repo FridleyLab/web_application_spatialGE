@@ -34,7 +34,7 @@
                             <div class="w-30 mb-3 d-flex" v-show="!uploading">
                                 <div class="input-group input-group-outline focused is-focused">
                                     <label class="form-label">Sample name</label>
-                                    <input type="text" class="form-control" name="sample_name" :placeholder="suggestedSampleName" v-model="sample_name">
+                                    <input type="text" class="form-control" name="sample_name" :placeholder="suggestedSampleName" v-model="sample_name" :disabled="uploading">
                                 </div>
                                 <show-modal tag="importdata_sample_name"></show-modal>
                             </div>

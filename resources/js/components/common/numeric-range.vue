@@ -5,7 +5,7 @@
         </div>
         <div class="d-flex">
             <div :class="showPercentages ? 'w-15' : 'w-10'">
-                <input :id="showToolTip" class="text-end border border-info border-2 rounded px-1" :class="showPercentages ? 'w-65' : 'w-100'" type="text" v-model="value[0]">
+                <input class="text-end border border-info border-2 rounded px-1" :class="showPercentages ? 'w-65' : 'w-100'" type="text" v-model="value[0]" :id="showToolTip">
                 <span v-if="showPercentages" class="text-info ms-2 w-35">{{ Math.round(value[0]/max*100) }}%</span>
             </div>
             <div class="ps-3 pe-3 pt-3" :class="showPercentages ? 'w-70' : 'w-80'">
@@ -13,7 +13,7 @@
             </div>
             <div :class="showPercentages ? 'w-15' : 'w-10'">
                 <span v-if="showPercentages" class="text-info me-2 w-35">{{ Math.round(value[1]/max*100) }}%</span>
-                <input class="text-end border border-info border-2 rounded px-1" :class="showPercentages ? 'w-65' : 'w-100'" type="text" v-model="value[1]">
+                <input class="text-end border border-info border-2 rounded px-1" :class="showPercentages ? 'w-65' : 'w-100'" type="text" v-model="value[1]" :id="showToolTip.length ? (showToolTip + '_max') : ''">
             </div>
         </div>
     </div>

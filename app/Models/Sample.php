@@ -31,11 +31,26 @@ class Sample extends Model
         return $this->belongsToMany(File::class);
     }
 
+
+    private function isTestUser() {
+        $userName = $this->projects[0]->user->name;
+        return (str_contains($userName, '_test_user_') && str_contains($userName, '@moffitt.org'));
+    }
+
     public function getExpressionFileAttribute() {
+        if($this->isTestUser()) {
+            $file = new File;
+            $file->filename = 'test.h5';
+            return $file;
+        }
+
         return $this->files()->where('type', 'expressionFile')->firstOrFail();
     }
 
     public function getCoordinatesFileAttribute() {
+
+        if($this->isTestUser()) return null;
+
         return $this->files()->where('type', 'coordinatesFile')->firstOrFail();
     }
 

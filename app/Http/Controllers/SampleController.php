@@ -57,13 +57,14 @@ class SampleController extends Controller
                     $sample->files()->save($fileModel);
 
                     if($fileType === 'expressionFile')
-                        $file->storeAs($sampleFolder, $file->getClientOriginalName());
+                        $file->storeAs($sampleFolder, $sample->name . '_counts.' . $fileModel->extension);
+                        //$file->storeAs($sampleFolder, $file->getClientOriginalName());
                     if($fileType === 'coordinatesFile')
-                        $file->storeAs($sampleFolderSpatial, $file->getClientOriginalName());
+                        $file->storeAs($sampleFolderSpatial, $sample->name . '_coordinates.' . $fileModel->extension);
                     if($fileType === 'scaleFile')
-                        $file->storeAs($sampleFolderSpatial, $file->getClientOriginalName());
+                        $file->storeAs($sampleFolderSpatial, $sample->name . '_scaling.' . $fileModel->extension);
                     if($fileType === 'imageFile')
-                        $file->storeAs($sampleFolderSpatial, $file->getClientOriginalName());
+                        $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue.' . $fileModel->extension);
 
                 }
             });

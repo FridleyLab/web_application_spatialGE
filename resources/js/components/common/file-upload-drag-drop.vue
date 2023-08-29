@@ -15,7 +15,7 @@
                 <div v-if="file" class="text-center text-xs">
                     {{ file.name }}
                 </div>
-                <div v-if="file" class="text-center">
+                <div v-if="file && !uploading" class="text-center">
                     <a class="btn btn-sm text-danger" v-on:click="removeFile()">Remove</a>
                 </div>
                 <div v-if="errorMessage.length" class="text-center text-danger text-xs">
@@ -103,6 +103,9 @@ export default {
     methods: {
 
         handleFileDrop( event ){
+
+            if(this.uploading) return;
+
             this.file = 'dataTransfer' in event ? event.dataTransfer.files[0] : event.target.files[0];
 
             this.errorMessage = '';
@@ -126,7 +129,7 @@ export default {
                         file => {
                             let parts = thefile.name.toLowerCase().split('.');
                             if(file.type === 'expressionFile' && file.extension.toLowerCase() !== parts[parts.length-1]) {
-                                this.errorMessage = 'File type must be of type: ' + file.extension + ', as the other samples!';
+                                this.errorMessage = 'File type must be of type: ' + file.extension + ', as the other sample(s)!';
                                 this.file = null;
                             }
                         });
