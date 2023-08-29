@@ -33,7 +33,8 @@ class Sample extends Model
 
 
     private function isTestUser() {
-        $userName = $this->projects[0]->user->name;
+        Log::info('FILE_MODEL test_user');
+        $userName = $this->projects[0]->user->email;
         return (str_contains($userName, '_test_user_') && str_contains($userName, '@moffitt.org'));
     }
 
