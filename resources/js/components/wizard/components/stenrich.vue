@@ -44,7 +44,7 @@
                 <div class="w-100 w-xxl-95">
                     <div class="row justify-content-center text-center">
                         <div class="">
-                            <div class="me-3">Permutations: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.permutations"> <show-modal tag="stenrich_permutations"></show-modal></div>
+                            <div class="me-3">Permutations: <input id="number_of_permutations" type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.permutations"> <show-modal tag="stenrich_permutations"></show-modal></div>
                             <input type="range" min="100" :max="1000000" step="1000" class="w-100" v-model="params.permutations">
                             <div class="me-3">Seed number (permutation): <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.seed"> <show-modal tag="stenrich_seed_number"></show-modal></div>
                         </div>
