@@ -42,11 +42,15 @@ class RunScript implements ShouldQueue
     public function handle(): void
     {
         //Execute the process
-        $command = $this->command;
-        Log::info('**### BEGIN** ' . $command);
-        Log::info("\nPARAMS: " . json_encode($this->parameters));
-        $result = $this->project->$command($this->parameters);
-        Log::info('**END** ' . $command);
+        try {
+            $command = $this->command;
+            Log::info('**### BEGIN** ' . $command);
+            Log::info("\nPARAMS: " . json_encode($this->parameters));
+            $result = $this->project->$command($this->parameters);
+            Log::info('**END** ' . $command);
+        } catch(\Exception $e) {
+            Log::error('ERROR executing [' . $command . ']: ' . $e->getMessage());
+        }
 
         $commandline = '';
         try {
