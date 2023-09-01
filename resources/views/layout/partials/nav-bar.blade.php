@@ -4,6 +4,12 @@
 
         <img src="/images/moffitt-logo.svg" width="150" alt="main_logo">
 
+        @if(!app()->isProduction())
+            <div class="ms-3 py-1 px-2 text-white text-xxl-center bg-danger rounded rounded-xl">
+                SpatialGE - Testing environment
+            </div>
+        @endif
+
 
 {{--        @auth--}}
 {{--        <nav aria-label="breadcrumb">--}}
