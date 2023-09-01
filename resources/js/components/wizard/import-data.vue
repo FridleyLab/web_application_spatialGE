@@ -1,0 +1,317 @@
+<template>
+    <div class="container-fluid py-4 col-xl-11 col-md-12 col-sm-12">
+        <div class="row justify-content-center">
+            <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4 mt-4">
+                <div class="card" :class="changingStep ? 'disabled-clicks' : ''">
+                    <div class="card-header p-3 pt-2">
+                        <div class="icon icon-lg icon-shape bg-gradient-info shadow-dark text-center border-radius-xl mt-n4 position-absolute">
+                            <i class="material-icons opacity-10">filter_1</i>
+                        </div>
+                        <div class="text-end pt-1">
+                            <h6 class="mb-0 text-capitalize">Importing data</h6>
+                            <div>
+                                <show-vignette url="/documentation/vignettes/import_data.pdf"></show-vignette>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <h5>Samples for project: <span class="text-primary">{{ project.name }}</span></h5>
+                    </div>
+
+                    <div v-if="samples.length && !uploading && !changingStep && project.current_step === 1" class="p-3">
+                        <input type="button" class="btn" :class="showAddSample ? 'btn-outline-warning' : 'btn-info'" @click="showAddSample = !showAddSample" :value=" showAddSample ? 'Cancel sample upload' : 'Add new sample'" />
+                    </div>
+                    <div v-if="project.current_step !== 1" class="p-3">
+                        <p>You already imported your samples, if you want to add/remove samples the import process would need to be executed again and you'll have to run the analyses again</p>
+                    </div>
+
+
+
+                    <template v-if="!samples.length || showAddSample">
+                        <div class="row justify-content-center">
+                            <!--                        <div class="w-30" :class="fileSelected ? 'mt-6' : 'mt-4'" v-show="!uploading">-->
+                            <div class="w-30 mb-3 d-flex" v-show="!uploading">
+                                <div class="input-group input-group-outline focused is-focused">
+                                    <label class="form-label">Sample name</label>
+                                    <input type="text" class="form-control" name="sample_name" :placeholder="suggestedSampleName" v-model="sample_name" :disabled="uploading">
+                                </div>
+                                <show-modal tag="importdata_sample_name"></show-modal>
+                            </div>
+                        </div>
+                        <h6 class="text-center">Please select or drop your gene expression and coordinates files (tissue image is optional)</h6>
+                        <hr class="dark horizontal my-0">
+
+                        <div class="container" style="max-width: 600px">
+                            <div class="my-2 row">
+                                <div class="col-3 text-center">
+                                    <show-modal tag="importdata_gene_expression_file"></show-modal>
+                                    <file-upload-drag-drop code="expression" :project="project" :samples="samples" caption="Gene expression" :required="true" @fileSelected="expressionFileAdded" @fileRemoved="expressionFileRemoved" tooltip="A file containing the gene counts. Accepted file formats include .h5 or MEX (from space ranger), or a gene x spot .csv, .tsv, or .txt table"></file-upload-drag-drop>
+                                </div>
+                                <div class="col-3 text-center">
+                                    <show-modal tag="importdata_coordinates_file"></show-modal>
+                                    <file-upload-drag-drop code="coordinates" :project="project" :samples="samples" caption="Coordinates" :required="true" @fileSelected="coordinatesFileAdded" @fileRemoved="coordinatesFileRemoved" tooltip="A .csv file containing the spot x and y coordinates. Accepted formats include the “tissue_positions” file from space ranger or a three-column file with spot names in the first column and y, x coordinates in the second and third columns"></file-upload-drag-drop>
+                                </div>
+                                <div class="col-3 text-center">
+                                    <show-modal tag="importdata_tissue_image_file"></show-modal>
+                                    <file-upload-drag-drop code="image" :project="project" :samples="samples" caption="Tissue image" @fileSelected="imageFileAdded" @fileRemoved="imageFileRemoved" tooltip="Optional. A PNG, JPEG, TIFF image of the Visium capture area. Usually a H&E image"></file-upload-drag-drop>
+                                </div>
+                                <div class="col-3 text-center">
+                                    <show-modal tag="importdata_scale_factor_file"></show-modal>
+                                    <file-upload-drag-drop code="scale" :project="project" :samples="samples" caption="Scale factor" @fileSelected="scaleFileAdded" @fileRemoved="scaleFileRemoved" tooltip="Optional. A JSON file generated by space ranger. The file is used for image and spot registration"></file-upload-drag-drop>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="w-100 mt-6" v-show="uploading">
+                            <progress max="100" :value.prop="uploadPercentage" class="w-100"></progress>
+                        </div>
+
+                        <div class="my-6 w-100 text-center">
+                            <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">
+                                Import sample
+                            </button>
+                        </div>
+                    </template>
+
+                    <project-samples v-if="!showAddSample" :samples="samples" :project="project" :disabled="uploading || changingStep" :excel-metadata-url="excelMetadataUrl"></project-samples>
+
+
+                </div>
+
+                <div v-if="samples.length && !showAddSample && project.current_step === 1" class="p-3 text-end">
+                    <send-job-button label="Import Data" :project-id="project.id" :project="project" job-name="createStList" @started="nextStep" @ongoing="changingStep = true" @completed="importCompleted" ></send-job-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+
+import { getCurrentInstance } from 'vue';
+
+    export default {
+        name: 'importData',
+
+        setup() {
+            const app = getCurrentInstance();
+        },
+
+        props: {
+            project: Object,
+            samples: Object,
+            nexturl: String,
+            qcDtUrl: String,
+            excelMetadataUrl: String,
+        },
+
+        data() {
+            return {
+
+                showAddSample: false,
+
+                changingStep: false,
+
+                expressionFile: null,
+                coordinatesFile: null,
+                imageFile: null,
+                scaleFile: null,
+
+                sample_name: '',
+                uploading: false,
+                uploadPercentage: 0,
+
+                nextStepLabel: 'All samples added - Import Data',
+                //nextStepLabel: 'Next step: QC & data transformation',
+                nextStepCssClasses: '',
+
+                jobPositionInQueue: 0,
+                checkQueueIntervalId: 0,
+                reloadPage: false,
+
+            };
+        },
+
+        /*mounted() {
+            //this.updateJobPosition();
+            this.setIntervalQueue();
+        },*/
+
+        /*watch: {
+            jobPositionInQueue: {
+                    handler: function (newValue, oldValue) {
+                        console.log('---', this.jobPositionInQueue);
+                        if(this.jobPositionInQueue) this.reloadPage = true;
+                        this.changingStep = !!this.jobPositionInQueue;
+                        if(!this.jobPositionInQueue) {
+                            clearInterval(this.checkQueueIntervalId);
+                            if(this.reloadPage) location.href=this.qcDtUrl //location.reload();
+                        }
+                },
+                immediate: true
+            }
+        },*/
+
+        computed: {
+
+            canStartImportProcess() {
+                return this.expressionFile && this.coordinatesFile;
+            },
+
+            fileSelected() {
+                return this.expressionFile || this.coordinatesFile || this.imageFile || this.scaleFile;
+            },
+
+            suggestedSampleName() {
+                return 'Sample' + (this.samples.length < 10 ? '0' : '') + (this.samples.length+1)
+            }
+
+        },
+
+        methods: {
+
+            /*setIntervalQueue: function() {
+                this.checkQueueIntervalId = setInterval(async () => {this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'createStList');}, 1800);
+                console.log('Interval set');
+            },*/
+
+            /*updateJobPosition: async function() {
+
+                this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'createStList');
+            },*/
+
+            importSample() {
+                /*
+                    Initialize the form data
+                */
+                let formData = new FormData();
+
+
+                /*
+                    Iterate over any file sent over appending the files
+                    to the form data.
+                */
+                let i = 0;
+                if(this.expressionFile) {
+                    formData.append('files[' + i + ']', this.expressionFile);
+                    formData.append('expressionFile', this.expressionFile.name);
+                    i++;
+                }
+                if(this.coordinatesFile) {
+                    formData.append('files[' + i + ']', this.coordinatesFile);
+                    formData.append('coordinatesFile', this.coordinatesFile.name);
+                    i++;
+                }
+                if(this.imageFile) {
+                    formData.append('files[' + i + ']', this.imageFile);
+                    formData.append('imageFile', this.imageFile.name);
+                    i++;
+                }
+                if(this.scaleFile) {
+                    formData.append('files[' + i + ']', this.scaleFile);
+                    formData.append('scaleFile', this.scaleFile.name);
+                    i++;
+                }
+
+
+                formData.append('project_id', this.project.id);
+                formData.append('sample_name', this.sample_name.trim());
+
+                this.uploading = true;
+
+                /*
+                    Make the request to the POST /file-drag-drop URL
+                */
+                axios.post( '/samples',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        },
+                        onUploadProgress: function( progressEvent ) {
+                            this.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
+                        }.bind(this)
+                    }
+                ).then((response) => {
+                    console.log('SUCCESS!!');
+                    console.log(response.data);
+                    //this.nextStepLabel = 'Data import queued - wait for email notification';
+                    location.reload();
+                }
+                ).catch((error) => {
+                        console.log('FAILURE!!');
+                        this.uploading = false;
+                });
+            },
+
+
+            nextStep() {
+
+                this.changingStep = true;
+
+                //this.nextStepLabel = 'Processing samples... please wait!';
+                this.nextStepCssClasses = 'disabled';
+
+                //return;
+
+                axios.get(this.nexturl)
+                    .then(async (response) => {
+                        //this.changingStep = false;
+                        //console.log(response);
+                        //this.nextStepLabel = 'Data import queued - wait for email notification';
+                        //setTimeout(() => location.href = response.data, 1000);
+                        //location.href = response.data;
+
+                        let position = await this.$getJobPositionInQueue(this.project.id, 'createStList');
+
+                        console.log('Job position =>', position);
+
+                    })
+
+            },
+
+            importCompleted() {
+                this.changingStep = false;
+                location.href=this.qcDtUrl;
+            },
+
+            expressionFileAdded(file) {
+                this.expressionFile = file;
+            },
+
+            expressionFileRemoved() {
+                this.expressionFile = null;
+            },
+
+            coordinatesFileAdded(file) {
+                this.coordinatesFile = file;
+                console.log(file.name);
+            },
+
+            coordinatesFileRemoved() {
+                this.coordinatesFile = null;
+            },
+
+            imageFileAdded(file) {
+                this.imageFile = file;
+            },
+
+            imageFileRemoved() {
+                this.imageFile = null;
+            },
+
+            scaleFileAdded(file) {
+                this.scaleFile = file;
+            },
+
+            scaleFileRemoved() {
+                this.scaleFile = null;
+            },
+
+
+        }
+
+    }
+</script>

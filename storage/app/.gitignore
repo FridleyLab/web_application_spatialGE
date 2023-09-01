@@ -1,0 +1,6 @@
+*
+!public/
+!common/
+!common/stenrich/
+!common/stenrich/*
+!.gitignore
