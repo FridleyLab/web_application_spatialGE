@@ -29,4 +29,4 @@ Laravel 10, VueJS 3, Bootstrap 5, Docker...
 ## Server deployment
 
 - Follow the instructions for the development environment, except for the last step, change it for:
-- npm run prod
+- npm run build
