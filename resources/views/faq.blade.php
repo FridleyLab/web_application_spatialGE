@@ -70,7 +70,7 @@
                             PACKAGE).</p>
 
                         <div class="text-center">
-                            <img class="img-fluid pt-2 pb-4 w-80 w-md-70 w-xl-60 w-xxl-50" src="/images/faq/supported_formats.png">
+                            <img class="img-fluid pt-2 pb-4 w-80 w-md-70 w-xl-60 w-xxl-40" src="/images/faq/supported_formats.png">
                         </div>
 
 
