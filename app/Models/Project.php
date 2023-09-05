@@ -2360,13 +2360,20 @@ lapply(names(grad_res), function(i){
         try {
             $job = Job::findOrFail($jobId);
 
-            if(!$job->isRunning()) {
+            //Kill the container, if running
+            $spatial = new spatialContainer($this);
+            $spatial->killProcess($task->task);
+            sleep(1);
+            //Try to delete the job from the queue, if still there
+            $job->delete();
+
+            /*if(!$job->isRunning()) {
                 $job->delete();
             }
             else {
                 $spatial = new spatialContainer($this);
                 $spatial->killProcess($task->task);
-            }
+            }*/
 
             return 1;
         }
