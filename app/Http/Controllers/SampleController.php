@@ -56,7 +56,7 @@ class SampleController extends Controller
                     $fileModel = File::create(['filename' => $file->getClientOriginalName(), 'type' => $fileType]);
                     $sample->files()->save($fileModel);
 
-                    $file->storeAs($sampleFolder, $sample->name . '__' . $file->getClientOriginalName());
+                    $file->storeAs($fileType === 'expressionFile' ? $sampleFolder : $sampleFolderSpatial, $sample->name . '__' . $file->getClientOriginalName());
 
                     /*if($fileType === 'expressionFile')
                         $file->storeAs($sampleFolder, $sample->name . '_counts.' . $fileModel->extension);
