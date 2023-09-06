@@ -44,7 +44,7 @@
 
                         <p><b>What does spatialGE do with my data?</b></p>
 
-                        <p>Any sample data you upload to spatialGE can only be accessed using your credentials.</p>
+                        <p>Any sample data you upload to spatialGE can only be accessed using your credentials. <strong>Please, do not upload any PHI</strong>.</p>
 
 
                         <p><b>Is it normal for some methods in spatialGE to take long time to complete?</b></p>
@@ -58,7 +58,7 @@
                             use via command-line requiring basic knowledge of R programming. Should the user choose to
                             use the spatialGE web app, when running an analysis, the user is prompted to select to
                             receive an email notifying when an analysis is complete. Once the analysis is started and an
-                            email notification selected, the user can close spatialGE and them process will keep
+                            email notification selected, the user can close spatialGE and the process will keep
                             running.</p>
 
 
@@ -66,8 +66,10 @@
 
                         <p>The spatialGE web application currently supports Visium data sets. Many more formats will be
                             available soon (see table below). If you would like to analyze other spatial
-                            transcriptiomics data formats, please use the command-line R package (LINK TO SPATIALGE R
-                            PACKAGE).</p>
+                            transcriptiomics data formats, please use the command-line <a class="text-info"
+                                                                                          href="https://github.com/FridleyLab/spatialGE"
+                                                                                          target="_blank">R package</a>.
+                        </p>
 
                         <div class="text-center">
                             <img class="img-fluid pt-2 pb-4 w-80 w-md-70 w-xl-60 w-xxl-40" src="/images/faq/supported_formats.png">
@@ -79,7 +81,10 @@
                         <p>While there is not a maximum number of samples per project, the spatialGE web application has
                             been designed as an exploratory tool and projects with more than 10 samples are not
                             recommended. Projects with more than 10 samples might experience long queue and execution
-                            times. For analysis of larger projects, the use of the spatialGE R package (MAKE HYPERLINK)
+                            times. For analysis of larger projects, the use of the <a class="text-info"
+                                                                                      href="https://github.com/FridleyLab/spatialGE"
+                                                                                      target="_blank">spatialGE R
+                                package</a>
                             is recommended, installed in either a personal laptop or a high-performance computing
                             (HPC/cluster) environment.</p>
 
@@ -87,7 +92,8 @@
 
                         <p>Because spatialGE is a free tool open to the public, you can only run one analysis at a time.
                             A maximum number of users can run analyses concurrently, when that number is reached, any
-                            additional analyses will be queued until enough resources are available</p>
+                            additional analyses will be queued until analyses from other users are completed and enough
+                            computing resources for your job are available.</p>
 
 
                     </div>

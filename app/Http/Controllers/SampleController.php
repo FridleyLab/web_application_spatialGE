@@ -56,15 +56,16 @@ class SampleController extends Controller
                     $fileModel = File::create(['filename' => $file->getClientOriginalName(), 'type' => $fileType]);
                     $sample->files()->save($fileModel);
 
-                    if($fileType === 'expressionFile')
+                    $file->storeAs($sampleFolder, $sample->name . '__' . $file->getClientOriginalName());
+
+                    /*if($fileType === 'expressionFile')
                         $file->storeAs($sampleFolder, $sample->name . '_counts.' . $fileModel->extension);
-                        //$file->storeAs($sampleFolder, $file->getClientOriginalName());
                     if($fileType === 'coordinatesFile')
                         $file->storeAs($sampleFolderSpatial, $sample->name . '_coordinates.' . $fileModel->extension);
                     if($fileType === 'scaleFile')
                         $file->storeAs($sampleFolderSpatial, $sample->name . '_scaling.' . $fileModel->extension);
                     if($fileType === 'imageFile')
-                        $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue.' . $fileModel->extension);
+                        $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue.' . $fileModel->extension);*/
 
                 }
             });
