@@ -11,9 +11,9 @@ use Illuminate\Support\HtmlString;
 
 class ProcessCompleted extends Notification implements ShouldQueue
 {
-    //use Queueable;
+    use Queueable;
 
-    public $queue = 'notifications';
+    public $connection = 'notifications';
 
     /**
      * Create a new notification instance.
