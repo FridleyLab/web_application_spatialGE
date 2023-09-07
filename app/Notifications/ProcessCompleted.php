@@ -13,14 +13,14 @@ class ProcessCompleted extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $connection = 'notifications';
+    //public $connection = 'notifications';
 
     /**
      * Create a new notification instance.
      */
     public function __construct(public Project $project, public string $processName, public string $output, public string $script)
     {
-        //
+        $this->onQueue('notifications');
     }
 
     /**
