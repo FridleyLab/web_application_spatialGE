@@ -9,9 +9,11 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
 
-class ProcessCompleted extends Notification
+class ProcessCompleted extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    public $queue = 'notifications';
 
     /**
      * Create a new notification instance.
