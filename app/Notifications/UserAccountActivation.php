@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
 
-class UserAccountActivation extends Notification
+class UserAccountActivation extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -17,7 +17,7 @@ class UserAccountActivation extends Notification
      */
     public function __construct()
     {
-        //
+        $this->onQueue('notifications');
     }
 
     /**

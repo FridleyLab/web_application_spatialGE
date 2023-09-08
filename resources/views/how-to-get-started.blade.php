@@ -38,8 +38,8 @@
                                     Ranger workflow outputs two .h5 files, however the file used in spatialGE is named
                                     filtered_feature_bc_matrix.h5 (see 1a in figure below).</p>
 
-                                <ul>
-                                    <li>If the filtered_feature_bc_matrix.h5 is not available, users can upload the
+                                <ul class="mb-3">
+                                    <li><span class="text-secondary">(To be supported soon) </span>If the filtered_feature_bc_matrix.h5 is not available, users can upload the
                                         expression data in the Matrix Exchange (MEX) format provided by Space Ranger
                                         (see 1b in figure below).
                                     </li>

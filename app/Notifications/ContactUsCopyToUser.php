@@ -11,7 +11,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\HtmlString;
 
-class ContactUsCopyToUser extends Notification
+class ContactUsCopyToUser extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -20,7 +20,7 @@ class ContactUsCopyToUser extends Notification
      */
     public function __construct(public string $subject, public string $description, public string $email, public string $first_name, public string $last_name)
     {
-        //
+        $this->onQueue('notifications');
     }
 
     /**

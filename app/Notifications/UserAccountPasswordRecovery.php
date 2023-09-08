@@ -8,15 +8,16 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
 
-class UserAccountPasswordRecovery extends Notification
+class UserAccountPasswordRecovery extends Notification implements ShouldQueue
 {
+    use Queueable;
 
     /**
      * Create a new notification instance.
      */
     public function __construct()
     {
-        //
+        $this->onQueue('notifications');
     }
 
     /**

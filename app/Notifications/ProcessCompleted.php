@@ -13,8 +13,6 @@ class ProcessCompleted extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    //public $connection = 'notifications';
-
     /**
      * Create a new notification instance.
      */
