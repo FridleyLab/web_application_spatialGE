@@ -7,7 +7,7 @@
                     Process sent to server
                 </div>
                 <div class="py-2 justify-content-center align-items-center text-center">
-                    <span class="text-lg me-2">Send email when completed?</span>
+                    <span class="text-lg me-2">Send email when completed? {{ sendEmail }}</span>
                     <div>
                         <label class="me-3">
                             <input type="radio" :value="0" v-model="sendEmail" @click="setEmailNofitication"> No
@@ -65,7 +65,7 @@ export default {
             queuePosition: -1,
             checkQueueIntervalId: 0,
             processing: false,
-            sendEmail: ('job.' + this.jobName + '.email') in this.project.project_parameters ? this.project.project_parameters['job.' + this.jobName + '.email'] : 0,
+            sendEmail: 0,
 
             startButtonVisible: false,
 
@@ -112,6 +112,10 @@ export default {
     },
 
     mounted() {
+
+        this.sendEmail = this.project.project_parameters.hasOwnProperty('job.' + this.jobName + '.email') ? parseInt(this.project.project_parameters['job.' + this.jobName + '.email']) : 0;
+        console.log(this.sendEmail);
+
         //this.updateJobPosition();
         this.setIntervalQueue();
 
@@ -173,7 +177,7 @@ export default {
             axios.get('/projects/' + this.projectId + '/get-jobs-in-queue', {params: {'command': this.jobName}})
                 .then((response) => {
                     this.otherJobsInQueue = response.data;
-                    console.log(response.data);
+                    //console.log(response.data);
                 })
                 .catch((error) => console.log(error));
         },

@@ -297,6 +297,11 @@ class Project extends Model
         //Create the initial_stlist
         $output = $this->spatialExecute("Rscript $scriptName", $parameters['__task']);
 
+        $task = Task::where('task', $parameters['__task'])->firstOrFail();
+        if($task->completed !== 1) {
+            return ['output' => $output, 'script' => ''];
+        }
+
 
         //Load genes present in samples into the DB
         $genes_file = $workingDir . 'genes.csv';
