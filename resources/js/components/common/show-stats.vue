@@ -56,7 +56,7 @@
                 <DxSearchPanel :visible="true" />
                 <DxGroupPanel :visible="true" />
 
-                <DxScrolling :mode="scrollingMode"/>
+                <DxScrolling :mode="scrollingMode" use-native="true" />
 
                 <DxColumn v-for="(column, index) in headers"
                           :data-field="column" :cell-template="column === 'gene' ? (column + '-cell') : ''"></DxColumn>

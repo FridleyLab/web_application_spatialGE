@@ -7,7 +7,7 @@
                     Process sent to server
                 </div>
                 <div class="py-2 justify-content-center align-items-center text-center">
-                    <span class="text-lg me-2">Send email when completed? {{ sendEmail }}</span>
+                    <span class="text-lg me-2">Send email when completed?</span>
                     <div>
                         <label class="me-3">
                             <input type="radio" :value="0" v-model="sendEmail" @click="setEmailNofitication"> No
