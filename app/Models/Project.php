@@ -24,7 +24,7 @@ class Project extends Model
 
     protected $fillable = ['name', 'description', 'user_id', 'project_platform_id'];
 
-    protected $appends = ['url', 'project_parameters'];
+    protected $appends = ['url', 'project_parameters', 'platform_name'];
 
     private ?spatialContainer $_container = null;
 
@@ -57,6 +57,17 @@ class Project extends Model
     //Attributes
     public function getUrlAttribute() {
         return route('open-project', ['project' => $this->id]);
+    }
+
+    public function getPlatformNameAttribute() {
+
+        if($this->project_platform_id === 1)
+            return 'VISIUM';
+        elseif($this->project_platform_id === 8)
+            return 'GENERIC';
+
+
+        return 'UNKNOWN';
     }
 
     public function getProjectParametersAttribute() {

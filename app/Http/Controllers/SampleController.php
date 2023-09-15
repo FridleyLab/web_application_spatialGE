@@ -26,6 +26,7 @@ class SampleController extends Controller
 
             DB::transaction(function () use($userFolder) {
                 $projectId = request('project_id');
+                $project = Project::findOrFail($projectId);
                 $sample_name = request('sample_name');
                 $sample = Sample::create(['name' => $sample_name]);
                 if(!strlen(trim($sample->name))) { //if no name was provided for the sample
@@ -34,7 +35,7 @@ class SampleController extends Controller
                 }
                 $sample->save();
 
-                $sample->projects()->save(Project::findOrFail($projectId));
+                $sample->projects()->save($project);
                 $fileType = null;
 
 
@@ -56,16 +57,28 @@ class SampleController extends Controller
                     $fileModel = File::create(['filename' => $file->getClientOriginalName(), 'type' => $fileType]);
                     $sample->files()->save($fileModel);
 
-                    $file->storeAs($fileType === 'expressionFile' ? $sampleFolder : $sampleFolderSpatial, $sample->name . '__' . $file->getClientOriginalName());
+                    //$file->storeAs($fileType === 'expressionFile' ? $sampleFolder : $sampleFolderSpatial, $sample->name . '__' . $file->getClientOriginalName());
 
-                    /*if($fileType === 'expressionFile')
-                        $file->storeAs($sampleFolder, $sample->name . '_counts.' . $fileModel->extension);
-                    if($fileType === 'coordinatesFile')
-                        $file->storeAs($sampleFolderSpatial, $sample->name . '_coordinates.' . $fileModel->extension);
-                    if($fileType === 'scaleFile')
-                        $file->storeAs($sampleFolderSpatial, $sample->name . '_scaling.' . $fileModel->extension);
-                    if($fileType === 'imageFile')
-                        $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue.' . $fileModel->extension);*/
+                    if($project->platform_name === 'GENERIC') {
+                        if ($fileType === 'expressionFile')
+                            $file->storeAs($sampleFolder, $sample->name . '_counts.' . $fileModel->extension);
+                        if ($fileType === 'coordinatesFile')
+                            $file->storeAs($sampleFolderSpatial, $sample->name . '_coordinates.' . $fileModel->extension);
+                        if ($fileType === 'scaleFile')
+                            $file->storeAs($sampleFolderSpatial, $sample->name . '_scaling.' . $fileModel->extension);
+                        if ($fileType === 'imageFile')
+                            $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue.' . $fileModel->extension);
+                    }
+                    elseif($project->platform_name === 'VISIUM') {
+                        if ($fileType === 'expressionFile')
+                            $file->storeAs($sampleFolder, $sample->name . '_filtered_feature_bc_matrix.' . $fileModel->extension);
+                        if ($fileType === 'coordinatesFile')
+                            $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue_positions_list.' . $fileModel->extension);
+                        if ($fileType === 'scaleFile')
+                            $file->storeAs($sampleFolderSpatial, $sample->name . '_scalefactors_json.' . $fileModel->extension);
+                        if ($fileType === 'imageFile')
+                            $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue_hires_image.' . $fileModel->extension);
+                    }
 
                 }
             });

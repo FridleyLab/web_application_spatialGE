@@ -66,14 +66,6 @@ export default {
 
             errorMessage: '',
 
-            acceptedFileTypes: {
-                'expression': ['h5', 'csv', 'tsv', 'txt'],
-                'coordinates': ['csv', 'tsv', 'txt'],
-                'image': ['jpeg', 'jpg', 'png', 'gif', 'tiff'],
-                'scale': ['json'],
-                'metadata': ['csv', 'tsv', 'txt', 'xls', 'xlsx'],
-            },
-
         }
     },
 
@@ -96,6 +88,27 @@ export default {
 
         fileExtension() {
             return this.file ?  this.file.name.split('.').pop() : '';
+        },
+
+        acceptedFileTypes() {
+            if(this.project.platform_name === 'VISIUM') {
+                return {
+                    'expression': ['h5'],
+                    'coordinates': ['csv'],
+                    'image': ['png'],
+                    'scale': ['json'],
+                    'metadata': ['csv', 'tsv', 'txt', 'xls', 'xlsx']
+                }
+            }
+            else if(this.project.platform_name === 'GENERIC') {
+                return {
+                    'expression': ['csv', 'tsv', 'txt'],
+                    'coordinates': ['csv', 'tsv', 'txt'],
+                    'image': ['png', 'jpg'],
+                    'scale': ['json'],
+                    'metadata': ['csv', 'tsv', 'txt', 'xls', 'xlsx']
+                }
+            }
         },
 
     },
