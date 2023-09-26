@@ -59,26 +59,46 @@ class SampleController extends Controller
 
                     //$file->storeAs($fileType === 'expressionFile' ? $sampleFolder : $sampleFolderSpatial, $sample->name . '__' . $file->getClientOriginalName());
 
+                    $fileName = $fileModel->filename;
                     if($project->platform_name === 'GENERIC') {
-                        if ($fileType === 'expressionFile')
-                            $file->storeAs($sampleFolder, $sample->name . '_counts.' . $fileModel->extension);
-                        if ($fileType === 'coordinatesFile')
-                            $file->storeAs($sampleFolderSpatial, $sample->name . '_coordinates.' . $fileModel->extension);
-                        if ($fileType === 'scaleFile')
-                            $file->storeAs($sampleFolderSpatial, $sample->name . '_scaling.' . $fileModel->extension);
-                        if ($fileType === 'imageFile')
-                            $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue.' . $fileModel->extension);
+                        if ($fileType === 'expressionFile') {
+                            $fileName = $sample->name . '_counts.' . $fileModel->extension;
+                            $file->storeAs($sampleFolder, $fileName);
+                        }
+                        if ($fileType === 'coordinatesFile') {
+                            $fileName = $sample->name . '_coordinates.' . $fileModel->extension;
+                            $file->storeAs($sampleFolderSpatial, $fileName);
+                        }
+                        if ($fileType === 'scaleFile') {
+                            $fileName = $sample->name . '_scaling.' . $fileModel->extension;
+                            $file->storeAs($sampleFolderSpatial, $fileName);
+                        }
+                        if ($fileType === 'imageFile') {
+                            $fileName = $sample->name . '_tissue.' . $fileModel->extension;
+                            $file->storeAs($sampleFolderSpatial, $fileName);
+                        }
                     }
                     elseif($project->platform_name === 'VISIUM') {
-                        if ($fileType === 'expressionFile')
-                            $file->storeAs($sampleFolder, $sample->name . '_filtered_feature_bc_matrix.' . $fileModel->extension);
-                        if ($fileType === 'coordinatesFile')
-                            $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue_positions_list.' . $fileModel->extension);
-                        if ($fileType === 'scaleFile')
-                            $file->storeAs($sampleFolderSpatial, $sample->name . '_scalefactors_json.' . $fileModel->extension);
-                        if ($fileType === 'imageFile')
-                            $file->storeAs($sampleFolderSpatial, $sample->name . '_tissue_hires_image.' . $fileModel->extension);
+                        if ($fileType === 'expressionFile') {
+                            $fileName = $sample->name . '_filtered_feature_bc_matrix.' . $fileModel->extension;
+                            $file->storeAs($sampleFolder, $fileName);
+                        }
+                        if ($fileType === 'coordinatesFile') {
+                            $fileName = $sample->name . '_tissue_positions_list.' . $fileModel->extension;
+                            $file->storeAs($sampleFolderSpatial, $fileName);
+                        }
+                        if ($fileType === 'scaleFile') {
+                            $fileName = $sample->name . '_scalefactors_json.' . $fileModel->extension;
+                            $file->storeAs($sampleFolderSpatial, $fileName);
+                        }
+                        if ($fileType === 'imageFile') {
+                            $fileName = $sample->name . '_tissue_hires_image.' . $fileModel->extension;
+                            $file->storeAs($sampleFolderSpatial, $fileName);
+                        }
                     }
+
+                    $fileModel->filename = $fileName;
+                    $fileModel->save();
 
                 }
             });
