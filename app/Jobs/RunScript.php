@@ -67,7 +67,7 @@ class RunScript implements ShouldQueue
 
 
         //check if the task completed correctly
-        if(isset($this->parameters['__task'])) {
+        if(isset($this->parameters['__task']) && !isset($this->parameters['executeIn'])) {
             $task = Task::where('task', $this->parameters['__task'])->firstOrFail();
             if($task->completed) {
                 //Notify the user if requested

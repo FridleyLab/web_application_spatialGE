@@ -10,6 +10,7 @@ use App\Models\ProjectParameter;
 use App\Models\ProjectPlatform;
 use App\Models\Task;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -271,7 +272,14 @@ class ProjectController extends Controller
 
     public function applyNormalization(Project $project) {
 
-        $jobId = $project->createJob('Normalize data', 'applyNormalization', request('parameters'));
+        $parameters = request('parameters');
+
+        /*************** EXPERIMENTAL HPC **************/
+        if(app()->isLocal()) {
+            $parameters['executeIn'] = 'HPC';
+        }
+
+        $jobId = $project->createJob('Normalize data', 'applyNormalization', $parameters);
 
         //RunScript::dispatch('Normalize data', $project, 'applyNormalization', request('parameters'));
 
@@ -345,6 +353,7 @@ class ProjectController extends Controller
         ProjectParameter::updateOrCreate(['parameter' => 'STplotExpressionSurface.genes', 'project_id' => $project->id], ['type' => 'json', 'value' => json_encode(request('genes'))]);
 
         $jobId = $project->createJob('STplot - Expression surface', 'STplotExpressionSurface', $parameters);
+
         return $project->getJobPositionInQueue($jobId);
 
     }

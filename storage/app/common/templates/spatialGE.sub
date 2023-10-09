@@ -1,0 +1,37 @@
+#!/bin/bash
+#SBATCH --job-name={{job-name}}
+#SBATCH --cpus-per-task={{CPUs}}
+#SBATCH --mem={{RAM}}
+#SBATCH --time={{time}}
+#SBATCH --output /share/dept_bbsr/Projects/Manjarres_Betancur_Roberto/spatialGE/{{project-id}}/output.out
+#SBATCH --error /share/dept_bbsr/Projects/Manjarres_Betancur_Roberto/spatialGE/{{project-id}}/error.err
+
+export LMOD_SETTARG_CMD=:
+export MODULEPATH=/cm/local/modulefiles:/etc/modulefiles:/usr/share/modulefiles:/usr/share/Modules/modulefiles:/cm/shared/modulefiles:/app/eb/modules/all:/app/other/modules
+export LMOD_DIR=/usr/share/lmod/lmod/libexec
+export LMOD_CMD=/usr/share/lmod/lmod/libexec/lmod
+module ()
+{
+    eval $($LMOD_CMD bash "$@") && eval $(${LMOD_SETTARG_CMD:-:} -s sh)
+}
+ml ()
+{
+    eval $($LMOD_DIR/ml_cmd "$@")
+}
+
+
+cd {{hpc-local-folder}}{{project-id}}
+
+ml R
+
+echo "Start analysis {{script-name}}: "
+echo $(date)
+
+Rscript {{script-name}}.R
+
+echo "End analysis: "
+echo $(date)
+
+if [ -e ../{{project-id}}.{{script-name}}.spatialGE.running ]; then
+    mv ../{{project-id}}.{{script-name}}.spatialGE.running ../{{job-name}}.spatialGE.completed
+fi

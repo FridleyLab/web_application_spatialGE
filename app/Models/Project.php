@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
@@ -150,10 +151,12 @@ class Project extends Model
         return '/';
     }
 
-    public function workingDir($replace_backslashes = true) : string {
-        $workingDir = '/users/' . $this->user_id . '/' . $this->id . '/';
-        //if($replace_backslashes) $workingDir = str_replace('\\', '/', $workingDir);
-        return $workingDir;
+    public function workingDir() : string {
+        return '/users/' . $this->user_id . '/' . $this->id . '/';
+    }
+
+    public function workingDirHPC() : string {
+        return env('HPC_FOLDER') . $this->id . '/';
     }
 
     public function workingDirPublic() : string {
@@ -240,10 +243,18 @@ class Project extends Model
         return $command;
     }
 
-    private function pca_max_var_genes() {
-        $file = $this->workingDir() . 'pca_max_var_genes.csv';
-        if(Storage::fileExists($file)) {
-            $data = trim(Storage::read($file));
+    private function pca_max_var_genes($HPC = 0) {
+        if($HPC) {
+            $file = $this->workingDirHPC() . 'pca_max_var_genes.csv';
+        }
+        else {
+            $file = Storage::path($this->workingDir()) . 'pca_max_var_genes.csv';
+        }
+
+        //if(Storage::fileExists($file)) {
+        if(file_exists($file)) {
+            //$data = trim(Storage::read($file));
+            $data = trim(file_get_contents($file));
             ProjectParameter::updateOrCreate(['parameter' => 'pca_max_var_genes', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'number', 'value' => $data]);
             return intval($data);
         }
@@ -268,8 +279,24 @@ class Project extends Model
     }
 
     private function createGeneList($genes_file, $context) {
-        if(Storage::fileExists($genes_file)) {
-            $data = Storage::read($genes_file);
+        //if(Storage::fileExists($genes_file)) {
+        if(file_exists($genes_file)) {
+
+            /***************** COPIAR EL ARCHIVO LOCAL o utilizar File:: *******/
+            //$data = file_get_contents($genes_file); //FALLA AL LEER EL ARCHIVO
+
+            $fileName = Storage::path($this->workingDir() . 'genesNormalized.csv');
+
+            //copy($genes_file, $fileName);
+
+            $command = 'copy ' . $genes_file . ' ' . $fileName;
+            $command = str_replace('/', '\\', $command);
+            Log::info('=================>  ' . $command);
+            $process = Process::run($command);
+
+            $data = file_get_contents($fileName);
+
+
             $genes = explode("\n", $data);
             $genes = array_unique($genes);
 
@@ -705,9 +732,10 @@ $plots
 
         $workingDir = $this->workingDir();
 
-        $scriptName = 'Normalization.R';
+        $scriptName = 'Normalization';
+        $scriptFilename = 'Normalization.R';
 
-        $script = $workingDir . $scriptName;
+        $script = $workingDir . $scriptFilename;
 
         $scriptContents = $this->getNormalizationScript($parameters);
         Storage::put($script, $scriptContents);
@@ -721,8 +749,31 @@ $plots
                 Storage::delete($file);
         }
 
-        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        if(array_key_exists('executeIn', $parameters) && $parameters['executeIn'] === 'HPC') {
+            $this->sendJobHPC($parameters['__task'], $scriptName, ['filtered_stlist.RData', 'initial_stlist.RData']);
+
+            $task = Task::where('task', $parameters['__task'])->firstOrFail();
+            $task->started_at = DB::raw('CURRENT_TIMESTAMP');
+            $task->save();
+
+        }
+        else {
+            $output = $this->spatialExecute('Rscript ' . $scriptFilename, $parameters['__task']);
+            $this->applyNormalizationCompleted();
+        }
+
+    }
+
+    public function applyNormalizationCompleted($HPC = 0) {
+
+
+        if($HPC) {
+            $workingDir = $this->workingDirHPC();
+        }
+        else {
+            $workingDir = Storage::path($this->workingDir());
+        }
 
         //Load genes present in the normalized STlist into the DB
         $genes_file = $workingDir . 'genesNormalized.csv';
@@ -737,10 +788,19 @@ $plots
             foreach ($file_extensions as $file_extension) {
                 $fileName = $parameterName . '.' . $file_extension;
                 $file = $workingDir . $fileName;
-                $file_public = $this->workingDirPublic() . $fileName;
-                if (Storage::fileExists($file)) {
-                    Storage::delete($file_public);
-                    Storage::move($file, $file_public);
+                $file_public = Storage::path($this->workingDirPublic()) . $fileName;
+                //if (Storage::fileExists($file)) {
+                if (file_exists($file)) {
+                    //Storage::delete($file_public);
+                    if (file_exists($file_public)) unlink($file_public);
+                    //Storage::move($file, $file_public);
+
+                    //copy($file, $file_public);
+                    $command = 'copy ' . $file . ' ' . $file_public;
+                    $command = str_replace('/', '\\', $command);
+                    Log::info('=================>  ' . $command);
+                    $process = Process::run($command);
+
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
                 }
@@ -756,10 +816,9 @@ $plots
         $this->current_step = 6;
         $this->save();
 
-        $result['output'] = $output;
-        $result['script'] = $scriptContents;
+        $result['output'] = ''; // $output;
+        $result['script'] = ''; // $scriptContents;
         return $result;
-
     }
 
 
@@ -771,7 +830,7 @@ $plots
 
         $str_params = '';
         foreach ($parameters as $key => $value) {
-            if(strlen($value) && $key !== '__task') {
+            if(strlen($value) && $key !== '__task' && $key !== 'executeIn') {
                 $str_params .= strlen($str_params) ? ', ' : '';
                 $quote = in_array($key, ['method']) ? "'" : '';
                 $str_params .= $key . '=' . $quote . $value . $quote;
@@ -1700,6 +1759,8 @@ for(p in n_plots) {
         $scriptContents = $this->getSTDiffNonSpatialScript($parameters);
         Storage::put($script, $scriptContents);
 
+        $this->clusterTestSTDiffNonSpatial();
+
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
@@ -1780,7 +1841,7 @@ library('spatialGE')
             $this->_loadStList('stclust_stlist')
             . "
 
-de_genes_results = STdiff(stclust_stlist, #### NORMALIZED STList
+de_genes_results = STdiff(stclust_stlist, #### STCLUST STList
                           samples=$samples,   #### Users should be able to select which samples to include in analysis
                           annot='$annotation',  #### Name of variable to use in analysis... Dropdown to select one of `annot_variables`
                           topgenes=$topgenes, #### !!! Defines a lot of the speed. 100 are too few genes. Minimally would like 5000 but is SLOW. Can be a slider as in pseudobulk
@@ -1788,7 +1849,7 @@ de_genes_results = STdiff(stclust_stlist, #### NORMALIZED STList
                           test_type='$test_type', #### Other options are 't_test' and 'mm',
                           pairwise=$pairwise, #### Check box
                           clusters=$clusters, #### Need ideas for this one. Values in `cluster_values` and after user selected value in annot dropdown
-                          cores=4) #### You know, the more the merrier
+                          cores=12) #### You know, the more the merrier
 
 # Get workbook with results (samples in spreadsheets)
 openxlsx::write.xlsx(de_genes_results, file='stdiff_ns_results.xlsx')
@@ -1962,6 +2023,8 @@ lapply(names(ps), function(i){
 
         $scriptContents = $this->getSTEnrichScript($parameters);
         Storage::put($script, $scriptContents);
+
+        $this->clusterTestSTEnrich($parameters['gene_sets'] . '.gmt');
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
@@ -2223,8 +2286,9 @@ lapply(names(grad_res), function(i){
 
             $project_id = $this->id;
 
-            //Create a unique name or id for the task
-            $parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . substr(microtime(true) * 1000, 0, 13);
+            //Create a unique name or id for the task based on the current timestamp
+            $parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . now()->format('YmdHis_u');
+            //$parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . substr(microtime(true) * 1000, 0, 13);
 
             //Information necessary to run the job again in case it fails
             $payload = json_encode(compact('description', 'project_id', 'command', 'parameters', 'queue'));
@@ -2418,4 +2482,221 @@ lapply(names(grad_res), function(i){
         }
     }
 
+    private function clusterTestSTEnrich($gene_set) {
+
+        try {
+
+            $sharedFolderBase = env('HPC_FOLDER');
+
+            if(!File::isDirectory($sharedFolderBase . $this->id)) {
+                File::makeDirectory($sharedFolderBase . $this->id);
+            }
+
+
+            $replace = '
+
+local_library_path <- "/home/4476777/R_libraries"
+.libPaths(c(local_library_path, .libPaths()))
+setwd("/share/dept_bbsr/Projects/Manjarres_Betancur_Roberto/spatialGE/1")
+
+            ';
+
+            $text = Storage::get($this->workingDir() . 'STEnrich.R');
+            $text = str_replace("setwd('/spatialGE')", $replace, $text);
+            File::put(Storage::path($this->workingDir() . 'STEnrich2.R'), $text);
+
+            $filesToCopy = ['STEnrich2.R', 'normalized_stlist.RData', $gene_set /*'hallmark.gmt'*/];
+
+            foreach ($filesToCopy as $file) {
+
+                $source = Storage::path($this->workingDir() . $file);
+                $destination = $sharedFolderBase . $this->id . '/' . $file;
+
+                if(File::exists($source)) {
+
+                    $command = 'copy ' . $source . ' ' . $destination;
+
+                    $command = str_replace('/', '\\', $command);
+
+                    Log::info('=================>  ' . $command);
+
+                    $process = Process::run($command);
+                }
+
+                //File::copy(Storage::path($this->workingDir() . $file), $sharedFolderBase . $this->id . '/' . $file);
+            }
+
+            $command = 'copy ' . $sharedFolderBase . 'template.spatialGE.sub' . ' ' . $sharedFolderBase . 'run.spatialGE.sub';
+            $command = str_replace('/', '\\', $command);
+            $process = Process::run($command);
+
+            return
+
+            $text = Storage::get($this->workingDir() . 'STplot-ExpressionSurface.R');
+            File::put($sharedFolderBase . $this->id . '/' . 'STplot-ExpressionSurface.R', $text);
+
+
+
+        } catch (\Exception $e) {
+            Log::error('Error while copying files to the HPC:');
+            Log::error($e->getMessage());
+        }
+
+    }
+    private function clusterTestSTDiffNonSpatial() {
+
+        try {
+
+            $sharedFolderBase = env('HPC_FOLDER');
+
+            if(!File::isDirectory($sharedFolderBase . $this->id)) {
+                File::makeDirectory($sharedFolderBase . $this->id);
+            }
+
+
+            $replace = '
+
+local_library_path <- "/home/4476777/R_libraries"
+.libPaths(c(local_library_path, .libPaths()))
+setwd("/share/dept_bbsr/Projects/Manjarres_Betancur_Roberto/spatialGE/' . $this->id . '")
+
+            ';
+
+            $text = Storage::get($this->workingDir() . 'STDiff_NonSpatial.R');
+            $text = str_replace("setwd('/spatialGE')", $replace, $text);
+            File::put(Storage::path($this->workingDir() . 'STDiff_NonSpatial2.R'), $text);
+
+            $filesToCopy = ['STDiff_NonSpatial2.R', 'stclust_stlist.RData'];
+
+            foreach ($filesToCopy as $file) {
+
+                $source = Storage::path($this->workingDir() . $file);
+                $destination = $sharedFolderBase . $this->id . '/' . $file;
+
+                if(File::exists($source)) {
+
+                    $command = 'copy ' . $source . ' ' . $destination;
+
+                    $command = str_replace('/', '\\', $command);
+
+                    Log::info('=================>  ' . $command);
+
+                    $process = Process::run($command);
+                }
+
+                //File::copy(Storage::path($this->workingDir() . $file), $sharedFolderBase . $this->id . '/' . $file);
+            }
+
+            $command = 'copy ' . $sharedFolderBase . 'template.spatialGE.sub' . ' ' . $sharedFolderBase . 'run.spatialGE.sub';
+            $command = str_replace('/', '\\', $command);
+            $process = Process::run($command);
+
+            return
+
+            $text = Storage::get($this->workingDir() . 'STplot-ExpressionSurface.R');
+            File::put($sharedFolderBase . $this->id . '/' . 'STplot-ExpressionSurface.R', $text);
+
+
+
+        } catch (\Exception $e) {
+            Log::error('Error while copying files to the HPC:');
+            Log::error($e->getMessage());
+        }
+
+    }
+
+    private function getHPCscript($jobName, $scriptName, $cpus = 5, $ram='32G', $time='24:00:00') {
+
+        $template = Storage::get('common/templates/spatialGE.sub');
+
+        $template = str_replace('{{job-name}}', $jobName, $template);
+
+        $template = str_replace('{{script-name}}', $scriptName, $template);
+
+        $template = str_replace('{{project-id}}', $this->id, $template);
+
+        $template = str_replace('{{CPUs}}', $cpus, $template);
+
+        $template = str_replace('{{RAM}}', $ram, $template);
+
+        $template = str_replace('{{time}}', $time, $template);
+
+        $template = str_replace('{{hpc-local-folder}}', env('HPC_LOCAL_FOLDER'), $template);
+
+        return $template;
+
+    }
+
+    private function sendJobHPC($jobName, $scriptName, $filesToCopy) {
+
+        try {
+
+            $sharedFolderBase = env('HPC_FOLDER');
+
+            if(!File::isDirectory($sharedFolderBase . $this->id)) {
+                File::makeDirectory($sharedFolderBase . $this->id);
+            }
+
+
+            /************ create R script to RUN in the HPC ****************/
+            $replace = '
+local_library_path <- "/home/4476777/R_libraries"
+.libPaths(c(local_library_path, .libPaths()))
+setwd("/share/dept_bbsr/Projects/Manjarres_Betancur_Roberto/spatialGE/' . $this->id . '")
+options(bitmapType="cairo")
+            ';
+            $scriptNameHPC = $jobName . '_' . $scriptName . '_HPC';
+            $text = Storage::get($this->workingDir() . $scriptName . '.R');
+            $text = str_replace("setwd('/spatialGE')", $replace, $text);
+            Storage::put($this->workingDir() . $scriptNameHPC . '.R', $text);
+            /******************* end R script*******************************************/
+
+
+            /************ create SLURM script to RUN in the HPC ****************/
+            $text = $this->getHPCscript($jobName, $scriptNameHPC, $this->samples->count(), ($this->samples->count()*2) . 'G');
+            $slurmScriptNameHPC = $jobName . '_' . $scriptName . '_HPC.sub';
+            Storage::put($this->workingDir() . $slurmScriptNameHPC, $text);
+            /******************* end SLURM script*******************************************/
+
+            $filesToCopy[] = $scriptNameHPC . '.R';
+            $filesToCopy[] = $slurmScriptNameHPC;
+
+            foreach ($filesToCopy as $file) {
+
+                $source = Storage::path($this->workingDir() . $file);
+                $destination = $sharedFolderBase . $this->id . '/' . $file;
+
+                if(File::exists($source)) {
+
+                    $command = 'copy ' . $source . ' ' . $destination;
+
+                    $command = str_replace('/', '\\', $command);
+
+                    Log::info('=================>  ' . $command);
+
+                    $process = Process::run($command);
+                }
+
+                //File::copy(Storage::path($this->workingDir() . $file), $sharedFolderBase . $this->id . '/' . $file);
+            }
+
+            $taskFileName = $this->id . '.' . $jobName . '_' . $scriptName . '_HPC.spatialGE';
+            $command = 'copy ' . $sharedFolderBase . 'template.spatialGE.sub' . ' ' . $sharedFolderBase . $taskFileName;
+            $command = str_replace('/', '\\', $command);
+            $process = Process::run($command);
+
+            return;
+
+            /*$text = Storage::get($this->workingDir() . 'STplot-ExpressionSurface.R');
+            File::put($sharedFolderBase . $this->id . '/' . 'STplot-ExpressionSurface.R', $text);*/
+
+
+
+        } catch (\Exception $e) {
+            Log::error('Error while copying files to the HPC:');
+            Log::error($e->getMessage());
+        }
+    }
+
 }
+
