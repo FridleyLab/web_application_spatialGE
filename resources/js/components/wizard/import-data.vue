@@ -39,7 +39,7 @@
                                 </div>
                                 <show-modal tag="importdata_sample_name"></show-modal>
                             </div>
-                            <div v-if="!validSampleName" class="text-danger text-center mb-3">{{ validSampleNameMessage }}</div>
+                            <div v-if="!validSampleName" class="text-danger text-center mb-3" v-html="validSampleNameMessage"></div>
                         </div>
                         <h6 class="text-center">Please select or drop your gene expression and coordinates files (tissue image is optional)</h6>
                         <hr class="dark horizontal my-0">
@@ -169,7 +169,7 @@ import { getCurrentInstance } from 'vue';
                 this.validSampleName = !similarNames.length;
 
                 if(similarNames.length) {
-                    this.validSampleNameMessage = 'A sample name cannot be a substring of another one, it conflicts with: ' + similarNames[0].name;
+                    this.validSampleNameMessage = '<p>A sample name cannot be a substring of another one, it conflicts with: ' + similarNames[0].name + '</p><p>Please select a different name</p>';
                 }
 
 
