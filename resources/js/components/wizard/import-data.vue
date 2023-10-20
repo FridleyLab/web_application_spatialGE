@@ -33,11 +33,13 @@
                             <!--                        <div class="w-30" :class="fileSelected ? 'mt-6' : 'mt-4'" v-show="!uploading">-->
                             <div class="w-30 mb-3 d-flex" v-show="!uploading">
                                 <div class="input-group input-group-outline focused is-focused">
-                                    <label class="form-label">Sample name</label>
-                                    <input type="text" class="form-control" name="sample_name" :placeholder="suggestedSampleName" v-model="sample_name" :disabled="uploading">
+                                    <label class="form-label">Sample name (optional)</label>
+                                    <input type="text" class="form-control" name="sample_name" v-model="sampleName" :disabled="uploading">
+<!--                                    <input type="text" class="form-control" name="sampleName" :placeholder="suggestedSampleName" v-model="sampleName" :disabled="uploading">-->
                                 </div>
                                 <show-modal tag="importdata_sample_name"></show-modal>
                             </div>
+                            <div v-if="!validSampleName" class="text-danger text-center mb-3">{{ validSampleNameMessage }}</div>
                         </div>
                         <h6 class="text-center">Please select or drop your gene expression and coordinates files (tissue image is optional)</h6>
                         <hr class="dark horizontal my-0">
@@ -70,7 +72,7 @@
                         </div>
 
                         <div class="my-6 w-100 text-center">
-                            <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess">
+                            <button @click="importSample" class="btn bg-gradient-success w-25 mb-0 toast-btn" :disabled="!canStartImportProcess || !validSampleName">
                                 Import sample
                             </button>
                         </div>
@@ -119,7 +121,9 @@ import { getCurrentInstance } from 'vue';
                 imageFile: null,
                 scaleFile: null,
 
-                sample_name: '',
+                sampleName: '',
+                validSampleName: true,
+                validSampleNameMessage: '',
                 uploading: false,
                 uploadPercentage: 0,
 
@@ -139,8 +143,8 @@ import { getCurrentInstance } from 'vue';
             this.setIntervalQueue();
         },*/
 
-        /*watch: {
-            jobPositionInQueue: {
+        watch: {
+            /*jobPositionInQueue: {
                     handler: function (newValue, oldValue) {
                         console.log('---', this.jobPositionInQueue);
                         if(this.jobPositionInQueue) this.reloadPage = true;
@@ -151,8 +155,26 @@ import { getCurrentInstance } from 'vue';
                         }
                 },
                 immediate: true
-            }
-        },*/
+            }*/
+
+            sampleName(newValue, oldValue) {
+
+                if(!newValue.length) {
+                    this.validSampleName = true;
+                    return;
+                }
+
+                let similarNames = this.samples.filter(sample => (sample.name.toLowerCase().includes(newValue.toLowerCase()) || newValue.toLowerCase().includes(sample.name.toLowerCase())));
+
+                this.validSampleName = !similarNames.length;
+
+                if(similarNames.length) {
+                    this.validSampleNameMessage = 'A sample name cannot be a substring of another one, it conflicts with: ' + similarNames[0].name;
+                }
+
+
+            },
+        },
 
         computed: {
 
@@ -217,7 +239,7 @@ import { getCurrentInstance } from 'vue';
 
 
                 formData.append('project_id', this.project.id);
-                formData.append('sample_name', this.sample_name.trim());
+                formData.append('sample_name', this.sampleName.trim());
 
                 this.uploading = true;
 
