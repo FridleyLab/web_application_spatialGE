@@ -184,7 +184,7 @@ class ProjectController extends Controller
 
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
 
-        $tasks = Task::where('user_id', auth()->id())->where('project_id', $project->id)->where('process', request('command'))->whereNull('finished_at')->orderByDesc('scheduled_at')->get();
+        $tasks = Task::where('user_id', auth()->id())->where('project_id', $project->id)->where('process', request('command'))->/*whereNull('finished_at')->*/orderByDesc('scheduled_at')->get();
 
         $task = null;
         if($tasks->count()) {
@@ -275,7 +275,7 @@ class ProjectController extends Controller
         $parameters = request('parameters');
 
         /*************** EXPERIMENTAL HPC **************/
-        if(app()->isLocal()) {
+        if(app()->isLocal() && env('HPC_ENABLED', false)) {
             $parameters['executeIn'] = 'HPC';
         }
 
@@ -409,6 +409,11 @@ class ProjectController extends Controller
 
     public function sdd_stclust(Project $project) {
         $jobId = $project->createJob('Spatial Domain Detection - STclust', 'STclust', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
+    public function sdd_spagcn(Project $project) {
+        $jobId = $project->createJob('Spatial Domain Detection - SpaGCN', 'SpaGCN', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 

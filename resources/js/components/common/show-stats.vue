@@ -59,10 +59,12 @@
                 <DxScrolling :mode="scrollingMode" use-native="true" />
 
                 <DxColumn v-for="(column, index) in headers"
-                          :data-field="column" :cell-template="column === 'gene' ? (column + '-cell') : ''"></DxColumn>
+                          :data-field="column"
+                          :cell-template="column === 'project_id' ? 'projectid-cell' : ''">
+                </DxColumn>
 
-                <template #gene-cell="{ data }">
-                    <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data.text" class="text-info" target="_blank">{{ data.text }}</a>
+                <template #projectid-cell="{ data }">
+                    <a :href="'/projects/' + data.text" class="text-info" target="_blank">{{ data.text }}</a>
                 </template>
 
                 <template #scrollingModeTemplate>
@@ -184,28 +186,29 @@ export default {
         onCellPrepared(cell) {
 
 
-            if(cell.rowType === 'data' && cell.column.dataField === 'completed') {
+            if(cell.rowType === 'data') {
 
-                if(parseInt(cell.value) === 0 && cell.data.cancelled_at !== null) {
-                    cell.cellElement.innerText = 'Cancelled';
-                    cell.cellElement.style.cssText = "color:white; background-color: orange";
+                if(cell.column.dataField === 'completed') {
+                    if (parseInt(cell.value) === 0 && cell.data.cancelled_at !== null) {
+                        cell.cellElement.innerText = 'Cancelled';
+                        cell.cellElement.style.cssText = "color:white; background-color: orange";
+                    } else if (cell.data.started_at !== null && cell.data.finished_at === null) {
+                        cell.cellElement.innerText = 'Running';
+                        cell.cellElement.style.cssText = "color:white; background-color: green";
+                    } else if (cell.data.started_at === null) {
+                        cell.cellElement.innerText = 'Scheduled';
+                        cell.cellElement.style.cssText = "color:white; background-color: green";
+                    } else if (parseInt(cell.value) === 1) {
+                        cell.cellElement.innerText = 'OK';
+                        cell.cellElement.style.cssText = "color:green;";
+                    } else if (parseInt(cell.value) === 0 && cell.data.finished_at !== null) {
+                        cell.cellElement.innerText = 'Failed';
+                        cell.cellElement.style.cssText = "color:white; background-color: red";
+                    }
                 }
-                else if(cell.data.started_at !== null && cell.data.finished_at === null) {
-                    cell.cellElement.innerText = 'Running';
-                    cell.cellElement.style.cssText = "color:white; background-color: green";
-                }
-                else if(cell.data.started_at === null) {
-                    cell.cellElement.innerText = 'Scheduled';
-                    cell.cellElement.style.cssText = "color:white; background-color: green";
-                }
-                else if(parseInt(cell.value) === 1) {
-                    cell.cellElement.innerText = 'OK';
-                    cell.cellElement.style.cssText = "color:green;";
-                }
-                else if(parseInt(cell.value) === 0 && cell.data.finished_at !== null) {
-                    cell.cellElement.innerText = 'Failed';
-                    cell.cellElement.style.cssText = "color:white; background-color: red";
-                }
+                /*else if(cell.column.dataField === 'project_id') {
+                    cell.cellElement.innerText = '<a href="">' + cell.value + '</a>';
+                }*/
 
             }
 

@@ -8,8 +8,16 @@ else
     exit 1
 fi
 
-chown -R apache:apache storage/
-sudo -u apache php artisan queue:restart
+if [ -n "$WWW_USER" ]; then
+    chown -R "$WWW_USER":"$WWW_USER" storage/
+fi
+
+if [ -n "$WWW_USER" ]; then
+    sudo -u "$WWW_USER" php artisan queue:restart
+else
+    php artisan queue:restart
+fi
+
 
 if [ "$APP_ENV" == "production" ]; then
     WORKERS=8
@@ -18,5 +26,9 @@ else
 fi
 
 for ((i=1; i<=WORKERS; i++)); do
-    sudo -u apache php artisan queue:work --queue="default" --timeout=259200 --tries=1 &
+    if [ -n "$WWW_USER" ]; then
+        sudo -u "$WWW_USER" php artisan queue:work --queue="default" --timeout=259200 --tries=1 &
+    else
+        php artisan queue:work --queue="default" --timeout=259200 --tries=1 &
+    fi
 done

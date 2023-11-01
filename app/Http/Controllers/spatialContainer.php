@@ -135,47 +135,47 @@ class spatialContainer {
         return '"' . env('DOCKER_EXECUTABLE' . ($this->isWindows() ? '_WINDOWS' : ''), 'docker') . '"';
     }
 
-    public function execute($docker_command, $task_id = '') {
+    public function execute($docker_command, $task_id = '', $container = 'SPATIALGE') {
 
         //set the max execution time for the system call
         $timeout = env('MAX_EXECUTION_TIME',259200);
 
-        $image_name = env('DOCKER_IMAGE_NAME','spatialge');
+        $image_name = env('DOCKER_IMAGE_NAME_' . $container,'spatialge');
 
         //load memory limit parameters
         $physical_memory = env('DOCKER_MAX_PHYSICAL_MEMORY', '4g');
         $total_memory = env('DOCKER_MAX_TOTAL_MEMORY', '12g');
 
         $container_id = $task_id;
-        if(!strlen($container_id)) $container_id = 'spatialGE_' . $this->project->user->id . '_' . $this->project->id . '_' . substr(microtime(true) * 1000, 0, 13);
+        if(!strlen($container_id)) $container_id = 'spatialGE_' . $this->project->user->id . '_' . $this->project->id . '_' . now()->format('YmdHis_u');
 
         $command = '';
         try {
 
-            //$storage_path = '/users/' . $this->project->user_id . '/' . $this->project->id . '/';
             $storage_path = $this->project->workingDir();
             $workingDir = Storage::path($storage_path);
-
-            $log_file = "$workingDir$container_id.log";
 
             //Transform the path to map inside the container (Windows paths)
             $workingDir = str_replace(':', '', $workingDir);
             $workingDir = str_replace('\\', '/', $workingDir);
             $workingDir = '/' . $workingDir;
 
-
-            $script = 'cd /spatialGE' . "\n";
-            $script .= $docker_command . "\n";
-            $script .= 'R --quiet -e "print(\'$container_id - spatialGE_PROCESS_COMPLETED\')"';
-            $script_file = "$task_id.sh";
-            Storage::put($storage_path . $script_file, $script);
-
-
             $exe = $this->getDockerExecutable();
-            //$command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name $docker_command > \"$log_file\" 2>&1 & R --quiet -e \"print('$container_id - spatialGE_PROCESS_COMPLETED')\" >> \"$log_file\" 2>&1";
-            $command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name sh $script_file";
 
-            //$log_contents = Storage::get("$storage_path$container_id.log");
+            if($container === 'SPATIALGE') {
+                $script = 'cd /spatialGE' . "\n";
+                $script .= $docker_command . "\n";
+                $script .= 'R --quiet -e "print(\'$container_id - spatialGE_PROCESS_COMPLETED\')"';
+                $script_file = "$task_id.sh";
+                Storage::put($storage_path . $script_file, $script);
+                $command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name sh $script_file";
+            }
+            elseif ($container === 'SPAGCN') {
+                $command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name $docker_command";
+            }
+
+            //$command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name $docker_command > \"$log_file\" 2>&1 & R --quiet -e \"print('$container_id - spatialGE_PROCESS_COMPLETED')\" >> \"$log_file\" 2>&1";
+
 
             Log::info("\nCOMMAND TO EXECUTE: " . $command . "\n");
 

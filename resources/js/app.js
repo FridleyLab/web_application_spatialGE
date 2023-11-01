@@ -44,6 +44,7 @@ import sendJobButton from "./components/common/send-job-button.vue";
 
 import spatialDomainDetection from "./components/wizard/spatial-domain-detection.vue";
 import sddStclust from "./components/wizard/components/sdd-stclust.vue";
+import sddSpagcn from "./components/wizard/components/sdd-spagcn.vue";
 
 import differentialExpression from "./components/wizard/differential-expression.vue";
 import stdeNonSpatial from "./components/wizard/components/stde-non-spatial.vue";
@@ -128,6 +129,7 @@ app.component('send-job-button', sendJobButton);
 
 app.component('spatial-domain-detection', spatialDomainDetection);
 app.component('sdd-stclust', sddStclust);
+app.component('sdd-spagcn', sddSpagcn);
 
 app.component('differential-expression', differentialExpression);
 app.component('stde-non-spatial', stdeNonSpatial);

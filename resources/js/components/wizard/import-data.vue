@@ -169,7 +169,7 @@ import { getCurrentInstance } from 'vue';
                 this.validSampleName = !similarNames.length;
 
                 if(similarNames.length) {
-                    this.validSampleNameMessage = '<p>A sample name cannot be a substring of another one, it conflicts with: ' + similarNames[0].name + '</p><p>Please select a different name</p>';
+                    this.validSampleNameMessage = '<p>This sample name conflicts with the name of sample <strong>' + similarNames[0].name + '</strong>. A sample name cannot be contained within another sample name.</p><p>Please change/complete the name, so it differs from the others</p>';
                 }
 
 

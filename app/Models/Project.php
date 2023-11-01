@@ -174,7 +174,7 @@ class Project extends Model
         return $workingDir;
     }
 
-    public function spatialExecute($command, $task_id) {
+    public function spatialExecute($command, $task_id, $container = 'SPATIALGE') {
 
         if(is_null($this->_container))
             $this->_container = new spatialContainer($this);
@@ -183,7 +183,10 @@ class Project extends Model
         $task->started_at = DB::raw('CURRENT_TIMESTAMP');
         $task->save();
 
-        $output = $this->_container->execute($command, $task_id);
+        $output = $this->_container->execute($command, $task_id, $container);
+
+        //Update the output in the Task table
+        $task->output = (($task->attempts > 1 || strlen($task->output)) ? $task->output . "\n\nATTEMPT $task->attempts:\n" : '' ) . $output;
 
         //Check output for possible strings that indicate an error during execution
         $error_strings_to_look_for = [
@@ -194,15 +197,14 @@ class Project extends Model
         ];
         $error_found = false;
         foreach ($error_strings_to_look_for as $item) {
-            if(strpos(strtolower($output), strtolower($item))) {
+            if(strpos(strtolower($task->output), strtolower($item))) {
                 $error_found = true;
                 break;
             }
         }
 
         $task->finished_at = DB::raw('CURRENT_TIMESTAMP');
-        $task->completed = !strpos($output, 'spatialGE_PROCESS_COMPLETED') || $error_found  ? 0 : 1;
-        $task->output = ($task->attempts > 1 ? $task->output . "\n\nATTEMPT $task->attempts:\n" : '' ) . $output;
+        $task->completed = !strpos($task->output, 'spatialGE_PROCESS_COMPLETED') || $error_found ? 0 : 1;
         $task->save();
 
         return $output;
@@ -781,7 +783,7 @@ $plots
 
         $result = [];
 
-        $parameterNames = [/*'normalized_violin', 'normalized_boxplot', */'normalized_boxplot_1', 'normalized_boxplot_2', 'normalized_violin_1', 'normalized_violin_2', 'normalized_density_1', 'normalized_density_2'];
+        $parameterNames = ['normalized_boxplot_1', 'normalized_boxplot_2', 'normalized_violin_1', 'normalized_violin_2', 'normalized_density_1', 'normalized_density_2'];
         foreach($parameterNames as $parameterName) {
 
             $file_extensions = ['svg', 'pdf', 'png'];
@@ -855,7 +857,7 @@ library('spatialGE')
 
 {$this->_loadStList($stlist)}
 
-normalized_stlist = transform_data($stlist, $str_params)
+normalized_stlist = transform_data($stlist, $str_params, cores = 4)
 
 {$this->_saveStList('normalized_stlist')}
 
@@ -1678,12 +1680,17 @@ $export_files
 
     public function getSTclustScript($parameters) : string {
 
+        //If there's no stclust_stlist use the normalized_stlist
+        $stlist = 'stclust_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
+
         $samples_with_tissue = '';
-        foreach($this->samples as $sample)
-            if($sample->has_image) {
-                if(strlen($samples_with_tissue)) $samples_with_tissue .= ',';
+        foreach($this->samples as $sample) {
+            if ($sample->has_image) {
+                if (strlen($samples_with_tissue)) $samples_with_tissue .= ',';
                 $samples_with_tissue .= "'" . $sample->name . "'";
             }
+        }
 
 
         $script = "
@@ -1694,7 +1701,7 @@ library('spatialGE')
 library('magrittr')
 
 # Load normalized STList
-{$this->_loadStList('normalized_stlist')}
+{$this->_loadStList($stlist)}
 
 stclust_stlist = STclust(x=normalized_stlist,
                          ws={$parameters['ws']},
@@ -1745,6 +1752,189 @@ for(p in n_plots) {
 
         return $script;
     }
+
+
+
+
+
+
+    public function SpaGCN($parameters) {
+
+        $workingDir = $this->workingDir();
+
+        //Create simple STlist as input for SpaGCN
+        $scriptName = 'SpaGCN_1_simpleSTlist.R';
+        $script = $workingDir . $scriptName;
+        $scriptContents = $this->getSpaGCN_SimpleSTlistScript();
+        Storage::put($script, $scriptContents);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+        //Run SpaGCN on the simple STList
+        $scriptName = 'RunSpaGCN.py';
+        $scriptContents = Storage::get("/common/templates/$scriptName");
+        $params = ['p', 'user_seed', 'number_of_domains_min', 'number_of_domains_max', 'refine_clusters'];
+        foreach($params as $param) {
+            $scriptContents = str_replace("{param_$param}", $parameters[$param], $scriptContents);
+        }
+        Storage::put("$workingDir/$scriptName", $scriptContents);
+        $output .= $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');
+
+        //Import back results from SpaGCN
+        $scriptName = 'SpaGCN_3_import.R';
+        $script = $workingDir . $scriptName;
+        $scriptContents = $this->getSpaGCN_ImportClassifications();
+        Storage::put($script, $scriptContents);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+
+        $file = $workingDir . 'spagcn_plots.csv';
+        if(Storage::fileExists($file)) {
+            $data = trim(Storage::read($file));
+            $plots = [];
+            foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
+                $plots[] = $this->workingDirPublicURL() . $plot;
+                $file_extensions = ['svg', 'pdf', 'png'];
+
+                $plot_files = [$plot, "$plot-sbs"];
+                foreach ($plot_files as $plot_file) {
+                    foreach ($file_extensions as $file_extension) {
+                        $fileName = $plot_file . '.' . $file_extension;
+                        $file = $workingDir . $fileName;
+                        $file_public = $this->workingDirPublic() . $fileName;
+                        if (Storage::fileExists($file)) {
+                            Storage::delete($file_public);
+                            Storage::move($file, $file_public);
+                        }
+                    }
+                }
+            }
+            ProjectParameter::updateOrCreate(['parameter' => 'spagcn', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
+        }
+
+        $this->current_step = 8;
+        $this->save();
+
+
+
+        return ['output' => $output, 'script' => $scriptContents];
+
+    }
+
+
+
+    public function getSpaGCN_SimpleSTlistScript() : string {
+
+        $script = "
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+
+# Load normalized STList
+{$this->_loadStList('normalized_stlist')}
+
+simple_stlist = list(tr_counts=normalized_stlist@tr_counts,
+                    spatial_meta=lapply(normalized_stlist@spatial_meta, function(i){
+                      df_tmp = as.data.frame(i[, 1:3])
+                      #rownames(df_tmp) = df_tmp[[1]]
+                      #df_tmp = df_tmp[, -1]
+                      return(df_tmp)
+                    }),
+                    col_names=lapply(normalized_stlist@tr_counts, function(i){ return(colnames(i)) }),
+                    gene_names=lapply(normalized_stlist@tr_counts, function(i){ return(rownames(i)) }),
+                    sample_names=names(normalized_stlist@tr_counts)
+                )
+
+{$this->_saveStList('simple_stlist')}
+
+";
+        return $script;
+    }
+
+
+
+    public function getSpaGCN_ImportClassifications() : string {
+
+        $stlist = 'stclust_stlist';
+        if(!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
+
+        $samples_with_tissue = '';
+        foreach($this->samples as $sample) {
+            if ($sample->has_image) {
+                if (strlen($samples_with_tissue)) $samples_with_tissue .= ',';
+                $samples_with_tissue .= "'" . $sample->name . "'";
+            }
+        }
+
+        $script = "
+setwd('/spatialGE')
+# Load the package
+library('spatialGE')
+library('magrittr')
+
+# Load normalized STList
+{$this->_loadStList($stlist)}
+
+spagcn_preds = './'
+spagcn_preds = list.files(spagcn_preds, pattern='spagcn_predicted_domains_sample_', full.names=T)
+
+stclust_stlist = $stlist
+for(i in names(stclust_stlist@spatial_meta)){
+  spagcn_tmp = read.csv(grep(paste0(i, '.csv'), spagcn_preds, value=T))
+  # Convert doain classifications to factor
+  spagcn_tmp[, -1] = lapply(spagcn_tmp[, -1], as.factor)
+
+  # Check for repeated columns in STlist
+  duplicated_cols = colnames(stclust_stlist@spatial_meta[[i]])[ colnames(stclust_stlist@spatial_meta[[i]]) %in% colnames(spagcn_tmp[, -1]) ]
+  if(length(duplicated_cols) > 0){
+    stclust_stlist@spatial_meta[[i]] = stclust_stlist@spatial_meta[[i]][, !(colnames(stclust_stlist@spatial_meta[[i]]) %in% duplicated_cols) ]
+  }
+
+  stclust_stlist@spatial_meta[[i]] = stclust_stlist@spatial_meta[[i]] %>%
+    dplyr::left_join(., spagcn_tmp, by='libname')
+}
+
+annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_', colnames(i), value=T); return(var_cols) })))
+write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+cluster_values = tibble::tibble()
+for(i in names(stclust_stlist@spatial_meta)){
+  for(cl in grep('spagcn_|stclust_', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
+    cluster_values = dplyr::bind_rows(cluster_values,
+                                      tibble::tibble(cluster=as.character(unique(stclust_stlist@spatial_meta[[i]][[cl]]))) %>%
+                                        tibble::add_column(annotation=as.character(cl)))
+  }}
+cluster_values = dplyr::distinct(cluster_values) %>%
+  dplyr::select(annotation, cluster)
+write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F, row.names=F, col.names=F, sep=',')
+
+{$this->_saveStList('stclust_stlist')}
+
+ps = STplot(stclust_stlist, plot_meta = annot_variables, ptsize = 2, color_pal = 'smoothrainbow')
+
+n_plots = names(ps)
+write.table(n_plots, 'spagcn_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+library('svglite')
+for(p in n_plots) {
+    #print(p)
+    ggpubr::ggexport(filename = paste(p,'.png', sep=''), ps[[p]], width = 800, height = 600)
+    ggpubr::ggexport(filename = paste(p,'.pdf', sep=''), ps[[p]], width = 8, height = 6)
+    svglite(paste(p,'.svg', sep=''), width = 8, height = 6)
+    print(ps[[p]])
+    dev.off()
+
+    #generate side-by-side for samples with tissue image
+    for(sample in list($samples_with_tissue)) {
+        if(grepl(sample, p, fixed=TRUE)) {
+            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample, '/spatial/image_', sample, '.png'))
+            ptp = ggpubr::ggarrange(ps[[p]], tp, ncol=2)
+            {$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
+        }
+    }
+}
+
+";
+        return $script;
+    }
+
 
 
 
@@ -2288,7 +2478,6 @@ lapply(names(grad_res), function(i){
 
             //Create a unique name or id for the task based on the current timestamp
             $parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . now()->format('YmdHis_u');
-            //$parameters['__task'] = 'spatialGE_' . $this->user->id . '_' . $this->id . '_' . substr(microtime(true) * 1000, 0, 13);
 
             //Information necessary to run the job again in case it fails
             $payload = json_encode(compact('description', 'project_id', 'command', 'parameters', 'queue'));
@@ -2653,7 +2842,7 @@ options(bitmapType="cairo")
 
 
             /************ create SLURM script to RUN in the HPC ****************/
-            $text = $this->getHPCscript($jobName, $scriptNameHPC, $this->samples->count(), ($this->samples->count()*2) . 'G');
+            $text = $this->getHPCscript($jobName, $scriptNameHPC, $this->samples->count(), (($this->samples->count()+1)*2) . 'G');
             $slurmScriptNameHPC = $jobName . '_' . $scriptName . '_HPC.sub';
             Storage::put($this->workingDir() . $slurmScriptNameHPC, $text);
             /******************* end SLURM script*******************************************/
