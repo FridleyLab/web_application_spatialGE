@@ -39,7 +39,7 @@ class spatialContainer {
 
     private function createContainer() : void {
 
-        $image_name = env('DOCKER_IMAGE_NAME','spatialge');
+        $image_name = env('DOCKER_IMAGE_NAME_SPATIALGE','spatialge');
 
         $container_id = 'spatial_' . $this->project->user->id . '_' . $this->project->id . '_' . substr(microtime(true) * 1000, 0, 13);
 

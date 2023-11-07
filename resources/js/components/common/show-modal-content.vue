@@ -101,6 +101,13 @@ export default {
                 "sdd_stclust_number_of_domains": {"title": "Number of domains", "text": "Select a range of K values to define domains in each sample. STclust will define as many domains in the samples as each of the values in the range."},
                 "sdd_stclust_deepsplit": {"title": "DeepSplit", "text": "The DeepSplit parameter allows rough control over the number of detected domains when using DynamicTreeCuts. The larger DeepSplit is, the more domains are detected in each sample."},
                 "sdd_stclust_number_genes": {"title": "Number of most variable genes to use", "text": "Use this many high-variance genes to estimate gene expression differences among ROIs/spots/cells. The genes are selected using the vst function from the R package Seurat. In spatial transcriptomics data, more than 5000 genes often do not result in better defined clusters due to zero-inflation."},
+                //SpaGCN
+                "sdd_spagcn_perc_neigh_expr": {"title": "Percentage of neighborhood expression", "text": "The parameter p is used during the construction of the graph. It controls how much the gene expression of neighboring spots/cells affects each spot/cell. The parameter is used to estimate the rapidness at which the spatial weight decays with distance. For Visium data sets, p=0.5 is recommended. For single-cell level data, apply larger values of p."},
+                "sdd_spagcn_seed_number": {"title": "Seed number (permutation)", "text": "Seed number used during SpaGCN parameter estimation. Repeating the analysis with different seed numbers is encouraged to check for consistency."},
+                "sdd_spagcn_refine_clusters": {"title": "Refine clusters?", "text": "Whether to refine domain assignments. Spots with more than half of their neighbors assigned to a different domain are assigned its neighbors’ domain. Available only for gridded technologies (i.e., Visium data sets)."},
+                "sdd_spagcn_number_of_domains": {"title": "Number of domains", "text": "Select a range of K values to define domains in each sample. SpaGCN will define as many domains in the samples as each of the values in the range."},
+                "sdd_spagcn_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots."},
+
 
                 //STenrich
                 "stenrich_select_gene_set": {"title": "Select a gene set database", "text": "Select a gene set database to test for spatial enrichment. Future implementations will allow input of custom gene sets."},

@@ -32,7 +32,7 @@
                                 <sdd-stclust :project="project" :samples="samples" :sdd-stclust-url="sddStclustUrl" :color-palettes="colorPalettes"></sdd-stclust>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-spagcn" role="tabpanel" aria-labelledby="sdd-spagcn-tab">
-                                <sdd-spagcn :project="project" :samples="samples" :sdd-spagcn-url="sddSpagcnUrl"></sdd-spagcn>
+                                <sdd-spagcn :project="project" :samples="samples" :sdd-spagcn-url="sddSpagcnUrl" :color-palettes="colorPalettes"></sdd-spagcn>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-milwrm" role="tabpanel" aria-labelledby="sdd-milwrm-tab">
                                 Coming soon

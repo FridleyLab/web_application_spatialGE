@@ -25,7 +25,7 @@ class Project extends Model
 
     protected $fillable = ['name', 'description', 'user_id', 'project_platform_id'];
 
-    protected $appends = ['url', 'project_parameters', 'platform_name'];
+    protected $appends = ['url', 'assets_url', 'project_parameters', 'platform_name'];
 
     private ?spatialContainer $_container = null;
 
@@ -58,6 +58,10 @@ class Project extends Model
     //Attributes
     public function getUrlAttribute() {
         return route('open-project', ['project' => $this->id]);
+    }
+
+    public function getAssetsUrlAttribute() {
+        return $this->workingDirPublicURL();
     }
 
     public function getPlatformNameAttribute() {
@@ -164,13 +168,13 @@ class Project extends Model
         Storage::createDirectory('/public/users/' . $this->user_id);
         Storage::createDirectory('/public/users/' . $this->user_id . '/' . $this->id);
         $workingDir = '/public/users/' . $this->user_id . '/' . $this->id . '/';
-        $workingDir = str_replace('\\', '/', $workingDir);
+        #$workingDir = str_replace('\\', '/', $workingDir);
         return $workingDir;
     }
 
     public function workingDirPublicURL() : string {
         $workingDir = '/storage/users/' . $this->user_id . '/' . $this->id . '/';
-        $workingDir = str_replace('\\', '/', $workingDir);
+        #$workingDir = str_replace('\\', '/', $workingDir);
         return $workingDir;
     }
 
@@ -1782,13 +1786,18 @@ for(p in n_plots) {
         //Import back results from SpaGCN
         $scriptName = 'SpaGCN_3_import.R';
         $script = $workingDir . $scriptName;
-        $scriptContents = $this->getSpaGCN_ImportClassifications();
+        $scriptContents = $this->getSpaGCN_ImportClassifications($parameters);
         Storage::put($script, $scriptContents);
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
         $file = $workingDir . 'spagcn_plots.csv';
         if(Storage::fileExists($file)) {
+
+            $zip = new \ZipArchive();
+            $zipFileName = 'SpaGCN.zip';
+            $addToZip = $zip->open(Storage::path($this->workingDirPublic() . $zipFileName), \ZipArchive::CREATE) == TRUE;
+
             $data = trim(Storage::read($file));
             $plots = [];
             foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
@@ -1804,10 +1813,24 @@ for(p in n_plots) {
                         if (Storage::fileExists($file)) {
                             Storage::delete($file_public);
                             Storage::move($file, $file_public);
+
+                            if($addToZip) $zip->addFile(Storage::path($file_public), basename($file_public));
                         }
                     }
                 }
             }
+
+            $task = Task::where('task', $parameters['__task'])->firstOrFail();
+            $parameterLog = json_decode($task->payload)->parameters;
+            //unset($parameterLog['__task']);
+            $logFileName = $this->workingDirPublicURL() . 'SpaGCN_execution_log.txt';
+            Storage::put($logFileName, json_encode($parameterLog));
+
+            if($addToZip) {
+                $zip->addFile(Storage::path($logFileName), basename($logFileName));
+                $zip->close();
+            }
+
             ProjectParameter::updateOrCreate(['parameter' => 'spagcn', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
         }
 
@@ -1852,7 +1875,9 @@ simple_stlist = list(tr_counts=normalized_stlist@tr_counts,
 
 
 
-    public function getSpaGCN_ImportClassifications() : string {
+    public function getSpaGCN_ImportClassifications($parameters) : string {
+
+        $col_pal = $parameters['col_pal'];
 
         $stlist = 'stclust_stlist';
         if(!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
@@ -1908,7 +1933,7 @@ write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F,
 
 {$this->_saveStList('stclust_stlist')}
 
-ps = STplot(stclust_stlist, plot_meta = annot_variables, ptsize = 2, color_pal = 'smoothrainbow')
+ps = STplot(stclust_stlist, plot_meta = annot_variables, ptsize = 2, color_pal = '$col_pal')
 
 n_plots = names(ps)
 write.table(n_plots, 'spagcn_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
