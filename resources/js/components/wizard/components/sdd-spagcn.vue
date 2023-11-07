@@ -229,7 +229,7 @@ import Multiselect from '@vueform/multiselect';
     --ms-border-color-active: #3B82F6;
     --ms-ring-color: #3B82F630;
     --ms-spinner-color: #3B82F6;
-//--ms-dropdown-border-color: #3B82F6;
+    /*--ms-dropdown-border-color: #3B82F6;*/
     --ms-tag-bg: #3B82F6;
     --ms-tag-color: #FFFFFF;
     --ms-tag-radius: 9999px;
