@@ -453,5 +453,16 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function phenotyping(Project $project) {
+        $samples = $project->samples;
+        $color_palettes = ColorPalette::orderBy('label')->get();
+        return view('wizard.phenotyping')->with(compact('project', 'samples', 'color_palettes'));
+    }
+
+    public function STdeconvolve(Project $project) {
+        $jobId = $project->createJob('Phenotyping - STdeconvolve', 'STdeconvolve', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
 
 }

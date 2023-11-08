@@ -3,8 +3,8 @@
     <form>
 
         <div :class="processing ? 'disabled-clicks' : ''">
-            <div class="my-3 text-bold">
-                SpaGCN
+            <div class="d-flex my-3 text-bold">
+                SpaGCN&nbsp;<show-vignette url="/documentation/vignettes/spatial_domain_detection_spagcn.pdf"></show-vignette>
             </div>
             <div>
                 The domain detection method <a href="https://www.nature.com/articles/s41592-021-01255-8" class="text-info" target="_blank">SpaGCN</a> (Hu et al. 2021) implements a graph convolutional neural (GCN) network approach to integrate spatial gene expression with the accompanying spatial coordinates and optionally, tissue imaging. The GCNs are used to condense the information from the different data modalities, followed by Louvain clustering to clasify the spots or cells into tissue domains.
@@ -30,7 +30,7 @@
                         <div class="me-3">Seed number (permutation): <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.user_seed"> <show-modal tag="sdd_spagcn_seed_number"></show-modal></div>
 
                         <div v-if="project.platform_name === 'VISIUM'" class="mt-3">
-                            <label class="me-3">
+                            <label class="me-3 text-md">
                                 <input type="checkbox" v-model="params.refine_clusters"> Refine clusters? <show-modal tag="sdd_spagcn_refine_clusters"></show-modal>
                             </label>
                         </div>

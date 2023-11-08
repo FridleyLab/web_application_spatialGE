@@ -56,6 +56,9 @@ import stenrich from "./components/wizard/components/stenrich.vue";
 import spatialGradients from "./components/wizard/spatial-gradients.vue";
 import stgradients from "./components/wizard/components/stgradients.vue";
 
+import phenotyping from "./components/wizard/phenotyping.vue";
+import stdeconvolve from "./components/wizard/components/phenotyping-stdeconvolve.vue";
+
 
 
 //Global event emitter
@@ -140,6 +143,9 @@ app.component('stenrich', stenrich);
 
 app.component('spatial-gradients', spatialGradients);
 app.component('stgradients', stgradients);
+
+app.component('phenotyping', phenotyping);
+app.component('stdeconvolve', stdeconvolve);
 
 
 
