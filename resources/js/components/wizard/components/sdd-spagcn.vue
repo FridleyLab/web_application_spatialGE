@@ -95,7 +95,10 @@
                         <div class="tab-content" :id="'SPAGCN_myTabContent' + k">
                             <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_K_' + k + '-tab'">
                                 <div v-for="image in spagcn.plots">
-                                    <show-plot v-if="image.includes(sample.name) && image.includes('k' + k)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                                    <template v-if="image.includes(sample.name) && image.includes('k' + k)">
+                                        <h4 class="text-center" v-if="image.includes('refined')">Refined clusters</h4>
+                                        <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                                    </template>
                                 </div>
                             </div>
                         </div>

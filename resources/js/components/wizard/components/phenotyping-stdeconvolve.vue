@@ -75,7 +75,7 @@
 <!--            </div>-->
 
             <div>
-                <ul class="nav nav-tabs" id="STdeconvolve_myTab" role="tablist">
+                <!-- <ul class="nav nav-tabs" id="STdeconvolve_myTab" role="tablist">
                     <template v-for="index in parseInt(STdeconvolve.parameters.max_k)">
                         <template v-if="index >= parseInt(STdeconvolve.parameters.min_k)">
                             <li class="nav-item" role="presentation">
@@ -86,26 +86,26 @@
                     <a :href="project.assets_url + 'STdeconvolve.zip'" class="ms-3 btn btn-sm btn-outline-info" download>Download all results (ZIP)</a>
                 </ul>
 
-                <div class="tab-content m-4" id="STdeconvolve_myTabContent">
+                <div class="tab-content m-4" id="STdeconvolve_myTabContent"> -->
 
-                    <div v-for="k in parseInt(STdeconvolve.parameters.max_k)" class="tab-pane fade min-vh-50" :class="k === parseInt(STdeconvolve.parameters.min_k) ? 'show active' : ''" :id="'STdeconvolve_K_' + k" role="tabpanel" :aria-labelledby="'STdeconvolve_K_' + k + '-tab'">
+                    <!-- <div v-for="k in parseInt(STdeconvolve.parameters.max_k)" class="tab-pane fade min-vh-50" :class="k === parseInt(STdeconvolve.parameters.min_k) ? 'show active' : ''" :id="'STdeconvolve_K_' + k" role="tabpanel" :aria-labelledby="'STdeconvolve_K_' + k + '-tab'"> -->
 
-                        <ul class="nav nav-tabs" :id="'STdeconvolve_myTab' + k" role="tablist">
+                        <ul class="nav nav-tabs" id="STdeconvolve_myTab" role="tablist">
                             <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
-                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'STdeconvolve_K_' + k + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'STdeconvolve_K_' + k" type="button" role="tab" :aria-controls="sample.name + 'STdeconvolve_K_' + k" aria-selected="true">{{ sample.name }}</button>
+                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'STdeconvolve-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'STdeconvolve'" type="button" role="tab" :aria-controls="sample.name + 'STdeconvolve'" aria-selected="true">{{ sample.name }}</button>
                             </li>
                         </ul>
 
-                        <div class="tab-content" :id="'STdeconvolve_myTabContent' + k">
-                            <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'STdeconvolve_K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'STdeconvolve_K_' + k + '-tab'">
-                                <div v-for="image in spagcn.plots">
-                                    <show-plot v-if="image.includes(sample.name) && image.includes('k' + k)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                        <div class="tab-content" id="STdeconvolve_myTabContent">
+                            <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'STdeconvolve'" role="tabpanel" :aria-labelledby="sample.name + 'STdeconvolve-tab'">
+                                <div v-for="image in STdeconvolve.plots">
+                                    <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot>
                                 </div>
                             </div>
                         </div>
 
-                    </div>
-                </div>
+                    <!-- </div> -->
+                <!-- </div> -->
             </div>
         </div>
 

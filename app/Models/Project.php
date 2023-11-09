@@ -1707,7 +1707,7 @@ library('magrittr')
 # Load normalized STList
 {$this->_loadStList($stlist)}
 
-stclust_stlist = STclust(x=normalized_stlist,
+stclust_stlist = STclust(x=$stlist,
                          ws={$parameters['ws']},
                          ks={$parameters['ks']},
                          topgenes={$parameters['topgenes']},
@@ -1731,7 +1731,7 @@ write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F,
 
 {$this->_saveStList('stclust_stlist')}
 
-ps = STplot(x=stclust_stlist, ks={$parameters['ks']}, ws={$parameters['ws']}, ptsize=2, color_pal='smoothrainbow')
+ps = STplot(x=stclust_stlist, ks={$parameters['ks']}, ws={$parameters['ws']}, ptsize=2, txsize=14, color_pal='smoothrainbow')
 n_plots = names(ps)
 write.table(n_plots, 'stclust_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 library('svglite')
@@ -1933,7 +1933,7 @@ write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F,
 
 {$this->_saveStList('stclust_stlist')}
 
-ps = STplot(stclust_stlist, plot_meta = annot_variables, ptsize = 2, color_pal = '$col_pal')
+ps = STplot(stclust_stlist, plot_meta = annot_variables, ptsize = 2, txsize=14, color_pal = '$col_pal')
 
 n_plots = names(ps)
 write.table(n_plots, 'spagcn_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
@@ -2479,10 +2479,13 @@ lapply(names(grad_res), function(i){
             $data = trim(Storage::read($file));
             $plots = [];
             foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
-                $plots[] = $this->workingDirPublicURL() . $plot;
+
+                $fileplot = 'stdeconvolve_' . $plot;
+
+                $plots[] = $this->workingDirPublicURL() . $fileplot;
                 $file_extensions = ['svg', 'pdf', 'png'];
 
-                $plot_files = [$plot, "$plot-sbs"];
+                $plot_files = [$fileplot, "$fileplot-sbs"];
                 foreach ($plot_files as $plot_file) {
                     foreach ($file_extensions as $file_extension) {
                         $fileName = $plot_file . '.' . $file_extension;
@@ -2514,6 +2517,14 @@ lapply(names(grad_res), function(i){
         $min_k = $parameters['min_k'];
         $max_k = $parameters['max_k'];
 
+        $samples_with_tissue = '';
+        foreach($this->samples as $sample) {
+            if ($sample->has_image) {
+                if (strlen($samples_with_tissue)) $samples_with_tissue .= ',';
+                $samples_with_tissue .= "'" . $sample->name . "'";
+            }
+        }
+
         $script = "
 
 ##
@@ -2536,6 +2547,8 @@ library('magrittr')
 library('STdeconvolve')
 #library('ggthemes')
 library('spatialGE')
+library('ggplot2')
+library('ggtext')
 
 # USE NORMALIZED
 {$this->_loadStList('normalized_stlist')}
@@ -2547,18 +2560,18 @@ p = list() # Save plots
 for(i in names(stlist@counts)){
   # Remove mitochondrial/ribosomal genes from corpus
   if(rm_mt){
-    rm_genes = rownames(stlist@counts[[i]])[grepl('^MT-', rownames(stlist@counts[[i]]))]
+    rm_genes = rownames(stlist@counts[[i]])[grepl(\"^MT-\", rownames(stlist@counts[[i]]))]
     stlist = filter_data(stlist, rm_genes=rm_genes, samples=i)
     rm(rm_genes) # Clean env
   }
   if(rm_rp){
-    rm_genes = rownames(stlist@counts[[i]])[grepl('^RP[L|S]', rownames(stlist@counts[[i]]))]
+    rm_genes = rownames(stlist@counts[[i]])[grepl(\"^RP[L|S]\", rownames(stlist@counts[[i]]))]
     stlist = filter_data(stlist, rm_genes=rm_genes, samples=i)
     rm(rm_genes) # Clean env
   }
 
   # Extract counts from STlist
-  cd = as.matrix(t(stlist@counts[[i]]))
+  cd = t(as.matrix(stlist@counts[[i]]))
   #pos = stlist@spatial_meta[[i]] %>% select(y=ypos, x=xpos)
 
   # Process counts
@@ -2630,12 +2643,12 @@ for(i in names(stlist@counts)){
                                              length.out=max(metrics_df[['k']])+1)))) +
     scale_x_continuous(breaks=as.numeric(names(ldas[['models']])), labels=metrics_df[['k_alpha']]) +
     ggtitle(paste0(i, '<br>
-      <span style='color: blue;'>Rare (<5% frequency) topics</span> and <span style='color: red;'>model perplexity</span><br>
+      <span style=\"color: blue;\">Rare (<5% frequency) topics</span> and <span style=\"color: red;\">model perplexity</span><br>
       Model alpha: (
-      <span style='color: gray50;'>Alpha < 1</span> |
-      <span style='color: orange;'>Alpha > 1</span>
+      <span style=\"color: gray50;\">Alpha < 1</span> |
+      <span style=\"color: orange;\">Alpha > 1</span>
       )')) +
-    theme(panel.background=element_rect(color='black', fill=NULL),
+    theme(panel.background=element_rect(color=\"black\", fill=NULL),
           axis.text.x=element_text(angle=45, vjust=1, hjust=1, color=col_alpha),
           axis.title.y.left=ggplot2::element_text(color='blue'),
           axis.text.y.left=element_text(color=c('gray50', rep('blue', 16))),
@@ -2648,6 +2661,25 @@ for(i in names(stlist@counts)){
 }
 
 write.table(names(p), 'stdeconvolve_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+
+library('svglite')
+for(i in names(p)) {
+    filetitle = paste('stdeconvolve_', i, sep='')
+    ggpubr::ggexport(filename = paste(filetitle,'.png', sep=''), p[[i]], width = 800, height = 600)
+    ggpubr::ggexport(filename = paste(filetitle,'.pdf', sep=''), p[[i]], width = 8, height = 6)
+    svglite(paste(filetitle,'.svg', sep=''), width = 8, height = 6)
+    print(p[[i]])
+    dev.off()
+
+    #generate side-by-side for samples with tissue image
+    for(sample in list($samples_with_tissue)) {
+        if(grepl(sample, i, fixed=TRUE)) {
+            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample, '/spatial/image_', sample, '.png'))
+            ptp = ggpubr::ggarrange(p[[i]], tp, ncol=2)
+            {$this->getExportFilesCommands("paste0(filetitle, '-sbs')", 'ptp', 1400, 600)}
+        }
+    }
+}
 
 end_t = difftime(Sys.time(), start_t, units='min')
 cat(paste0('STdeconvolve finished. ', round(as.vector(end_t), 2), ' min\n'))
