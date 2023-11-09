@@ -46,12 +46,12 @@
                         </div>
                     </div>
 
-                    <div class="row justify-content-center text-center m-4">
+                    <!-- <div class="row justify-content-center text-center m-4">
                         <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                             <div>Color palette <show-modal tag="sdd_spagcn_color_palette"></show-modal></div>
                             <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
                         </div>
-                    </div>
+                    </div> -->
 
 
                 </div>
