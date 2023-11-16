@@ -147,6 +147,30 @@ class Project extends Model
             $params['annotation_variables_clusters'] = $annotations_clusters;
         }
 
+
+        if(array_key_exists('STdeconvolve', $params))
+        {
+            $STdeconvolve = json_decode($params['STdeconvolve']);
+            $STdeconvolve->selected_k = $STdeconvolve->suggested_k; #assume the defaults
+
+            $fileName = $this->workingDir() . 'stdeconvolve_selected_k.csv';
+            if(Storage::fileExists($fileName)) {
+                $data = Storage::read($fileName);
+                $lines = explode("\n", $data);
+                $selected_k = [];
+                foreach($lines as $line) {
+                    if (strlen(trim($line))) {
+                        $values = explode(',', $line);
+                        $selected_k[$values[0]] = $values[1];
+                    }
+                }
+                array_shift($selected_k);
+                $STdeconvolve->selected_k = $selected_k;
+            }
+
+            $params['STdeconvolve'] = json_encode($STdeconvolve);
+        }
+
         return $params;
     }
 
@@ -2553,53 +2577,65 @@ lapply(names(grad_res), function(i){
         $scriptContents = $this->getSTdeconvolve2Script($parameters);
         Storage::put($script, $scriptContents);
 
-        Log::info('SCRIPT---->'. $scriptContents);
-
-        $files = ['celltype_markers_25perc_200toplogFC_blueprint_Nov142023.csv', 'celltype_markers_25perc_200toplogFC_blueprint_Nov142023.RDS'];
-        foreach($files as $filename) {
-            Storage::copy("/common/stdeconvolve/$filename", $this->workingDir() . $filename);
+        $file_ext = ['csv', 'RDS'];
+        foreach($file_ext as $ext) {
+            Storage::copy("/common/stdeconvolve/{$parameters['celltype_markers']}.$ext", $this->workingDir() . $parameters['celltype_markers'] . ".$ext");
         }
+
+        $selected_k = "sample_name,suggested_k\n";
+        foreach($parameters['selected_k'] as $sample => $k) {
+            $selected_k .= $sample . ',' . $k . "\n";
+        }
+        Storage::put($workingDir . 'stdeconvolve_selected_k.csv', $selected_k);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
-        // $file = $workingDir . 'stdeconvolve_plots.csv';
-        // if(Storage::fileExists($file)) {
-        //     $data = trim(Storage::read($file));
-        //     $plots = [];
-        //     foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
+        $file = $workingDir . 'stdeconvolve2_logfold_plots.csv';
+        $logfold_plots = [];
+        if(Storage::fileExists($file)) {
+            $data = explode(',',trim(Storage::read($file)));
+            foreach($data as $plot) {
 
-        //         $fileplot = 'stdeconvolve_' . $plot;
+                $logfold_plots[] = $this->workingDirPublicURL() . 'stdeconvolve2_' . $plot;
+                $file_extensions = ['svg', 'pdf', 'png'];
 
-        //         $plots[] = $this->workingDirPublicURL() . $fileplot;
-        //         $file_extensions = ['svg', 'pdf', 'png'];
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $plot . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . 'stdeconvolve2_' . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                    }
+                }
 
-        //         $plot_files = [$fileplot, "$fileplot-sbs"];
-        //         foreach ($plot_files as $plot_file) {
-        //             foreach ($file_extensions as $file_extension) {
-        //                 $fileName = $plot_file . '.' . $file_extension;
-        //                 $file = $workingDir . $fileName;
-        //                 $file_public = $this->workingDirPublic() . $fileName;
-        //                 if (Storage::fileExists($file)) {
-        //                     Storage::delete($file_public);
-        //                     Storage::move($file, $file_public);
-        //                 }
-        //             }
-        //         }
-        //     }
+            }
+        }
 
-        //     $suggested_k = [];
-        //     $file = $workingDir . 'stdeconvolve_suggested_k.csv';
-        //     if(Storage::fileExists($file)) {
-        //         $data = trim(Storage::read($file));
-        //         foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $line) {
-        //             $tmp = explode(',', $line);
-        //             $suggested_k[$tmp[0]] = $tmp[1];
-        //         }
-        //     }
+        $file = $workingDir . 'stdeconvolve2_scatterpie_plots.csv';
+        $scatterpie_plots = [];
+        if(Storage::fileExists($file)) {
+            $data = explode(',',trim(Storage::read($file)));
+            foreach($data as $plot) {
 
-        //     ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots, 'suggested_k' => $suggested_k])]);
-        // }
+                $scatterpie_plots[] = $this->workingDirPublicURL() . 'stdeconvolve2_' . $plot;
+                $file_extensions = ['svg', 'pdf', 'png'];
+
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $plot . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . 'stdeconvolve2_' . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                    }
+                }
+
+            }
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'logfold_plots' => $logfold_plots, 'scatterpie_plots' => $scatterpie_plots])]);
 
         return ['output' => $output, 'script' => $scriptContents];
 
@@ -2608,10 +2644,10 @@ lapply(names(grad_res), function(i){
     private function getSTdeconvolve2Script($parameters) {
 
         $script = Storage::get("/common/templates/STdeconvolve2_biological_identification.R");
-        // $params = ['rm_mt', 'rm_rp', 'use_var_genes', 'use_var_genes_n', 'min_k', 'max_k'];
-        // foreach($params as $param) {
-        //     $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
-        // }
+        $params = ['q_val', 'user_radius', 'color_pal', 'celltype_markers'];
+        foreach($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
         $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
 
         return $script;

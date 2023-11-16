@@ -3,4 +3,6 @@
 !common/
 !common/stenrich/
 !common/stenrich/*
+!common/stdeconvolve/
+!common/stdeconvolve/*
 !.gitignore
