@@ -235,6 +235,8 @@ import 'vue3-easy-data-table/dist/style.css';
         mounted() {
             //console.log(this.project.project_parameters.annotation_variables_clusters);
             this.loadResults();
+
+            console.log(this.project.project_parameters.annotation_variables);
         },
 
         watch: {

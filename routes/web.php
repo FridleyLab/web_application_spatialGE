@@ -107,6 +107,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('/projects/{project}/phenotyping',[ProjectController::class, 'phenotyping'])->name('phenotyping')->middleware('project');
     Route::post('/projects/{project}/phenotyping/STdeconvolve', [ProjectController::class, 'STdeconvolve'])->name('STdeconvolve')->middleware('project');
+    Route::post('/projects/{project}/phenotyping/STdeconvolve2', [ProjectController::class, 'STdeconvolve2'])->name('STdeconvolve2')->middleware('project');
 
 });
 

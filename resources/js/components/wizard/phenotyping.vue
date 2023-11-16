@@ -23,7 +23,7 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="stdeconvolve" role="tabpanel" aria-labelledby="stdeconvolve-tab">
-                                <stdeconvolve :project="project" :samples="samples" :st-deconvolve-url="stDeconvolveUrl" :color-palettes="colorPalettes"></stdeconvolve>
+                                <stdeconvolve :project="project" :samples="samples" :st-deconvolve-url="stDeconvolveUrl" :st-deconvolve2-url="stDeconvolve2Url" :color-palettes="colorPalettes"></stdeconvolve>
                             </div>
                         </div>
                     </div>
@@ -43,6 +43,7 @@
             samples: Object,
             colorPalettes: Object,
             stDeconvolveUrl: String,
+            stDeconvolve2Url: String,
         },
 
     }

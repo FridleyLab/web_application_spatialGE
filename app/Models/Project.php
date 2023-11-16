@@ -96,16 +96,16 @@ class Project extends Model
             $data = Storage::read($fileName);
             $lines = explode("\n", $data);
             $annotations = [];
-            foreach($lines as $annotation)
+            foreach($lines as $annotation) {
                 if(strlen(trim($annotation))) {
                     $label = '';
                     $parts = explode('_', $annotation);
-                    if(sizeof($parts) > 2) {
+                    if(sizeof($parts) > 2 && $parts[0] === 'stclust') {
 
-                        if($parts[0] === 'stclust') $label .= 'STclust; ';
+                        $label .= 'STclust; ';
 
                         if(str_starts_with($parts[2], 'k'))
-                            $label .= 'Domains (k): ' . substr($parts[2],1) . '; ';
+                            $label .= 'Domains (k): ' . str_pad(substr($parts[2],1), 2, '0', STR_PAD_LEFT) . '; ';
 
                         if($parts[1] === 'spw0')
                             $label .= 'No spatial weight';
@@ -114,10 +114,20 @@ class Project extends Model
 
                         if(str_starts_with($parts[2], 'dspl'))
                             $label .= '; DeepSplit=' . substr($parts[2], 4) . '; Automatic mode (DynamicTreeCut)';
+                    } elseif(sizeof($parts) >= 2 && $parts[0] === 'spagcn') {
+                        $label .= 'SpaGCN; ';
+                        if(str_starts_with($parts[1], 'k'))
+                            $label .= 'Domains (k): ' . str_pad(substr($parts[1],1), 2, '0', STR_PAD_LEFT);
+                        if(sizeof($parts) > 2 && $parts[2] === 'refined')
+                            $label .= '; Refined clusters';
                     }
+
+                    if($label === '') $label = $annotation;
 
                     $annotations[] = ['label' => $label, 'value' => $annotation];
                 }
+            }
+            sort($annotations);
             $params['annotation_variables'] = $annotations;
         }
 
@@ -1714,12 +1724,12 @@ stclust_stlist = STclust(x=$stlist,
                          deepSplit={$parameters['deepSplit']})
 
 #annot_variables used for Differential Expression analyses
-annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('stclust_', colnames(i), value=T); return(var_cols) })))
+annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_', colnames(i), value=T); return(var_cols) })))
 write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 ##clusters_by_annot_variables used for Differential Expression analyses
 cluster_values = tibble::tibble()
 for(i in names(stclust_stlist@spatial_meta)){
-  for(cl in grep('stclust_', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
+  for(cl in grep('spagcn_|stclust_', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
     cluster_values = dplyr::bind_rows(cluster_values,
                                       tibble::tibble(cluster=unique(stclust_stlist@spatial_meta[[i]][[cl]])) %>%
                                         tibble::add_column(annotation=cl))
@@ -1918,7 +1928,7 @@ for(i in names(stclust_stlist@spatial_meta)){
     dplyr::left_join(., spagcn_tmp, by='libname')
 }
 
-annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_', colnames(i), value=T); return(var_cols) })))
+annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_', colnames(i), value=T); return(var_cols) })))
 write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 cluster_values = tibble::tibble()
 for(i in names(stclust_stlist@spatial_meta)){
@@ -2468,7 +2478,7 @@ lapply(names(grad_res), function(i){
 
         $script = $workingDir . $scriptName;
 
-        $scriptContents = $this->getSTdeconvolveScript($parameters);
+        $scriptContents = $this->getSTdeconvolve1Script($parameters);
         Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
@@ -2498,25 +2508,130 @@ lapply(names(grad_res), function(i){
                     }
                 }
             }
-            ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
-        }
 
-        //$this->current_step = 9;
-        //$this->save();
+            $suggested_k = [];
+            $file = $workingDir . 'stdeconvolve_suggested_k.csv';
+            if(Storage::fileExists($file)) {
+                $data = trim(Storage::read($file));
+                foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $line) {
+                    $tmp = explode(',', $line);
+                    $suggested_k[$tmp[0]] = $tmp[1];
+                }
+                array_shift($suggested_k);
+            }
+
+            ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots, 'suggested_k' => $suggested_k])]);
+        }
 
         return ['output' => $output, 'script' => $scriptContents];
 
     }
 
-    private function getSTdeconvolveScript($parameters) {
+    private function getSTdeconvolve1Script($parameters) {
 
-        $rm_mt = $parameters['rm_mt'] ? 'T' : 'F';
-        $rm_rp = $parameters['rm_rp'] ? 'T' : 'F';
-        $use_var_genes = $parameters['use_var_genes'] ? 'T' : 'F';
-        $use_var_genes_n = $parameters['use_var_genes_n'];
-        $min_k = $parameters['min_k'];
-        $max_k = $parameters['max_k'];
+        $script = Storage::get("/common/templates/STdeconvolve1_model_fitting.R");
+        $params = ['rm_mt', 'rm_rp', 'use_var_genes', 'use_var_genes_n', 'min_k', 'max_k'];
+        foreach($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+        $script = $this->replaceRscriptParameter('samples_with_tissue', $this->samplesWithTissue(), $script);
 
+        return $script;
+    }
+
+
+
+    public function STdeconvolve2($parameters) {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'STdeconvolve2.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getSTdeconvolve2Script($parameters);
+        Storage::put($script, $scriptContents);
+
+        Log::info('SCRIPT---->'. $scriptContents);
+
+        $files = ['celltype_markers_25perc_200toplogFC_blueprint_Nov142023.csv', 'celltype_markers_25perc_200toplogFC_blueprint_Nov142023.RDS'];
+        foreach($files as $filename) {
+            Storage::copy("/common/stdeconvolve/$filename", $this->workingDir() . $filename);
+        }
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+
+        // $file = $workingDir . 'stdeconvolve_plots.csv';
+        // if(Storage::fileExists($file)) {
+        //     $data = trim(Storage::read($file));
+        //     $plots = [];
+        //     foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
+
+        //         $fileplot = 'stdeconvolve_' . $plot;
+
+        //         $plots[] = $this->workingDirPublicURL() . $fileplot;
+        //         $file_extensions = ['svg', 'pdf', 'png'];
+
+        //         $plot_files = [$fileplot, "$fileplot-sbs"];
+        //         foreach ($plot_files as $plot_file) {
+        //             foreach ($file_extensions as $file_extension) {
+        //                 $fileName = $plot_file . '.' . $file_extension;
+        //                 $file = $workingDir . $fileName;
+        //                 $file_public = $this->workingDirPublic() . $fileName;
+        //                 if (Storage::fileExists($file)) {
+        //                     Storage::delete($file_public);
+        //                     Storage::move($file, $file_public);
+        //                 }
+        //             }
+        //         }
+        //     }
+
+        //     $suggested_k = [];
+        //     $file = $workingDir . 'stdeconvolve_suggested_k.csv';
+        //     if(Storage::fileExists($file)) {
+        //         $data = trim(Storage::read($file));
+        //         foreach(preg_split("/((\r?\n)|(\r\n?))/", $data) as $line) {
+        //             $tmp = explode(',', $line);
+        //             $suggested_k[$tmp[0]] = $tmp[1];
+        //         }
+        //     }
+
+        //     ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots, 'suggested_k' => $suggested_k])]);
+        // }
+
+        return ['output' => $output, 'script' => $scriptContents];
+
+    }
+
+    private function getSTdeconvolve2Script($parameters) {
+
+        $script = Storage::get("/common/templates/STdeconvolve2_biological_identification.R");
+        // $params = ['rm_mt', 'rm_rp', 'use_var_genes', 'use_var_genes_n', 'min_k', 'max_k'];
+        // foreach($params as $param) {
+        //     $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        // }
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+
+        return $script;
+    }
+
+
+
+
+
+    private function getSavePlotFunctionRscript() {
+
+        return Storage::get("/common/templates/_save_plots.R");
+
+    }
+
+    private function replaceRscriptParameter($parameter, $value, $script) {
+        return str_replace('#{' . $parameter . '}#', $value, $script);
+    }
+
+    private function samplesWithTissue() {
         $samples_with_tissue = '';
         foreach($this->samples as $sample) {
             if ($sample->has_image) {
@@ -2524,178 +2639,8 @@ lapply(names(grad_res), function(i){
                 $samples_with_tissue .= "'" . $sample->name . "'";
             }
         }
-
-        $script = "
-
-##
-# Domain/niche phenotyping with STdeconvolve
-#
-
-# Arguments
-rm_mt = $rm_mt # Check box -- Remove mitochondiral genes? (Visium only)
-rm_rp = $rm_rp # Check box -- Remove ribosomal genes? (Visium only)
-use_var_genes = $use_var_genes # Check box -- Use only high-variance genes?
-use_var_genes_n = $use_var_genes_n
-min_k = $min_k
-max_k = $max_k
-
-cores = 6 # For parallelization (not user-controlled)
-
-start_t = Sys.time()
-library('magrittr')
-#library('Seurat')
-library('STdeconvolve')
-#library('ggthemes')
-library('spatialGE')
-library('ggplot2')
-library('ggtext')
-
-# USE NORMALIZED
-{$this->_loadStList('normalized_stlist')}
-stlist = normalized_stlist
-
-# Process each sample
-suggested_k = tibble::tibble() # To store suggested k values
-p = list() # Save plots
-for(i in names(stlist@counts)){
-  # Remove mitochondrial/ribosomal genes from corpus
-  if(rm_mt){
-    rm_genes = rownames(stlist@counts[[i]])[grepl(\"^MT-\", rownames(stlist@counts[[i]]))]
-    stlist = filter_data(stlist, rm_genes=rm_genes, samples=i)
-    rm(rm_genes) # Clean env
-  }
-  if(rm_rp){
-    rm_genes = rownames(stlist@counts[[i]])[grepl(\"^RP[L|S]\", rownames(stlist@counts[[i]]))]
-    stlist = filter_data(stlist, rm_genes=rm_genes, samples=i)
-    rm(rm_genes) # Clean env
-  }
-
-  # Extract counts from STlist
-  cd = t(as.matrix(stlist@counts[[i]]))
-  #pos = stlist@spatial_meta[[i]] %>% select(y=ypos, x=xpos)
-
-  # Process counts
-  corpus = preprocess(dat=cd, ODgenes=use_var_genes, nTopOD=use_var_genes_n, verbose=F, plot=F)
-
-  rm(cd) # Clean env
-
-  # Run LDA
-  log_start_t = Sys.time()
-  ldas = fitLDA(corpus[['corpus']], Ks=c(min_k:max_k), ncores=cores, seed=12345, plot=F, verbose=F)
-  log_end_t = difftime(Sys.time(), log_start_t, units='min')
-  cat(paste0('Finished fitting LDA model to ', i, '... ', round(as.vector(log_end_t), 2), ' min\n'))
-
-  # Save/load model results
-  #saveRDS(ldas, file=paste0('../data/', i, '_lda_model_results.RDS'))
-  #ldas = readRDS(file=paste0('../data/', i, '_lda_model_results.RDS'))
-
-  # Plot LDA model selection metrics
-  metrics_df = tibble::tibble(k=as.numeric(names(ldas[['models']])),
-                              alpha=unlist(lapply(ldas[['models']], function(i)(return(i@alpha)))),
-                              perplexity=ldas[['perplexities']],
-                              scaled_perplexity=scales::rescale(ldas[['perplexities']], to=c(0, max_k)),
-                              rare_types=ldas[['numRare']]) %>%
-    dplyr::mutate(k_alpha=paste0(as.character(names(ldas[['models']])), ' (', round(alpha, 2), ')'))
-
-  # Attempt to find best K
-  # Find model with minimum perplexity
-  min_perp_index = which.min(metrics_df[['perplexity']])
-  min_perp_k = metrics_df[['k']][min_perp_index]
-  min_perp_val = metrics_df[['perplexity']][min_perp_index]
-  min_perp_rare_val = metrics_df[['rare_types']][min_perp_index]
-  range_perp = max(metrics_df[['perplexity']])- metrics_df[['perplexity']][min_perp_index]
-  if(min_perp_rare_val > 0){
-    next_rare_index = min_perp_index - 1
-    next_rare_val = metrics_df[['rare_types']][next_rare_index]
-    next_rare_perp = metrics_df[['perplexity']][next_rare_index]
-    diff_perp = next_rare_perp - min_perp_val
-    # Checks that differences in perplexity are lower than half the range of perplexities, on order to pick a 'drop/elbow'
-    while(next_rare_val > 0 & diff_perp < range_perp * 0.5 & next_rare_index > 0){
-      next_rare_index = next_rare_index - 1
-      next_rare_val = metrics_df[['rare_types']][next_rare_index]
-      next_rare_perp = metrics_df[['perplexity']][next_rare_index]
-      diff_perp = next_rare_perp - min_perp_val
-      min_perp_k = metrics_df[['k']][next_rare_index]
+        return $samples_with_tissue;
     }
-    rm(next_rare_index, next_rare_val, next_rare_perp, diff_perp) # Clean env
-  }
-  suggested_k = dplyr::bind_rows(suggested_k, tibble::tibble(sample_name=i, suggested_k=min_perp_k))
-
-  rm(min_perp_index, min_perp_k, min_perp_val, min_perp_rare_val, range_perp) # Clean env
-
-  # Create color palette accroding to model alphas (desirable bwlow 1)
-  col_alpha = ifelse(metrics_df[['alpha']] > 1, 'orange', 'gray50')
-
-  p[[i]] = ggplot(metrics_df) +
-    geom_line(aes(x=k, y=rare_types), col='blue') +
-    geom_line(aes(x=k, y=scaled_perplexity), col='red') +
-    #    geom_text(aes(x=k, y=-1, label=sprintf('%.2f', alpha)), angle=45, size=4, col=col_alpha) +
-    xlab('Number of topics in model') +
-    scale_y_continuous('Topics with proportion < 0.05',
-                       breaks=seq(-1, max_k),
-                       labels=c('Model\nAlpha', 0:max_k),
-                       sec.axis=sec_axis(~., name='Perplexity',
-                                         breaks=seq(0, max(metrics_df[['k']])),
-                                         labels=sprintf(
-                                           '%.1f', seq(
-                                             min(metrics_df[['perplexity']]),
-                                             max(metrics_df[['perplexity']]),
-                                             length.out=max(metrics_df[['k']])+1)))) +
-    scale_x_continuous(breaks=as.numeric(names(ldas[['models']])), labels=metrics_df[['k_alpha']]) +
-    ggtitle(paste0(i, '<br>
-      <span style=\"color: blue;\">Rare (<5% frequency) topics</span> and <span style=\"color: red;\">model perplexity</span><br>
-      Model alpha: (
-      <span style=\"color: gray50;\">Alpha < 1</span> |
-      <span style=\"color: orange;\">Alpha > 1</span>
-      )')) +
-    theme(panel.background=element_rect(color=\"black\", fill=NULL),
-          axis.text.x=element_text(angle=45, vjust=1, hjust=1, color=col_alpha),
-          axis.title.y.left=ggplot2::element_text(color='blue'),
-          axis.text.y.left=element_text(color=c('gray50', rep('blue', 16))),
-          axis.title.y.right=ggplot2::element_text(color='red'),
-          axis.text.y.right=element_text(color='red'),
-          axis.ticks.y.left=element_line(color=c('white', rep('black', 16))),
-          plot.title=ggtext::element_markdown())
-
-  rm(metrics_df, col_alpha, log_start_t, log_end_t) # Clean env
-}
-
-write.table(names(p), 'stdeconvolve_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
-
-library('svglite')
-for(i in names(p)) {
-    filetitle = paste('stdeconvolve_', i, sep='')
-    ggpubr::ggexport(filename = paste(filetitle,'.png', sep=''), p[[i]], width = 800, height = 600)
-    ggpubr::ggexport(filename = paste(filetitle,'.pdf', sep=''), p[[i]], width = 8, height = 6)
-    svglite(paste(filetitle,'.svg', sep=''), width = 8, height = 6)
-    print(p[[i]])
-    dev.off()
-
-    #generate side-by-side for samples with tissue image
-    for(sample in list($samples_with_tissue)) {
-        if(grepl(sample, i, fixed=TRUE)) {
-            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample, '/spatial/image_', sample, '.png'))
-            ptp = ggpubr::ggarrange(p[[i]], tp, ncol=2)
-            {$this->getExportFilesCommands("paste0(filetitle, '-sbs')", 'ptp', 1400, 600)}
-        }
-    }
-}
-
-end_t = difftime(Sys.time(), start_t, units='min')
-cat(paste0('STdeconvolve finished. ', round(as.vector(end_t), 2), ' min\n'))
-
-        ";
-
-        return $script;
-
-
-    }
-
-
-
-
-
-
 
     private function getExportFilesCommands($file, $plot, $width = 800, $height = 600) : string {
 
