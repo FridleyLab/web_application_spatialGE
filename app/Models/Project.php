@@ -151,7 +151,7 @@ class Project extends Model
         if(array_key_exists('STdeconvolve', $params))
         {
             $STdeconvolve = json_decode($params['STdeconvolve']);
-            if(isset($STdeconvolve['suggested_k'])) {
+            if(isset($STdeconvolve->suggested_k)) {
                 $STdeconvolve->selected_k = $STdeconvolve->suggested_k; #assume the defaults
 
                 $fileName = $this->workingDir() . 'stdeconvolve_selected_k.csv';
