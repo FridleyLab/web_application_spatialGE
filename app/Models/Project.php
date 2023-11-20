@@ -148,28 +148,30 @@ class Project extends Model
         }
 
 
-        /*if(array_key_exists('STdeconvolve', $params))
+        if(array_key_exists('STdeconvolve', $params))
         {
             $STdeconvolve = json_decode($params['STdeconvolve']);
-            $STdeconvolve->selected_k = $STdeconvolve->suggested_k; #assume the defaults
+            if(array_key_exists('suggested_k', $STdeconvolve)) {
+                $STdeconvolve->selected_k = $STdeconvolve->suggested_k; #assume the defaults
 
-            $fileName = $this->workingDir() . 'stdeconvolve_selected_k.csv';
-            if(Storage::fileExists($fileName)) {
-                $data = Storage::read($fileName);
-                $lines = explode("\n", $data);
-                $selected_k = [];
-                foreach($lines as $line) {
-                    if (strlen(trim($line))) {
-                        $values = explode(',', $line);
-                        $selected_k[$values[0]] = $values[1];
+                $fileName = $this->workingDir() . 'stdeconvolve_selected_k.csv';
+                if(Storage::fileExists($fileName)) {
+                    $data = Storage::read($fileName);
+                    $lines = explode("\n", $data);
+                    $selected_k = [];
+                    foreach($lines as $line) {
+                        if (strlen(trim($line))) {
+                            $values = explode(',', $line);
+                            $selected_k[$values[0]] = $values[1];
+                        }
                     }
+                    array_shift($selected_k);
+                    $STdeconvolve->selected_k = $selected_k;
                 }
-                array_shift($selected_k);
-                $STdeconvolve->selected_k = $selected_k;
             }
 
             $params['STdeconvolve'] = json_encode($STdeconvolve);
-        }*/
+        }
 
         return $params;
     }
