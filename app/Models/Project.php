@@ -148,7 +148,7 @@ class Project extends Model
         }
 
 
-        if(array_key_exists('STdeconvolve', $params))
+        /*if(array_key_exists('STdeconvolve', $params))
         {
             $STdeconvolve = json_decode($params['STdeconvolve']);
             $STdeconvolve->selected_k = $STdeconvolve->suggested_k; #assume the defaults
@@ -169,7 +169,7 @@ class Project extends Model
             }
 
             $params['STdeconvolve'] = json_encode($STdeconvolve);
-        }
+        }*/
 
         return $params;
     }
