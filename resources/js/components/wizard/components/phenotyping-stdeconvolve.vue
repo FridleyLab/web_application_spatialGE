@@ -266,7 +266,7 @@ import Multiselect from '@vueform/multiselect';
 
                 filter_variable: '',
 
-                gene_signatures: ['celltype_markers_25perc_200toplogFC_blueprint_Nov142023'],
+                gene_signatures: [{value: 'celltype_markers_25perc_200toplogFC_blueprint_Nov142023', label: 'BluePrint signatures (200 top genes, highest logFC)'}],
 
                 params2: {
                     celltype_markers: 'celltype_markers_25perc_200toplogFC_blueprint_Nov142023',
