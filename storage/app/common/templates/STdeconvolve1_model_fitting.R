@@ -1,9 +1,7 @@
 #{HEADER}#
-
 ##
 # Domain/niche phenotyping with STdeconvolve
 #
-
 # Arguments
 rm_mt = #{rm_mt}# # Check box -- Remove mitochondiral genes? (Visium only)
 rm_rp = #{rm_rp}# # Check box -- Remove ribosomal genes? (Visium only)
@@ -11,7 +9,6 @@ use_var_genes = #{use_var_genes}# # Check box -- Use only high-variance genes?
 use_var_genes_n = #{use_var_genes_n}#
 min_k = #{min_k}#
 max_k = #{max_k}#
-
 cores = 6 # For parallelization (not user-controlled)
 
 start_t = Sys.time()
@@ -26,6 +23,7 @@ library('ggtext')
 # USE NORMALIZED
 load(file='normalized_stlist.RData')
 stlist = normalized_stlist
+#stlist = filter_data(stlist, rm_tissue=c(#{sample_list}#))
 
 # Process each sample
 suggested_k = tibble::tibble() # To store suggested k values

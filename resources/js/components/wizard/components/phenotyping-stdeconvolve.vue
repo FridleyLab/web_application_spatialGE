@@ -63,35 +63,8 @@
                                 <!-- Create tabs for each sample -->
                                 <div v-if="!processing && ('STdeconvolve' in project.project_parameters)">
 
-                                    <div>
-                                        <ul class="nav nav-tabs" id="STdeconvolve_myTab" role="tablist">
-                                            <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
-                                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'STdeconvolve-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'STdeconvolve'" type="button" role="tab" :aria-controls="sample.name + 'STdeconvolve'" aria-selected="true">{{ sample.name }}</button>
-                                            </li>
-                                        </ul>
+                                    <stdeconvolve-suggested-ks :samples="samples" :STdeconvolve="STdeconvolve" key="step1"></stdeconvolve-suggested-ks>
 
-                                        <div class="tab-content" id="STdeconvolve_myTabContent">
-                                            <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'STdeconvolve'" role="tabpanel" :aria-labelledby="sample.name + 'STdeconvolve-tab'">
-
-                                                <div class="row justify-content-center text-center m-4">
-                                                    <div class="w-50">
-                                                        <div class="me-3">
-                                                            <label class="text-lg">
-                                                                Suggested K={{STdeconvolve.suggested_k[sample.name]}}&nbsp;&nbsp;
-                                                            </label>
-                                                            <input type="number" class="text-end text-md border border-1 rounded w-25 w-md-15 w-xl-10" size="3" v-model="STdeconvolve.selected_k[sample.name]">
-                                                            <span v-if="STdeconvolve.suggested_k[sample.name] !== STdeconvolve.selected_k[sample.name]" class="mx-2 text-warning">modified</span>
-                                                        </div>
-                                                        <input type="range" :min="STdeconvolve.parameters.min_k" :max="STdeconvolve.parameters.max_k" step="1" class="w-100" v-model="STdeconvolve.selected_k[sample.name]">
-                                                    </div>
-                                                </div>
-
-                                                <div v-for="image in STdeconvolve.plots">
-                                                    <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <!-- <div class="row justify-content-center text-center m-4">
@@ -118,6 +91,18 @@
 
                         <div class="row justify-content-center text-center m-3">
                             <div class="w-100 w-lg-90 w-xxl-85">
+
+
+                                <button type="button" class="btn btn-sm btn-outline-success mt-3" @click="showSuggestedKs = !showSuggestedKs">Modify Suggested K</button>
+                                <!-- Create tabs for each sample -->
+                                <div v-if="showSuggestedKs && !processing && ('STdeconvolve' in project.project_parameters)" class="mb-5">
+
+                                    <stdeconvolve-suggested-ks :samples="samples" :STdeconvolve="STdeconvolve" key="step2" :editable="true"></stdeconvolve-suggested-ks>
+
+                                </div>
+
+
+
                                 <div class="row justify-content-center text-center m-3">
                                     <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                                         <div>
@@ -275,7 +260,9 @@ import Multiselect from '@vueform/multiselect';
                     color_pal: 'discreterainbow'
                 },
 
-                plots_visible: []
+                plots_visible: [],
+
+                showSuggestedKs: false,
             }
         },
 

@@ -2562,6 +2562,8 @@ lapply(names(grad_res), function(i){
         }
         $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
         $script = $this->replaceRscriptParameter('samples_with_tissue', $this->samplesWithTissue(), $script);
+        $sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
+        $script = $this->replaceRscriptParameter('sample_list', $sampleList, $script);
 
         return $script;
     }

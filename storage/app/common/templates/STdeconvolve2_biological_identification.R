@@ -1,5 +1,8 @@
 #{HEADER}#
 
+
+start_t = Sys.time()
+
 library('STdeconvolve')
 library('magrittr')
 library('ggplot2')
@@ -33,10 +36,13 @@ all_ldas = readRDS('./stdeconvolve_lda_models.RDS')
 col_pal = as.vector(khroma::color(color_pal, force=T)(length(celltype_markers)))
 names(col_pal) = names(celltype_markers)
 col_pal = c(col_pal, unknown='gray40')
+# Save general color palette
+saveRDS(col_pal, './general_color_palette_stdeconvolve.RDS')
 
 ps = list()
 sctr_p = list()
-topic_ann = list()
+topic_props = list()
+sample_col_pal = list()
 for(i in suggested_k[['sample_name']]){
   opt_k = suggested_k[['suggested_k']][ suggested_k[['sample_name']] == i ]
 
@@ -69,6 +75,7 @@ for(i in suggested_k[['sample_name']]){
   # Save selected annotation per topic
   topic_ann = tibble::enframe(celltype_annotations[['predictions']])
   colnames(topic_ann) = c('topic', 'annotation')
+  topic_ann[['new_annotation']] = topic_ann[['annotation']]
   write.csv(topic_ann, paste0('./topic_annotations_', i, '.csv'), row.names=F)
 
   # Find gene markers defined as those with highest log-fold change per topic from
@@ -141,10 +148,14 @@ for(i in suggested_k[['sample_name']]){
     scale_y_reverse() +
     coord_equal() +
     theme_void() +
-    theme(legend.position="bottom",
-          legend.title=element_blank())
+    theme(legend.position="bottom", legend.title=element_blank())
 
- rm(cols_prop, col_pal_tmp, decon_prop_sctr, celltype_annotations) # Clean env
+  # Save per-spot topic proportions in case user decides to change plots
+  topic_props[[i]] = decon_prop_sctr
+  # Save color palette
+  sample_col_pal[[i]] = col_pal_tmp
+
+ rm(decon_expr, decon_prop, cols_prop, col_pal_tmp, decon_prop_sctr, celltype_annotations, topic_ann) # Clean env
 }
 
 # Save log-fold change plots
@@ -167,3 +178,9 @@ for(i in names(sctr_p)){
 }
 
 write.table(plotnames, 'stdeconvolve2_scatterpie_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+
+# Save logFC plots in case changes to title are required
+saveRDS(ps, './topic_logfc_all_plots.RDS')
+
+end_t = difftime(Sys.time(), start_t, units='min')
+cat(paste0('STdeconvolve [part 2] finished. ', round(as.vector(end_t), 2), ' min\n'))
