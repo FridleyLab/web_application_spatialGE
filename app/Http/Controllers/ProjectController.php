@@ -469,5 +469,10 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function STdeconvolve3(Project $project) {
+        $jobId = $project->createJob('Phenotyping - STdeconvolve3', 'STdeconvolve3', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
 
 }

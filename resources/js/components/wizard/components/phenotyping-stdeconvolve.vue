@@ -63,7 +63,7 @@
                                 <!-- Create tabs for each sample -->
                                 <div v-if="!processing && ('STdeconvolve' in project.project_parameters)">
 
-                                    <stdeconvolve-suggested-ks :samples="samples" :STdeconvolve="STdeconvolve" key="step1"></stdeconvolve-suggested-ks>
+                                    <stdeconvolve-suggested-ks :samples="samples" :STdeconvolve="STdeconvolve" id-key="step1"></stdeconvolve-suggested-ks>
 
                                 </div>
 
@@ -80,7 +80,7 @@
                     </div>
                 </div>
 
-                <div class="accordion-item" v-if="!processing && ('STdeconvolve2' in project.project_parameters)">
+                <div class="accordion-item" v-if="!processing && ('STdeconvolve' in project.project_parameters)">
                     <h2 class="accordion-header d-flex" id="headingBiologicalIdentities">
                         <show-modal tag="qcfilter_samples"></show-modal>
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBiologicalIdentities" aria-expanded="false" aria-controls="collapseBiologicalIdentities">
@@ -93,12 +93,21 @@
                             <div class="w-100 w-lg-90 w-xxl-85">
 
 
-                                <button type="button" class="btn btn-sm btn-outline-success mt-3" @click="showSuggestedKs = !showSuggestedKs">Modify Suggested K</button>
-                                <!-- Create tabs for each sample -->
-                                <div v-if="showSuggestedKs && !processing && ('STdeconvolve' in project.project_parameters)" class="mb-5">
+                                <div :class="showSuggestedKs ? 'border border-2 border-success rounded rounded-3 mb-6' : ''">
+                                    <button type="button" class="btn btn-sm btn-outline-success mt-3" @click="showSuggestedKs = !showSuggestedKs">
+                                        <svg v-if="!showSuggestedKs" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down" viewBox="0 0 16 16">
+                                            <path d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659"/>
+                                        </svg>
+                                        <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up" viewBox="0 0 16 16">
+                                            <path d="M3.204 11h9.592L8 5.519zm-.753-.659 4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659"/>
+                                        </svg>
+                                        Modify Suggested K
+                                    </button>
+                                    <div v-if="showSuggestedKs && !processing && ('STdeconvolve' in project.project_parameters)" class="mb-5">
 
-                                    <stdeconvolve-suggested-ks :samples="samples" :STdeconvolve="STdeconvolve" key="step2" :editable="true"></stdeconvolve-suggested-ks>
+                                        <stdeconvolve-suggested-ks :samples="samples" :STdeconvolve="STdeconvolve" id-key="step2" :editable="true"></stdeconvolve-suggested-ks>
 
+                                    </div>
                                 </div>
 
 
@@ -153,10 +162,9 @@
                                     <send-job-button label="Assign identities" :disabled="processing2" :project-id="project.id" job-name="STdeconvolve2" @started="runSTdeconvolve2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
                                 </div>
 
-
-
-
-
+                                <div v-if="topicNamesChanged" class="p-3 text-center mt-4">
+                                    <send-job-button label="Rename Topics" :disabled="processing3" :project-id="project.id" job-name="STdeconvolve3" @started="runSTdeconvolve3" @ongoing="processing3 = true" @completed="processCompleted3" :project="project" ></send-job-button>
+                                </div>
 
 
                                 <!-- Create tabs for each sample -->
@@ -171,8 +179,15 @@
 
                                         <div class="tab-content" id="STdeconvolve2_myTabContent">
                                             <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'STdeconvolve2'" role="tabpanel" :aria-labelledby="sample.name + 'STdeconvolve2-tab'">
-                                                <div v-for="image in STdeconvolve2.logfold_plots">
-                                                    <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot>
+                                                <div v-for="(topic, topicName) in STdeconvolve2.logfold_plots[sample.name]">
+                                                    <div class="mt-4 d-flex flex-column justify-content-start">
+                                                        <div v-if="'current_annotation' in topic">
+                                                            <label class="text-lg me-1">Rename topic (optional):</label>
+                                                            <input type="text" v-model="topic.current_annotation" class="border border-2 rounded rounded-2" @input="_topicNamesChanged()">
+                                                            <div v-if="topic.current_annotation.trim() !== topic.new_annotation" class="mx-2 text-warning">Modified. Original topic name was '{{ topic.annotation }}'</div>
+                                                        </div>
+                                                        <show-plot :src="topic.plot" :sample="sample" css-classes="mt-0"></show-plot>
+                                                    </div>
                                                 </div>
                                                 <div v-for="image in STdeconvolve2.scatterpie_plots">
                                                     <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot>
@@ -224,6 +239,7 @@ import Multiselect from '@vueform/multiselect';
             samples: Object,
             stDeconvolveUrl: String,
             stDeconvolve2Url: String,
+            stDeconvolve3Url: String,
             colorPalettes: Object,
         },
 
@@ -235,6 +251,7 @@ import Multiselect from '@vueform/multiselect';
 
                 processing: false,
                 processing2: false,
+                processing3: false,
 
                 textOutput: '',
 
@@ -263,6 +280,8 @@ import Multiselect from '@vueform/multiselect';
                 plots_visible: [],
 
                 showSuggestedKs: false,
+
+                topicNamesChanged: false,
             }
         },
 
@@ -277,7 +296,7 @@ import Multiselect from '@vueform/multiselect';
         },
 
         mounted() {
-            console.log(this.STdeconvolve);
+            this.diplicateTopicNames();
         },
 
         methods: {
@@ -286,8 +305,7 @@ import Multiselect from '@vueform/multiselect';
                 this.processing = true;
 
                 axios.post(this.stDeconvolveUrl, this.params)
-                    .then((response) => {
-                    })
+                    .then((response) => {})
                     .catch((error) => {
                         this.processing = false;
                         console.log(error.message);
@@ -312,8 +330,7 @@ import Multiselect from '@vueform/multiselect';
                 };
 
                 axios.post(this.stDeconvolve2Url, params)
-                    .then((response) => {
-                    })
+                    .then((response) => {})
                     .catch((error) => {
                         this.processing = false;
                         console.log(error.message);
@@ -323,7 +340,58 @@ import Multiselect from '@vueform/multiselect';
             processCompleted2() {
                 //console.log(this.project.project_parameters);
                 this.STdeconvolve2 = ('STdeconvolve2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve2) : {};
+                this.diplicateTopicNames();
                 this.processing2 = false;
+            },
+
+
+            runSTdeconvolve3() {
+                this.processing3 = true;
+
+                let params = {
+                    logfold_plots: this.STdeconvolve2['logfold_plots'],
+                };
+
+                axios.post(this.stDeconvolve3Url, params)
+                    .then((response) => {})
+                    .catch((error) => {
+                        this.processing = false;
+                        console.log(error.message);
+                    })
+            },
+
+            processCompleted3() {
+                //console.log(this.project.project_parameters);
+                this.STdeconvolve2 = ('STdeconvolve2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve2) : {};
+                this.diplicateTopicNames();
+                this.processing2 = false;
+            },
+
+
+            getTopicNewAnnotation(sample_name, topic) {
+                let obj = this.STdeconvolve2.topic_annotations[sample_name][topic];
+                return typeof obj === 'object' ? obj["new_annotation"] : '';
+            },
+
+            diplicateTopicNames() {
+                if('logfold_plots' in this.STdeconvolve2) {
+                    Object.entries(this.STdeconvolve2['logfold_plots']).forEach(([keySample, sample]) => {
+                        Object.entries(sample).forEach(([keyTopic, topic]) => {
+                            topic['current_annotation'] = topic['new_annotation'];
+                        });
+                    });
+                }
+            },
+
+            _topicNamesChanged() {
+                this.topicNamesChanged = false;
+                if('logfold_plots' in this.STdeconvolve2) {
+                    Object.entries(this.STdeconvolve2['logfold_plots']).forEach(([keySample, sample]) => {
+                        Object.entries(sample).forEach(([keyTopic, topic]) => {
+                            if(topic['current_annotation'].trim() !== topic['new_annotation']) this.topicNamesChanged = true; //change found
+                        });
+                    });
+                }
             },
 
         },

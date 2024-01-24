@@ -19,14 +19,15 @@ color_pal = '#{color_pal}#'
 load(file='normalized_stlist.RData')
 
 # Read cell type markers (This file saved in spatialGE server and used by all users/projects)
-celltype_markers = readRDS('#{celltype_markers}#.RDS')
+#{included_celltype_markers}#celltype_markers = readRDS('#{celltype_markers}#.RDS')
 # OR
-# Take CSV from user
-#celltype_markers_csv = read.csv('#{celltype_markers}#.csv', check.names=F)
-#celltype_markers = lapply(1:ncol(celltype_markers_csv), function(i){
-#  return(celltype_markers_csv[[i]][celltype_markers_csv[[i]] != ''])})
-#names(celltype_markers) = colnames(celltype_markers_csv)
-#rm(celltype_markers_csv) # Clean env
+# Take CSV or XLSX from user
+#{uploaded_celltype_markers_csv}#celltype_markers_csv = read.csv('#{celltype_markers}#.csv', check.names=F)
+#{uploaded_celltype_markers_xlsx}#celltype_markers_csv = openxlsx::read.xlsx('#{celltype_markers}#.xlsx', sep.names=' ')
+#{uploaded_celltype_markers}#celltype_markers = lapply(1:ncol(celltype_markers_csv), function(i){
+#{uploaded_celltype_markers}#  return(as.vector(na.omit(celltype_markers_csv[[i]][celltype_markers_csv[[i]] != ''])))})
+#{uploaded_celltype_markers}#names(celltype_markers) = colnames(celltype_markers_csv)
+#{uploaded_celltype_markers}#rm(celltype_markers_csv) # Clean env
 
 # Read suggested K
 # Capture user-selected Ks and replace values as needed
@@ -181,6 +182,11 @@ write.table(plotnames, 'stdeconvolve2_scatterpie_plots.csv',sep=',', row.names =
 
 # Save logFC plots in case changes to title are required
 saveRDS(ps, './topic_logfc_all_plots.RDS')
+
+saveRDS(sample_col_pal, './color_palette_stdeconvolve.RDS')
+
+# Save per-spot topic proportions in case user decides to change plots
+saveRDS(topic_props, './topic_proportions_all_samples.RDS')
 
 end_t = difftime(Sys.time(), start_t, units='min')
 cat(paste0('STdeconvolve [part 2] finished. ', round(as.vector(end_t), 2), ' min\n'))
