@@ -1,7 +1,7 @@
 <template>
 
 
-    <button type="button" class="btn btn-sm btn-outline-secondary" @click="scrollingMode = scrollingMode === 'standard' ? 'virtual' : 'standard'">{{ scrollingMode === 'standard' ? 'Continuous scrolling' : 'Paginated view' }}</button>
+    <button v-if="scrollingToggle" type="button" class="btn btn-sm btn-outline-secondary" @click="scrollingMode = scrollingMode === 'standard' ? 'virtual' : 'standard'">{{ scrollingMode === 'standard' ? 'Continuous scrolling' : 'Paginated view' }}</button>
     <dx-data-grid
 
                   :style="scrollingMode !== 'standard' ? 'height: 70vh;' : ''"
@@ -35,13 +35,13 @@
 <!--            <DxItem name="columnChooserButton" />-->
 <!--        </DxToolbar>-->
 
-        <DxFilterRow :visible="true" />
+        <DxFilterRow :visible="showFilterRow" />
 <!--        <DxHeaderFilter :visible="true" />-->
 <!--        <DxFilterPanel :visible="true" />-->
 
-        <DxColumnChooser :enabled="true" />
-        <DxSearchPanel :visible="true" />
-        <DxGroupPanel :visible="true" />
+        <DxColumnChooser :enabled="showColumnChooser" />
+        <DxSearchPanel :visible="showSearchPanel" />
+        <DxGroupPanel :visible="showGroupPanel" />
 
         <DxScrolling :mode="scrollingMode" use-native="true" />
 
@@ -126,6 +126,11 @@ export default {
     props: {
         headers: Array,
         data: Array,
+        scrollingToggle: {type: Boolean, default: true},
+        showFilterRow: {type: Boolean, default: true},
+        showColumnChooser: {type: Boolean, default: true},
+        showSearchPanel: {type: Boolean, default: true},
+        showGroupPanel: {type: Boolean, default: true},
     },
 
     data() {
@@ -153,7 +158,8 @@ export default {
             return ['size_test', 'size_gene_set', 'p_value', 'adj_p_value', 'avg_log2fc', 'cluster_1', 'cluster_2',
                 'wilcox_p_val', 'ttest_p_val', 'mm_p_val', 'adj_p_val', 'exp_p_val', 'exp_adj_p_val',
                 'min_lm_coef', 'min_lm_pval', 'min_spearman_r', 'min_spearman_r_pval', 'min_spearman_r_pval_adj',
-                'avg_lm_coef', 'avg_lm_pval', 'avg_spearman_r', 'avg_spearman_r_pval', 'avg_spearman_r_pval_adj'
+                'avg_lm_coef', 'avg_lm_pval', 'avg_spearman_r', 'avg_spearman_r_pval', 'avg_spearman_r_pval_adj',
+                'sscore', 'q_val', 'p_val'
             ].includes(column);
         }
     },

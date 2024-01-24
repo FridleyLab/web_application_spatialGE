@@ -7,6 +7,7 @@
         :samples="{{ json_encode($samples) }}"
         sdd-stclust-url="{{ route('sdd-stclust', ['project' => $project->id]) }}"
         sdd-spagcn-url="{{ route('sdd-spagcn', ['project' => $project->id]) }}"
+        sdd-spagcn-svg-url="{{ route('sdd-spagcn-svg', ['project' => $project->id]) }}"
         :color-palettes="{{ json_encode($color_palettes) }}"
     >
     </spatial-domain-detection>

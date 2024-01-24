@@ -14,10 +14,14 @@ RUN pip install pandas==1.5.3
 RUN pip install SpaGCN==1.2.7
 
 
-RUN pip install anndata scanpy anndata2ri
+RUN pip install anndata scanpy
 RUN pip install torch
-RUN pip install scipy
-RUN pip install rpy2
+#RUN pip install scipy
+
+RUN pip install pyreadr==0.5.0
+
+#RUN pip install anndata2ri
+#RUN pip install rpy2
 # Set any environment variables if needed
 # ENV MY_VARIABLE=value
 

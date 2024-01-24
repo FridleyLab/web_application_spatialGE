@@ -12,101 +12,128 @@
 
 
 
+            <ul class="nav nav-tabs mt-4" id="myTabsSpaGCN" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="domain-detection-tab" data-bs-toggle="tab" data-bs-target="#domain-detection" type="button" role="tab" aria-controls="domain-detection" aria-selected="true">Domain detection</button>
+                </li>
+                <li v-if="!processing && ('spagcn' in project.project_parameters)" class="nav-item" role="presentation">
+                    <button class="nav-link" id="spatially-variable-genes-tab" data-bs-toggle="tab" data-bs-target="#spatially-variable-genes" type="button" role="tab" aria-controls="spatially-variable-genes" aria-selected="false">Spatially variable genes</button>
+                </li>
+            </ul>
 
 
-            <div class="row justify-content-center text-center m-3">
-                <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
+            <div class="tab-content" id="myTabsSpaGCNContent">
+                <div class="tab-pane fade show active min-vh-50" id="domain-detection" role="tabpanel" aria-labelledby="domain-detection-tab">
+                    <div class="row justify-content-center text-center m-3">
+                        <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
 
-                    <div class="row justify-content-center text-center mt-4">
-                        <div class="">
-                            <div class="me-3">
-                                Percentage of neighborhood expression: <span class="text-lg text-bold text-primary">{{ params.p }}</span> <show-modal tag="sdd_spagcn_perc_neigh_expr"></show-modal>
+                            <div class="row justify-content-center text-center mt-4">
+                                <div class="">
+                                    <div class="me-3">
+                                        Percentage of neighborhood expression: <span class="text-lg text-bold text-primary">{{ params.p }}</span> <show-modal tag="sdd_spagcn_perc_neigh_expr"></show-modal>
+                                    </div>
+                                    <input type="range" min="0.05" max="1" step="0.05" class="w-100" v-model="params.p">
+                                </div>
                             </div>
-                            <input type="range" min="0.05" max="1" step="0.05" class="w-100" v-model="params.p">
+
+                            <div class="mt-4">
+                                <div class="me-3">Seed number (permutation): <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.user_seed"> <show-modal tag="sdd_spagcn_seed_number"></show-modal></div>
+
+                                <div v-if="project.platform_name === 'VISIUM'" class="mt-3">
+                                    <label class="me-3 text-md">
+                                        <input type="checkbox" v-model="params.refine_clusters"> Refine clusters? <show-modal tag="sdd_spagcn_refine_clusters"></show-modal>
+                                    </label>
+                                </div>
+
+                            </div>
+
+                            <div class="mt-4">
+                                <numeric-range title="Number of domains:" show-tool-tip="sdd_spagcn_number_of_domains" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
+                            </div>
+
+
+                            <div class="row justify-content-center text-center m-4">
+                                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                                    <div>Color palette <show-modal tag="sdd_spagcn_color_palette"></show-modal></div>
+                                    <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
+                                </div>
+                            </div>
+
                         </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <div class="me-3">Seed number (permutation): <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-20 w-xxl-10" v-model="params.user_seed"> <show-modal tag="sdd_spagcn_seed_number"></show-modal></div>
-
-                        <div v-if="project.platform_name === 'VISIUM'" class="mt-3">
-                            <label class="me-3 text-md">
-                                <input type="checkbox" v-model="params.refine_clusters"> Refine clusters? <show-modal tag="sdd_spagcn_refine_clusters"></show-modal>
-                            </label>
+                        <div class="p-3 text-center my-4">
+                            <send-job-button label="Run SpaGCN" :disabled="processing" :project-id="project.id" job-name="SpaGCN" @started="SDD_SpaGCN" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
                         </div>
 
-                    </div>
 
-                    <div class="mt-4">
-                        <numeric-range title="Number of domains:" show-tool-tip="sdd_spagcn_number_of_domains" title-class="" :min="2" :max="30" :step="1" :default-max="5" @updated="(min,max) => {params.number_of_domains_min = min; params.number_of_domains_max = max}"></numeric-range>
-                    </div>
+                        <!-- Create tabs for each K value and sub-tabs for each sample -->
+                        <div v-if="!processing && ('spagcn' in project.project_parameters)">
 
+                <!--            <div class="">-->
+                <!--                <a :href="project.assets_url + 'SpaGCN.zip'" class="float-end btn btn-sm btn-outline-info" download>Download all results (ZIP)</a>-->
+                <!--            </div>-->
 
-                    <div class="row justify-content-center text-center m-4">
-                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                            <div>Color palette <show-modal tag="sdd_spagcn_color_palette"></show-modal></div>
-                            <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
-                        </div>
-                    </div>
-
-
-                </div>
-            </div>
-        </div>
-
-        <div class="p-3 text-center mt-4">
-            <send-job-button label="Run SpaGCN" :disabled="processing" :project-id="project.id" job-name="SpaGCN" @started="SDD_SpaGCN" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
-        </div>
-
-
-
-
-
-
-        <!-- Create tabs for each K value and sub-tabs for each sample -->
-        <div v-if="!processing && ('spagcn' in project.project_parameters)">
-
-<!--            <div class="">-->
-<!--                <a :href="project.assets_url + 'SpaGCN.zip'" class="float-end btn btn-sm btn-outline-info" download>Download all results (ZIP)</a>-->
-<!--            </div>-->
-
-            <div>
-                <ul class="nav nav-tabs" id="SPAGCN_myTab" role="tablist">
-                    <template v-for="index in parseInt(spagcn.parameters.number_of_domains_max)">
-                        <template v-if="index >= parseInt(spagcn.parameters.number_of_domains_min)">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" :class="index === parseInt(spagcn.parameters.number_of_domains_min) ? 'active' : ''" :id="'SPAGCN_K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + 'SPAGCN_K_' + index" type="button" role="tab" :aria-controls="'SPAGCN_K_' + index" aria-selected="true">{{ 'K=' + index }}</button>
-                            </li>
-                        </template>
-                    </template>
-                    <a :href="project.assets_url + 'SpaGCN.zip'" class="ms-3 btn btn-sm btn-outline-info" download>Download all results (ZIP)</a>
-                </ul>
-
-                <div class="tab-content m-4" id="SPAGCN_myTabContent">
-
-                    <div v-for="k in parseInt(spagcn.parameters.number_of_domains_max)" class="tab-pane fade min-vh-50" :class="k === parseInt(spagcn.parameters.number_of_domains_min) ? 'show active' : ''" :id="'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="'SPAGCN_K_' + k + '-tab'">
-
-                        <ul class="nav nav-tabs" :id="'SPAGCN_myTab' + k" role="tablist">
-                            <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
-                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_K_' + k + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_K_' + k" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_K_' + k" aria-selected="true">{{ sample.name }}</button>
-                            </li>
-                        </ul>
-
-                        <div class="tab-content" :id="'SPAGCN_myTabContent' + k">
-                            <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_K_' + k + '-tab'">
-                                <div v-for="image in spagcn.plots">
-                                    <template v-if="image.includes('spagcn') && image.includes(sample.name) && (image.endsWith('k' + k) || image.endsWith('k' + k + '_refined'))">
-                                        <h4 class="text-center" v-if="image.includes('refined')">Refined clusters</h4>
-                                        <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                            <div>
+                                <ul class="nav nav-tabs" id="SPAGCN_myTab" role="tablist">
+                                    <template v-for="index in parseInt(spagcn.parameters.number_of_domains_max)">
+                                        <template v-if="index >= parseInt(spagcn.parameters.number_of_domains_min)">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" :class="index === parseInt(spagcn.parameters.number_of_domains_min) ? 'active' : ''" :id="'SPAGCN_K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + 'SPAGCN_K_' + index" type="button" role="tab" :aria-controls="'SPAGCN_K_' + index" aria-selected="true">{{ 'K=' + index }}</button>
+                                            </li>
+                                        </template>
                                     </template>
+                                    <a :href="project.assets_url + 'SpaGCN.zip'" class="ms-3 btn btn-sm btn-outline-info" download>Download all results (ZIP)</a>
+                                </ul>
+
+                                <div class="tab-content m-4" id="SPAGCN_myTabContent">
+
+                                    <div v-for="k in parseInt(spagcn.parameters.number_of_domains_max)" class="tab-pane fade min-vh-50" :class="k === parseInt(spagcn.parameters.number_of_domains_min) ? 'show active' : ''" :id="'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="'SPAGCN_K_' + k + '-tab'">
+
+                                        <ul class="nav nav-tabs" :id="'SPAGCN_myTab' + k" role="tablist">
+                                            <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
+                                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_K_' + k + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_K_' + k" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_K_' + k" aria-selected="true">{{ sample.name }}</button>
+                                            </li>
+                                        </ul>
+
+                                        <div class="tab-content" :id="'SPAGCN_myTabContent' + k">
+                                            <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_K_' + k + '-tab'">
+                                                <div v-for="image in spagcn.plots">
+                                                    <template v-if="image.includes('spagcn') && image.includes(sample.name) && (image.endsWith('k' + k) || image.endsWith('k' + k + '_refined'))">
+                                                        <h4 class="text-center" v-if="image.includes('refined')">Refined clusters</h4>
+                                                        <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
+                </div>
+                <div v-if="!processing && ('spagcn' in project.project_parameters)" class="tab-pane fade min-vh-50" id="spatially-variable-genes" role="tabpanel" aria-labelledby="spatially-variable-genes-tab">
+
+                    <div class="row justify-content-center text-center m-3">
+                        <div class="w-100 w-md-90 w-lg-80 w-xxl-65">
+                            <div>Annotation to test <show-modal tag="stdiff_non_spatial_annotation"></show-modal></div>
+                            <div>
+                                <span>
+                                    <Multiselect id="multiselect_annotation_variables" :options="project.project_parameters.annotation_variables" v-model="params_svg.annotation_to_test"></Multiselect>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="p-3 text-center my-4">
+                        <send-job-button label="SpaGCN - Spatially variable genes" :disabled="processing_svg" :project-id="project.id" job-name="SpaGCN_SVG" @started="SDD_SpaGCN_SVG" @ongoing="processing_svg = true" @completed="processCompleted_SVG" :project="project" ></send-job-button>
+                    </div>
+
                 </div>
             </div>
         </div>
+
+
 
 
     </form>
@@ -127,6 +154,7 @@ import Multiselect from '@vueform/multiselect';
             project: Object,
             samples: Object,
             sddSpagcnUrl: String,
+            sddSpagcnSvgUrl: String,
             colorPalettes: Object,
         },
 
@@ -134,8 +162,10 @@ import Multiselect from '@vueform/multiselect';
             return {
 
                 spagcn: ('spagcn' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.spagcn) : {},
+                spagcn_svg: ('spagcn_svg' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.spagcn_svg) : {},
 
                 processing: false,
+                processing_svg: false,
 
                 textOutput: '',
 
@@ -147,6 +177,10 @@ import Multiselect from '@vueform/multiselect';
                     number_of_domains_min: 2,
                     number_of_domains_max: 5,
                     col_pal: 'smoothrainbow'
+                },
+
+                params_svg: {
+                    annotation_to_test: '',
                 },
 
                 filter_variable: '',
@@ -218,6 +252,27 @@ import Multiselect from '@vueform/multiselect';
                         this.processing = false;
                         console.log(error.response);
                     })
+            },
+
+            SDD_SpaGCN_SVG() {
+                this.processing_svg = true;
+
+                let parameters = {
+                    annotation_to_test: this.params_svg.annotation_to_test
+                };
+
+                axios.post(this.sddSpagcnSvgUrl, parameters)
+                    .then((response) => {
+                    })
+                    .catch((error) => {
+                        this.processing_svg = false;
+                        console.log(error.message);
+                    })
+            },
+
+            processCompleted_SVG() {
+                this.spagcn_svg = ('spagcn_svg' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.spagcn_svg) : {};
+                this.processing_svg = false;
             },
 
         },

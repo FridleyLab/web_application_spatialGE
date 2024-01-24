@@ -417,6 +417,10 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function sdd_spagcn_svg(Project $project) {
+        $jobId = $project->createJob('SpaGCN - Spatially variable genes', 'SpaGCN_SVG', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
 
     public function differential_expression(Project $project) {
         $samples = $project->samples;

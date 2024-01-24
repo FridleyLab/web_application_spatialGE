@@ -1823,12 +1823,14 @@ for(p in n_plots) {
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         //Run SpaGCN on the simple STList
-        $scriptName = 'RunSpaGCN.py';
+        $scriptName = 'SpaGCN1.py';
         $scriptContents = Storage::get("/common/templates/$scriptName");
         $params = ['p', 'user_seed', 'number_of_domains_min', 'number_of_domains_max', 'refine_clusters'];
         foreach ($params as $param) {
             $scriptContents = str_replace("{param_$param}", $parameters[$param], $scriptContents);
         }
+        $sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
+        $scriptContents = str_replace("{param_sample_list}", $sampleList, $scriptContents);
         Storage::put("$workingDir/$scriptName", $scriptContents);
         $output .= $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');
 
@@ -1904,19 +1906,15 @@ library('spatialGE')
 # Load normalized STList
 {$this->_loadStList('normalized_stlist')}
 
-simple_stlist = list(tr_counts=normalized_stlist@tr_counts,
-                    spatial_meta=lapply(normalized_stlist@spatial_meta, function(i){
-                      df_tmp = as.data.frame(i[, 1:3])
-                      #rownames(df_tmp) = df_tmp[[1]]
-                      #df_tmp = df_tmp[, -1]
-                      return(df_tmp)
-                    }),
-                    col_names=lapply(normalized_stlist@tr_counts, function(i){ return(colnames(i)) }),
-                    gene_names=lapply(normalized_stlist@tr_counts, function(i){ return(rownames(i)) }),
-                    sample_names=names(normalized_stlist@tr_counts)
-                )
-
-{$this->_saveStList('simple_stlist')}
+for(i in names(normalized_stlist@tr_counts)){
+    tr_counts = as.matrix(normalized_stlist@tr_counts[[i]])
+    spatial_meta = normalized_stlist@spatial_meta[[i]][, 1:3]
+    col_names = colnames(normalized_stlist@tr_counts[[i]])
+    gene_names = rownames(normalized_stlist@tr_counts[[i]])
+    sample_name = i
+    save('tr_counts', 'spatial_meta', 'col_names', 'gene_names', 'sample_name',
+         file=paste0(i, '_simplestlist_example.RData'))
+  }
 
 ";
         return $script;
@@ -1968,14 +1966,26 @@ for(i in names(stclust_stlist@spatial_meta)){
     dplyr::left_join(., spagcn_tmp, by='libname')
 }
 
+# Annotation names for dropdown selection
 annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_', colnames(i), value=T); return(var_cols) })))
 write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+
+# Save tables with spot/cell domain assigments (used in SpaGCN-SVG analysis to avoid reading STlist again)
+for(i in names(stclust_stlist@spatial_meta)){
+  df_tmp = stclust_stlist@spatial_meta[[i]] %>% dplyr::select(1, grep('stclust_|spagcn_', colnames(stclust_stlist@spatial_meta[[i]]), value=T))
+  write.csv(df_tmp, paste0(i, '_domain_annotations_deg_svg.csv'), row.names=F, quote=F)
+  rm(df_tmp) # Clean env
+}
+
+# Save unique lables for each annotation (to display in dropdowns)
 cluster_values = tibble::tibble()
 for(i in names(stclust_stlist@spatial_meta)){
   for(cl in grep('spagcn_|stclust_', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
     cluster_values = dplyr::bind_rows(cluster_values,
-                                      tibble::tibble(cluster=as.character(unique(stclust_stlist@spatial_meta[[i]][[cl]]))) %>%
-                                        tibble::add_column(annotation=as.character(cl)))
+                                        tibble::tibble(cluster=as.vector(unique(stclust_stlist@spatial_meta[[i]][[cl]]))) %>%
+                                        tibble::add_column(annotation=as.vector(cl)))
+                                        #tibble::tibble(cluster=as.character(unique(stclust_stlist@spatial_meta[[i]][[cl]]))) %>%
+                                        #tibble::add_column(annotation=as.character(cl)))
   }}
 cluster_values = dplyr::distinct(cluster_values) %>%
   dplyr::select(annotation, cluster)
@@ -2008,6 +2018,37 @@ for(p in n_plots) {
 
 ";
         return $script;
+    }
+
+
+
+
+    public function SpaGCN_SVG($parameters)
+    {
+
+        $workingDir = $this->workingDir();
+
+        //Run SpaGCN_SVG on the simple STList
+        $scriptName = 'SpaGCN2_SVG.py';
+        $scriptContents = Storage::get("/common/templates/$scriptName");
+
+        $params = ['annotation_to_test'];
+        foreach ($params as $param) {
+            $scriptContents = str_replace("{param_$param}", $parameters[$param], $scriptContents);
+        }
+        $sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
+        $scriptContents = str_replace("{param_sample_list}", $sampleList, $scriptContents);
+        Storage::put("$workingDir/$scriptName", $scriptContents);
+        $output = $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');
+
+
+        $file = $workingDir . 'spagcn_svg_files.json';
+        if (Storage::fileExists($file)) {
+            $data = trim(Storage::read($file));
+            ProjectParameter::updateOrCreate(['parameter' => 'spagcn_svg', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'csvs' => json_decode($data)])]);
+        }
+
+        return ['output' => $output, 'script' => $scriptContents];
     }
 
 
@@ -2597,8 +2638,6 @@ lapply(names(grad_res), function(i){
         //tabs per sample
         //Spatial plot,  Log-fold change
 
-        //Gene set, p-?value, q-?value, Enrichment score
-
         $workingDir = $this->workingDir();
 
         $scriptName = 'STdeconvolve2.R';
@@ -2649,13 +2688,53 @@ lapply(names(grad_res), function(i){
         }
 
 
+
+
+        $gsea_results = [];
+        if (count($topic_annotations)) {
+
+            $column_names = [
+                'gene_set' => 'Gene set',
+                'p_val' => 'p-value',
+                'q_val' => 'q-value',
+                'sscore' => 'Enrichment score'
+            ];
+
+            foreach($topic_annotations as $sampleName => $topics) {
+                $gsea_results[$sampleName] = [];
+                foreach($topics as $topicName => $topic) {
+
+                    $fileName = $this->workingDir() . 'gsea_results_' . $sampleName . '_' . $topicName . '.csv';
+
+                    if (Storage::fileExists($fileName)) {
+
+                        $contents = Storage::read($fileName);
+                        $contents = str_replace('p.val', 'p_val', $contents);
+                        $contents = str_replace('q.val', 'q_val', $contents);
+                        Storage::put($fileName, $contents);
+
+                        $gsea_results[$sampleName][$topicName] = json_decode($this->csv2json($fileName, 0, $column_names, true));
+                    }
+                }
+            }
+        }
+
+
+
+        $scatterpie_plots = $this->STdeconvolveMovePlotsToPublic();
+
+
+        ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'logfold_plots' => $topic_annotations, 'scatterpie_plots' => $scatterpie_plots, 'gsea_results' => $gsea_results])]);
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function STdeconvolveMovePlotsToPublic() {
+        $workingDir = $this->workingDir();
         $file = $workingDir . 'stdeconvolve2_logfold_plots.csv';
-        //$logfold_plots = [];
         if (Storage::fileExists($file)) {
             $data = explode(',', trim(Storage::read($file)));
             foreach ($data as $plot) {
-
-                //$logfold_plots[] = $this->workingDirPublicURL() . 'stdeconvolve2_' . $plot;
                 $file_extensions = ['svg', 'pdf', 'png'];
 
                 foreach ($file_extensions as $file_extension) {
@@ -2691,11 +2770,7 @@ lapply(names(grad_res), function(i){
             }
         }
 
-
-
-        ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'logfold_plots' => $topic_annotations, 'scatterpie_plots' => $scatterpie_plots/*, 'topic_annotations' => $topic_annotations*/])]);
-
-        return ['output' => $output, 'script' => $scriptContents];
+        return $scatterpie_plots;
     }
 
     private function getSTdeconvolve2Script($parameters)
@@ -2740,6 +2815,30 @@ lapply(names(grad_res), function(i){
         foreach($annotations as $sampleName => $data) {
             Storage::put($this->workingDir() . 'topic_annotations_' . $sampleName . '.csv', $data);
         }
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'STdeconvolve3_rename_topics.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getSTdeconvolve3Script();
+        Storage::put($script, $scriptContents);
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+        $this->STdeconvolveMovePlotsToPublic();
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function getSTdeconvolve3Script()
+    {
+
+        $script = Storage::get("/common/templates/STdeconvolve3_rename_topics.R");
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+
+        return $script;
     }
 
 
@@ -2890,7 +2989,7 @@ lapply(names(grad_res), function(i){
         ProjectParameter::updateOrCreate(['parameter' => 'job.' . $command . '.email', 'project_id' => $this->id], ['type' => 'number', 'value' => $sendEmail ? 1 : 0]);
     }
 
-    public function csv2json($file, $column_offset = 2, $column_names = [])
+    public function csv2json($file, $column_offset = 2, $column_names = [], $return_string = false)
     {
         $data = Storage::read($file);
         $lines = explode("\n", $data);
@@ -2900,8 +2999,10 @@ lapply(names(grad_res), function(i){
             //process the headers
             $fields = explode(',', $lines[0]);
             if (sizeof($fields) > $column_offset) {
-                for ($i = $column_offset; $i < sizeof($fields); $i++)
+                for ($i = $column_offset; $i < sizeof($fields); $i++) {
+                    $fields[$i] = str_replace('"', '', $fields[$i]);
                     $headers[] = '{ "value": "' . $fields[$i] . '", "text": "' . (array_key_exists($fields[$i], $column_names) ? $column_names[$fields[$i]] : $fields[$i]) . '", "sortable": "true" }';
+                }
 
                 //process the body
                 for ($k = 1; $k < sizeof($lines); $k++) {
@@ -2923,7 +3024,7 @@ lapply(names(grad_res), function(i){
                                 //    $value = '<a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=' . $value . '" target="_blank">';
 
                                 //wrap everything in quotes to prevent javascript from auto-formatting scientific notation
-                                $value = '"' . $value . '"';
+                                $value = '"' . str_replace('"', '', $value) . '"';
 
                                 $body_line .= '"' . $fields[$i] . '":' . $value;
                             }
@@ -2934,6 +3035,9 @@ lapply(names(grad_res), function(i){
             }
         }
         $contents = '{' . "\n" . '"headers": [' . "\n" . implode(",\n", $headers) . '],' . "\n" . '"items": [' . "\n" . implode(",\n", $body) . "\n" . ']' . "\n" . '}';
+
+        if($return_string) return $contents;
+
         Storage::put(explode('.', $file)[0] . '.json', $contents);
     }
 
