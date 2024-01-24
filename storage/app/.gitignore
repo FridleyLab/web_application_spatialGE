@@ -5,4 +5,6 @@
 !common/stenrich/*
 !common/stdeconvolve/
 !common/stdeconvolve/*
+!common/templates/
+!common/templates/*
 !.gitignore
