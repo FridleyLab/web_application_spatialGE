@@ -99,6 +99,7 @@ class Project extends Model
         if (Storage::fileExists($fileName)) {
             $data = Storage::read($fileName);
             $lines = explode("\n", $data);
+            sort($lines);
             $annotations = [];
             foreach ($lines as $annotation) {
                 if (strlen(trim($annotation))) {
@@ -2049,20 +2050,16 @@ for(p in n_plots) {
         }
 
 
-        $column_names2 = [
-            'genes',
-            'in_group_fraction',
-            'out_group_fraction',
-            'in_out_group_ratio',
-            'in_group_mean_exp',
-            'out_group_mean_exp',
-            'fold_change',
-            'pvals_adj'
+        $column_names = [
+            'genes' => 'Gene',
+            'in_group_fraction' => 'In-group fraction',
+            'out_group_fraction' => 'Out-group fraction',
+            'in_out_group_ratio' => 'In/out-group ratio',
+            'in_group_mean_exp' => 'In-group mean expr.',
+            'out_group_mean_exp' => 'Out-group mean expr.',
+            'fold_change' => 'Fold change',
+            'pvals_adj' => 'Adjusted p-value'
         ];
-
-        //TODO: temp
-        $column_names = [];
-        foreach($column_names2 as $column) $column_names[$column] = $column;
 
         $filesJSON = [];
         $k = 0;
@@ -2691,7 +2688,7 @@ lapply(names(grad_res), function(i){
         $scriptContents = $this->getSTdeconvolve2Script($parameters);
 
         if(strlen($parameters['celltype_markers'])) {
-            $file_ext = ['csv', 'RDS'];
+            $file_ext = [/*'csv',*/ 'RDS'];
             foreach ($file_ext as $ext) {
                 Storage::copy("/common/stdeconvolve/{$parameters['celltype_markers']}.$ext", $this->workingDir() . $parameters['celltype_markers'] . ".$ext");
             }

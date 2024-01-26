@@ -19,7 +19,7 @@ class SampleController extends Controller
     public function store()
     {
 
-        $userFolder = auth()->user()->getuserFolder();
+        $userFolder = auth()->user()->getUserFolder();
 
 
         if(request()->file('files')) {

@@ -86,6 +86,20 @@ export default {
 
     computed: {
 
+        coordinatesColumnCount() {
+            let platform_columns = {
+                VISIUM: 6,
+                GENERIC: 3,
+            };
+
+            //Error
+            if(!(this.project.platform_name in platform_columns)) {
+                return 99;
+            }
+
+            return platform_columns[this.project.platform_name];
+        },
+
         fileExtension() {
             return this.file ?  this.file.name.split('.').pop() : '';
         },
@@ -271,11 +285,13 @@ export default {
 
         checkCoordinatesData(data) {
 
-            const columnCount = 6;
+            const columnCount = this.coordinatesColumnCount;
+
+            console.log(columnCount);
 
             let lines = data.split(/\r?\n|\r|\n/g);
-            if((!lines.length || !lines[0].length || lines[0].split(/\t|,/g).length > 6 /*!== 6*/)) {
-               this.errorMessage = 'File should be "tissue_positions.csv" from space ranger and have 6 columns';
+            if((!lines.length || !lines[0].length || lines[0].split(/\t|,/g).length !== columnCount)) {
+               this.errorMessage = 'File should be "tissue_positions.csv" from space ranger and have ' + columnCount + ' columns';
                return false;
             }
 
@@ -283,16 +299,16 @@ export default {
             lines.forEach((line) => {
                 let values = line.split(/\t|,/g);
 
-                if(values.length >6 /*!== 6*/ && (i < lines.length) && !this.errorMessage.length ) {
-                    this.errorMessage = 'Line ' + i + ': number of columns is not 6';
+                if(values.length !== columnCount && (i < lines.length) && !this.errorMessage.length ) {
+                    this.errorMessage = 'Line ' + i + ': number of columns is not ' + columnCount;
                     return false;
                 }
 
-                //TODO: if cols is 3, check [2] and [3]
-                if((Number(values[4]) < 100 || Number(values[5]) < 100) && (i < lines.length) && !this.errorMessage.length ) {
+                //if cols is 3, check [2] and [3], if 6 columns check 5 and 6
+                /*if((Number(values[columnCount-2]) < 100 || Number(values[columnCount-1]) < 100) && (i < lines.length) && !this.errorMessage.length ) {
                     this.errorMessage = 'Line ' + i + ': coordinates too small';
                     return false;
-                }
+                }*/
 
                 i++;
             });

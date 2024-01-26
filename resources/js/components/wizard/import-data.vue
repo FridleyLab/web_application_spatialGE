@@ -92,6 +92,8 @@
 </template>
 <script>
 
+import JSZip from 'jszip';
+
 import { getCurrentInstance } from 'vue';
 
     export default {
@@ -204,7 +206,24 @@ import { getCurrentInstance } from 'vue';
                 this.jobPositionInQueue =  await this.$getJobPositionInQueue(this.project.id, 'createStList');
             },*/
 
-            importSample() {
+
+            async zipFile(file) {
+
+                if (file) {
+                    const zip = new JSZip();
+                    zip.file(file.name, file);
+
+                    const zippedBlob = await zip.generateAsync({ type: 'blob' })
+                        .then(function (blob) {
+                            console.log(blob);
+                        });;
+
+                    return zippedBlob;
+                }
+            },
+
+
+            async importSample() {
                 /*
                     Initialize the form data
                 */
@@ -217,6 +236,11 @@ import { getCurrentInstance } from 'vue';
                 */
                 let i = 0;
                 if(this.expressionFile) {
+                    /*console.log('Zipping...');
+                    let expressionFile = await this.zipFile(this.expressionFile);
+                    console.log('Zipped...');
+                    console.log(expressionFile.size);
+                    return;*/
                     formData.append('files[' + i + ']', this.expressionFile);
                     formData.append('expressionFile', this.expressionFile.name);
                     i++;
@@ -252,6 +276,7 @@ import { getCurrentInstance } from 'vue';
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         },
+                        maxContentLength: 500*1024*1024,
                         onUploadProgress: function( progressEvent ) {
                             this.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 ) );
                         }.bind(this)
@@ -264,6 +289,7 @@ import { getCurrentInstance } from 'vue';
                 }
                 ).catch((error) => {
                         console.log('FAILURE!!');
+                        console.log(error.message);
                         this.uploading = false;
                 });
             },

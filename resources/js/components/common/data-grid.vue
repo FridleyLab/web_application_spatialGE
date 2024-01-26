@@ -19,6 +19,8 @@
 
                   :word-wrap-enabled="false"
 
+                  :row-alternation-enabled="true"
+
                   @cell-prepared="onCellPrepared"
     >
 
@@ -47,15 +49,18 @@
 
         <DxColumn v-for="(column, index) in headers"
                   :data-field="column.value"
-                  :cell-template="column.value === 'gene' ? (column.value + '-cell') : ''"
+                  :cell-template="['gene', 'genes'].includes(column.value) ? (column.value + '-cell') : ''"
                   :data-type="is_numeric_column(column.value) ? 'number' : ''"
                   :alignment="is_numeric_column(column.value) ? 'right' : ''"
-
                   :caption="column.text"
         >
         </DxColumn>
 
         <template #gene-cell="{ data }">
+            <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data.text" class="text-info" target="_blank">{{ data.text }}</a>
+        </template>
+
+        <template #genes-cell="{ data }">
             <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data.text" class="text-info" target="_blank">{{ data.text }}</a>
         </template>
 
@@ -149,9 +154,11 @@ export default {
 
     methods: {
         onCellPrepared(cell) {
-            if(cell.column.dataField === 'gene')
-                console.log()
-                //cell.cellElement.href  = '<a href="https://google.com" target="_blank">Goo</a>';
+            /*if(cell.rowType === 'data' && this.is_numeric_column(cell.column.dataField)) {
+                console.log(cell);
+                cell.text = cell.data[cell.column.dataField];
+                cell.displayValue = cell.data[cell.column.dataField].toString();
+            }*/
         },
 
         is_numeric_column(column) {
@@ -159,7 +166,8 @@ export default {
                 'wilcox_p_val', 'ttest_p_val', 'mm_p_val', 'adj_p_val', 'exp_p_val', 'exp_adj_p_val',
                 'min_lm_coef', 'min_lm_pval', 'min_spearman_r', 'min_spearman_r_pval', 'min_spearman_r_pval_adj',
                 'avg_lm_coef', 'avg_lm_pval', 'avg_spearman_r', 'avg_spearman_r_pval', 'avg_spearman_r_pval_adj',
-                'sscore', 'q_val', 'p_val'
+                'sscore', 'q_val', 'p_val', 'in_group_fraction', 'out_group_fraction', 'in_out_group_ratio', 'in_group_mean_exp',
+                'out_group_mean_exp', 'fold_change', 'pvals_adj'
             ].includes(column);
         }
     },
