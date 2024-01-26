@@ -2045,8 +2045,51 @@ for(p in n_plots) {
         $file = $workingDir . 'spagcn_svg_files.json';
         if (Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            ProjectParameter::updateOrCreate(['parameter' => 'spagcn_svg', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'csvs' => json_decode($data)])]);
+            $filesCSV = json_decode($data);
         }
+
+
+        $column_names2 = [
+            'genes',
+            'in_group_fraction',
+            'out_group_fraction',
+            'in_out_group_ratio',
+            'in_group_mean_exp',
+            'out_group_mean_exp',
+            'fold_change',
+            'pvals_adj'
+        ];
+
+        //TODO: temp
+        $column_names = [];
+        foreach($column_names2 as $column) $column_names[$column] = $column;
+
+        $filesJSON = [];
+        $k = 0;
+        foreach ($filesCSV as $sampleName => $files) {
+            $filesJSON[$sampleName] = [];
+            $k_tmp = 0;
+            foreach ($files as $file) {
+                if (Storage::fileExists($workingDir . $file)) {
+
+                    $this->csv2json($workingDir . $file, 0, $column_names);
+
+                    $fileJSON = str_replace('.csv', '.json', $file);
+
+                    $file_public = $this->workingDirPublic() . $fileJSON;
+                    $file_to_move = $workingDir . $fileJSON;
+                    Storage::delete($file_public);
+                    Storage::move($file_to_move, $file_public);
+
+                    $filesJSON[$sampleName][] = $this->workingDirPublicURL() . $fileJSON;
+
+                    $k_tmp++;
+                }
+            }
+            $k = $k_tmp;
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'spagcn_svg', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'json_files' => $filesJSON, 'k' => $k])]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -2088,7 +2131,7 @@ for(p in n_plots) {
             $files[] = 'stdiff_ns_' . $sample . '.csv';
             $files[] = 'stdiff_ns_' . $sample . '.json';
         }
-        foreach ($files as $file)
+        foreach ($files as $file) {
             if (Storage::fileExists($workingDir . $file)) {
 
                 if (explode('.', $file)[1] === 'csv')
@@ -2099,6 +2142,7 @@ for(p in n_plots) {
                 Storage::delete($file_public);
                 Storage::move($file_to_move, $file_public);
             }
+        }
 
 
         $file = $workingDir . 'stdiff_ns_volcano_plots.csv';
