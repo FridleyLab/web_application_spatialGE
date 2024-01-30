@@ -50,11 +50,19 @@
                             <div class="row">
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep spots/cells with this number of counts:" show-tool-tip="qcfilter_spots_cells_number_counts" title-class="text-bold" :min="0" :max="project.project_parameters.max_spot_counts" :step="500" @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
+                                    <numeric-range
+                                        title="Keep spots/cells with this number of counts:"
+                                        show-tool-tip="qcfilter_spots_cells_number_counts"
+                                        title-class="text-bold" :min="0" :max="project.project_parameters.max_spot_counts" :step="500"
+                                        @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
                                 </div>
 
                                 <div class="mt-2 pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep spots/cells with this number of expressed genes:" show-tool-tip="qcfilter_spots_cells_number_expressed_counts" :show-percentages="true" title-class="text-bold" :min="0" :max="project.project_parameters.total_genes" :step="500" @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
+                                    <numeric-range
+                                        title="Keep spots/cells with this number of expressed genes:"
+                                        show-tool-tip="qcfilter_spots_cells_number_expressed_counts"
+                                        :show-percentages="true" title-class="text-bold" :min="0" :max="project.project_parameters.total_genes" :step="500"
+                                        @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
                                 </div>
 
                                 <div class="mt-4">

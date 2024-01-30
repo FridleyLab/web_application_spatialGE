@@ -11,7 +11,7 @@ class ProjectGene extends Model
 {
     public $timestamps = false;
 
-    protected $table = 'project_genes';
+    protected $table = 'project_gene';
 
     //protected $fillable = ['gene', 'project_id'];
 

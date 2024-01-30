@@ -211,14 +211,25 @@ import { getCurrentInstance } from 'vue';
 
                 if (file) {
                     const zip = new JSZip();
-                    zip.file(file.name, file);
+                    let zippedBlob = null;
 
-                    const zippedBlob = await zip.generateAsync({ type: 'blob' })
-                        .then(function (blob) {
-                            console.log(blob);
-                        });;
 
-                    return zippedBlob;
+                    //const reader = new FileReader();
+                    //reader.onload = async function (event) {
+
+                        zip.file(file.name + '.zip', event.target.result);
+
+                        zippedBlob = await zip.generateAsync({ type: 'blob' })
+                            .then(function (blob) {
+                                //console.log(blob);
+                                saveAs(blob, "hello.zip");
+                            });
+
+                    //}
+
+                    //await reader.readAsArrayBuffer(file);
+
+                        //return zippedBlob;
                 }
             },
 
@@ -236,11 +247,11 @@ import { getCurrentInstance } from 'vue';
                 */
                 let i = 0;
                 if(this.expressionFile) {
-                    /*console.log('Zipping...');
-                    let expressionFile = await this.zipFile(this.expressionFile);
-                    console.log('Zipped...');
-                    console.log(expressionFile.size);
-                    return;*/
+                    // console.log('Zipping...');
+                    //let expressionFile = await this.zipFile(this.expressionFile);
+                    // console.log('Zipped...');
+                    // console.log(expressionFile.size);
+                    // return;
                     formData.append('files[' + i + ']', this.expressionFile);
                     formData.append('expressionFile', this.expressionFile.name);
                     i++;

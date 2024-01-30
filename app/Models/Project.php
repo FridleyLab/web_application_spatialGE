@@ -333,13 +333,13 @@ class Project extends Model
 
     private function createGeneList($genes_file, $context)
     {
-        //if(Storage::fileExists($genes_file)) {
-        if (file_exists($genes_file)) {
+        if(Storage::fileExists($genes_file)) {
+        //if (file_exists($genes_file)) {
 
             /***************** COPIAR EL ARCHIVO LOCAL o utilizar File:: *******/
             //$data = file_get_contents($genes_file); //FALLA AL LEER EL ARCHIVO
 
-            $fileName = Storage::path($this->workingDir() . 'genesNormalized.csv');
+            /*$fileName = Storage::path($this->workingDir() . 'genesNormalized.csv');
 
             //copy($genes_file, $fileName);
 
@@ -348,7 +348,9 @@ class Project extends Model
             Log::info('=================>  ' . $command);
             $process = Process::run($command);
 
-            $data = file_get_contents($fileName);
+            $data = file_get_contents($fileName);*/
+
+            $data = Storage::get($genes_file);
 
 
             $genes = explode("\n", $data);

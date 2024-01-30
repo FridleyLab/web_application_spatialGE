@@ -34,16 +34,10 @@ load(file='normalized_stlist.RData')
 suggested_k = read.csv('./stdeconvolve_selected_k.csv')
 all_ldas = readRDS('./stdeconvolve_lda_models.RDS')
 
-col_pal = as.vector(khroma::color(color_pal, force=T)(length(celltype_markers)))
-names(col_pal) = names(celltype_markers)
-col_pal = c(col_pal, unknown='gray40')
-# Save general color palette
-saveRDS(col_pal, './general_color_palette_stdeconvolve.RDS')
-
 ps = list()
 sctr_p = list()
 topic_props = list()
-sample_col_pal = list()
+possible_celltypes = c()
 for(i in suggested_k[['sample_name']]){
   opt_k = suggested_k[['suggested_k']][ suggested_k[['sample_name']] == i ]
 
@@ -65,13 +59,19 @@ for(i in suggested_k[['sample_name']]){
 
   # Save GSEA results to display
   lapply(names(celltype_annotations[['results']]), function(j){
-    celltype_annotations[['results']][[j]] %>% dplyr::select(-edge) %>%
+    celltype_annotations[['results']][[j]] %>% dplyr::select(-edge) %>% dplyr::filter(sscore > 0) %>%
       tibble::rownames_to_column('gene_set') %>%
       write.csv(., paste0('./gsea_results_', i, '_', j, '.csv'), row.names=F)
   })
 
   # Change NAs to 'unknown'
   celltype_annotations[['predictions']][is.na(celltype_annotations$predictions)] = 'unknown'
+
+  # Save all possible cell types according to GSEA results to create color palette
+  possible_celltypes = unique(append(possible_celltypes,
+                                     unlist(lapply(names(celltype_annotations[['predictions']]), function(j){
+                                       return(celltype_annotations[['predictions']][[j]])
+                                     }))))
 
   # Save selected annotation per topic
   topic_ann = tibble::enframe(celltype_annotations[['predictions']])
@@ -133,19 +133,12 @@ for(i in suggested_k[['sample_name']]){
     dplyr::left_join(normalized_stlist@spatial_meta[[i]] %>%
                        dplyr::select(c('libname', 'ypos', 'xpos')), by='libname')
 
-  # Change color palette names
-  col_pal_tmp = unlist(lapply(1:length(celltype_annotations[['predictions']]), function(t){
-    topic_col = col_pal[names(col_pal) == celltype_annotations[['predictions']][t]]
-    names(topic_col) = paste0(names(celltype_annotations[['predictions']][t]), ' (', names(topic_col), ')')
-    return(topic_col)
-  }))
 
   cols_prop = colnames(decon_prop_sctr %>% dplyr::select(-c('libname', 'dummycol', 'xpos', 'ypos', 'radius')))
   sctr_p[[i]] = ggplot() +
     scatterpie::geom_scatterpie(data=decon_prop_sctr, aes(x=xpos, y=ypos, group=libname, r=radius), color=NA, cols=cols_prop) +
     ggtitle(i) +
-    scale_fill_manual(values=col_pal_tmp) +
-    guides(fill=guide_legend(nrow=3)) +
+    guides(fill=guide_legend(ncol=3)) +
     scale_y_reverse() +
     coord_equal() +
     theme_void() +
@@ -153,11 +146,40 @@ for(i in suggested_k[['sample_name']]){
 
   # Save per-spot topic proportions in case user decides to change plots
   topic_props[[i]] = decon_prop_sctr
-  # Save color palette
-  sample_col_pal[[i]] = col_pal_tmp
 
- rm(decon_expr, decon_prop, cols_prop, col_pal_tmp, decon_prop_sctr, celltype_annotations, topic_ann) # Clean env
+ rm(decon_expr, decon_prop, cols_prop, decon_prop_sctr, celltype_annotations, topic_ann) # Clean env
 }
+
+
+# Create base color palette
+col_pal = sample(as.vector(khroma::color(color_pal, force=T)(length(possible_celltypes))))
+names(col_pal) = possible_celltypes
+if(any(names(col_pal) == 'unknown')){
+  col_pal[['unknown']] = 'gray40'
+} else{
+  col_pal = c(col_pal, unknown='gray40')
+}
+# Save general color palette
+saveRDS(col_pal, './general_color_palette_stdeconvolve.RDS')
+
+# Change color palette names per sample
+# Also change colors in scatterpies and save sample color palette
+sample_col_pal = list()
+for(i in names(topic_props)){
+  topics_tmp = colnames(topic_props[[i]] %>% dplyr::select(-c('libname', 'dummycol', 'radius', 'ypos', 'xpos')))
+  sample_col_pal[[i]] = c()
+  for(j in topics_tmp){
+    topic_cell_tmp = gsub('^Topic_[0-9]+ \\(', '', j) %>% gsub('\\)$', '', .)
+    sample_col_pal[[i]] = append(sample_col_pal[[i]], col_pal[[topic_cell_tmp]])
+    rm(topic_cell_tmp) # Clean env
+  }
+  names(sample_col_pal[[i]]) = topics_tmp
+  rm(topics_tmp) # Clean env
+
+  sctr_p[[i]] = sctr_p[[i]] + scale_fill_manual(values=sample_col_pal[[i]])
+}
+
+
 
 # Save log-fold change plots
 plotnames = list()

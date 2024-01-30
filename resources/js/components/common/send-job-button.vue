@@ -1,6 +1,6 @@
 <template>
         <input v-if="startButtonVisible && !processing" type="button" class="btn btn-lg mt-2 mb-0" :class="((processing || disabled || otherJobsInQueue) ? 'disabled' : '') + (!secondary ? ' bg-gradient-info' : ' btn-sm btn-outline-info')" @click="sendStartSignal" :value="label" />
-        <div v-if="otherJobsInQueue" class="mt-2 text-warning text-xxs">Running other process <show-modal tag="running_other_process"></show-modal></div>
+        <div v-if="otherJobsInQueue && startButtonVisible" class="mt-2 text-warning text-xxs">Running other process <show-modal tag="running_other_process"></show-modal></div>
         <div v-if="processing" :class="processing ? 'popup-center' : ''" class="border border-1 rounded rounded-2 bg-gray-400 p-4">
             <div class="text-info text-bold">
                 <div class="text-center">

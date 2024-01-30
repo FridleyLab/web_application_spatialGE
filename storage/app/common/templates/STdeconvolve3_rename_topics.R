@@ -11,7 +11,7 @@ library('khroma')
 library('spatialGE')
 
 color_pal = 'discreterainbow' # Same as in Step 2, no dropdown needed for the moment
-col_pal = readRDS('./color_palette_stdeconvolve.RDS')
+col_pal = readRDS('./general_color_palette_stdeconvolve.RDS')
 
 # Read logFC plots
 ps = readRDS('./topic_logfc_all_plots.RDS')
@@ -32,19 +32,23 @@ for(i in sample_annots){
   topic_annot = topic_annot[which(topic_annot[[2]] != topic_annot[[3]]), ]
   if(nrow(topic_annot) > 0){
     # Get sample name
-    sample_name = gsub('[\\.\\/a-zA-Z0-9]+topic_annotations_', '', i) %>% gsub('\\.csv', '', .)
+    sample_name = gsub('[_\\.\\/a-zA-Z0-9]+topic_annotations_', '', i) %>% gsub('\\.csv', '', .)
 
     # Make changes in logFC plot and scatterpie color palette
     for(topic in topic_annot[['topic']]){
       # Change name in sample color palette
       new_topic_name = paste0(topic, ' (', topic_annot[[3]][topic_annot[[1]] == topic], ')')
-      names(sample_col_pal[[sample_name]])[grep(paste0(topic, ' '), names(sample_col_pal[[sample_name]]))] = new_topic_name
 
       # Use color of biological ID is possible
-      bio_id = grep(paste0('^', topic, ' '), names(sample_col_pal[[sample_name]]), value=T) %>% gsub('^Topic_[0-9] \\(', '', .) %>% gsub('\\)$', '', .)
+      bio_id = topic_annot[[3]][ topic_annot[[1]] == topic ]
       bio_id_present = grep(paste0('^', bio_id, '$'), names(col_pal), value=T)
       if(length(bio_id_present) > 0){
         sample_col_pal[[sample_name]][new_topic_name] = as.vector(col_pal[bio_id_present])
+      } else if(any(grepl(paste0('^Topic_[0-9]+ \\(', bio_id, '\\)'), names(sample_col_pal[[sample_name]])))){ # See if ID already in sample palette
+        # Get only first hit (other topics could have same ID)
+        existing_tmp = grep(paste0('^Topic_[0-9]+ \\(', bio_id, '\\)'), names(sample_col_pal[[sample_name]]), value=T)
+        sample_col_pal[[sample_name]][new_topic_name] = sample_col_pal[[sample_name]][existing_tmp][[1]]
+        rm(existing_tmp) # Clean env
       } else{
         sample_col_pal[[sample_name]][new_topic_name] = sample(khroma::color(color_pal, force=T)(100), 1)
       }
@@ -65,7 +69,7 @@ for(i in sample_annots){
       scatterpie::geom_scatterpie(data=topic_props[[sample_name]], aes(x=xpos, y=ypos, group=libname, r=radius), color=NA, cols=cols_prop) +
       ggtitle(sample_name) +
       scale_fill_manual(values=sample_col_pal[[sample_name]]) +
-      guides(fill=guide_legend(nrow=3)) +
+      guides(fill=guide_legend(ncol=3)) +
       scale_y_reverse() +
       coord_equal() +
       theme_void() +

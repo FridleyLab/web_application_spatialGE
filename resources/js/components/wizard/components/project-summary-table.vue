@@ -7,7 +7,7 @@
                 <th colspan="6" class="text-center">per spot/cell metrics</th>
             </tr>
             <tr>
-                <th v-for="header in main_data.headers" scope="col">{{ header.replace('_per_spotcell', '').replace('_', ' ').replace('mean', 'average') }}</th>
+                <th v-for="header in main_data.headers" scope="col">{{ header in header_names ? header_names[header] : header.replace('_per_spotcell', '').replace('_', ' ').replace('mean', 'average') }}</th>
             </tr>
             </thead>
             <tbody>
@@ -38,6 +38,18 @@
             return {
                 main_data: {headers: [], rows: []},
                 reference_data: {headers: [], rows: []},
+
+                header_names: {
+                    sample_name: 'Sample name',
+                    spotscells: 'Total spots/cells',
+                    genes: 'Total genes',
+                    min_counts_per_spotcell: 'Min. counts',
+                    mean_counts_per_spotcell: 'Avg. counts',
+                    max_counts_per_spotcell: 'Max. counts',
+                    min_genes_per_spotcell: 'Min. genes',
+                    mean_genes_per_spotcell: 'Avg. genes',
+                    max_genes_per_spotcell: 'Max. genes'
+                },
             }
         },
 
