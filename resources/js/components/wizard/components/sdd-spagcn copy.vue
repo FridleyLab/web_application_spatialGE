@@ -115,7 +115,7 @@
 
                     <div class="row justify-content-center text-center m-3">
                         <div class="w-100 w-md-90 w-lg-80 w-xxl-65">
-                            <div>Annotation to test <show-modal tag="stdiff_non_spatial_annotation"></show-modal></div>
+                            <div>Annotation to test <show-modal tag="spagcn_spavargenes_annotation"></show-modal></div>
                             <div>
                                 <span>
                                     <Multiselect id="multiselect_annotation_variables" :options="project.project_parameters.annotation_variables" v-model="params_svg.annotation_to_test"></Multiselect>
