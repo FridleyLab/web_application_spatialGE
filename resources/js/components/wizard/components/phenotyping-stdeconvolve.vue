@@ -32,16 +32,16 @@
                         <div class="w-100 w-lg-90 w-xxl-85">
 
                             <div class="mt-4">
-                                <numeric-range title="Fit LDA models with this many topics:" show-tool-tip="sdd_spagcn_number_of_domains" title-class="" :min="2" :max="20" :step="1" :default-min="5" :default-max="10" @updated="(min,max) => {params.min_k = min; params.max_k = max}"></numeric-range>
+                                <numeric-range title="Fit LDA models with this many topics:" show-tool-tip="stdeconvolve_ldatopics" title-class="" :min="2" :max="20" :step="1" :default-min="5" :default-max="10" @updated="(min,max) => {params.min_k = min; params.max_k = max}"></numeric-range>
                             </div>
 
                             <div class="form-check mt-4">
                                 <label class="text-lg">
-                                    <input type="checkbox" v-model="params.rm_mt"> Remove mitochondrial genes ("^MT-") <show-modal tag="sdd_stclust_range_of_ks"></show-modal>
+                                    <input type="checkbox" v-model="params.rm_mt"> Remove mitochondrial genes ("^MT-") <show-modal tag="stdeconvolve_remove_mito"></show-modal>
                                 </label>
 
                                 <label class="text-md ms-3">
-                                    <input type="checkbox" v-model="params.rm_rp"> Remove ribosomal genes ("^RP[LIS]") <show-modal tag="sdd_stclust_dynamicTreeCuts"></show-modal>
+                                    <input type="checkbox" v-model="params.rm_rp"> Remove ribosomal genes ("^RP[LIS]") <show-modal tag="stdeconvolve_remove_ribo"></show-modal>
                                 </label>
                             </div>
 
@@ -51,7 +51,7 @@
                                         <label class="text-lg">
                                             <input type="checkbox" v-model="params.use_var_genes">&nbsp;Use <span v-if="params.use_var_genes">this many</span> variable genes<span v-if="params.use_var_genes">:</span>&nbsp;
                                         </label>
-                                        <span v-if="params.use_var_genes"><input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.use_var_genes_n"></span><show-modal tag="qcpca_number_variable_genes"></show-modal>
+                                        <span v-if="params.use_var_genes"><input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.use_var_genes_n"></span><show-modal tag="stdeconvolve_n_variablegenes"></show-modal>
                                     </div>
                                     <input v-if="params.use_var_genes" type="range" min="0" :max="40000" step="200" class="w-100" v-model="params.use_var_genes_n">
                                 </div>
