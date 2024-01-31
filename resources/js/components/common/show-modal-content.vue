@@ -139,11 +139,19 @@ export default {
                 "stgradient_restrict_correlation_to_this_limit": {"title": "Restrict correlation to this limit", "text": "A distance value to restrict the correlation analysis. Some tissues can be very heterogeneous in composition. As a result it could be reasonable to test for spatial gradients within a restricted area of the tissue."},
                 "stgradient_distance_summary_metric": {"title": "Distance summary metric", "text": "The method to summarize the distances. STgradient calculates the distances each spot/cell to all the spots/cells in the reference niche. A single distance value is calculated for each spot/cell by taking the minimum or average distance. The users are encouraged to try both methods and look for the approach that provides biologically insightful results."},
 
-                //PhenotypingSTdeconvolve
+                //PhenotypingSTdeconvolveLDA
                 "stdeconvolve_ldatopics": {"title": "Number of topics", "text": "Select a range of LDA topics to test. For example, selecting from 5 to 10 results in 6 different LDA models with 5, 6, 7, 8, 9, and 10 topics."},
                 "stdeconvolve_remove_mito": {"title": "Remove mitochondrial genes?", "text": "Whether to remove mitochondrial genes from the data set during LDA model fitting. This option only works if mitochondrial gene names start with the letters “MT-” (e.g., Visium). The option only affects STdeconvolve."},
                 "stdeconvolve_remove_ribo": {"title": "Remove ribosomal genes?", "text": "Whether to remove ribosomal genes from the data set during LDA model fitting. This option only works if ribosomal gene names start with the letters “RP”, followed by an “L” or “S” (e.g., Visium). The option only affects STdeconvolve."},
                 "stdeconvolve_n_variablegenes": {"title": "Number of variable genes", "text": "Used this many variable genes to fit LDA models."},
+
+                //PhenotypingBioIdentitiesSuggestedK
+                "FORSUGGESTEDKBOXANDACCORDIONBUTTON": {"title": "Change suggested LDA model", "text": "If the suggested LDA model does not represent the expected number, enter here the number of topics in the model that best represents the sample."},
+                //PhenotypingBioIdentities
+                "stdeconvolve_genesignature": {"title": "Gene signature collection", "text": "Select a built-in collection of gene signatures to use in GSEA and biologically identify topics. The built-in collections contain gene sets to identify major cell types."},
+                "stdeconvolve_qvalue": {"title": "GSEA q-value", "text": "Gene sets with GSEA q-value higher than this threshold will not be displayed in the results."},
+                "stdeconvolve_sctrpie_r": {"title": "Size of piecharts", "text": "Controls the size of the individual piecharts in the spatial plot."},
+                "stdeconvolve_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the spatial plots."},
 
             },
         }
