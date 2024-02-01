@@ -101,14 +101,14 @@ for i in range(len(samples)):
             clf.train(adata, adj, init_spa=True, init="louvain", res=res, tol=5e-3, lr=0.05, max_epochs=200)
             y_pred, prob = clf.predict()
 
-            pred_df['spagcn_spw_k' + str(k)] = y_pred.tolist()
+            pred_df['spagcn_k' + str(k)] = y_pred.tolist()
 
             # Cluster refinement (optional). Has to be gridded to be used?
             if refine_clusters:
                 #adj_2d = spg.calculate_adj_matrix(x=adata.obs["x_pixel"].tolist(), y=adata.obs["y_pixel"].tolist(), histology=False)
                 adj_2d = adj
                 refined_pred = spg.refine(sample_id=adata.obs.index.tolist(), pred=y_pred.tolist(), dis=adj_2d, shape="hexagon")
-                pred_df['spagcn_spw_k' + str(k) + '_refined'] = refined_pred
+                pred_df['spagcn_k' + str(k) + '_refined'] = refined_pred
 
                 del adj_2d, refined_pred
 
