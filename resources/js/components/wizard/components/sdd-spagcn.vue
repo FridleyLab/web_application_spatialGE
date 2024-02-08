@@ -133,6 +133,23 @@
 
                     <!-- Create tabs for each K value and sub-tabs for each sample -->
                     <div v-if="!processing_svg && ('spagcn_svg' in project.project_parameters)">
+
+
+                        <div class="text-justify">
+                            <div class="fs-5">Explanation of results:</div>
+                            <ul>
+                                <li><strong>Gene:</strong> The name of the gene tested. If the gene name is clicked, the corresponding GeneCards record is opened.</li>
+                                <li><strong>In-group fraction:</strong> The proportion of spots/cells within the tested domain that express the gene.</li>
+                                <li><strong>Out-group fraction:</strong> The proportion of spots/cells outside the tested domain that express the gene.</li>
+                                <li><strong>In/out-group ratio:</strong> The ratio between the proportion of spots/cells that express the gene within and outside the tested domain.</li>
+                                <li><strong>In-group mean expr.:</strong> The average expression of the gene within the tested domain.</li>
+                                <li><strong>Out-group mean expr.:</strong> The average expression of the gene outside the tested domain.</li>
+                                <li><strong>Fold change:</strong> The difference in expression of the gene between the tested domain and the rest of the sample.</li>
+                                <li><strong>Adjusted p-value:</strong> The False Discovery Rate (FDR) adjusted p-value</li>
+                            </ul>
+                        </div>
+
+
                         <div>
                             <ul class="nav nav-tabs" id="SPAGCN_SVG_MyTab" role="tablist">
                                 <li v-for="(sample, indexSample) in samples" class="nav-item" role="presentation">

@@ -623,6 +623,9 @@ lapply(names(tissues), function(i){
             $result[$parameterName] = $data;
         }
 
+
+        ProjectParameter::updateOrCreate(['parameter' => 'applyFilter', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters])]);
+
         $result['output'] = $output;
         $result['script'] = $scriptContents;
 
@@ -635,12 +638,22 @@ lapply(names(tissues), function(i){
 
         $str_params = '';
         foreach ($parameters as $key => $value) {
-            if (strlen($value) && $key !== '__task') {
+            if (!is_array($value) && strlen($value) && $key !== '__task') {
                 $str_params .= strlen($str_params) ? ', ' : '';
                 $quote = in_array($key, ['rm_genes_expr', 'spot_pct_expr']) ? "'" : '';
                 $str_params .= $key . '=' . $quote . $value . $quote;
             }
         }
+
+        $samples = $parameters['samples'];
+        if(is_array($samples) && count($samples)) {
+            $samples = "c('" . join("','", $samples) . "')";
+        }
+        else {
+            $samples = "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
+        }
+
+        $str_params .= ', samples=' . $samples;
 
         $plots = $this->getExportFilesCommands('filter_violin', 'vp');
         $plots .= $this->getExportFilesCommands('filter_boxplot', 'bp');
@@ -2941,6 +2954,8 @@ lapply(names(grad_res), function(i){
     public function createJob($description, $command, $parameters, $queue = 'default'): int
     {
 
+        Log::info("---------1--");
+
         $min_delay = env('QUEUE_INITIAL_DELAY_SECONDS_MIN', 5);
         $max_delay = env('QUEUE_INITIAL_DELAY_SECONDS_MAX', 7);
 
@@ -2958,7 +2973,10 @@ lapply(names(grad_res), function(i){
 
             //insert record in Tasks table to gather statistics
             Task::create(['task' => $parameters['__task'], 'project_id' => $this->id, 'samples' => $this->samples->count(), 'user_id' => $this->user->id, 'process' => $command, 'payload' => $payload]);
+
+            Log::info("---------2--");
         } else {
+            Log::info("---------3--");
             $task = Task::where('task', $parameters['__task'])->firstOrFail();
             $task->attempts++;
             $task->save();

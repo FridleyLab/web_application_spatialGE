@@ -254,7 +254,10 @@ class ProjectController extends Controller
         //RunScript::dispatch('Filter data', $project, 'applyFilter', request('parameters'));
         //return 'OK';
 
-        $jobId = $project->createJob('Filter data', 'applyFilter', request('parameters'));
+        $parameters = request('parameters');
+        unset($parameters['__task']);
+
+        $jobId = $project->createJob('Filter data', 'applyFilter', $parameters);
         return $project->getJobPositionInQueue($jobId);
 
     }

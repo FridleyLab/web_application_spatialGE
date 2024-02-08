@@ -1,5 +1,5 @@
 <template>
-<div class="m-4">
+<div v-if="loaded" class="m-4">
     <form>
 
 <!--        <div class="w-30 m-4">-->
@@ -53,6 +53,7 @@
                                     <numeric-range
                                         title="Keep spots/cells with this number of counts:"
                                         show-tool-tip="qcfilter_spots_cells_number_counts"
+                                        :default-min="params.spot_minreads" :default-max="params.spot_maxreads"
                                         title-class="text-bold" :min="0" :max="project.project_parameters.max_spot_counts" :step="500"
                                         @updated="(min,max) => {params.spot_minreads = min; params.spot_maxreads = max}"></numeric-range>
                                 </div>
@@ -61,6 +62,7 @@
                                     <numeric-range
                                         title="Keep spots/cells with this number of expressed genes:"
                                         show-tool-tip="qcfilter_spots_cells_number_expressed_counts"
+                                        :default-min="params.spot_mingenes" :default-max="params.spot_maxgenes"
                                         :show-percentages="true" title-class="text-bold" :min="0" :max="project.project_parameters.total_genes" :step="500"
                                         @updated="(min,max) => {params.spot_mingenes = min; params.spot_maxgenes = max}"></numeric-range>
                                 </div>
@@ -117,7 +119,10 @@
                                     </div>
 
                                     <div class="mt-4">
-                                        <numeric-range title="" :min="0" :max="100" :step="1" @updated="(min,max) => {params.spot_minpct = min; params.spot_maxpct = max}"></numeric-range>
+                                        <numeric-range title="" :min="0" :max="100" :step="1"
+                                            :default-min="params.spot_minpct" :default-max="params.spot_maxpct"
+                                            @updated="(min,max) => {params.spot_minpct = min; params.spot_maxpct = max}">
+                                        </numeric-range>
                                     </div>
 
 
@@ -204,13 +209,20 @@
                         <div class="m-4 gap-1">
                             <div class="row">
                                 <div class="pb-4 border border-4 border-start-0 border-end-0 border-top-0">
-                                    <numeric-range title="Keep genes with counts between:" show-tool-tip="qcfilter_genes_counts_between" title-class="text-bold" :min="0" :max="project.project_parameters.max_gene_counts" :step="500" @updated="(min,max) => {params.gene_minreads = min; params.gene_maxreads = max}"></numeric-range>
+                                    <numeric-range title="Keep genes with counts between:" show-tool-tip="qcfilter_genes_counts_between" title-class="text-bold"
+                                        :default-min="params.gene_minreads" :default-max="params.gene_maxreads"
+                                        :min="0" :max="project.project_parameters.max_gene_counts" :step="500" @updated="(min,max) => {params.gene_minreads = min; params.gene_maxreads = max}">
+                                    </numeric-range>
                                 </div>
                                 <div class="mt-4">
                                     <div class="text-start text-bold">Keep genes expressed in: <show-modal tag="qcfilter_genes_expressed_in"></show-modal></div>
                                     <div class="mt-2">
                                         <!--                                        TODO: script maximum number of spots  -->
-                                        <numeric-range title="Number of spots:" :show-percentages="true" :min="0" :max="project.project_parameters.max_spots_number" :step="50" @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}"></numeric-range>
+                                        <numeric-range title="Number of spots:" :show-percentages="true"
+                                            :default-min="params.gene_minspots" :default-max="params.gene_maxspots"
+                                            :min="0" :max="project.project_parameters.max_spots_number" :step="50"
+                                            @updated="(min,max) => {params.gene_minspots = min; params.gene_maxspots = max}">
+                                        </numeric-range>
                                     </div>
                                     <!--                                    <div class="mt-4">-->
                                     <!--                                        <numeric-range title="Percentage of spots" :min="0" :max="100" :step="1" @updated="(min,max) => {gene_minpct = min; gene_maxpct = max}"></numeric-range>-->
@@ -380,12 +392,29 @@
                 checkQueueIntervalId: 0,
                 reloadPage: false,
 
+                loaded: false,
+
             }
         },
 
-        // mounted() {
+        mounted() {
+
+            if('applyFilter' in this.project.project_parameters) {
+                let params = JSON.parse(this.project.project_parameters['applyFilter'])['parameters'];
+                for(let param in params) {
+                    if(!isNaN(params[param])) {
+                        params[param] = Number.parseFloat(params[param]);
+                    }
+                    //console.log(param, params[param], typeof params[param], !isNaN(params[param]));
+                }
+                console.log(params);
+                this.params = params;
+            }
+
+            this.loaded = true;
+
         //     this.setIntervalQueue();
-        // },
+        },
 
         /*computed: {
             samplesToFilter() {
@@ -500,17 +529,12 @@
 
                 let _params = JSON.parse(JSON.stringify(this.params));
 
-                //Check if specific samples were selected and form the list
-                /*if(this.$refs.availableSamples.options.length && this.$refs.selectedSamples.options.length)
-                    for(let i = 0; i< this.$refs.selectedSamples.options.length; i++)
-                        _params.samples.push(this.$refs.selectedSamples.options[i].value);*/
-
-                if(_params.samples.length) {
+                /*if(_params.samples.length) {
                     _params.samples = _params.samples.join("','");
                     _params.samples = "c('" + _params.samples + "')";
                 }
                 else
-                    _params.samples = '';
+                    _params.samples = '';*/
 
                 //Check if specific genes are to be removed
                 if(this.filter_genes_selected.length) {
@@ -532,6 +556,9 @@
                 if(this.filter_spots_regexp_remove_rp)
                     _params.spot_pct_expr += (_params.spot_pct_expr.length ? '|' : '') + '^RP[L|S]';
 
+
+                console.log(_params);
+                //return;
 
 
                 axios.post(this.filterUrl, {parameters: _params})

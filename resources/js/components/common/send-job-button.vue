@@ -114,7 +114,7 @@ export default {
     mounted() {
 
         this.sendEmail = this.project.project_parameters.hasOwnProperty('job.' + this.jobName + '.email') ? parseInt(this.project.project_parameters['job.' + this.jobName + '.email']) : 0;
-        console.log(this.sendEmail);
+        //console.log(this.sendEmail);
 
         //this.updateJobPosition();
         this.setIntervalQueue();
