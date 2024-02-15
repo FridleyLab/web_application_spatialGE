@@ -853,16 +853,22 @@ $plots
                 $file = $workingDir . $fileName;
                 $file_public = Storage::path($this->workingDirPublic()) . $fileName;
                 //if (Storage::fileExists($file)) {
-                if (file_exists($file)) {
-                    //Storage::delete($file_public);
-                    if (file_exists($file_public)) unlink($file_public);
-                    //Storage::move($file, $file_public);
+                if (($HPC && file_exists($file)) || Storage::fileExists($file)) {
 
-                    //copy($file, $file_public);
-                    $command = 'copy ' . $file . ' ' . $file_public;
-                    $command = str_replace('/', '\\', $command);
-                    Log::info('=================>  ' . $command);
-                    $process = Process::run($command);
+                    //Delete, if exists, any previously generated file in the public folder
+                    if (Storage::fileExists($file_public)) { Storage::delete($file_public); }
+
+                    if($HPC) {
+                        //if (file_exists($file_public)) unlink($file_public);
+
+                        //copy($file, $file_public);
+                        $command = 'copy ' . $file . ' ' . $file_public;
+                        $command = str_replace('/', '\\', $command); //TODO: works only on Windows
+                        Log::info('=================>  ' . $command);
+                        $process = Process::run($command);
+                    } else {
+                        Storage::move($file, $file_public);
+                    }
 
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
