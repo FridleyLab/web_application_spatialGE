@@ -867,6 +867,7 @@ $plots
                         Log::info('=================>  ' . $command);
                         $process = Process::run($command);
                     } else {
+                        Log::info($file . '   ==>   ' . $file_public);
                         Storage::move($file, $file_public);
                     }
 
