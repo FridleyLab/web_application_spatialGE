@@ -852,7 +852,7 @@ $plots
             foreach ($file_extensions as $file_extension) {
                 $fileName = $parameterName . '.' . $file_extension;
                 $file = $workingDir . $fileName;
-                $file_public = Storage::path($this->workingDirPublic()) . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
                 Log::info('Checking if exists ==> ' . $file);
                 if (($HPC && file_exists($file)) || Storage::fileExists($file)) {
 
@@ -862,6 +862,8 @@ $plots
                     if (Storage::fileExists($file_public)) { Storage::delete($file_public); }
 
                     if($HPC) {
+                        $file_public = Storage::path($file_public);
+
                         //if (file_exists($file_public)) unlink($file_public);
 
                         //copy($file, $file_public);
