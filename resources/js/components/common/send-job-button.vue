@@ -40,11 +40,11 @@
             </div>
         </div>
 
-        <div v-if="jobParameters" class="mt-2">
+        <div v-if="jobParameters" class="mt-4">
             <!-- <pre>
-                {{ JSON.stringify(jobParameters, null, 2) }}
+                {{ JSON.stringify(jobParameters, null, 4) }}
             </pre> -->
-            <a role="button" class="text-info text-sm" @click="downloadJobParameters">Download parameters</a>
+            <a role="button" class="text-info text-sm" @click="downloadJobParameters">Download parameter log</a>
         </div>
 
 </template>

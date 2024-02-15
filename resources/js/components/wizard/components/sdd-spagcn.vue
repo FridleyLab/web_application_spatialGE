@@ -4,7 +4,8 @@
 
         <div :class="processing ? 'disabled-clicks' : ''">
             <div class="d-flex my-3 text-bold">
-                SpaGCN&nbsp;<show-vignette url="/documentation/vignettes/spatial_domain_detection_spagcn.pdf"></show-vignette>
+                SpaGCN
+                <!-- &nbsp;<show-vignette url="/documentation/vignettes/spatial_domain_detection_spagcn.pdf"></show-vignette> -->
             </div>
             <div>
                 The domain detection method <a href="https://www.nature.com/articles/s41592-021-01255-8" class="text-info" target="_blank">SpaGCN</a> (Hu et al. 2021) implements a graph convolutional neural (GCN) network approach to integrate spatial gene expression with the accompanying spatial coordinates and optionally, tissue imaging. The GCNs are used to condense the information from the different data modalities, followed by Louvain clustering to clasify the spots or cells into tissue domains.

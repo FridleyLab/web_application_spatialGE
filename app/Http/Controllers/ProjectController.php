@@ -174,20 +174,29 @@ class ProjectController extends Controller
             return redirect()->route('qc-data-transformation', ['project' => $project->id]);*/
     }
 
+
+    private function getTasks($user_id, $project_id, $process) {
+        return Task::where('user_id', $user_id)->where('project_id', $project_id)->where('process', $process)->orderByDesc('scheduled_at')->get();
+    }
+
     private function getLatestTask($user_id, $project_id, $process) {
-        $tasks = Task::where('user_id', $user_id)->where('project_id', $project_id)->where('process', $process)->orderByDesc('scheduled_at')->get();
+        $tasks = $this->getTasks($user_id, $project_id, $process);
         return $tasks->count() ? $tasks[0] : null;
     }
 
-    public function getLastParametersUsedInJob(Project $project) {
-        $task = $this->getLatestTask(auth()->id(), $project->id, request('command'));
+    public function getParametersUsedInJob(Project $project) {
+        $tasks = $this->getTasks(auth()->id(), $project->id, request('command'));
 
-        if(!$task) return 0;
+        if(!$tasks->count()) return 0;
 
-        $data = json_decode($task->payload);
-        unset($data->parameters->__task);
+        $output = [];
+        foreach($tasks as $task) {
+            $data = json_decode($task->payload);
+            unset($data->parameters->__task);
+            $output[] = ['date' => $task->scheduled_at, 'parameters' => $data->parameters];
+        }
 
-        return $data->parameters;
+        return $output;
     }
 
     public function getJobPositionInQueue(Project $project) {
