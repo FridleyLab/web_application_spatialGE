@@ -39,6 +39,14 @@
                 </div>
             </div>
         </div>
+
+        <div v-if="jobParameters" class="mt-2">
+            <!-- <pre>
+                {{ JSON.stringify(jobParameters, null, 2) }}
+            </pre> -->
+            <a role="button" class="text-info text-sm" @click="downloadJobParameters">Download parameters</a>
+        </div>
+
 </template>
 
 <script>
@@ -73,6 +81,8 @@ export default {
             cancellingJob: false,
 
             otherJobsInQueue: 0,
+
+            jobParameters: 0,
         }
     },
 
@@ -93,14 +103,17 @@ export default {
                     if(this.reload) window.document.location.href = window.document.location.href;
 
                     this.processing = false;
-                    if(this.project === null)
+                    if(this.project === null) {
                         this.$emit('completed');
+                    }
                     else {
                         console.log('job-button: before project parameters');
                         this.project.project_parameters = await this.$getProjectParameters(this.projectId);
                         console.log('job-button: after project parameters');
                         this.$emit('completed');
                     }
+
+                    await this.getJobParameters();
 
                 }
 
@@ -111,7 +124,7 @@ export default {
         }
     },
 
-    mounted() {
+    async mounted() {
 
         this.sendEmail = this.project.project_parameters.hasOwnProperty('job.' + this.jobName + '.email') ? parseInt(this.project.project_parameters['job.' + this.jobName + '.email']) : 0;
         //console.log(this.sendEmail);
@@ -120,6 +133,8 @@ export default {
         this.setIntervalQueue();
 
         this.jobsInQueue();
+
+        await this.getJobParameters();
     },
 
     methods: {
@@ -181,6 +196,24 @@ export default {
                 })
                 .catch((error) => console.log(error));
         },
+
+        async getJobParameters() {
+            this.jobParameters = await this.$getJobParameters(this.projectId, this.jobName);
+            console.log(JSON.stringify(this.jobParameters, null, 2));
+        },
+
+        downloadJobParameters() {
+            const text = JSON.stringify(this.jobParameters, null, 4);
+            const blob = new Blob([text], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = this.jobName + ".json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
     },
 }
 </script>

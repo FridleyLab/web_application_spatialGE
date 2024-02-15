@@ -853,10 +853,7 @@ $plots
                 $fileName = $parameterName . '.' . $file_extension;
                 $file = $workingDir . $fileName;
                 $file_public = $this->workingDirPublic() . $fileName;
-                Log::info('Checking if exists ==> ' . $file);
                 if (($HPC && file_exists($file)) || Storage::fileExists($file)) {
-
-                    Log::info('Exists! ==> ' . $file);
 
                     //Delete, if exists, any previously generated file in the public folder
                     if (Storage::fileExists($file_public)) { Storage::delete($file_public); }
@@ -872,7 +869,6 @@ $plots
                         Log::info('=================>  ' . $command);
                         $process = Process::run($command);
                     } else {
-                        Log::info($file . '   ==>   ' . $file_public);
                         Storage::move($file, $file_public);
                     }
 

@@ -174,6 +174,21 @@ class ProjectController extends Controller
             return redirect()->route('qc-data-transformation', ['project' => $project->id]);*/
     }
 
+    private function getLatestTask($user_id, $project_id, $process) {
+        $tasks = Task::where('user_id', $user_id)->where('project_id', $project_id)->where('process', $process)->orderByDesc('scheduled_at')->get();
+        return $tasks->count() ? $tasks[0] : null;
+    }
+
+    public function getLastParametersUsedInJob(Project $project) {
+        $task = $this->getLatestTask(auth()->id(), $project->id, request('command'));
+
+        if(!$task) return 0;
+
+        $data = json_decode($task->payload);
+        unset($data->parameters->__task);
+
+        return $data->parameters;
+    }
 
     public function getJobPositionInQueue(Project $project) {
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
@@ -184,11 +199,9 @@ class ProjectController extends Controller
 
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
 
-        $tasks = Task::where('user_id', auth()->id())->where('project_id', $project->id)->where('process', request('command'))->/*whereNull('finished_at')->*/orderByDesc('scheduled_at')->get();
+        $task = $this->getLatestTask(auth()->id(), $project->id, request('command'));
 
-        $task = null;
-        if($tasks->count()) {
-            $task = $tasks[0];
+        if($task) {
             $task->cancelled_at = now();
             $task->save();
         }

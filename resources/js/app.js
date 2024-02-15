@@ -176,11 +176,17 @@ const getProjectParameters = async (projectId) => {
 app.config.globalProperties.$getProjectParameters = getProjectParameters;
 
 const getJobPositionInQueue = async (projectId, command) => {
-    let position = 0;
     const response = await axios.get('/projects/' + projectId + '/get-job-position-in-queue', {params :{'command': command}});
     return response.data;
 }
 app.config.globalProperties.$getJobPositionInQueue = getJobPositionInQueue;
+
+const getJobParameters = async (projectId, command) => {
+    const response = await axios.get('/projects/' + projectId + '/get-job-parameters', {params :{'command': command}});
+    return response.data;
+}
+app.config.globalProperties.$getJobParameters = getJobParameters;
+
 const enableWizardStep = (step) => {
     ['a', 'i', 'span'].forEach(tag => {
         let element = window.document.getElementById(step + '-' + tag);
