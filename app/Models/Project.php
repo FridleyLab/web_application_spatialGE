@@ -835,7 +835,8 @@ $plots
         if ($HPC) {
             $workingDir = $this->workingDirHPC();
         } else {
-            $workingDir = Storage::path($this->workingDir());
+            // $workingDir = Storage::path($this->workingDir());
+            $workingDir = $this->workingDir();
         }
 
         //Load genes present in the normalized STlist into the DB
