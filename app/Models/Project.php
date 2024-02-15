@@ -852,8 +852,10 @@ $plots
                 $fileName = $parameterName . '.' . $file_extension;
                 $file = $workingDir . $fileName;
                 $file_public = Storage::path($this->workingDirPublic()) . $fileName;
-                //if (Storage::fileExists($file)) {
+                Log::info('Checking if exists ==> ' . $file);
                 if (($HPC && file_exists($file)) || Storage::fileExists($file)) {
+
+                    Log::info('Exists! ==> ' . $file);
 
                     //Delete, if exists, any previously generated file in the public folder
                     if (Storage::fileExists($file_public)) { Storage::delete($file_public); }
