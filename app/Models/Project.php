@@ -26,7 +26,9 @@ class Project extends Model
 
     protected $fillable = ['name', 'description', 'user_id', 'project_platform_id'];
 
-    protected $appends = ['url', 'assets_url', 'project_parameters', 'platform_name'];
+    protected $appends = ['url', 'assets_url', 'project_parameters', 'platform_name', 'created_on'];
+
+    protected $dates = ['created_at', 'updated_at'];
 
     private ?spatialContainer $_container = null;
 
@@ -66,6 +68,11 @@ class Project extends Model
     public function getAssetsUrlAttribute()
     {
         return $this->workingDirPublicURL();
+    }
+
+    public function getCreatedOnAttribute()
+    {
+        return $this->created_at->format('M d, Y');
     }
 
     public function getPlatformNameAttribute()
@@ -1761,12 +1768,18 @@ $export_files
         if (!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
 
         $samples_with_tissue = '';
+        $samples_with_tissue_image_files = 'tissues <- c(';
         foreach ($this->samples as $sample) {
             if ($sample->has_image) {
-                if (strlen($samples_with_tissue)) $samples_with_tissue .= ',';
+                if (strlen($samples_with_tissue)) {
+                    $samples_with_tissue .= ',';
+                    $samples_with_tissue_image_files .= ',';
+                }
                 $samples_with_tissue .= "'" . $sample->name . "'";
+                $samples_with_tissue_image_files .= $sample->name . "='" . $sample->image_file->filename . "'";
             }
         }
+        $samples_with_tissue_image_files .= ")";
 
 
         $script = "
@@ -1816,9 +1829,10 @@ for(p in n_plots) {
     dev.off()
 
     #generate side-by-side for samples with tissue image
+    $samples_with_tissue_image_files
     for(sample in list($samples_with_tissue)) {
         if(grepl(sample, p, fixed=TRUE)) {
-            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample, '/spatial/image_', sample, '.png'))
+            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample,'/spatial/', tissues[sample]))
             ptp = ggpubr::ggarrange(ps[[p]], tp, ncol=2)
             {$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
         }
@@ -1955,12 +1969,18 @@ for(i in names(normalized_stlist@tr_counts)){
         if (!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
 
         $samples_with_tissue = '';
+        $samples_with_tissue_image_files = 'tissues <- c(';
         foreach ($this->samples as $sample) {
             if ($sample->has_image) {
-                if (strlen($samples_with_tissue)) $samples_with_tissue .= ',';
+                if (strlen($samples_with_tissue)) {
+                    $samples_with_tissue .= ',';
+                    $samples_with_tissue_image_files .= ',';
+                }
                 $samples_with_tissue .= "'" . $sample->name . "'";
+                $samples_with_tissue_image_files .= $sample->name . "='" . $sample->image_file->filename . "'";
             }
         }
+        $samples_with_tissue_image_files .= ")";
 
         $script = "
 setwd('/spatialGE')
@@ -2031,9 +2051,10 @@ for(p in n_plots) {
     dev.off()
 
     #generate side-by-side for samples with tissue image
+    $samples_with_tissue_image_files
     for(sample in list($samples_with_tissue)) {
         if(grepl(sample, p, fixed=TRUE)) {
-            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample, '/spatial/image_', sample, '.png'))
+            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample,'/spatial/', tissues[sample]))
             ptp = ggpubr::ggarrange(ps[[p]], tp, ncol=2)
             {$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
         }

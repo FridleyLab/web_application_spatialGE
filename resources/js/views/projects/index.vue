@@ -18,11 +18,22 @@
 
                     <div class="card-body">
 
+                        <div>
+                            <div class="m-3 row">
+                                <div class="text-2xl text-bolder col-4">Project name</div>
+                                <div class="text-2xl text-bolder col-4">Description</div>
+                                <div class="text-2xl text-bolder col-2 text-center">Created on</div>
+                                <div class="text-2xl text-bolder text-center col-2">Actions</div>
+                            </div>
+                            <hr class="dark horizontal my-0">
+                        </div>
+
                         <div v-for="project in projects">
                             <div class="m-3 row">
-                                <div class="col-5"><a class="text-info text-bolder text-lg" :href="project.url">{{ project.name }}</a></div>
-                                <div class="text-bolder col-5">{{ project.description }}</div>
-                                <div class="text-end col-2">
+                                <div class="col-4"><a class="text-info text-bolder text-lg" :href="project.url">{{ project.name }}</a></div>
+                                <div class="col-4">{{ project.description }}</div>
+                                <div class="col-2 text-center">{{ project.created_on }}</div>
+                                <div class="col-2 text-center">
                                     <i v-if="!deleting" class="material-icons opacity-10 text-info cursor-pointer ms-2" title="Delete" @click="editProject(project)">edit</i>
                                     <i v-if="!deleting" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deleting = project.id">delete</i>
 
