@@ -149,37 +149,39 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mt-3">
 
-                    <div class="p-3 text-end">
-                        <send-job-button label="Generate plots" :disabled="generating_plots || generating_data || !filter_color_palette.length || !selected_gene.length" :project-id="project.id" job-name="generateNormalizationPlots" @started="normalizedPlots" @ongoing="generating_plots = true" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
+            </div>
+        </div>
+
+        <div class="row mt-3" v-if="!processing && ('normalized_boxplot_1' in project.project_parameters)">
+
+            <div class="p-3 text-end">
+                <send-job-button label="Generate plots" :disabled="generating_plots || generating_data || !filter_color_palette.length || !selected_gene.length" :project-id="project.id" job-name="generateNormalizationPlots" @started="normalizedPlots" @ongoing="generating_plots = true" @completed="plotsProcessCompleted" :project="project" ></send-job-button>
+            </div>
+
+        </div>
+        <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
+
+            <div class="mt-4" v-if="!generating_plots">
+                <h5 class="mt-4">Normalized expression of a gene per ROI/spot/cell</h5>
+                <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="false">Boxplots</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="normalizedDiagramsContent">
+
+                    <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
+                        <show-plot :src="project.project_parameters.normalized_violin"></show-plot>
                     </div>
 
-                </div>
-                <div v-if="!generating_plots && 'normalized_violin' in project.project_parameters">
-
-                    <div class="mt-4" v-if="!generating_plots">
-                        <h5 class="mt-4">Normalized expression of a gene per ROI/spot/cell</h5>
-                        <ul class="nav nav-tabs" id="normalizedDiagrams" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="normalized-violinplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-violinplot" type="button" role="tab" aria-controls="normalized-violinplot" aria-selected="false">Violin plots</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="normalized-boxplot-tab" data-bs-toggle="tab" data-bs-target="#normalized-boxplot" type="button" role="tab" aria-controls="normalized-boxplot" aria-selected="false">Boxplots</button>
-                            </li>
-                        </ul>
-                        <div class="tab-content" id="normalizedDiagramsContent">
-
-                            <div class="tab-pane show active" id="normalized-violinplot" role="tabpanel" aria-labelledby="normalized-violinplot-tab">
-                                <show-plot :src="project.project_parameters.normalized_violin"></show-plot>
-                            </div>
-
-                            <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
-                                <show-plot :src="project.project_parameters.normalized_boxplot"></show-plot>
-                            </div>
-
-                        </div>
+                    <div class="tab-pane fade" id="normalized-boxplot" role="tabpanel" aria-labelledby="normalized-boxplot-tab">
+                        <show-plot :src="project.project_parameters.normalized_boxplot"></show-plot>
                     </div>
+
                 </div>
             </div>
         </div>

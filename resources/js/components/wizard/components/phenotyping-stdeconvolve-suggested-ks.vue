@@ -16,7 +16,7 @@
                                 Suggested K={{STdeconvolve.suggested_k[sample.name]}}&nbsp;&nbsp;
                             </label>
                             <span v-if="editable && STdeconvolve.suggested_k[sample.name] !== STdeconvolve.selected_k[sample.name]" class="mx-2 text-warning">Modified K=</span>
-                            <input v-if="editable" type="number" class="text-end text-md border border-1 rounded w-15 w-md-10 w-xl-10" size="3" v-model="STdeconvolve.selected_k[sample.name]">
+                            <input v-if="editable" type="number" :min="STdeconvolve.parameters.min_k" :max="STdeconvolve.parameters.max_k" class="text-end text-md border border-1 rounded w-15 w-md-10 w-xl-10" size="3" v-model="STdeconvolve.selected_k[sample.name]" @change="check_k(sample.name)">
                             <!-- <span v-if="editable && STdeconvolve.suggested_k[sample.name] !== STdeconvolve.selected_k[sample.name]" class="mx-2 text-warning">modified</span> -->
                         </div>
                         <input v-if="editable" type="range" :min="STdeconvolve.parameters.min_k" :max="STdeconvolve.parameters.max_k" step="1" class="w-100" v-model="STdeconvolve.selected_k[sample.name]">
@@ -40,5 +40,12 @@ export default {
         editable: {type: Boolean, default: false},
         idKey: String,
     },
+
+    methods: {
+        check_k(sampleName) {
+            if(this.STdeconvolve.selected_k[sampleName] < this.STdeconvolve.parameters.min_k) this.STdeconvolve.selected_k[sampleName] = this.STdeconvolve.parameters.min_k;
+            if(this.STdeconvolve.selected_k[sampleName] > this.STdeconvolve.parameters.max_k) this.STdeconvolve.selected_k[sampleName] = this.STdeconvolve.parameters.max_k;
+        }
+    }
 }
 </script>

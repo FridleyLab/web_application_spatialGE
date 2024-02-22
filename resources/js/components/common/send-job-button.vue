@@ -40,7 +40,7 @@
             </div>
         </div>
 
-        <div v-if="jobParameters" class="mt-4">
+        <div v-if="startButtonVisible && !processing && jobParameters && downloadLog" class="mt-4">
             <!-- <pre>
                 {{ JSON.stringify(jobParameters, null, 4) }}
             </pre> -->
@@ -66,6 +66,8 @@ export default {
         secondary: {type: Boolean, default: false},
 
         reload: {type: Boolean, default: false},
+
+        downloadLog: {type: Boolean, default: true},
     },
 
     data() {

@@ -2,7 +2,7 @@
 <div class="m-4">
     <form>
 
-        <div :class="processing ? 'disabled-clicks' : ''">
+        <div>
             <div class="d-flex my-3 text-bold">
                 STdeconvolve
             </div>
@@ -29,7 +29,7 @@
             <div class="tab-content" id="myTabsSTdeconvolveContent">
                 <div class="tab-pane fade show active min-vh-50" id="model-fitting" role="tabpanel" aria-labelledby="model-fitting-tab">
                     <div class="row justify-content-center text-center m-3">
-                        <div class="w-100 w-lg-90 w-xxl-85">
+                        <div class="w-100 w-lg-90 w-xxl-85" :class="processing ? 'disabled-clicks' : ''">
 
                             <div class="mt-4">
                                 <numeric-range title="Fit LDA models with this many topics:" show-tool-tip="stdeconvolve_ldatopics" title-class="" :min="2" :max="20" :step="1" :default-min="5" :default-max="10" @updated="(min,max) => {params.min_k = min; params.max_k = max}"></numeric-range>
@@ -57,17 +57,6 @@
                                 </div>
                             </div>
 
-                            <div class="p-3 text-center mt-4 mb-3">
-                                <send-job-button label="Run LDA models" :disabled="processing" :project-id="project.id" job-name="STdeconvolve" @started="runSTdeconvolve" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
-                            </div>
-
-                            <!-- Create tabs for each sample -->
-                            <div v-if="!processing && ('STdeconvolve' in project.project_parameters)">
-
-                                <stdeconvolve-suggested-ks :samples="samples" :STdeconvolve="STdeconvolve" id-key="step1"></stdeconvolve-suggested-ks>
-
-                            </div>
-
                             <!-- <div class="row justify-content-center text-center m-4">
                                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                                     <div>Color palette <show-modal tag="sdd_spagcn_color_palette"></show-modal></div>
@@ -77,12 +66,23 @@
 
 
                         </div>
+
+                        <div class="p-3 text-center mt-4 mb-3">
+                            <send-job-button label="Run LDA models" :disabled="processing" :project-id="project.id" job-name="STdeconvolve" @started="runSTdeconvolve" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+                        </div>
+
+                        <!-- Create tabs for each sample -->
+                        <div v-if="!processing && ('STdeconvolve' in project.project_parameters)">
+
+                            <stdeconvolve-suggested-ks :samples="samples" :STdeconvolve="STdeconvolve" id-key="step1"></stdeconvolve-suggested-ks>
+
+                        </div>
                     </div>
                 </div>
 
                 <div v-if="!processing && ('STdeconvolve' in project.project_parameters)" class="tab-pane fade min-vh-50" id="biological-identities" role="tabpanel" aria-labelledby="biological-identities-tab">
                     <div class="row justify-content-center text-center m-3">
-                        <div class="w-100 w-lg-90 w-xxl-85">
+                        <div class="w-100 w-lg-90 w-xxl-85" :class="(processing2 || processing3) ? 'disabled-clicks' : ''">
 
 
                             <div :class="showSuggestedKs ? 'border border-2 border-success rounded rounded-3 mb-6' : ''">
@@ -150,79 +150,78 @@
                                 </div>
                             </div>
 
-                            <div class="p-3 text-center mt-4">
-                                <send-job-button label="Assign identities" :disabled="processing2 || processing3" :project-id="project.id" job-name="STdeconvolve2" @started="runSTdeconvolve2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
-                            </div>
+                        </div>
 
 
-                            <!-- Create tabs for each sample -->
-                            <div v-if="!processing2 && !processing3 && ('STdeconvolve2' in project.project_parameters)">
+                        <div class="p-3 text-center mt-4">
+                            <send-job-button label="Assign identities" :disabled="processing2 || processing3" :project-id="project.id" job-name="STdeconvolve2" @started="runSTdeconvolve2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
+                        </div>
 
-                                <div>
-                                    <ul class="nav nav-tabs" id="STdeconvolve2_myTab" role="tablist">
-                                        <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
-                                            <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'STdeconvolve2-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'STdeconvolve2'" type="button" role="tab" :aria-controls="sample.name + 'STdeconvolve2'" aria-selected="true">{{ sample.name }}</button>
-                                        </li>
-                                    </ul>
 
-                                    <div class="tab-content" id="STdeconvolve2_myTabContent">
-                                        <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50 mt-3 ms-4" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'STdeconvolve2'" role="tabpanel" :aria-labelledby="sample.name + 'STdeconvolve2-tab'">
 
-                                            <ul class="nav nav-tabs" :id="'stdec2_plots_tab_' + sample.name" role="tablist">
-                                                <li class="nav-item" role="presentation">
-                                                    <button class="nav-link active" :id="'stdec2_scatterpie_tab_' + sample.name" data-bs-toggle="tab" :data-bs-target="'#stdec2_scatterpie_' + sample.name" type="button" role="tab" :aria-controls="'stdec2_scatterpie_' + sample.name" aria-selected="true">Spatial plot</button>
-                                                </li>
-                                                <li class="nav-item" role="presentation">
-                                                    <button class="nav-link" :id="'stdec2_topics_tab_' + sample.name" data-bs-toggle="tab" :data-bs-target="'#stdec2_topics_' + sample.name" type="button" role="tab" :aria-controls="'stdec2_topics_' + sample.name" aria-selected="true">Log-fold change</button>
-                                                </li>
-                                            </ul>
+                        <div v-if="topicNamesChanged" class="p-3 text-center mt-4">
+                            <div class="text-warning">Please click the "RENAME TOPICS" button only after completing all annotation changes in all samples</div>
+                            <send-job-button label="Rename Topics" :disabled="processing2 || processing3" :project-id="project.id" job-name="STdeconvolve3" @started="runSTdeconvolve3" @ongoing="processing3 = true" @completed="processCompleted3" :project="project" :download-log="false"></send-job-button>
+                        </div>
 
-                                            <div class="tab-content" :id="'stdec2_plots_tabContent_' + sample.name">
-                                                <div class="tab-pane fade show active min-vh-50" :id="'stdec2_scatterpie_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_scatterpie_tab_' + sample.name">
-                                                    <div v-for="image in STdeconvolve2.scatterpie_plots">
-                                                        <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot>
-                                                    </div>
+                        <!-- Create tabs for each sample -->
+                        <div v-if="!processing2 && !processing3 && ('STdeconvolve2' in project.project_parameters)">
+
+                            <div>
+                                <ul class="nav nav-tabs" id="STdeconvolve2_myTab" role="tablist">
+                                    <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
+                                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'STdeconvolve2-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'STdeconvolve2'" type="button" role="tab" :aria-controls="sample.name + 'STdeconvolve2'" aria-selected="true">{{ sample.name }}</button>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content" id="STdeconvolve2_myTabContent">
+                                    <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50 mt-3 ms-4" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'STdeconvolve2'" role="tabpanel" :aria-labelledby="sample.name + 'STdeconvolve2-tab'">
+
+                                        <ul class="nav nav-tabs" :id="'stdec2_plots_tab_' + sample.name" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" :id="'stdec2_scatterpie_tab_' + sample.name" data-bs-toggle="tab" :data-bs-target="'#stdec2_scatterpie_' + sample.name" type="button" role="tab" :aria-controls="'stdec2_scatterpie_' + sample.name" aria-selected="true">Spatial plot</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" :id="'stdec2_topics_tab_' + sample.name" data-bs-toggle="tab" :data-bs-target="'#stdec2_topics_' + sample.name" type="button" role="tab" :aria-controls="'stdec2_topics_' + sample.name" aria-selected="true">Log-fold change</button>
+                                            </li>
+                                        </ul>
+
+                                        <div class="tab-content" :id="'stdec2_plots_tabContent_' + sample.name">
+                                            <div class="tab-pane fade show active min-vh-50" :id="'stdec2_scatterpie_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_scatterpie_tab_' + sample.name">
+                                                <div v-for="image in STdeconvolve2.scatterpie_plots">
+                                                    <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot>
                                                 </div>
-                                                <div class="tab-pane fade min-vh-50" :id="'stdec2_topics_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_topics_tab_' + sample.name">
-                                                    <div v-for="(topic, topicName) in STdeconvolve2.logfold_plots[sample.name]">
-                                                        <div class="mt-6 d-flex flex-column justify-content-start">
+                                            </div>
+                                            <div class="tab-pane fade min-vh-50" :id="'stdec2_topics_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_topics_tab_' + sample.name">
+                                                <div v-for="(topic, topicName) in STdeconvolve2.logfold_plots[sample.name]">
+                                                    <div class="mt-6 d-flex flex-column justify-content-start">
 
-                                                            <div v-if="'current_annotation' in topic">
-                                                                <label class="text-lg me-1">Rename topic (optional):</label>
-                                                                <input type="text" v-model="topic.current_annotation" class="border border-2 rounded rounded-2" @input="_topicNamesChanged()">
-                                                                <div v-if="topic.current_annotation.trim() !== topic.new_annotation" class="mx-2 text-warning">Modified. Original topic name was '{{ topic.annotation }}'</div>
-                                                                <div v-if="topicNamesChanged" class="p-3 text-center mt-4">
-                                                                    <div class="text-warning">Please click the "RENAME TOPICS" button only after completing all annotation changes in all samples</div>
-                                                                    <send-job-button label="Rename Topics" :disabled="processing2 || processing3" :project-id="project.id" job-name="STdeconvolve3" @started="runSTdeconvolve3" @ongoing="processing3 = true" @completed="processCompleted3" :project="project" ></send-job-button>
-                                                                </div>
-                                                            </div>
-                                                            <show-plot :src="topic.plot" :sample="sample" css-classes="mt-0"></show-plot>
-                                                            <data-grid v-if="'gsea_results' in STdeconvolve2"
-                                                                :scrolling-toggle="false"
-                                                                :show-filter-row="false"
-                                                                :show-column-chooser="false"
-                                                                :show-search-panel="false"
-                                                                :show-group-panel="false"
-                                                                :headers="STdeconvolve2.gsea_results[sample.name][topicName].headers"
-                                                                :data="STdeconvolve2.gsea_results[sample.name][topicName].items">
-                                                            </data-grid>
+                                                        <div v-if="'current_annotation' in topic">
+                                                            <label class="text-lg me-1">Rename topic (optional):</label>
+                                                            <input type="text" v-model="topic.current_annotation" class="border border-2 rounded rounded-2" @input="_topicNamesChanged()">
+                                                            <div v-if="topic.current_annotation.trim() !== topic.new_annotation" class="mx-2 text-warning">Modified. Original topic name was '{{ topic.annotation }}'</div>
                                                         </div>
+                                                        <show-plot :src="topic.plot" :sample="sample" css-classes="mt-0"></show-plot>
+                                                        <data-grid v-if="'gsea_results' in STdeconvolve2"
+                                                            :scrolling-toggle="false"
+                                                            :show-filter-row="false"
+                                                            :show-column-chooser="false"
+                                                            :show-search-panel="false"
+                                                            :show-group-panel="false"
+                                                            :headers="STdeconvolve2.gsea_results[sample.name][topicName].headers"
+                                                            :data="STdeconvolve2.gsea_results[sample.name][topicName].items">
+                                                        </data-grid>
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
-
-
-
-
-
-
-
                         </div>
+
+
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@
 <div class="m-4">
     <form>
 
-        <div :class="processing ? 'disabled-clicks' : ''">
+        <div>
             <div class="d-flex my-3 text-bold">
                 SpaGCN
                 <!-- &nbsp;<show-vignette url="/documentation/vignettes/spatial_domain_detection_spagcn.pdf"></show-vignette> -->
@@ -26,7 +26,8 @@
             <div class="tab-content" id="myTabsSpaGCNContent">
                 <div class="tab-pane fade show active min-vh-50" id="domain-detection" role="tabpanel" aria-labelledby="domain-detection-tab">
                     <div class="row justify-content-center text-center m-3">
-                        <div class="w-100 w-md-80 w-lg-70  w-xxl-55">
+
+                        <div class="w-100 w-md-80 w-lg-70  w-xxl-55" :class="processing ? 'disabled-clicks' : ''">
 
                             <div class="row justify-content-center text-center mt-4">
                                 <div class="">
@@ -61,6 +62,7 @@
                             </div>
 
                         </div>
+
                         <div class="p-3 text-center my-4">
                             <send-job-button label="Run SpaGCN" :disabled="processing" :project-id="project.id" job-name="SpaGCN" @started="SDD_SpaGCN" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
                         </div>
@@ -114,7 +116,7 @@
                 </div>
                 <div v-if="!processing && ('spagcn' in project.project_parameters)" class="tab-pane fade min-vh-50" id="spatially-variable-genes" role="tabpanel" aria-labelledby="spatially-variable-genes-tab">
 
-                    <div class="row justify-content-center text-center mt-5">
+                    <div class="row justify-content-center text-center mt-5" :class="processing_svg ? 'disabled-clicks' : ''">
                         <div class="w-100 w-md-90 w-lg-80 w-xxl-65">
                             <div>Annotation to test <show-modal tag="spagcn_spavargenes_annotation"></show-modal></div>
                             <div>

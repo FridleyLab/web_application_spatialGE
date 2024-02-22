@@ -88,13 +88,27 @@
                                     for file for each tissue sample. The first column of each file contains gene names.
                                     Subsequent columns contain data for each ROI/spot/cell in the sample. Gene-level is
                                     information is preferred (as opposed to isoform level). If duplicate gene names are
-                                    present, they will be appended a number (“.1”, “.2”, etc.).</p></li>
+                                    present, they will be appended a number (“.1”, “.2”, etc.).
+                                </p>
+
+                                <div class="text-center">
+                                    <img src="/images/how-to/generic_format_1.png" class="img-fluid max-height-400 my-4">
+                                </div>
+
+                            </li>
 
                             <li><p>Coordinates (Y positions and X positions) for each ROI/spot/cell in the sample,
                                     one file for each tissue sample. The files should be comma- or tab-delimited. The
                                     first column of each file contains the ROI/spot/cell IDs matching the column names
                                     for each ROI/spot/cell (columns) in the gene count files. The second and third
-                                    column are the Y positions and X positions of each ROI/spot/cell.</p></li>
+                                    column are the Y positions and X positions of each ROI/spot/cell.
+                                </p>
+
+                                <div class="text-center">
+                                    <img src="/images/how-to/generic_format_2.png" class="img-fluid max-height-400 my-4">
+                                </div>
+
+                            </li>
 
                         </ol>
 
