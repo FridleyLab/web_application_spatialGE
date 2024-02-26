@@ -189,7 +189,8 @@
                                         <div class="tab-content" :id="'stdec2_plots_tabContent_' + sample.name">
                                             <div class="tab-pane fade show active min-vh-50" :id="'stdec2_scatterpie_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_scatterpie_tab_' + sample.name">
                                                 <div v-for="image in STdeconvolve2.scatterpie_plots">
-                                                    <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot>
+                                                    <!-- <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot> -->
+                                                    <show-plot v-if="image.includes(sample.name)" :src="image" :show-image="Boolean(sample)" :sample="sample" :side-by-side="true"></show-plot>
                                                 </div>
                                             </div>
                                             <div class="tab-pane fade min-vh-50" :id="'stdec2_topics_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_topics_tab_' + sample.name">
@@ -293,6 +294,7 @@ import Multiselect from '@vueform/multiselect';
                     {value: 'CellMarker2.0_Mouse__Cancer_cell_Nov162023', label: 'CellMarker signatures (v2.0, Mouse-Cancer)'},
                     {value: 'CellMarker2.0_Mouse_Bone__Nov162023', label: 'CellMarker signatures (v2.0, Mouse-Bone)'},
                     {value: 'celltype_markers_25perc_200toplogFC_blueprint_Nov142023', label: 'BluePrint signatures (200 top genes, highest logFC)'},
+                    {value: 'CellMarker2.0_Mouse_Bone__Nov162023_Curated_Feb262024', label: 'CellMarker signatures (v2.0, Mouse-Bone - curated)'},
                 ],
 
                 params2: {
