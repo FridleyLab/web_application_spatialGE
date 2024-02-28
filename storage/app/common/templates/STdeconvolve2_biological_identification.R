@@ -200,6 +200,16 @@ for(i in names(sctr_p)){
     plotnames = c(plotnames, list(plotname))
 }
 
+# Scatterpie AND tissue images
+#for(sample in list($samples_with_tissue)) {
+for(i in list(samples_with_tissue)) {
+  if(grepl(i, names(sctr_p), fixed=TRUE)) {
+    tp = cowplot::ggdraw() + cowplot::draw_image(paste0(i,'/spatial/', i, '.png'))
+    ptp = ggpubr::ggarrange(sctr_p[[i]], tp, ncol=2)
+    #{$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
+  }
+}
+
 write.table(plotnames, 'stdeconvolve2_scatterpie_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 # Save logFC plots in case changes to title are required
