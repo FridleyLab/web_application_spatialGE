@@ -53,8 +53,13 @@ for(i in suggested_k[['sample_name']]){
 
   rm(opt_k, optlda, results) # Clean env
 
-  set.seed(12345)
+  # Check at least 90% of genes in topic expression matrix are in the gene sets
+  prop_in_gs = sum(colnames(decon_expr) %in% unique(unlist(celltype_markers))) / ncol(decon_expr) < 0.9
+  if(prop_in_gs){
+    stop('STdeconvolve -> Less than 90% of genes in sample match genes in gene sets. Is the correct gene set and species being used?')
+  }
   # Apply GSEA to topics
+  set.seed(12345)
   celltype_annotations = annotateCellTypesGSEA(beta=decon_expr, gset=celltype_markers, qval=q_val)
 
   # Save GSEA results to display
