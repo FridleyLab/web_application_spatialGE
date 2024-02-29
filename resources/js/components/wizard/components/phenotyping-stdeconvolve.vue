@@ -190,7 +190,7 @@
                                             <div class="tab-pane fade show active min-vh-50" :id="'stdec2_scatterpie_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_scatterpie_tab_' + sample.name">
                                                 <div v-for="image in STdeconvolve2.scatterpie_plots">
                                                     <!-- <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot> -->
-                                                    <show-plot v-if="image.includes(sample.name)" :src="image" :show-image="Boolean(sample)" :sample="sample" :side-by-side="true"></show-plot>
+                                                    <show-plot v-if="image.includes(sample.name)" :src="image" :show-image="Boolean(sample)" :sample="sample" :side-by-side="false"></show-plot>
                                                 </div>
                                             </div>
                                             <div class="tab-pane fade min-vh-50" :id="'stdec2_topics_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_topics_tab_' + sample.name">
