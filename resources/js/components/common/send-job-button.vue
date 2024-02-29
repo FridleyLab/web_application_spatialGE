@@ -201,16 +201,18 @@ export default {
 
         async getJobParameters() {
             this.jobParameters = await this.$getJobParameters(this.projectId, this.jobName);
-            console.log(JSON.stringify(this.jobParameters, null, 2));
+            console.log(this.jobParameters);
+            //console.log(JSON.stringify(this.jobParameters, null, 2));
         },
 
         downloadJobParameters() {
-            const text = JSON.stringify(this.jobParameters, null, 4);
+            //const text = JSON.stringify(this.jobParameters, null, 4);
+            const text = this.jobParameters;
             const blob = new Blob([text], { type: "text/plain" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = this.jobName + ".json";
+            a.download = this.jobName + ".csv";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

@@ -25,10 +25,10 @@ RUN Rscript -e "install.packages('magick')"
 
 RUN Rscript -e "remotes::install_github('JEFworks-Lab/STdeconvolve')"
 
+RUN Rscript -e "install.packages('ggtext')"
 
 #Install spatialGE library
-RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')"
-
+RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')                                                   "
 
 # Create a home folder for the apache user
 #RUN mkdir /home/apache

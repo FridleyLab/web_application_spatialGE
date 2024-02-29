@@ -1,0 +1,134 @@
+{
+    "applyFilter": {
+        "spot_minreads": "Keep spots/cells with this minimum number of counts",
+        "spot_maxreads": "Keep spots/cells with this maximum number of counts",
+        "spot_mingenes": "Keep spots/cells with this minimum number of expressed genes",
+        "spot_maxgenes": "Keep spots/cells with this maximum number of expressed genes",
+        "gene_minreads": "Keep genes with this minimum of counts",
+        "gene_maxreads": "Keep genes with this maximum of counts",
+        "gene_minspots": "Keep genes expressed in minimum this number of spots",
+        "gene_maxspots": "Keep genes expressed in maximum this number of spots",
+        "spot_minpct": "Keep spots/cells with this minimum percentage of counts",
+        "spot_maxpct": "Keep spots/cells with this maximum percentage of counts",
+        "spot_pct_expr": "Percentage of counts assigned to gene matching a token",
+        "rm_genes": "Remove all counts originating from these genes",
+        "rm_genes_expr": "Remove all counts originating from these genes (RegEx)",
+        "samples": "List of filtered samples"
+    },
+    "generateFilterPlots": {
+        "color_palette": "Color palette",
+        "variable": "Variable"
+    },
+    "applyNormalization": {
+        "method": "Name of the method",
+        "scale_f": "Scaling factor (only in log method)"
+    },
+    "generateNormalizationPlots": {
+        "color_palette": "Color palette",
+        "gene": "Gene to plot"
+    },
+    "applyPca": {
+        "n_genes": "Number of most variable genes to calculate PCA"
+    },
+    "pcaPlots": {
+        "plot_meta": "Name of a sample-level metadata variable",
+        "color_pal": "Color palette",
+        "n_genes": "Number of most variable genes to calculate PCA",
+        "hm_display_genes": "Number of genes for heatmap"
+    },
+    "quiltPlot": {
+        "plot_meta": "ROI/spot/cell-level variable to plot",
+        "color_pal": "Color palette",
+        "sample1": "First sample",
+        "sample2": "Second sample"
+    },
+    "STplotQuilt": {
+        "genes": "List of genes",
+        "ptsize": "Point size",
+        "col_pal": "Color palette",
+        "data_type": "Data type"
+    },
+    "STplotExpressionSurface": {
+        "genes": "Genes to estimate expression surfaces"
+    },
+    "STplotExpressionSurfacePlots": {
+        "genes": "Genes to estimate expression surfaces",
+        "col_pal": "Color palette"
+    },
+    "SThet": {
+        "genes": "Genes to calculate SThet",
+        "method": "Methods used",
+        "color_pal": "Color palette",
+        "plot_meta": "Metadata variable"
+    },
+    "SThetPlot": {
+        "genes": "Genes to calculate SThet",
+        "color_pal": "Color palette",
+        "plot_meta": "Metadata variable"
+    },
+    "STEnrich": {
+        "gene_sets": "Gene set database",
+        "average": "Average gene set expression",
+        "gsea": "GSEA score",
+        "permutations": "Permutations",
+        "seed": "Seed number (permutation)",
+        "min_spots": "Minimum number of spots",
+        "min_genes": "Minimum number of genes",
+        "num_sds": "Standard deviations"
+    },
+    "STclust": {
+        "ws_value": "Spatial weight",
+        "ks": "Number of domains (K)/DynamicTreeCuts",
+        "topgenes": "Number of most variable genes",
+        "deepSplit": "DeepSplit",
+        "number_of_domains_min": "Number of domains min",
+        "number_of_domains_max": "Number of domains max"
+    },
+    "SpaGCN": {
+        "p": "Percentage of neighborhood expression",
+        "user_seed": "Seed number (permutation)",
+        "number_of_domains_min": "Number of domains min",
+        "number_of_domains_max": "Number of domains max",
+        "refine_clusters": "Refine clusters",
+        "col_pal": "Color palette"
+    },
+    "SpaGCN_SVG": {
+        "annotation_to_test": "Annotation to test"
+    },
+    "STDiffNonSpatial": {
+        "samples_array": "List of samples",
+        "annotation": "Annotation to test",
+        "topgenes": "Number of most variable genes to use",
+        "test_type": "Type of test",
+        "pairwise": "Pairwise comparisons",
+        "clusters": "Cluster annotations to test"
+    },
+    "STGradients": {
+        "samples_array": "List of samples",
+        "topgenes": "Number of most variable genes to use",
+        "annot": "Annotation to test",
+        "ref": "Reference cluster",
+        "exclude": "Cluster(s) to exclude (optional)",
+        "out_rm": "Ignore outliers",
+        "limit": "Restrict correlation limit",
+        "distsumm": "Distance summary metric",
+        "min_nb": "Minimum number of neighbors",
+        "robust": "Robust regression"
+    },
+    "STdeconvolve": {
+        "min_k": "Number of topics min",
+        "max_k": "Number of topics max",
+        "rm_mt": "Remove mitochondrial genes",
+        "rm_rp": "Remove ribosomal genes",
+        "use_var_genes": "Use variable genes",
+        "use_var_genes_n": "Number of variable genes",
+        "col_pal": "Color palette"
+    },
+    "STdeconvolve2": {
+        "selected_k": "K value per sample",
+        "celltype_markers": "Gene signatures",
+        "q_val": "GSEA q-value threshold",
+        "user_radius": "Scatterpie radius",
+        "color_pal": "Color palette"
+    }
+}

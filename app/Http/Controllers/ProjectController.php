@@ -185,7 +185,8 @@ class ProjectController extends Controller
     }
 
     public function getParametersUsedInJob(Project $project) {
-        $tasks = $this->getTasks(auth()->id(), $project->id, request('command'));
+        $jobName = request('command');
+        $tasks = $this->getTasks(auth()->id(), $project->id, $jobName);
 
         if(!$tasks->count()) return 0;
 
@@ -196,7 +197,35 @@ class ProjectController extends Controller
             $output[] = ['date' => $task->scheduled_at, 'parameters' => $data->parameters];
         }
 
-        return $output;
+        $dict = Storage::get('common/parameters_dictionary.json');
+        $dict = json_decode($dict);
+        $CSV = "";
+        if(property_exists($dict, $jobName)) {
+            $columnNames = implode(', ', get_object_vars($dict->$jobName));
+            $CSV = 'date, ' . $columnNames . "\n";
+            foreach($tasks as $task) {
+                $CSV .= $task->scheduled_at;
+                $values = json_decode($task->payload);
+                foreach(get_object_vars($dict->$jobName) as $attr => $value) {
+                    $tmp = $values->parameters->$attr;
+                    if(is_array($tmp)) {
+                        $tmp = '[' . implode('; ', $tmp) . ']' ;
+                    }
+                    if(is_object($tmp)) {
+                        $tmp_str = '';
+                        foreach(get_object_vars($tmp) as $key => $val) {
+                            if($tmp_str !== '') { $tmp_str .= ';'; }
+                            $tmp_str .= $key . ': ' . $val;
+                        }
+                        $tmp = '[' . $tmp_str . ']';
+                    }
+                    $CSV .= ', ' . $tmp;
+                }
+                $CSV .= "\n";
+            }
+        }
+
+        return $CSV !== "" ? response($CSV, 200, ['Content-Type' => 'text/csv']) : $output;
     }
 
     public function getJobPositionInQueue(Project $project) {
