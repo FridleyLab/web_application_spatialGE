@@ -186,6 +186,119 @@ class Project extends Model
         return $params;
     }
 
+    public function getTasks($process) {
+        return Task::where('project_id', $this->id)->where('process', $process)->orderByDesc('scheduled_at')->get();
+    }
+
+    public function getLatestTask($process) {
+        $tasks = $this->getTasks($process);
+        return $tasks->count() ? $tasks[0] : null;
+    }
+
+
+    public function getParametersUsedInJob($jobName) {
+
+        $tasks = $this->getTasks($jobName);
+
+        if(!$tasks->count()) return '';
+
+
+
+        $dict = Storage::get('common/parameters_dictionary.json');
+        $dict = json_decode($dict);
+        $CSV = "";
+        if(property_exists($dict, $jobName)) {
+
+            $columnNames = ['Date', 'Parameter', 'Value', 'Description'];
+            $CSV = implode(',', $columnNames) . "\n";
+
+            foreach($tasks as $task) {
+
+                $values = json_decode($task->payload);
+
+                Log::info($jobName);
+                Log::info(json_encode($values));
+
+                if($values !== null && property_exists($values, 'parameters')) {
+
+                    foreach(get_object_vars($dict->$jobName) as $attr => $value) {
+
+                        $CSV .= $task->scheduled_at . ','; //Date
+                        $CSV .= $attr . ','; //'Parameter name'
+
+                        $tmp = $values->parameters->$attr;
+                        if(is_array($tmp)) {
+                            $tmp = '[' . implode('; ', $tmp) . ']' ;
+                        }
+                        if(is_object($tmp)) {
+                            $tmp_str = '';
+                            foreach(get_object_vars($tmp) as $key => $val) {
+                                if($tmp_str !== '') { $tmp_str .= ';'; }
+                                $tmp_str .= $key . ': ' . $val;
+                            }
+                            $tmp = '[' . $tmp_str . ']';
+                        }
+
+                        $CSV .= $tmp . ','; //Value
+                        $CSV .= $value; //Parameter description
+
+                        $CSV .= "\n";
+                    }
+                }
+                $CSV .= "\n";
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+        /*$output = [];
+        foreach($tasks as $task) {
+            $data = json_decode($task->payload);
+            unset($data->parameters->__task);
+            $output[] = ['date' => $task->scheduled_at, 'parameters' => $data->parameters];
+        }*/
+
+        /*$dict = Storage::get('common/parameters_dictionary.json');
+        $dict = json_decode($dict);
+        $CSV = "";
+        if(property_exists($dict, $jobName)) {
+            $columnNames = implode(', ', get_object_vars($dict->$jobName));
+            $CSV = 'date, ' . $columnNames . "\n";
+            foreach($tasks as $task) {
+                $CSV .= $task->scheduled_at;
+                $values = json_decode($task->payload);
+                foreach(get_object_vars($dict->$jobName) as $attr => $value) {
+                    $tmp = $values->parameters->$attr;
+                    if(is_array($tmp)) {
+                        $tmp = '[' . implode('; ', $tmp) . ']' ;
+                    }
+                    if(is_object($tmp)) {
+                        $tmp_str = '';
+                        foreach(get_object_vars($tmp) as $key => $val) {
+                            if($tmp_str !== '') { $tmp_str .= ';'; }
+                            $tmp_str .= $key . ': ' . $val;
+                        }
+                        $tmp = '[' . $tmp_str . ']';
+                    }
+                    $CSV .= ', ' . $tmp;
+                }
+                $CSV .= "\n";
+            }
+        }*/
+
+        return $CSV;
+    }
+
+
+
 
     public function getCurrentStepUrl()
     {
@@ -575,6 +688,7 @@ lapply(names(tissues), function(i){
     {
 
         $workingDir = $this->workingDir();
+        $workingDirPublic = $this->workingDirPublic();
 
         $scriptName = 'Filter.R';
         $script = $workingDir . $scriptName;
@@ -594,7 +708,7 @@ lapply(names(tissues), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
-
+        $_process_files = [];
 
         $result = [];
 
@@ -612,26 +726,38 @@ lapply(names(tissues), function(i){
             foreach ($file_extensions as $file_extension) {
                 $fileName = $parameterName . '.' . $file_extension;
                 $file = $workingDir . $fileName;
-                $file_public = $this->workingDirPublic() . $fileName;
+                $file_public = $workingDirPublic . $fileName;
                 if (Storage::fileExists($file)) {
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'filter'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+
+                    if($file_extension === 'pdf') {
+                        $_process_files[] = $fileName;
+                    }
+
                 }
             }
         }
 
         $parameterName = 'filtered_stlist_summary';
         $file = $workingDir . $parameterName . '.csv';
+        $file_public = $workingDirPublic . $parameterName . '.csv';
         if (Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
             ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'filter'], ['type' => 'string', 'value' => $data]);
             $result[$parameterName] = $data;
+
+            Storage::delete($file_public);
+            Storage::move($file, $file_public);
+
+            $_process_files[] = $parameterName . '.csv';
         }
 
-
         ProjectParameter::updateOrCreate(['parameter' => 'applyFilter', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters])]);
+
+        ProjectProcessFiles::updateOrCreate(['process' => 'applyFilter', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         $result['output'] = $output;
         $result['script'] = $scriptContents;

@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\ProjectGene;
 use App\Models\ProjectParameter;
 use App\Models\ProjectPlatform;
+use App\Models\ProjectProcessFiles;
 use App\Models\Task;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -174,58 +175,38 @@ class ProjectController extends Controller
             return redirect()->route('qc-data-transformation', ['project' => $project->id]);*/
     }
 
-
-    private function getTasks($user_id, $project_id, $process) {
-        return Task::where('user_id', $user_id)->where('project_id', $project_id)->where('process', $process)->orderByDesc('scheduled_at')->get();
-    }
-
-    private function getLatestTask($user_id, $project_id, $process) {
-        $tasks = $this->getTasks($user_id, $project_id, $process);
-        return $tasks->count() ? $tasks[0] : null;
-    }
-
     public function getParametersUsedInJob(Project $project) {
-        $jobName = request('command');
-        $tasks = $this->getTasks(auth()->id(), $project->id, $jobName);
 
-        if(!$tasks->count()) return 0;
+        $data = $project->getParametersUsedInJob(request('command'));
 
-        $output = [];
-        foreach($tasks as $task) {
-            $data = json_decode($task->payload);
-            unset($data->parameters->__task);
-            $output[] = ['date' => $task->scheduled_at, 'parameters' => $data->parameters];
-        }
+        return response($data, 200, ['Content-Type' => 'text/csv']);
+    }
 
-        $dict = Storage::get('common/parameters_dictionary.json');
-        $dict = json_decode($dict);
-        $CSV = "";
-        if(property_exists($dict, $jobName)) {
-            $columnNames = implode(', ', get_object_vars($dict->$jobName));
-            $CSV = 'date, ' . $columnNames . "\n";
-            foreach($tasks as $task) {
-                $CSV .= $task->scheduled_at;
-                $values = json_decode($task->payload);
-                foreach(get_object_vars($dict->$jobName) as $attr => $value) {
-                    $tmp = $values->parameters->$attr;
-                    if(is_array($tmp)) {
-                        $tmp = '[' . implode('; ', $tmp) . ']' ;
-                    }
-                    if(is_object($tmp)) {
-                        $tmp_str = '';
-                        foreach(get_object_vars($tmp) as $key => $val) {
-                            if($tmp_str !== '') { $tmp_str .= ';'; }
-                            $tmp_str .= $key . ': ' . $val;
-                        }
-                        $tmp = '[' . $tmp_str . ']';
-                    }
-                    $CSV .= ', ' . $tmp;
-                }
-                $CSV .= "\n";
+    public function downloadJobFiles(Project $project, $process) {
+
+        $files = ProjectProcessFiles::where('project_id', $project->id)->where('process', $process)->firstOrFail();
+        $files = json_decode($files->files);
+
+        $public_folder = $project->workingDirPublic();
+
+        $zip = new \ZipArchive();
+        $zipFileName = $process . '.zip';
+        Storage::delete($project->workingDirPublic() . $zipFileName);
+        $zip->open(Storage::path($public_folder . $zipFileName), \ZipArchive::CREATE);
+
+        foreach($files as $file) {
+            if(Storage::fileExists($public_folder . $file)) {
+                $zip->addFile(Storage::path($public_folder . $file), $file);
             }
         }
 
-        return $CSV !== "" ? response($CSV, 200, ['Content-Type' => 'text/csv']) : $output;
+        Storage::put($public_folder . $process . '.log', $project->getParametersUsedInJob($process));
+        $zip->addFile(Storage::path($public_folder . $process . '.log'), $process . '.log');
+
+        $zip->close();
+
+        return response()->download(Storage::path($public_folder . $zipFileName), $zipFileName, array('Content-Type: application/octet-stream','Content-Length: '. Storage::size($public_folder . $zipFileName)))/*->deleteFileAfterSend(true)*/;
+
     }
 
     public function getJobPositionInQueue(Project $project) {
@@ -237,7 +218,7 @@ class ProjectController extends Controller
 
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
 
-        $task = $this->getLatestTask(auth()->id(), $project->id, request('command'));
+        $task = $project->getLatestTask(request('command'));
 
         if($task) {
             $task->cancelled_at = now();

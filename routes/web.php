@@ -75,6 +75,7 @@ Route::middleware(['auth'])->group(function() {
 
 
 
+    Route::get('/projects/{project}/download-files/{process}.zip',[ProjectController::class, 'downloadJobFiles'])->name('download-job-files')->middleware('project');
     Route::get('/projects/{project}/get-job-position-in-queue',[ProjectController::class, 'getJobPositionInQueue'])->name('get-job-position-in-queue')->middleware('project');
     Route::get('/projects/{project}/get-job-parameters',[ProjectController::class, 'getParametersUsedInJob'])->name('get-job-parameters')->middleware('project');
     Route::get('/projects/{project}/set-job-email-notification',[ProjectController::class, 'setJobEmailNotification'])->name('set-job-email-notification')->middleware('project');
