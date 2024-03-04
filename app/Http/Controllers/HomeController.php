@@ -213,7 +213,7 @@ class HomeController extends Controller
             }
 
             $headers = array_keys((array)$data[0]);
-            $columns_to_remove = ['output', 'task', 'stats', 'email'];
+            $columns_to_remove = ['output', 'task', 'stats', 'email', 'downloadable'];
             $headers = array_diff($headers, $columns_to_remove);
 
             $plot_data = [];
