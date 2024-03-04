@@ -182,6 +182,30 @@ class HomeController extends Controller
                 }
                 $row->stats = $stats;
 
+
+
+                $folder = Storage::path('users/' . $row->user_id . '/' . $row->project_id);
+                $filteredFiles = [];
+                if(is_dir($folder)) {
+                    $extensions = ['R', 'RData'];
+
+                    $files = scandir($folder);
+
+                    foreach ($files as $file) {
+                        $filePath = $folder . '/' . $file;
+                        if (is_file($filePath)) {
+                            $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
+                            if (in_array($fileExtension, $extensions)) {
+                                $filteredFiles[] = basename($filePath);
+                            }
+                        }
+
+                    }
+                }
+
+                $row->downloadable = $filteredFiles;
+
+
             }
 
             if (empty($data)) {
@@ -233,6 +257,16 @@ class HomeController extends Controller
             return response($e->getMessage());
         }
 
+    }
+
+
+    public function admin_download_file(Project $project, $filename) {
+        if(!auth()->user()->is_admin)
+            return response('Not found', '404');
+
+        $file = $project->workingDir() . $filename;
+
+        return response()->download(Storage::path($file));
     }
 
 

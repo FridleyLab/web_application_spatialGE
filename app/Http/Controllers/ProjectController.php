@@ -200,8 +200,9 @@ class ProjectController extends Controller
             }
         }
 
-        Storage::put($public_folder . $process . '.log', $project->getParametersUsedInJob($process));
-        $zip->addFile(Storage::path($public_folder . $process . '.log'), $process . '.log');
+        $logName = '_LOG_' . $process . '.csv';
+        Storage::put($public_folder . $logName, $project->getParametersUsedInJob($process));
+        $zip->addFile(Storage::path($public_folder . $logName), $logName);
 
         $zip->close();
 

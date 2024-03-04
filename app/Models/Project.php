@@ -866,6 +866,8 @@ $plots
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $parameterNames = ['filter_violin', 'filter_boxplot'];
         foreach ($parameterNames as $parameterName) {
 
@@ -878,9 +880,16 @@ $plots
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'filter'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+
+                    if($file_extension === 'pdf') {
+                        $_process_files[] = $fileName;
+                    }
+
                 }
             }
         }
+
+        ProjectProcessFiles::updateOrCreate(['process' => 'generateFilterPlots', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -972,6 +981,8 @@ $plots
             $workingDir = $this->workingDir();
         }
 
+        $_process_files = [];
+
         //Load genes present in the normalized STlist into the DB
         $genes_file = $workingDir . 'genesNormalized.csv';
         $this->createGeneList($genes_file, 'N');
@@ -1007,6 +1018,11 @@ $plots
 
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+
+                    if($file_extension === 'pdf') {
+                        $_process_files[] = $fileName;
+                    }
+
                 }
             }
         }
@@ -1015,6 +1031,8 @@ $plots
 
         //Delete (if any) previously generated normalized data, the user has to generate it again from the interface
         ProjectParameter::where('parameter', 'normalizedData')->where('project_id', $this->id)->delete();
+
+        ProjectProcessFiles::updateOrCreate(['process' => 'applyNormalization', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
 
         $this->current_step = 6;
@@ -1097,6 +1115,8 @@ $plots
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $parameterNames = ['normalized_violin', 'normalized_boxplot'];
         foreach ($parameterNames as $parameterName) {
             $file_extensions = ['svg', 'pdf', 'png'];
@@ -1108,9 +1128,15 @@ $plots
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
+
+                    if($file_extension === 'pdf') {
+                        $_process_files[] = $fileName;
+                    }
                 }
             }
         }
+
+        ProjectProcessFiles::updateOrCreate(['process' => 'generateNormalizationPlots', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -1291,6 +1317,8 @@ pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes)
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $result = [];
 
         $parameterNames = ['pseudo_bulk_pca', 'pseudo_bulk_heatmap'];
@@ -1306,9 +1334,15 @@ pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes)
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'pseudo_bulk_pca'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+
+                    if($file_extension === 'pdf') {
+                        $_process_files[] = $fileName;
+                    }
                 }
             }
         }
+
+        ProjectProcessFiles::updateOrCreate(['process' => 'pcaPlots', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         $result['output'] = $output;
         $result['script'] = $scriptContents;
@@ -1364,6 +1398,8 @@ $plots
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $result = [];
 
         $parameterNames = ['quilt_plot_1_initial', 'quilt_plot_2_initial'];
@@ -1381,9 +1417,15 @@ $plots
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'quilt_plot'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+
+                    if($file_extension === 'pdf') {
+                        $_process_files[] = $fileName;
+                    }
                 }
             }
         }
+
+        ProjectProcessFiles::updateOrCreate(['process' => 'quiltPlot', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         $result['output'] = $output;
         $result['script'] = $scriptContents;
@@ -1457,6 +1499,8 @@ $plots_initial
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $result = [];
         foreach ($parameters['genes'] as $gene) {
             $result[$gene] = [];
@@ -1477,6 +1521,11 @@ $plots_initial
                             Storage::delete($file_public);
                             Storage::move($file, $file_public);
                             $result[$gene][$sample->name] = $this->workingDirPublicURL() . $baseName; // $fileName;
+
+                            if($file_extension === 'pdf') {
+                                $_process_files[] = $fileName;
+                            }
+
                         }
                     }
                 }
@@ -1484,6 +1533,7 @@ $plots_initial
         }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_quilt', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STplotQuilt', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -1548,6 +1598,8 @@ $export_files_side_by_side
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $result = [];
         foreach ($parameters['genes'] as $gene) {
             $result[$gene] = [];
@@ -1564,12 +1616,17 @@ $export_files_side_by_side
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
                         $result[$gene][$sample->name] = $this->workingDirPublicURL() . $parameterName; // $fileName;
+
+                        if($file_extension === 'pdf') {
+                            $_process_files[] = $fileName;
+                        }
                     }
                 }
             }
         }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_expression_surface', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STplotExpressionSurface', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
         //return json_encode($result);
@@ -1627,6 +1684,8 @@ $export_files
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $result = [];
         foreach ($parameters['genes'] as $gene) {
             $result[$gene] = [];
@@ -1643,12 +1702,17 @@ $export_files
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
                         $result[$gene][$sample->name] = $this->workingDirPublicURL() . $parameterName; // $fileName;
+
+                        if($file_extension === 'pdf') {
+                            $_process_files[] = $fileName;
+                        }
                     }
                 }
             }
         }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stplot_expression_surface', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode($result)]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STplotExpressionSurfacePlots', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
         //return json_encode($result);
@@ -1708,6 +1772,8 @@ $export_files
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $result = [];
 
         $prevoius_genes = array_key_exists('sthet_genes', $this->project_parameters) ? json_decode($this->project_parameters['sthet_genes']) : [];
@@ -1726,9 +1792,13 @@ $export_files
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+
+                    $_process_files[] = $fileName;
                 }
             }
         }
+
+        ProjectProcessFiles::updateOrCreate(['process' => 'SThet', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         $result['output'] = $output;
         $result['script'] = $scriptContents;
@@ -1784,6 +1854,8 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $result = [];
 
         $parameterNames = ['sthet_plot'];
@@ -1798,9 +1870,15 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
+
+                    if($file_extension === 'pdf') {
+                        $_process_files[] = $fileName;
+                    }
                 }
             }
         }
+
+        ProjectProcessFiles::updateOrCreate(['process' => 'SThetPlot', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         $result['output'] = $output;
         $result['script'] = $scriptContents;
@@ -1855,6 +1933,7 @@ $export_files
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
 
         $file = $workingDir . 'stclust_plots.csv';
         if (Storage::fileExists($file)) {
@@ -1873,11 +1952,16 @@ $export_files
                         if (Storage::fileExists($file)) {
                             Storage::delete($file_public);
                             Storage::move($file, $file_public);
+
+                            if($file_extension === 'pdf') {
+                                $_process_files[] = $fileName;
+                            }
                         }
                     }
                 }
             }
             ProjectParameter::updateOrCreate(['parameter' => 'stclust', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
+            ProjectProcessFiles::updateOrCreate(['process' => 'STclust', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 
         $this->current_step = 8;
@@ -2005,13 +2089,14 @@ for(p in n_plots) {
         Storage::put($script, $scriptContents);
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
 
         $file = $workingDir . 'spagcn_plots.csv';
         if (Storage::fileExists($file)) {
 
-            $zip = new \ZipArchive();
+            /*$zip = new \ZipArchive();
             $zipFileName = 'SpaGCN.zip';
-            $addToZip = $zip->open(Storage::path($this->workingDirPublic() . $zipFileName), \ZipArchive::CREATE) == TRUE;
+            $addToZip = $zip->open(Storage::path($this->workingDirPublic() . $zipFileName), \ZipArchive::CREATE) == TRUE;*/
 
             $data = trim(Storage::read($file));
             $plots = [];
@@ -2029,24 +2114,28 @@ for(p in n_plots) {
                             Storage::delete($file_public);
                             Storage::move($file, $file_public);
 
-                            if ($addToZip) $zip->addFile(Storage::path($file_public), basename($file_public));
+                            if($file_extension === 'pdf') {
+                                $_process_files[] = $fileName;
+                            }
+
+                            //if ($addToZip) $zip->addFile(Storage::path($file_public), basename($file_public));
                         }
                     }
                 }
             }
 
-            $task = Task::where('task', $parameters['__task'])->firstOrFail();
+            /*$task = Task::where('task', $parameters['__task'])->firstOrFail();
             $parameterLog = json_decode($task->payload)->parameters;
-            //unset($parameterLog['__task']);
             $logFileName = $this->workingDirPublicURL() . 'SpaGCN_execution_log.txt';
-            Storage::put($logFileName, json_encode($parameterLog));
+            Storage::put($logFileName, json_encode($parameterLog));*/
 
-            if ($addToZip) {
+            /*if ($addToZip) {
                 $zip->addFile(Storage::path($logFileName), basename($logFileName));
                 $zip->close();
-            }
+            }*/
 
             ProjectParameter::updateOrCreate(['parameter' => 'spagcn', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
+            ProjectProcessFiles::updateOrCreate(['process' => 'SpaGCN', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 
         $this->current_step = 8;
@@ -2212,6 +2301,7 @@ for(p in n_plots) {
         Storage::put("$workingDir/$scriptName", $scriptContents);
         $output = $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');
 
+        $_process_files = [];
 
         $file = $workingDir . 'spagcn_svg_files.json';
         if (Storage::fileExists($file)) {
@@ -2248,7 +2338,14 @@ for(p in n_plots) {
                     Storage::delete($file_public);
                     Storage::move($file_to_move, $file_public);
 
+                    $file_public = $this->workingDirPublic() . $file;
+                    $file_to_move = $workingDir . $file;
+                    Storage::delete($file_public);
+                    Storage::move($file_to_move, $file_public);
+
                     $filesJSON[$sampleName][] = $this->workingDirPublicURL() . $fileJSON;
+
+                    $_process_files[] = $file;
 
                     $k_tmp++;
                 }
@@ -2257,6 +2354,7 @@ for(p in n_plots) {
         }
 
         ProjectParameter::updateOrCreate(['parameter' => 'spagcn_svg', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'json_files' => $filesJSON, 'k' => $k])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'SpaGCN_SVG', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -2280,6 +2378,7 @@ for(p in n_plots) {
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
 
         $column_names = [
             'gene' => 'Gene',
@@ -2308,6 +2407,11 @@ for(p in n_plots) {
                 $file_to_move = $workingDir . $file;
                 Storage::delete($file_public);
                 Storage::move($file_to_move, $file_public);
+
+                if (explode('.', $file)[1] !== 'json') {
+                    $_process_files[] = $file;
+                }
+
             }
         }
 
@@ -2327,12 +2431,17 @@ for(p in n_plots) {
                     if (Storage::fileExists($file)) {
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
+
+                        if($file_extension === 'pdf') {
+                            $_process_files[] = $fileName;
+                        }
                     }
                 }
             }
         }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stdiff_ns', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'samples' => $parameters['samples_array'], 'volcano_plots' => $vps])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STDiffNonSpatial', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -2411,6 +2520,7 @@ lapply(names(ps), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
 
         $column_names = [
             'gene' => 'Gene',
@@ -2440,6 +2550,10 @@ lapply(names(ps), function(i){
                 $file_to_move = $workingDir . $file;
                 Storage::delete($file_public);
                 Storage::move($file_to_move, $file_public);
+
+                if (explode('.', $file)[1] !== 'json') {
+                    $_process_files[] = $file;
+                }
             }
         }
 
@@ -2459,14 +2573,17 @@ lapply(names(ps), function(i){
                     if (Storage::fileExists($file)) {
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
+
+                        if($file_extension === 'pdf') {
+                            $_process_files[] = $fileName;
+                        }
                     }
                 }
             }
         }
 
-
-
         ProjectParameter::updateOrCreate(['parameter' => 'stdiff_s', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array'], 'volcano_plots' => $vps])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STDiffSpatial', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -2548,6 +2665,7 @@ lapply(names(ps), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
 
         $column_names = [
             'gene_set' => 'Gene set',
@@ -2573,10 +2691,15 @@ lapply(names(ps), function(i){
                 $file_to_move = $workingDir . $file;
                 Storage::delete($file_public);
                 Storage::move($file_to_move, $file_public);
+
+                if (explode('.', $file)[1] !== 'json') {
+                    $_process_files[] = $file;
+                }
             }
         }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $this->samples->pluck('name')])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STEnrich', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -2675,6 +2798,8 @@ lapply(names(sp_enrichment), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
         $column_names = [
             'gene' => 'Gene',
             //TODO: min and avg can be simplified
@@ -2707,9 +2832,14 @@ lapply(names(sp_enrichment), function(i){
                 $file_to_move = $workingDir . $file;
                 Storage::delete($file_public);
                 Storage::move($file_to_move, $file_public);
+
+                if (explode('.', $file)[1] !== 'json') {
+                    $_process_files[] = $file;
+                }
             }
 
         ProjectParameter::updateOrCreate(['parameter' => 'stgradients', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STGradients', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -2782,6 +2912,7 @@ lapply(names(grad_res), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
 
         $file = $workingDir . 'stdeconvolve_plots.csv';
         if (Storage::fileExists($file)) {
@@ -2803,6 +2934,10 @@ lapply(names(grad_res), function(i){
                         if (Storage::fileExists($file)) {
                             Storage::delete($file_public);
                             Storage::move($file, $file_public);
+
+                            if($file_extension === 'pdf') {
+                                $_process_files[] = $fileName;
+                            }
                         }
                     }
                 }
@@ -2820,6 +2955,7 @@ lapply(names(grad_res), function(i){
             }
 
             ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots, 'suggested_k' => $suggested_k])]);
+            ProjectProcessFiles::updateOrCreate(['process' => 'STdeconvolve', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 
         return ['output' => $output, 'script' => $scriptContents];
@@ -2881,24 +3017,32 @@ lapply(names(grad_res), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
 
         $topic_annotations = [];
         foreach ($this->samples as $sample) {
-            $file = $workingDir . 'topic_annotations_' . $sample->name . '.csv';
+            $fileName = 'topic_annotations_' . $sample->name . '.csv';
+            $file = $workingDir . $fileName;
             $sample_topics = [];
             if (Storage::fileExists($file)) {
                 $data = trim(Storage::read($file));
                 $data = str_replace('"', '', $data);
                 foreach (preg_split("/((\r?\n)|(\r\n?))/", $data) as $line) {
                     $tmp = explode(',', $line);
-                    $sample_topics[$tmp[0]] = ["annotation" => $tmp[1], "new_annotation" => $tmp[2], "plot" => $this->workingDirPublicURL() . "stdeconvolve2_topic_logfc_" . $sample->name . "_" . $tmp[0]];
+                    $plotName = "stdeconvolve2_topic_logfc_" . $sample->name . "_" . $tmp[0];
+                    $sample_topics[$tmp[0]] = ["annotation" => $tmp[1], "new_annotation" => $tmp[2], "plot" => $this->workingDirPublicURL() . $plotName];
+                    $_process_files[] = $plotName . '.pdf';
                 }
                 array_shift($sample_topics);
+
+                $file_public = $this->workingDirPublic() . $fileName;
+                Storage::delete($file_public);
+                Storage::move($file, $file_public);
+                $_process_files[] = $fileName;
+
             }
             $topic_annotations[$sample->name] = $sample_topics;
         }
-
-
 
 
         $gsea_results = [];
@@ -2915,27 +3059,33 @@ lapply(names(grad_res), function(i){
                 $gsea_results[$sampleName] = [];
                 foreach($topics as $topicName => $topic) {
 
-                    $fileName = $this->workingDir() . 'gsea_results_' . $sampleName . '_' . $topicName . '.csv';
+                    $fileName = 'gsea_results_' . $sampleName . '_' . $topicName . '.csv';
+                    $file = $this->workingDir() . $fileName;
 
-                    if (Storage::fileExists($fileName)) {
+                    if (Storage::fileExists($file)) {
 
-                        $contents = Storage::read($fileName);
+                        $contents = Storage::read($file);
                         $contents = str_replace('p.val', 'p_val', $contents);
                         $contents = str_replace('q.val', 'q_val', $contents);
-                        Storage::put($fileName, $contents);
+                        Storage::put($file, $contents);
 
-                        $gsea_results[$sampleName][$topicName] = json_decode($this->csv2json($fileName, 0, $column_names, true));
+                        $gsea_results[$sampleName][$topicName] = json_decode($this->csv2json($file, 0, $column_names, true));
+
+                        $file_public = $this->workingDirPublic() . $fileName;
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                        $_process_files[] = $fileName;
                     }
                 }
             }
         }
 
-
-
-        $scatterpie_plots = $this->STdeconvolveMovePlotsToPublic();
-
+        $_scatterpie_plots = $this->STdeconvolveMovePlotsToPublic();
+        $scatterpie_plots = $_scatterpie_plots['scatterpie_plots'];
+        $_process_files = array_merge($_process_files, $_scatterpie_plots['scatterpie_plots_names']);
 
         ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'logfold_plots' => $topic_annotations, 'scatterpie_plots' => $scatterpie_plots, 'gsea_results' => $gsea_results])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STdeconvolve2', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -2962,6 +3112,7 @@ lapply(names(grad_res), function(i){
 
         $file = $workingDir . 'stdeconvolve2_scatterpie_plots.csv';
         $scatterpie_plots = [];
+        $scatterpie_plots_names = [];
         if (Storage::fileExists($file)) {
             $data = explode(',', trim(Storage::read($file)));
             foreach ($data as $plot) {
@@ -2976,12 +3127,17 @@ lapply(names(grad_res), function(i){
                     if (Storage::fileExists($file)) {
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
+
+                        if($file_extension === 'pdf') {
+                            $scatterpie_plots_names[] = 'stdeconvolve2_' . $fileName;
+                        }
+
                     }
                 }
             }
         }
 
-        return $scatterpie_plots;
+        return compact('scatterpie_plots', 'scatterpie_plots_names');
     }
 
     private function getSTdeconvolve2Script($parameters)
