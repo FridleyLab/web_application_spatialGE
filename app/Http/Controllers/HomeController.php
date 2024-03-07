@@ -202,7 +202,6 @@ class HomeController extends Controller
 
                     }
                 }
-
                 $row->downloadable = $filteredFiles;
 
 

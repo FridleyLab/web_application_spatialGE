@@ -20,6 +20,18 @@
 
                         <h4 class="my-3 text-center">How to Get Started</h4>
 
+                        <div class="my-6">
+                            <h5>Using our Demo project is easy!</h5>
+                            <p>Description about the sample STlist provided with the sandbox</p>
+                            @auth
+                                <a href="{{ route('clone-sandbox-project') }}" class="text-info text-decoration-underline">Create demo project</a>
+                            @endauth
+                            @guest
+                                You need to <a href="{{ route('login') }}" class="text-info text-decoration-underline">log in</a> first to create your demo project!
+                            @endguest
+
+                        </div>
+
                         <p>
                             spatialGE provides a collection of methods for the visualization and spatial analysis of
                             gene expression using spatial transcriptomic experiments (e.g., Visium, SMI, or MERFISH).

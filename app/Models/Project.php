@@ -22,6 +22,10 @@ class Project extends Model
 {
     use SoftDeletes;
 
+    const VISIUM_PLATFORM = 1;
+    const GENERIC_PLATFORM = 8;
+    const COSMX_PLATFORM = 3;
+
     protected $table = 'projects';
 
     protected $fillable = ['name', 'description', 'user_id', 'project_platform_id'];
@@ -78,13 +82,27 @@ class Project extends Model
     public function getPlatformNameAttribute()
     {
 
-        if ($this->project_platform_id === 1)
+        if ($this->project_platform_id === self::VISIUM_PLATFORM)
             return 'VISIUM';
-        elseif ($this->project_platform_id === 8)
+        elseif ($this->project_platform_id === self::GENERIC_PLATFORM)
             return 'GENERIC';
+        elseif ($this->project_platform_id === self::COSMX_PLATFORM)
+            return 'COSMX';
 
 
         return 'UNKNOWN';
+    }
+
+    public function isVisiumPlatform() {
+        return $this->project_platform_id === self::VISIUM_PLATFORM;
+    }
+
+    public function isGenericPlatform() {
+        return $this->project_platform_id === self::GENERIC_PLATFORM;
+    }
+
+    public function isCosmxPlatform() {
+        return $this->project_platform_id === self::COSMX_PLATFORM;
     }
 
     public function getProjectParametersAttribute()
@@ -182,6 +200,9 @@ class Project extends Model
 
             $params['STdeconvolve'] = json_encode($STdeconvolve);
         }
+
+        $params['downloadable'] = ProjectProcessFiles::where('project_id', $this->id)->select('process')->distinct()->get()->pluck(['process']);
+
 
         return $params;
     }
@@ -451,7 +472,7 @@ class Project extends Model
         return $json;
     }
 
-    private function createGeneList($genes_file, $context)
+    public function createGeneList($genes_file, $context)
     {
         if(Storage::fileExists($genes_file)) {
         //if (file_exists($genes_file)) {
@@ -584,6 +605,8 @@ class Project extends Model
         $createSTlistCommand = '';
         $loadImagesCommand = '';
 
+        $cosMxFovList = '';
+
         $expressionFileExtension = $this->samples[0]->expression_file->extension;
 
         if ($expressionFileExtension === 'h5') {
@@ -592,7 +615,8 @@ class Project extends Model
             $countFiles = "'" . $countFiles . "/'";
 
             $createSTlistCommand = 'initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)';
-        } else if (in_array($expressionFileExtension, ['csv', 'txt', 'tsv'])) {
+        }
+        else if (in_array($expressionFileExtension, ['csv', 'txt', 'tsv'/*, 'zip'*/]) && ($this->isGenericPlatform() || $this->isCosmxPlatform())) {
 
             $countFiles = [];
             $coordinateFiles = [];
@@ -617,6 +641,16 @@ class Project extends Model
 
                 ";
             }
+
+            if($this->isCosmxPlatform()) {
+                $cosMxFovList = "
+                # Slide x FOV table
+                df_tmp = lapply(names(initial_stlist@counts), function(i){
+                  values = tibble::tibble(fov_name=i, slide=gsub('_fov_[0-9]+$', '', i), fov_id=stringr::str_extract(i, 'fov_[0-9]+$'))
+                  return(values)
+                })
+                write.csv(do.call(rbind, df_tmp), 'slide_x_fov_table.csv', quote=F, row.names=F)";
+            }
         }
 
         $script = "
@@ -640,6 +674,8 @@ $loadImagesCommand
 
 #Save the STList
 {$this->_saveStList("initial_stlist")}
+
+$cosMxFovList
 
 #max_var_genes PCA
 pca_max_var_genes = min(unlist(lapply(initial_stlist@counts, nrow)))

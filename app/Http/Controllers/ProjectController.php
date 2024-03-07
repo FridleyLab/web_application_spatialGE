@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\RunScript;
 use App\Models\ColorPalette;
 use App\Models\Project;
-use App\Models\ProjectGene;
+use App\Models\Sample;
+use App\Models\File as SampleFile;
 use App\Models\ProjectParameter;
 use App\Models\ProjectPlatform;
 use App\Models\ProjectProcessFiles;
-use App\Models\Task;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -62,6 +61,56 @@ class ProjectController extends Controller
         }
         catch (\Exception $e) {
             return $e->getMessage();
+        }
+    }
+
+    public function clone_sandbox_project() {
+        try {
+            //Create the Sandbox project for the user
+            $project = Project::create(['name' => 'Sandbox ' . Carbon::now()->format('Y-m-d'), 'description' => 'Sandbox project with preloaded samples to test out spatialGE functionalities', 'project_platform_id' => Project::VISIUM_PLATFORM, 'user_id' => auth()->id()]);
+            $project->current_step = 2;
+            $project->save();
+
+            //Load samples and files from disk
+            $json = json_decode(Storage::get('common/sandbox/samples.json'));
+            //Create new samples and files in the DB
+            foreach($json as $sampleName => $files) {
+                $sample = Sample::create(['name' => $sampleName]);
+                $sample->projects()->save($project);
+                foreach($files as $fileData) {
+                    $fileModel = SampleFile::create(['filename' => $fileData->filename, 'type' => $fileData->type]);
+                    $sample->files()->save($fileModel);
+                }
+            }
+
+            //Insert genes into DB
+            $project->createGeneList('common/sandbox/genes.csv', 'I');
+
+            //Load parameters from disk
+            $json = json_decode(Storage::get('common/sandbox/parameters.json'));
+            //Create new parameters in the DB
+            foreach($json as $parameter) {
+                ProjectParameter::updateOrCreate(['parameter' => $parameter->parameter, 'project_id' => $project->id, 'tag' => $parameter->tag], ['type' => $parameter->type, 'value' => $parameter->value]);
+            }
+
+            //Copy sample and other initial files
+            $userFolder = auth()->user()->getUserFolder();
+            $projectFolder = $userFolder . $project->id . '/';
+            Storage::createDirectory($projectFolder);
+            File::copyDirectory(Storage::path('common/sandbox/samples'), Storage::path($projectFolder));
+            File::copy(Storage::path('common/sandbox/initial_stlist.RData'), Storage::path("$projectFolder/initial_stlist.RData"));
+            File::copy(Storage::path('common/sandbox/initial_stlist_summary.csv'), Storage::path("$projectFolder/initial_stlist_summary.csv"));
+
+
+
+            setActiveProject($project);
+            return redirect($project->url);
+
+        } catch(Exception $e) {
+            Log::error('Error while creating Sandbox for user ' . auth()->id());
+            Logg:info($e->getMessage());
+
+            return response('Error', 500);
         }
     }
 

@@ -11,11 +11,22 @@ function setActiveProject($project) {
 }
 
 function getActiveProjectId() {
-    return session('project_id');
+    if(session()->has('project_id') && Project::where('id', session('project_id'))->count()) {
+        return session('project_id');
+    } else {
+        session()->forget('project_id');
+        return 0;
+    }
+
 }
 
 function getActiveProject() {
-    return Project::findOrFail(getActiveProjectId());
+    try {
+        return Project::findOrFail(getActiveProjectId());
+    }
+    catch(Exception $e) {
+        return null;
+    }
 }
 
 function getShortProjectName($project)

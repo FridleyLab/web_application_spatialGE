@@ -41,10 +41,12 @@
         </div>
 
         <div v-if="startButtonVisible && !processing && jobParameters && downloadLog" class="mt-4">
-            <!-- <pre>
-                {{ JSON.stringify(jobParameters, null, 4) }}
-            </pre> -->
-            <a role="button" class="text-info text-sm" @click="downloadJobParameters">Download parameter log</a>
+            <div>
+                <a role="button" class="text-info text-sm" @click="downloadJobParameters">Download parameter log</a>
+            </div>
+            <div v-if="project.project_parameters.downloadable.includes(jobName)">
+                <a role="button" class="text-info text-sm" :href="'/projects/' + projectId + '/download-files/' + jobName + '.zip'">Download zipped results</a>
+            </div>
         </div>
 
 </template>
@@ -201,8 +203,6 @@ export default {
 
         async getJobParameters() {
             this.jobParameters = await this.$getJobParameters(this.projectId, this.jobName);
-            console.log(this.jobParameters);
-            //console.log(JSON.stringify(this.jobParameters, null, 2));
         },
 
         downloadJobParameters() {

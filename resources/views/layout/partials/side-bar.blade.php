@@ -52,7 +52,7 @@
                 </li>
 
                 <div>
-                    @if(session()->has('project_id'))
+                    @if(getActiveProjectId())
                         <li class="nav-item ps-4 pt-2">
                             <div class="ms-2 text-white me-2 d-flex align-items-center">
                                 <span class="btn btn-sm btn-tag btn-rounded bg-white">{{ getShortProjectName(getActiveProject()) }}</span>
