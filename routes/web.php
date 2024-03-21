@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('/stats',[HomeController::class, 'download_statistics'])->name('stats');
     Route::get('/show-stats',[HomeController::class, 'show_statistics'])->name('show-stats');
+    Route::get('/admin-download-file/{project}/{filename}',[HomeController::class, 'admin_download_file'])->name('show-stats');
     Route::get('/create-test-users/prefix/{prefix}/n_users/{n_users}/n_samples/{n_samples}',[HomeController::class, 'create_test_users'])->name('create-test-users');
 
 
@@ -33,6 +34,9 @@ Route::middleware(['auth'])->group(function() {
 
 
 
+    //Clone Demo Project
+    Route::get('/projects/clone-demo-project/{platform}',[ProjectController::class, 'clone_demo_project'])->name('clone-demo-project');
+    Route::get('/projects/clone-demo-project-cosmx',[ProjectController::class, 'create_cosmx_temp_project'])->name('clone-demo-project-cosmx');
     //Project CRUD
     Route::get('/projects',[ProjectController::class, 'index'])->name('my-projects');
     Route::post('/projects',[ProjectController::class, 'store'])->name('store-project');
@@ -75,6 +79,7 @@ Route::middleware(['auth'])->group(function() {
 
 
 
+    Route::get('/projects/{project}/download-files/{process}.zip',[ProjectController::class, 'downloadJobFiles'])->name('download-job-files')->middleware('project');
     Route::get('/projects/{project}/get-job-position-in-queue',[ProjectController::class, 'getJobPositionInQueue'])->name('get-job-position-in-queue')->middleware('project');
     Route::get('/projects/{project}/get-job-parameters',[ProjectController::class, 'getParametersUsedInJob'])->name('get-job-parameters')->middleware('project');
     Route::get('/projects/{project}/set-job-email-notification',[ProjectController::class, 'setJobEmailNotification'])->name('set-job-email-notification')->middleware('project');

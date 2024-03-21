@@ -24,7 +24,7 @@
 <!--                <div class="mt-1"><i class="material-icons opacity-10 text-info">help</i></div>-->
                 <div v-if="!file && !errorMessage.length">
                     Valid file types:
-                    {{ this.acceptedFileTypes[this.code].join(' | ') }}
+                    {{ acceptedFileTypes[this.code].join(' | ') }}
                 </div>
             </form>
 
@@ -114,7 +114,7 @@ export default {
                     'metadata': ['csv', 'tsv', 'txt', 'xls', 'xlsx']
                 }
             }
-            else if(this.project.platform_name === 'GENERIC') {
+            else if(['GENERIC', 'COSMX'].includes(this.project.platform_name)) {
                 return {
                     'expression': ['csv', 'tsv', 'txt'],
                     'coordinates': ['csv', 'tsv', 'txt'],
@@ -285,9 +285,10 @@ export default {
 
         checkCoordinatesData(data) {
 
-            const columnCount = this.coordinatesColumnCount;
+            //TODO: implement CosMX validations
+            if(this.project.platform_name === 'COSMX') { return true; }
 
-            console.log(columnCount);
+            const columnCount = this.coordinatesColumnCount;
 
             let lines = data.split(/\r?\n|\r|\n/g);
             if((!lines.length || !lines[0].length || lines[0].split(/\t|,/g).length !== columnCount)) {

@@ -86,6 +86,9 @@
 <!--                            <show-stats-plot-detail :plot-data="process.data.stats.map(obj => ({ time: obj.time, memory: obj.memory }))"></show-stats-plot-detail>-->
 <!--                        </div>-->
 
+                        <template v-for="file in process.data.downloadable">
+                            <a :href="'/admin-download-file/' + process.data.project_id + '/' + file" download>{{ file }}</a>
+                        </template>
                         <pre>
                             {{ process.data.output }}
                         </pre>

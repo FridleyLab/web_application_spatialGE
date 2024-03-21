@@ -75,6 +75,12 @@
 
 
         <div class="mt-4" v-if="!generating_quilt && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
+
+
+            <div class="my-4">
+                <project-summary-table :data="project.project_parameters.initial_stlist_summary" :url="project.project_parameters.initial_stlist_summary_url" :selected-keys="visibleSamples" @selected="(keys) => visibleSamples = keys"></project-summary-table>
+            </div>
+
             <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
 
                 <li v-if="Object.keys(plots).length > 1" class="nav-item" role="presentation">
@@ -114,9 +120,11 @@
                                 <li v-if="Object.keys(samples).length > 1" class="nav-item" role="presentation">
                                     <button class="nav-link active" :id="'quilt-' + gene + '_' + 'all_samples' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene + '_' + 'all_samples'" type="button" role="tab" :aria-controls="'quilt-' + gene + '_' + 'all_samples'" aria-selected="true">All samples</button>
                                 </li>
-                                <li v-for="(image, sample, index) in samples" class="nav-item" role="presentation">
+                                <template v-for="(image, sample, index) in samples">
+                                <li class="nav-item" role="presentation" v-if="visibleSamples.includes(sample)">
                                     <button class="nav-link" :class="Object.keys(samples).length === 1 && index === 0 ? 'active' : ''" :id="'quilt-' + gene + '_' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene + '_' + sample" type="button" role="tab" :aria-controls="'quilt-' + gene + '_' + sample" aria-selected="true">{{ sample }}</button>
                                 </li>
+                                </template>
                             </ul>
                             <div class="tab-content" id="stplotQuiltContent">
 
@@ -128,7 +136,7 @@
 
                                     <div class="d-xxl-flex">
                                         <template v-for="(image, sample, index) in samples">
-                                            <div v-if="plots_visible[gene][sample]" class="text-center w-xxl-50">
+                                            <div v-if="plots_visible[gene][sample] && visibleSamples.includes(sample)" class="text-center w-xxl-50">
                                                 <show-plot :src="image" :downloadable="false"></show-plot>
                                                 <button @click="hide_plot(gene, sample)" class="btn btn-sm btn-outline-secondary">Hide</button>
                                             </div>
@@ -193,7 +201,9 @@ import Multiselect from '@vueform/multiselect';
 
                 generating_quilt: false,
 
-                plots_visible: []
+                plots_visible: [],
+
+                visibleSamples: [],
             }
         },
 

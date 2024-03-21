@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\RunScript;
 use App\Models\ColorPalette;
 use App\Models\Project;
-use App\Models\ProjectGene;
+use App\Models\Sample;
+use App\Models\File as SampleFile;
 use App\Models\ProjectParameter;
 use App\Models\ProjectPlatform;
-use App\Models\Task;
-use Illuminate\Support\Facades\DB;
+use App\Models\ProjectProcessFiles;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -61,6 +61,165 @@ class ProjectController extends Controller
         }
         catch (\Exception $e) {
             return $e->getMessage();
+        }
+    }
+
+
+    public function create_cosmx_temp_project() {
+        try {
+
+            //Create the Sandbox project for the user
+            $project = Project::create(['name' => 'Test CosMx project ' . Carbon::now()->format('Y-m-d'), 'description' => 'Test CosMx project with preloaded samples to explore spatialGE functionalities', 'project_platform_id' => Project::COSMX_PLATFORM, 'user_id' => auth()->id()]);
+            $project->current_step = 1;
+            $project->save();
+
+
+
+            //Copy sample and other initial files
+            $userFolder = auth()->user()->getUserFolder();
+            $projectFolder = $userFolder . $project->id . '/';
+            Storage::createDirectory($projectFolder);
+            File::copyDirectory(Storage::path('common/testprojects/cosmx/samples'), Storage::path($projectFolder));
+
+
+            //Load samples and files from disk
+            $json = json_decode(Storage::get('common/testprojects/cosmx/samples.json'));
+            //Create new samples and files in the DB
+            $fovSamples = [];
+            $metadata = ["name" => "tumor", "values" => []];
+            $_metadata = ["Lung5_Rep1" => "Tumor1", "Lung5_Rep2" => "Tumor1", "Lung5_Rep3" => "Tumor1","Lung9_Rep1" => "Tumor2","Lung9_Rep2" => "Tumor2"];
+            foreach($json as $sampleName => $files) {
+
+                $sample = Sample::create(['name' => $sampleName]);
+                $sample->projects()->save($project);
+                foreach($files as $fileData) {
+                    $fileModel = SampleFile::create(['filename' => $fileData->filename, 'type' => $fileData->type]);
+                    $sample->files()->save($fileModel);
+                }
+
+
+                // Get an instance of the directory iterator for the directory
+                $files = new \DirectoryIterator(Storage::path($projectFolder . $sampleName . '/spatial/'));
+
+                // Iterate over each file in the directory
+                foreach ($files as $file) {
+                    // Check if the file is a regular file and ends with '.jpg'
+                    if ($file->isFile() && $file->getExtension() === 'jpg') {
+                        // Get the filename without extension
+                        $filename = $file->getBasename('.jpg');
+
+                        // Extract the XXX number from the filename
+                        $xxxNumber = intval(preg_replace('/[^0-9]/', '', $filename));
+
+                        Storage::createDirectory($projectFolder . $sampleName . '_fov_' . $xxxNumber);
+                        Storage::createDirectory($projectFolder . $sampleName . '_fov_' . $xxxNumber . '/spatial');
+
+                        Storage::move($projectFolder . $sampleName . '/spatial/' . $file->getBasename(), $projectFolder . $sampleName . '_fov_' . $xxxNumber . '/spatial/' . $sampleName . '_fov_' . $xxxNumber . '.jpg');
+
+                        foreach($_metadata as $key => $value)
+                            if (strpos($sampleName, $key) === 0)
+                                $metadata["values"][$sampleName] = $_metadata[$key];
+
+                        $fovSamples[$sampleName . '_fov_' . $xxxNumber] = [];
+                        $fovSamples[$sampleName . '_fov_' . $xxxNumber][] = ["filename" => $sampleName . "_exprMat_file.csv", "type" => "expressionFile"];
+                        $fovSamples[$sampleName . '_fov_' . $xxxNumber][] = ["filename" => $sampleName . "_metadata_file.csv", "type" => "coordinatesFile"];
+                        $fovSamples[$sampleName . '_fov_' . $xxxNumber][] = ["filename" => $sampleName . '_fov_' . $xxxNumber . '.jpg', "type" => "imageFile"];
+
+                    }
+                }
+            }
+            Storage::put($projectFolder . 'samples.json', json_encode($fovSamples, JSON_PRETTY_PRINT));
+            Storage::put($projectFolder . 'metadata.json', json_encode(["meta" => json_encode($metadata)], JSON_PRETTY_PRINT));
+
+            // //Insert genes into DB
+            // $project->createGeneList('common/sandbox/genes.csv', 'I');
+
+            // //Load parameters from disk
+            // $json = json_decode(Storage::get('common/sandbox/parameters.json'));
+            // //Create new parameters in the DB
+            // foreach($json as $parameter) {
+            //     ProjectParameter::updateOrCreate(['parameter' => $parameter->parameter, 'project_id' => $project->id, 'tag' => $parameter->tag], ['type' => $parameter->type, 'value' => $parameter->value]);
+            // }
+
+
+
+            // File::copy(Storage::path('common/sandbox/initial_stlist.RData'), Storage::path("$projectFolder/initial_stlist.RData"));
+            // File::copy(Storage::path('common/sandbox/initial_stlist_summary.csv'), Storage::path("$projectFolder/initial_stlist_summary.csv"));
+
+            // //Add parameter to indicate that this is the 'Demo project'
+            // ProjectParameter::updateOrCreate(['parameter' => 'isDemoProject', 'project_id' => $project->id, 'tag' => ''], ['type' => 'number', 'value' => 1]);
+
+            setActiveProject($project);
+            return redirect($project->url);
+
+        } catch(Exception $e) {
+            Log::error('Error while creating Sandbox for user ' . auth()->id());
+            Logg:info($e->getMessage());
+
+            return response('Error', 500);
+        }
+    }
+
+
+    public function clone_demo_project($platform) {
+        try {
+
+            $_platform = Project::VISIUM_PLATFORM;
+            if($platform === 'CosMx') $_platform = Project::COSMX_PLATFORM;
+
+            $_basepath = "common/testprojects/$platform";
+
+            //Check if the user already has a Demo project
+            // if(auth()->user()->hasDemoProject()) {
+            //     return redirect(auth()->user()->getDemoProject()->url);
+            // }
+
+            //Create the Sandbox project for the user
+            $project = Project::create(['name' => $platform . ' test project ' . Carbon::now()->format('Y-m-d'), 'description' => 'Test project with preloaded samples to explore spatialGE functionalities', 'project_platform_id' => $_platform, 'user_id' => auth()->id()]);
+            $project->current_step = 2;
+            $project->save();
+
+            //Load samples and files from disk
+            $json = json_decode(Storage::get("$_basepath/samples.json"));
+            //Create new samples and files in the DB
+            foreach($json as $sampleName => $files) {
+                $sample = Sample::create(['name' => $sampleName]);
+                $sample->projects()->save($project);
+                foreach($files as $fileData) {
+                    $fileModel = SampleFile::create(['filename' => $fileData->filename, 'type' => $fileData->type]);
+                    $sample->files()->save($fileModel);
+                }
+            }
+
+            //Insert genes into DB
+            $project->createGeneList("$_basepath/genes.csv", 'I');
+
+            //Load parameters from disk
+            $json = json_decode(Storage::get("$_basepath/parameters.json"));
+            //Create new parameters in the DB
+            foreach($json as $parameter) {
+                ProjectParameter::updateOrCreate(['parameter' => $parameter->parameter, 'project_id' => $project->id, 'tag' => $parameter->tag], ['type' => $parameter->type, 'value' => $parameter->value]);
+            }
+
+            //Copy sample and other initial files
+            $userFolder = auth()->user()->getUserFolder();
+            $projectFolder = $userFolder . $project->id . '/';
+            Storage::createDirectory($projectFolder);
+            File::copyDirectory(Storage::path("$_basepath/samples"), Storage::path($projectFolder));
+            File::copy(Storage::path("$_basepath/initial_stlist.RData"), Storage::path("$projectFolder/initial_stlist.RData"));
+            File::copy(Storage::path("$_basepath/initial_stlist_summary.csv"), Storage::path("$projectFolder/initial_stlist_summary.csv"));
+
+            //Add parameter to indicate that this is the 'Demo project'
+            ProjectParameter::updateOrCreate(['parameter' => 'isDemoProject', 'project_id' => $project->id, 'tag' => ''], ['type' => 'number', 'value' => 1]);
+
+            setActiveProject($project);
+            return redirect($project->url);
+
+        } catch(Exception $e) {
+            Log::error('Error while creating Sandbox for user ' . auth()->id());
+            Logg:info($e->getMessage());
+
+            return response('Error', 500);
         }
     }
 
@@ -174,58 +333,39 @@ class ProjectController extends Controller
             return redirect()->route('qc-data-transformation', ['project' => $project->id]);*/
     }
 
-
-    private function getTasks($user_id, $project_id, $process) {
-        return Task::where('user_id', $user_id)->where('project_id', $project_id)->where('process', $process)->orderByDesc('scheduled_at')->get();
-    }
-
-    private function getLatestTask($user_id, $project_id, $process) {
-        $tasks = $this->getTasks($user_id, $project_id, $process);
-        return $tasks->count() ? $tasks[0] : null;
-    }
-
     public function getParametersUsedInJob(Project $project) {
-        $jobName = request('command');
-        $tasks = $this->getTasks(auth()->id(), $project->id, $jobName);
 
-        if(!$tasks->count()) return 0;
+        $data = $project->getParametersUsedInJob(request('command'));
 
-        $output = [];
-        foreach($tasks as $task) {
-            $data = json_decode($task->payload);
-            unset($data->parameters->__task);
-            $output[] = ['date' => $task->scheduled_at, 'parameters' => $data->parameters];
-        }
+        return response($data, 200, ['Content-Type' => 'text/csv']);
+    }
 
-        $dict = Storage::get('common/parameters_dictionary.json');
-        $dict = json_decode($dict);
-        $CSV = "";
-        if(property_exists($dict, $jobName)) {
-            $columnNames = implode(', ', get_object_vars($dict->$jobName));
-            $CSV = 'date, ' . $columnNames . "\n";
-            foreach($tasks as $task) {
-                $CSV .= $task->scheduled_at;
-                $values = json_decode($task->payload);
-                foreach(get_object_vars($dict->$jobName) as $attr => $value) {
-                    $tmp = $values->parameters->$attr;
-                    if(is_array($tmp)) {
-                        $tmp = '[' . implode('; ', $tmp) . ']' ;
-                    }
-                    if(is_object($tmp)) {
-                        $tmp_str = '';
-                        foreach(get_object_vars($tmp) as $key => $val) {
-                            if($tmp_str !== '') { $tmp_str .= ';'; }
-                            $tmp_str .= $key . ': ' . $val;
-                        }
-                        $tmp = '[' . $tmp_str . ']';
-                    }
-                    $CSV .= ', ' . $tmp;
-                }
-                $CSV .= "\n";
+    public function downloadJobFiles(Project $project, $process) {
+
+        $files = ProjectProcessFiles::where('project_id', $project->id)->where('process', $process)->firstOrFail();
+        $files = json_decode($files->files);
+
+        $public_folder = $project->workingDirPublic();
+
+        $zip = new \ZipArchive();
+        $zipFileName = $process . '.zip';
+        Storage::delete($project->workingDirPublic() . $zipFileName);
+        $zip->open(Storage::path($public_folder . $zipFileName), \ZipArchive::CREATE);
+
+        foreach($files as $file) {
+            if(Storage::fileExists($public_folder . $file)) {
+                $zip->addFile(Storage::path($public_folder . $file), $file);
             }
         }
 
-        return $CSV !== "" ? response($CSV, 200, ['Content-Type' => 'text/csv']) : $output;
+        $logName = '_LOG_' . $process . '.csv';
+        Storage::put($public_folder . $logName, $project->getParametersUsedInJob($process));
+        $zip->addFile(Storage::path($public_folder . $logName), $logName);
+
+        $zip->close();
+
+        return response()->download(Storage::path($public_folder . $zipFileName), $zipFileName, array('Content-Type: application/octet-stream','Content-Length: '. Storage::size($public_folder . $zipFileName)))/*->deleteFileAfterSend(true)*/;
+
     }
 
     public function getJobPositionInQueue(Project $project) {
@@ -237,7 +377,7 @@ class ProjectController extends Controller
 
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
 
-        $task = $this->getLatestTask(auth()->id(), $project->id, request('command'));
+        $task = $project->getLatestTask(request('command'));
 
         if($task) {
             $task->cancelled_at = now();
@@ -320,7 +460,7 @@ class ProjectController extends Controller
 
         //$project->generateFilterPlots(['color_palette' => request('color_palette'), 'variable' => request('variable')]);
 
-        $jobId = $project->createJob('Generate filter plots', 'generateFilterPlots', ['color_palette' => request('color_palette'), 'variable' => request('variable')]);
+        $jobId = $project->createJob('Generate filter plots', 'generateFilterPlots', ['color_palette' => request('color_palette'), 'variable' => request('variable'), 'samples' => request('samples')]);
         return $project->getJobPositionInQueue($jobId);
     }
 

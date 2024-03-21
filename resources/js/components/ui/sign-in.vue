@@ -132,7 +132,9 @@
 
                 axios.post(this.targetUrl , {'email' : this.email, 'password': this.password})
                     .then((response) => {
-                        window.location.href = "/projects";
+                        //console.log(response.data);
+                        //return;
+                        window.location.href = response.data;
                     })
                     .catch((error) => {
                         console.log(error.message);

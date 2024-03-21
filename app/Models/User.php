@@ -75,4 +75,26 @@ class User extends Authenticatable implements MustVerifyEmail
 
     }
 
+    public function hasDemoProject() {
+
+        foreach($this->projects as $project) {
+            if($project->isDemoProject()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getDemoProject() {
+
+        foreach($this->projects as $project) {
+            if($project->isDemoProject()) {
+                return $project;
+            }
+        }
+
+        return false;
+    }
+
 }
