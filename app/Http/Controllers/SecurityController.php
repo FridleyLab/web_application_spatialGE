@@ -22,6 +22,8 @@ class SecurityController extends Controller
 
     public function signin() {
 
+        $intended_url = session('url.intended', '/projects');
+
         session()->invalidate();
 
         $credentials = request()->only('email', 'password');
@@ -35,7 +37,8 @@ class SecurityController extends Controller
                 return response("<p>You have not activated your account yet</p><p>Please check your email</p>", 401);
             }
 
-            return response("Pass", 200); //return redirect()->intended(route('home'));
+            return response($intended_url, 200);
+            //return response(redirect()->intended(route('my-projects'))->getTargetUrl(), 200); //return redirect()->intended(route('home'));
         }
 
         return response("Email/Password incorrect!", 403);

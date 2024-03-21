@@ -53,6 +53,10 @@ class Project extends Model
         return $this->hasMany(ProjectParameter::class);
     }
 
+    public function isDemoProject() {
+        return $this->parameters()->where('parameter', 'isDemoProject')->count();
+    }
+
     /*public function genes(): HasMany
     {
         return $this->hasMany(ProjectGene::class);
@@ -572,6 +576,24 @@ class Project extends Model
             ProjectParameter::updateOrCreate(['parameter' => 'initial_stlist_summary', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'string', 'value' => $data]);
             Storage::copy($file, $file_public);
             ProjectParameter::updateOrCreate(['parameter' => 'initial_stlist_summary_url', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . 'initial_stlist_summary.csv']);
+
+
+            if($this->isCosmxPlatform()) {
+                //Delete initial samples containing multiple FOVs
+                foreach($this->samples as $sample) {
+                    $sample->delete();
+                }
+
+                //Insert each detected FOV as a new sample
+                $fovs = explode("\n", $data);
+                for($i = 1; $i < count($fovs); $i++) {
+                    $fields = explode(',', $fovs[$i]);
+                    $sample = Sample::create(['name' => $fields[0]]);
+                    $sample->projects()->save($this);
+                }
+            }
+
+
         }
 
         $this->filter_meta_options();
@@ -866,11 +888,11 @@ write.csv(df_summary, 'filtered_stlist_summary.csv', row.names=FALSE, quote=FALS
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='" . ($this->samples->count() < 12 ? "Spectral" : "smoothrainbow") . "')
+vp = distribution_plots(filtered_stlist, samples=$samples, plot_meta='total_counts', color_pal='" . ($this->samples->count() < 12 ? "Spectral" : "smoothrainbow") . "')
 #ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
-bp = distribution_plots(filtered_stlist, plot_meta='total_counts', color_pal='" . ($this->samples->count() < 12 ? "Spectral" : "smoothrainbow") . "', plot_type='box')
+bp = distribution_plots(filtered_stlist, samples=$samples, plot_meta='total_counts', color_pal='" . ($this->samples->count() < 12 ? "Spectral" : "smoothrainbow") . "', plot_type='box')
 #ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 #### Save plots to file
@@ -937,6 +959,14 @@ $plots
         $color_palette = $parameters['color_palette'];
         $variable = $parameters['variable'];
 
+        $samples = $parameters['samples'];
+        if(is_array($samples) && count($samples)) {
+            $samples = "c('" . join("','", $samples) . "')";
+        }
+        else {
+            $samples = "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
+        }
+
 
         $plots = $this->getExportFilesCommands('filter_violin', 'vp');
         $plots .= $this->getExportFilesCommands('filter_boxplot', 'bp');
@@ -955,11 +985,11 @@ library('spatialGE')
 #library('magrittr')
 #source('violin_plots.R')
 #source('utils.R')
-vp = distribution_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette')
+vp = distribution_plots(filtered_stlist, samples=$samples, plot_meta='$variable', color_pal='$color_palette')
 #ggpubr::ggexport(filename = 'filter_violin.png', vp, width = 800, height = 800)
 
 #### Box plot
-bp = distribution_plots(filtered_stlist, plot_meta='$variable', color_pal='$color_palette', plot_type='box')
+bp = distribution_plots(filtered_stlist, samples=$samples, plot_meta='$variable', color_pal='$color_palette', plot_type='box')
 #ggpubr::ggexport(filename = 'filter_boxplot.png', bp, width = 800, height = 800)
 
 #### save plots to file

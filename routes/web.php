@@ -34,8 +34,9 @@ Route::middleware(['auth'])->group(function() {
 
 
 
-    //Clone Sandbox Project
-    Route::get('/projects/clone-sandbox-project',[ProjectController::class, 'clone_sandbox_project'])->name('clone-sandbox-project');
+    //Clone Demo Project
+    Route::get('/projects/clone-demo-project/{platform}',[ProjectController::class, 'clone_demo_project'])->name('clone-demo-project');
+    Route::get('/projects/clone-demo-project-cosmx',[ProjectController::class, 'create_cosmx_temp_project'])->name('clone-demo-project-cosmx');
     //Project CRUD
     Route::get('/projects',[ProjectController::class, 'index'])->name('my-projects');
     Route::post('/projects',[ProjectController::class, 'store'])->name('store-project');

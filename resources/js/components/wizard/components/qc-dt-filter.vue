@@ -17,7 +17,10 @@
                 <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
 
                     <div class="text-center justify-content-center w-100">
-                        <div class="m-4 gap-4">
+
+                        <project-summary-table :data="project.project_parameters.initial_stlist_summary" :url="project.project_parameters.initial_stlist_summary_url" :selected-keys="params.samples" @selected="(keys) => params.samples = keys"></project-summary-table>
+
+                        <!-- <div class="m-4 gap-4">
                             <div class="text-info text-lg text-bolder text-center mb-2">Click to add/remove a sample</div>
                             <div class="text-info text-lg text-center mb-2" v-if="params.samples.length === samples.length">All samples selected</div>
                             <div class="text-info text-lg text-center mb-2" v-if="!params.samples.length">You must select at least one sample</div>
@@ -27,7 +30,7 @@
                                 </button>
                             </div>
 
-                        </div>
+                        </div> -->
                     </div>
 
                 </div>
@@ -580,7 +583,7 @@
 
             filterPlots() {
                 this.generating_plots = true;
-                axios.post(this.filterUrlPlots, {color_palette: this.filter_color_palette, variable: this.filter_variable})
+                axios.post(this.filterUrlPlots, {color_palette: this.filter_color_palette, variable: this.filter_variable, samples: this.params.samples})
                     .then((response) => {
                         //this.generating_plots = false;
                     })

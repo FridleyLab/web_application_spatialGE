@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,14 +45,26 @@ class Sample extends Model
             return $file;
         }
 
-        return $this->files()->where('type', 'expressionFile')->firstOrFail();
+        try {
+            return $this->files()->where('type', 'expressionFile')->firstOrFail();
+        }
+        catch(Exception $e) {
+            $file = new File;
+            $file->filename = 'test.csv';
+            return $file;
+        }
     }
 
     public function getCoordinatesFileAttribute() {
 
         if($this->isTestUser()) return null;
 
-        return $this->files()->where('type', 'coordinatesFile')->firstOrFail();
+        try {
+            return $this->files()->where('type', 'coordinatesFile')->firstOrFail();
+        }
+        catch(Exception $e) {
+            return null;
+        }
     }
 
     public function getImageFileAttribute() {

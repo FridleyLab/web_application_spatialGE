@@ -1,11 +1,6 @@
 <template>
     <div class="table-responsive mt-3">
-
-
-        <data-grid :headers="main_data.headers" :data="main_data.rows" :show-gene-card="false" :allow-selection="allowSelection" key-attribute="sample_name" :page-size="10" :selected-keys="selectedKeys" @selected="selectedKeysChanged"></data-grid>
-
-
-        <!-- <table class="table table-striped">
+        <table class="table table-striped">
             <thead>
             <tr>
                 <th></th>
@@ -25,7 +20,7 @@
 
             </tbody>
         </table>
-        <div v-if="url.length" class="float-end"><a class="text-info" :href="url" download>Download summary</a></div> -->
+        <div v-if="url.length" class="float-end"><a class="text-info" :href="url" download>Download summary</a></div>
     </div>
 </template>
 
@@ -33,14 +28,10 @@
     export default {
         name: 'projectSummaryTable',
 
-        emits: ['selected'],
-
         props: {
             data: String,
             reference: {type: String, default: ''},
-            url: {type: String, default: ''},
-            selectedKeys: {type: Object, default: []},
-            allowSelection: {type: Boolean, default: true},
+            url: {type: String, default: ''}
         },
 
         data() {
@@ -71,20 +62,14 @@
         created() {
             this.main_data = this.csvToJSON(this.data);
             this.reference_data = this.reference.length ? this.csvToJSON(this.reference) : {};
-
-            console.log(this.main_data);
         },
 
         methods: {
             csvToJSON: function(csv) {
                 let lines = csv.split("\n");
                 let rows = [];
-                let _headers = lines[0].split(",");
-                let headers = [];
-
-                for (let i = 0; i < _headers.length; i++) {
-                    headers.push( { value: _headers[i], text: this.header_names[_headers[i]] } );
-                }
+                let headers;
+                headers = lines[0].split(",");
 
                 for (let i = 1; i < lines.length; i++) {
                     let obj = {};
@@ -95,7 +80,7 @@
 
                     let words = lines[i].split(",");
                     for(let j = 0; j < words.length; j++) {
-                        obj[_headers[j].trim()] = j === 0 ? words[j] : Math.round(words[j]);
+                        obj[headers[j].trim()] = words[j];
                     }
 
                     rows.push(obj);
@@ -110,11 +95,6 @@
 
             numberFormat: function (x) {
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            },
-
-            selectedKeysChanged: function (keys) {
-                console.log(keys);
-                this.$emit('selected', keys);
             }
         }
     }

@@ -22,12 +22,16 @@
 
                         <div class="my-6">
                             <h5>Using our Demo project is easy!</h5>
-                            <p>Description about the sample STlist provided with the sandbox</p>
+                            <p>Description about the sample STlist provided with the Demo Project</p>
                             @auth
-                                <a href="{{ route('clone-sandbox-project') }}" class="text-info text-decoration-underline">Create demo project</a>
+                                @if(Auth::user()->hasDemoProject())
+                                    You already have a Demo Project, go to it <a href="{{ Auth::user()->getDemoProject()->url }}" class="text-info text-decoration-underline">here</a>
+                                @else
+                                    <a href="{{ route('clone-demo-project') }}" class="text-info text-decoration-underline">Create demo project</a>
+                                @endif
                             @endauth
                             @guest
-                                You need to <a href="{{ route('login') }}" class="text-info text-decoration-underline">log in</a> first to create your demo project!
+                                You need to <a href="{{ route('clone-demo-project') }}" class="text-info text-decoration-underline">log in</a> first to create your demo project!
                             @endguest
 
                         </div>
