@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Project;
+use App\Models\File;
 
 function getProjectById($project_id) {
     return Project::findOrFail($project_id);

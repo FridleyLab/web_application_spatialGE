@@ -17,13 +17,19 @@
 
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
+                            <li v-if="['VISIUM', 'GENERIC'].includes(project.platform_name)" class="nav-item" role="presentation">
                                 <button class="nav-link active" id="stdeconvolve-tab" data-bs-toggle="tab" data-bs-target="#stdeconvolve" type="button" role="tab" aria-controls="stdeconvolve" aria-selected="true">STdeconvolve</button>
+                            </li>
+                            <li v-if="project.platform_name === 'COSMX'" class="nav-item" role="presentation">
+                                <button class="nav-link active" id="insitutype-tab" data-bs-toggle="tab" data-bs-target="#insitutype" type="button" role="tab" aria-controls="insitutype" aria-selected="true">InSituType</button>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active min-vh-50" id="stdeconvolve" role="tabpanel" aria-labelledby="stdeconvolve-tab">
+                            <div v-if="['VISIUM', 'GENERIC'].includes(project.platform_name)" class="tab-pane fade show active min-vh-50" id="stdeconvolve" role="tabpanel" aria-labelledby="stdeconvolve-tab">
                                 <stdeconvolve :project="project" :samples="samples" :st-deconvolve-url="stDeconvolveUrl" :st-deconvolve2-url="stDeconvolve2Url" :st-deconvolve3-url="stDeconvolve3Url" :color-palettes="colorPalettes"></stdeconvolve>
+                            </div>
+                            <div v-if="project.platform_name === 'COSMX'" class="tab-pane fade show active min-vh-50" id="insitutype" role="tabpanel" aria-labelledby="insitutype-tab">
+                                <insitutype :project="project" :samples="samples" :st-deconvolve-url="stDeconvolveUrl" :st-deconvolve2-url="stDeconvolve2Url" :st-deconvolve3-url="stDeconvolve3Url" :color-palettes="colorPalettes"></insitutype>
                             </div>
                         </div>
                     </div>

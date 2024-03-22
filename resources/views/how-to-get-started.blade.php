@@ -21,18 +21,38 @@
                         <h4 class="my-3 text-center">How to Get Started</h4>
 
                         <div class="my-6">
-                            <h5>Using our Demo project is easy!</h5>
-                            <p>Description about the sample STlist provided with the Demo Project</p>
-                            @auth
-                                @if(Auth::user()->hasDemoProject())
-                                    You already have a Demo Project, go to it <a href="{{ Auth::user()->getDemoProject()->url }}" class="text-info text-decoration-underline">here</a>
-                                @else
-                                    <a href="{{ route('clone-demo-project') }}" class="text-info text-decoration-underline">Create demo project</a>
-                                @endif
-                            @endauth
-                            @guest
-                                You need to <a href="{{ route('clone-demo-project') }}" class="text-info text-decoration-underline">log in</a> first to create your demo project!
-                            @endguest
+
+                            <h4>Using our Test projects is easy!</h4>
+
+                            <div class="pt-4">
+                                <h5>Visium platform</h5>
+                                <p>Description about the sample Visium STlist provided with the Test Project</p>
+                                @auth
+                                    @if(false && Auth::user()->hasDemoProject())
+                                        You already have a Visium <a href="{{ Auth::user()->getDemoProject()->url }}" class="btn btn-sm btn-info">Test Project</a>
+                                    @else
+                                        <a href="{{ route('clone-demo-project', ['platform' => 'Visium']) }}" class="btn btn-sm btn-info">Create Visium test project</a>
+                                    @endif
+                                @endauth
+                                @guest
+                                    You need to <a href="{{ route('clone-demo-project', ['platform' => 'Visium']) }}" class="text-info text-decoration-underline">log in</a> first to create your demo project!
+                                @endguest
+                            </div>
+
+                            <div class="pt-4">
+                                <h5>CosMx platform</h5>
+                                <p>Description about the sample CosMx STlist provided with the Test Project</p>
+                                @auth
+                                    @if(false && Auth::user()->hasDemoProject())
+                                        You already have a CosMx <a href="{{ Auth::user()->getDemoProject()->url }}" class="btn btn-sm btn-info">Test Project</a>
+                                    @else
+                                        <a href="{{ route('clone-demo-project', ['platform' => 'CosMx']) }}" class="btn btn-sm btn-info">Create CosMx test project</a>
+                                    @endif
+                                @endauth
+                                @guest
+                                    You need to <a href="{{ route('clone-demo-project', ['platform' => 'CosMx']) }}" class="text-info text-decoration-underline">log in</a> first to create your demo project!
+                                @endguest
+                            </div>
 
                         </div>
 

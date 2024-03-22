@@ -59,7 +59,7 @@ import stgradients from "./components/wizard/components/stgradients.vue";
 import phenotyping from "./components/wizard/phenotyping.vue";
 import stdeconvolve from "./components/wizard/components/phenotyping-stdeconvolve.vue";
 import stdeconvolve_suggested_ks from "./components/wizard/components/phenotyping-stdeconvolve-suggested-ks.vue";
-
+import insitutype from "./components/wizard/components/phenotyping-insitutype.vue";
 
 
 //Global event emitter
@@ -147,6 +147,7 @@ app.component('stgradients', stgradients);
 
 app.component('phenotyping', phenotyping);
 app.component('stdeconvolve', stdeconvolve);
+app.component('insitutype', insitutype);
 app.component('stdeconvolve-suggested-ks', stdeconvolve_suggested_ks);
 
 
