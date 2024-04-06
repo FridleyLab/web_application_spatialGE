@@ -16,73 +16,65 @@
 
 
 
+            <div class="row justify-content-center text-center m-3">
+
+                <div class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2) ? 'disabled-clicks' : ''">
+
                     <div class="row justify-content-center text-center m-3">
-
-                        <div class="w-100 w-lg-90 w-xxl-85" :class="(processing2 || processing3) ? 'disabled-clicks' : ''">
-
-                            <div class="row justify-content-center text-center m-3">
-                                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                                    <div>
-                                        <label class="text-lg">
-                                            Gene signatures
-                                        </label>
-                                        <show-modal tag="stgradient_annotation_to_test"></show-modal>
-                                    </div>
-                                    <div>
-                                        <span>
-                                            <Multiselect :options="gene_signatures" v-model="params2.celltype_markers"></Multiselect>
-                                        </span>
-                                    </div>
-                                </div>
+                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                            <div>
+                                <label class="text-lg">
+                                    Cell profile signature
+                                </label>
+                                <show-modal tag="stgradient_annotation_to_test"></show-modal>
                             </div>
-
-                            <div class="row justify-content-center text-center m-4">
-                                <div class="w-100">
-                                    <div class="me-3">
-                                        <label class="text-lg">
-                                            Point size:&nbsp;
-                                        </label>
-                                        <input type="number" class="text-end text-md border border-1 rounded w-25 w-md-20 w-xl-15" size="3" v-model="params2.user_radius">
-                                    </div>
-                                    <input type="range" :min="1" :max="1000" step="1" class="w-100" v-model="params2.user_radius">
-                                </div>
+                            <div>
+                                <span>
+                                    <Multiselect :options="gene_signatures" v-model="params.cell_profile"></Multiselect>
+                                </span>
                             </div>
-
-                            <div class="row justify-content-center text-center m-4">
-                                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                                    <div>Color palette <show-modal tag="sdd_spagcn_color_palette"></show-modal></div>
-                                    <div><Multiselect :options="colorPalettes" v-model="params2.color_pal"></Multiselect></div>
-                                </div>
-                            </div>
-
                         </div>
-
-
-                        <div class="p-3 text-center mt-4">
-                            <send-job-button label="Run InSituType" :disabled="processing2 || processing3" :project-id="project.id" job-name="STdeconvolve2" @started="runSTdeconvolve2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
-                        </div>
-
-
-
-                        <div v-if="topicNamesChanged" class="p-3 text-center mt-4">
-                            <div class="text-warning">Please click the "RENAME TOPICS" button only after completing all annotation changes in all samples</div>
-                            <send-job-button label="Rename Topics" :disabled="processing2 || processing3" :project-id="project.id" job-name="STdeconvolve3" @started="runSTdeconvolve3" @ongoing="processing3 = true" @completed="processCompleted3" :project="project" :download-log="false"></send-job-button>
-                        </div>
-
-
-
                     </div>
 
 
+                    <div class="row justify-content-center text-center mt-4">
+                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                            <label class="me-3 text-lg">
+                                <input type="checkbox" v-model="params.refine_cells"> Refine celltypes <show-modal tag="sthet_plot_methods"></show-modal>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="text-center mt-3">
+                    <send-job-button label="Run InSituType" :disabled="processing || processing2" :project-id="project.id" job-name="InSituType" @started="runInSituType" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+                </div>
+
+                <div v-if="'InSituType' in this.project.project_parameters" class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2) ? 'disabled-clicks' : ''">
+                    <div class="row justify-content-center text-center m-4">
+                        <div class="w-100">
+                            <div class="me-3">
+                                <label class="text-lg">
+                                    Point size:&nbsp;
+                                </label>
+                                <input type="number" class="text-end text-md border border-1 rounded w-25 w-md-20 w-xl-15" size="3" v-model="params2.user_radius">
+                            </div>
+                            <input type="range" :min="1" :max="1000" step="1" class="w-100" v-model="params2.user_radius">
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center text-center m-4">
+                        <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
+                            <div>Color palette <show-modal tag="sdd_spagcn_color_palette"></show-modal></div>
+                            <div><Multiselect :options="colorPalettes" v-model="params2.color_pal"></Multiselect></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-
-
-
-
-
-
-
-
 
     </form>
 </div>
@@ -121,31 +113,70 @@ import Multiselect from '@vueform/multiselect';
 
                 dynamicTreeCuts: false,
                 params: {
-                    min_k: 5,
-                    max_k: 10,
-                    rm_mt: true,
-                    rm_rp: true,
-                    use_var_genes: true,
-                    use_var_genes_n: 1000,
-                    col_pal: 'smoothrainbow'
+                    cell_profile: '',
+                    refine_cells: true
                 },
 
                 filter_variable: '',
 
                 gene_signatures: [
-                    {value: 'CellMarker2.0_Human_Nov162023', label: 'CellMarker signatures (v2.0, Human)'},
-                    {value: 'CellMarker2.0_CancerHuman_Nov162023', label: 'CellMarker signatures (v2.0, Human-Cancer)'},
-                    {value: 'CellMarker2.0_Human_Breast__Nov162023', label: 'CellMarker signatures (v2.0, Human-Breast)'},
-                    {value: 'CellMarker2.0_Mouse__Normal_cell_Nov162023', label: 'CellMarker signatures (v2.0, Mouse)'},
-                    {value: 'CellMarker2.0_Mouse__Cancer_cell_Nov162023', label: 'CellMarker signatures (v2.0, Mouse-Cancer)'},
-                    {value: 'CellMarker2.0_Mouse_Bone__Nov162023', label: 'CellMarker signatures (v2.0, Mouse-Bone)'},
-                    {value: 'celltype_markers_25perc_200toplogFC_blueprint_Nov142023', label: 'BluePrint signatures (200 top genes, highest logFC)'},
-                    {value: 'CellMarker2.0_Mouse_Bone__Nov162023_Curated_Feb262024', label: 'CellMarker signatures (v2.0, Mouse-Bone - curated)'},
+                    {value: 'HUMAN-Brain_AllenBrainAtlas', label: 'HUMAN-Brain_AllenBrainAtlas'},
+                    {value: 'HUMAN-Brain_Darmanis', label: 'HUMAN-Brain_Darmanis'},
+                    {value: 'HUMAN-Colon_HCA', label: 'HUMAN-Colon_HCA'},
+                    {value: 'HUMAN-Decidua_HCA', label: 'HUMAN-Decidua_HCA'},
+                    {value: 'HUMAN-Esophagus_HCA', label: 'HUMAN-Esophagus_HCA'},
+                    {value: 'HUMAN-Gut_HCA', label: 'HUMAN-Gut_HCA'},
+                    {value: 'HUMAN-Heart_HCA', label: 'HUMAN-Heart_HCA'},
+                    {value: 'HUMAN-Ileum_Wang', label: 'HUMAN-Ileum_Wang'},
+                    {value: 'HUMAN-ImmuneCensus_HCA', label: 'HUMAN-ImmuneCensus_HCA'},
+                    {value: 'HUMAN-ImmuneTumor_safeTME', label: 'HUMAN-ImmuneTumor_safeTME'},
+                    {value: 'HUMAN-Kidney_HCA', label: 'HUMAN-Kidney_HCA'},
+                    {value: 'HUMAN-Liver_HCA', label: 'HUMAN-Liver_HCA'},
+                    {value: 'HUMAN-Lung_Control_Adams', label: 'HUMAN-Lung_Control_Adams'},
+                    {value: 'HUMAN-Lung_COPD_Adams', label: 'HUMAN-Lung_COPD_Adams'},
+                    {value: 'HUMAN-Lung_HCA', label: 'HUMAN-Lung_HCA'},
+                    {value: 'HUMAN-Lung_IPF_Adams', label: 'HUMAN-Lung_IPF_Adams'},
+                    {value: 'HUMAN-Muscle_DeMicheli', label: 'HUMAN-Muscle_DeMicheli'},
+                    {value: 'HUMAN-Pancreas_HCA', label: 'HUMAN-Pancreas_HCA'},
+                    {value: 'HUMAN-Placenta_HCA', label: 'HUMAN-Placenta_HCA'},
+                    {value: 'HUMAN-Prostate_Henry', label: 'HUMAN-Prostate_Henry'},
+                    {value: 'HUMAN-Rectum_Wang', label: 'HUMAN-Rectum_Wang'},
+                    {value: 'HUMAN-Retina_HCA', label: 'HUMAN-Retina_HCA'},
+                    {value: 'HUMAN-Skin_HCA', label: 'HUMAN-Skin_HCA'},
+                    {value: 'HUMAN-Spleen_HCA', label: 'HUMAN-Spleen_HCA'},
+                    {value: 'HUMAN-Testis_Guo', label: 'HUMAN-Testis_Guo'},
+
+                    {value: 'MOUSE-Bladder_MCA', label: 'MOUSE-Bladder_MCA'},
+                    {value: 'MOUSE-BoneMarrow_cKit_MCA', label: 'MOUSE-BoneMarrow_cKit_MCA'},
+                    {value: 'MOUSE-BoneMarrow_MCA', label: 'MOUSE-BoneMarrow_MCA'},
+                    {value: 'MOUSE-Brain_AllenBrainAtlas', label: 'MOUSE-Brain_AllenBrainAtlas'},
+                    {value: 'MOUSE-Brain_MCA', label: 'MOUSE-Brain_MCA'},
+                    {value: 'MOUSE-ImmuneAtlas_ImmGen_cellFamily', label: 'MOUSE-ImmuneAtlas_ImmGen_cellFamily'},
+                    {value: 'MOUSE-ImmuneAtlas_ImmGen', label: 'MOUSE-ImmuneAtlas_ImmGen'},
+                    {value: 'MOUSE-Kidney_MCA', label: 'MOUSE-Kidney_MCA'},
+                    {value: 'MOUSE-Liver_MCA', label: 'MOUSE-Liver_MCA'},
+                    {value: 'MOUSE-Lung_MCA', label: 'MOUSE-Lung_MCA'},
+                    {value: 'MOUSE-MammaryGland_Involution_MCA', label: 'MOUSE-MammaryGland_Involution_MCA'},
+                    {value: 'MOUSE-MammaryGland_Lactation_MCA', label: 'MOUSE-MammaryGland_Lactation_MCA'},
+                    {value: 'MOUSE-MammaryGland_Pregnancy_MCA', label: 'MOUSE-MammaryGland_Pregnancy_MCA'},
+                    {value: 'MOUSE-MammaryGland_Virgin_MCA', label: 'MOUSE-MammaryGland_Virgin_MCA'},
+                    {value: 'MOUSE-Muscle_MCA', label: 'MOUSE-Muscle_MCA'},
+                    {value: 'MOUSE-Ovary_MCA', label: 'MOUSE-Ovary_MCA'},
+                    {value: 'MOUSE-Pancreas_MCA', label: 'MOUSE-Pancreas_MCA'},
+                    {value: 'MOUSE-PeripheralBlood_MCA', label: 'MOUSE-PeripheralBlood_MCA'},
+                    {value: 'MOUSE-Placenta_MCA', label: 'MOUSE-Placenta_MCA'},
+                    {value: 'MOUSE-Prostate_MCA', label: 'MOUSE-Prostate_MCA'},
+                    {value: 'MOUSE-SmallIntestine_MCA', label: 'MOUSE-SmallIntestine_MCA'},
+                    {value: 'MOUSE-Spleen_MCA', label: 'MOUSE-Spleen_MCA'},
+                    {value: 'MOUSE-Stomach_MCA', label: 'MOUSE-Stomach_MCA'},
+                    {value: 'MOUSE-Testis_MCA', label: 'MOUSE-Testis_MCA'},
+                    {value: 'MOUSE-Thymus_MCA', label: 'MOUSE-Thymus_MCA'},
+                    {value: 'MOUSE-Uterus_MCA', label: 'MOUSE-Uterus_MCA'},
+
+
                 ],
 
                 params2: {
-                    celltype_markers: 'CellMarker2.0_Human_Nov162023',
-                    q_val: 0.05,
                     user_radius: 100,
                     color_pal: 'discreterainbow'
                 },
@@ -176,7 +207,7 @@ import Multiselect from '@vueform/multiselect';
 
         methods: {
 
-            runSTdeconvolve() {
+            runInSituType() {
                 this.processing = true;
 
                 axios.post(this.stDeconvolveUrl, this.params)
@@ -240,33 +271,6 @@ import Multiselect from '@vueform/multiselect';
                 this.STdeconvolve2 = ('STdeconvolve2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve2) : {};
                 this.diplicateTopicNames();
                 this.processing3 = false;
-            },
-
-
-            getTopicNewAnnotation(sample_name, topic) {
-                let obj = this.STdeconvolve2.topic_annotations[sample_name][topic];
-                return typeof obj === 'object' ? obj["new_annotation"] : '';
-            },
-
-            diplicateTopicNames() {
-                if('logfold_plots' in this.STdeconvolve2) {
-                    Object.entries(this.STdeconvolve2['logfold_plots']).forEach(([keySample, sample]) => {
-                        Object.entries(sample).forEach(([keyTopic, topic]) => {
-                            topic['current_annotation'] = topic['new_annotation'];
-                        });
-                    });
-                }
-            },
-
-            _topicNamesChanged() {
-                this.topicNamesChanged = false;
-                if('logfold_plots' in this.STdeconvolve2) {
-                    Object.entries(this.STdeconvolve2['logfold_plots']).forEach(([keySample, sample]) => {
-                        Object.entries(sample).forEach(([keyTopic, topic]) => {
-                            if(topic['current_annotation'].trim() !== topic['new_annotation']) this.topicNamesChanged = true; //change found
-                        });
-                    });
-                }
             },
 
         },

@@ -18,7 +18,7 @@
                     </div>
                 </div>
                 <div v-if="queuePosition>0" class="text-center">
-                    Queue position: <span class="text-warning text-lg">{{ queuePosition }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span>
+                    <span v-if="queuePosition > 1">Queue position: </span><span class="text-warning text-lg">{{ queuePosition > 2 ? queuePosition : queuePosition === 2 ? 'next in queue' : '' }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span>
                 </div>
                 <div class="my-3 text-center">
                     <img src="/images/loading-circular.gif" class="" style="width:100px" />

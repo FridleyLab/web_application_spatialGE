@@ -135,6 +135,12 @@ export default {
 
             this.file = 'dataTransfer' in event ? event.dataTransfer.files[0] : event.target.files[0];
 
+            if(!this.file.size) {
+                this.errorMessage = "File size is zero. If you dragged and dropped the file, try clicking the + button above and manually locating the file.";
+                this.file = null;
+                return;
+            }
+
             this.errorMessage = '';
             //TODO: after the first sample, all samples must match in format
 

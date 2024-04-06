@@ -16,7 +16,7 @@
                 </h2>
                 <div id="collapseSelectSamples" class="accordion-collapse collapse" aria-labelledby="headingSelectSamples" data-bs-parent="#accordionFilterTab">
 
-                    <div class="text-center justify-content-center w-100">
+                    <div class="text-center justify-content-center w-100 py-2">
 
                         <project-summary-table :data="project.project_parameters.initial_stlist_summary" :url="project.project_parameters.initial_stlist_summary_url" :selected-keys="params.samples" @selected="(keys) => params.samples = keys"></project-summary-table>
 
