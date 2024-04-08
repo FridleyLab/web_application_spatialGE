@@ -80,15 +80,19 @@
                     template="masterDetailTemplate"
                 />
                 <template #masterDetailTemplate="{ data: process }">
-                    <div>
+                    <div class="w-100">
 
 <!--                        <div class="my-6">-->
 <!--                            <show-stats-plot-detail :plot-data="process.data.stats.map(obj => ({ time: obj.time, memory: obj.memory }))"></show-stats-plot-detail>-->
 <!--                        </div>-->
 
-                        <template v-for="file in process.data.downloadable">
-                            <a :href="'/admin-download-file/' + process.data.project_id + '/' + file" download>{{ file }}</a>
-                        </template>
+                        <div class="container">
+                            <div class="row row-cols-4">
+                                <div v-for="file in process.data.downloadable" class="col my-2">
+                                    <a class="border rounded rounded-2 border-1 px-2 py-1" :href="'/admin-download-file/' + process.data.project_id + '/' + file" download>{{ file }}</a>
+                                </div>
+                            </div>
+                        </div>
                         <pre>
                             {{ process.data.output }}
                         </pre>
