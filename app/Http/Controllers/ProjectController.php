@@ -79,11 +79,11 @@ class ProjectController extends Controller
             $userFolder = auth()->user()->getUserFolder();
             $projectFolder = $userFolder . $project->id . '/';
             Storage::createDirectory($projectFolder);
-            File::copyDirectory(Storage::path('common/testprojects/cosmx/samples'), Storage::path($projectFolder));
+            File::copyDirectory(Storage::path('common/test_projects/cosmx/samples'), Storage::path($projectFolder));
 
 
             //Load samples and files from disk
-            $json = json_decode(Storage::get('common/testprojects/cosmx/samples.json'));
+            $json = json_decode(Storage::get('common/test_projects/cosmx/samples.json'));
             //Create new samples and files in the DB
             $fovSamples = [];
             $metadata = ["name" => "tumor", "values" => []];
@@ -99,10 +99,10 @@ class ProjectController extends Controller
 
 
                 // Get an instance of the directory iterator for the directory
-                $files = new \DirectoryIterator(Storage::path($projectFolder . $sampleName . '/spatial/'));
+                //$files = new \DirectoryIterator(Storage::path($projectFolder . $sampleName . '/spatial/'));
 
                 // Iterate over each file in the directory
-                foreach ($files as $file) {
+                /*foreach ($files as $file) {
                     // Check if the file is a regular file and ends with '.jpg'
                     if ($file->isFile() && $file->getExtension() === 'jpg') {
                         // Get the filename without extension
@@ -126,10 +126,11 @@ class ProjectController extends Controller
                         $fovSamples[$sampleName . '_fov_' . $xxxNumber][] = ["filename" => $sampleName . '_fov_' . $xxxNumber . '.jpg', "type" => "imageFile"];
 
                     }
-                }
+                }*/
             }
-            Storage::put($projectFolder . 'samples.json', json_encode($fovSamples, JSON_PRETTY_PRINT));
-            Storage::put($projectFolder . 'metadata.json', json_encode(["meta" => json_encode($metadata)], JSON_PRETTY_PRINT));
+            //Storage::put($projectFolder . 'samples.json', json_encode($fovSamples, JSON_PRETTY_PRINT));
+            //Storage::put($projectFolder . 'metadata.json', json_encode(["meta" => json_encode($metadata)], JSON_PRETTY_PRINT));
+
 
             // //Insert genes into DB
             // $project->createGeneList('common/sandbox/genes.csv', 'I');
@@ -669,6 +670,17 @@ class ProjectController extends Controller
 
     public function STdeconvolve3(Project $project) {
         $jobId = $project->createJob('Phenotyping - STdeconvolve3', 'STdeconvolve3', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
+
+    public function InSituType(Project $project) {
+        $jobId = $project->createJob('Phenotyping - InSituType', 'InSituType', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
+    public function InSituType2(Project $project) {
+        $jobId = $project->createJob('Phenotyping - InSituType2', 'InSituType2', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 

@@ -836,14 +836,7 @@ lapply(names(tissues), function(i){
             }
         }
 
-        $samples = $parameters['samples'];
-        if(is_array($samples) && count($samples)) {
-            $samples = "c('" . join("','", $samples) . "')";
-        }
-        else {
-            $samples = "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
-        }
-
+        $samples = $this->getSampleList($parameters['samples']);
         $str_params .= ', samples=' . $samples;
 
         $plots = $this->getExportFilesCommands('filter_violin', 'vp');
@@ -959,13 +952,16 @@ $plots
         $color_palette = $parameters['color_palette'];
         $variable = $parameters['variable'];
 
-        $samples = $parameters['samples'];
+
+        $samples = $this->getSampleList($parameters['samples']);
+
+        /*$samples = $parameters['samples'];
         if(is_array($samples) && count($samples)) {
             $samples = "c('" . join("','", $samples) . "')";
         }
         else {
             $samples = "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
-        }
+        }*/
 
 
         $plots = $this->getExportFilesCommands('filter_violin', 'vp');
@@ -1117,6 +1113,8 @@ $plots
         $stlist = 'filtered_stlist';
         if (!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'initial_stlist';
 
+        $samples = $this->getSampleList(NULL);
+
         $str_params = '';
         foreach ($parameters as $key => $value) {
             if (strlen($value) && $key !== '__task' && $key !== 'executeIn') {
@@ -1156,8 +1154,8 @@ pca_max_var_genes = min(unlist(lapply(normalized_stlist@counts, nrow)))
 write.table(pca_max_var_genes, 'pca_max_var_genes.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 #### Violin & Box plots
-den_raw = plot_counts(normalized_stlist, distrib_subset=0.01, data_type='raw', plot_type=c('density', 'violin', 'box'))
-den_tr = plot_counts(normalized_stlist, distrib_subset=0.01, plot_type=c('density', 'violin', 'box'))
+den_raw = plot_counts(normalized_stlist, distrib_subset=0.01, data_type='raw', plot_type=c('density', 'violin', 'box'), samples=$samples)
+den_tr = plot_counts(normalized_stlist, distrib_subset=0.01, plot_type=c('density', 'violin', 'box'), samples=$samples)
 
 $plots
 
@@ -1224,6 +1222,8 @@ $plots
         $plots = $this->getExportFilesCommands('normalized_violin', 'vp');
         $plots .= $this->getExportFilesCommands('normalized_boxplot', 'bp');
 
+        $samples = $this->getSampleList(NULL);
+
         $script = "
 setwd('/spatialGE')
 # Load the package
@@ -1234,9 +1234,9 @@ library('spatialGE')
 {$this->_loadStList($stlist)}
 
 #### Violin plot
-vp = distribution_plots($stlist, color_pal='$color_palette', data_type='tr', genes='$gene')
+vp = distribution_plots($stlist, color_pal='$color_palette', data_type='tr', genes='$gene', samples=$samples)
 #### Box plot
-bp = distribution_plots($stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene')
+bp = distribution_plots($stlist, color_pal='$color_palette', plot_type='box', data_type='tr', genes='$gene', samples=$samples)
 
 $plots
 
@@ -1614,10 +1614,14 @@ $plots_initial
 
         $_genes = "c('" . join("','", $genes) . "')";
 
+        $samples = $this->getSampleList(NULL);
+        $samples_array = $this->getSampleList(NULL, true);
+
         $export_files = '';
         $export_files_side_by_side = '';
-        foreach ($genes as $gene)
-            foreach ($this->samples as $sample) {
+        foreach ($genes as $gene) {
+            $_samples = $this->samples()->whereIn('name', $samples_array)->get();
+            foreach ($_samples as $sample) {
                 $export_files .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name, "qp\$" . $gene . "_" . $sample->name);
                 if ($sample->has_image) {
                     $export_files_side_by_side .= "tp = cowplot::ggdraw() + cowplot::draw_image('{$sample->image_file_path(true)}')" . PHP_EOL;
@@ -1625,6 +1629,7 @@ $plots_initial
                     $export_files_side_by_side .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name . '-sbs', 'qptp', 1400, 600) . PHP_EOL;
                 }
             }
+        }
 
         $script = "
 
@@ -1637,7 +1642,7 @@ library('spatialGE')
             $this->_loadStList('normalized_stlist')
             . "
 
-qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pal', data_type='$data_type')
+qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pal', data_type='$data_type', samples=$samples)
 
 $export_files
 
@@ -3277,8 +3282,160 @@ lapply(names(grad_res), function(i){
 
 
 
+    public function InSituType($parameters)
+    {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'InSituType.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getInSituTypeScript($parameters);
+        Storage::put($script, $scriptContents);
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+        $file = $workingDir . 'insitutype_results.csv';
+        if (Storage::fileExists($file)) {
+            ProjectParameter::updateOrCreate(['parameter' => 'InSituType', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters])]);
+        }
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function getInSituTypeScript($parameters)
+    {
+
+        $script = Storage::get("/common/templates/InSituType1.R");
+
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
+
+        $_parameters = [];
+        $_parameters['_species'] = explode('-',$parameters['cell_profile'])[0];
+        $_parameters['_cell_prof_db'] = explode('-',$parameters['cell_profile'])[1];
+        $_parameters['_refine_cells'] = $parameters['refine_cells'] ? 'T' : 'F';
+        $_parameters['_stlist'] = $_stlist;
+
+        $params = ['_species', '_cell_prof_db', '_refine_cells', '_stlist'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $_parameters[$param], $script);
+        }
+
+        return $script;
+    }
+
+    public function InSituType2($parameters)
+    {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'InSituType2.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getInSituTypeScript($parameters);
+        Storage::put($script, $scriptContents);
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+        $file = $workingDir . 'insitutype_results.csv';
+        if (Storage::fileExists($file)) {
+            ProjectParameter::updateOrCreate(['parameter' => 'InSituType', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters])]);
+        }
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function getInSituType2Script($parameters)
+    {
+        $script = Storage::get("/common/templates/InSituType2.R");
+
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+        $script = $this->replaceRscriptParameter('_color_palette_function', $this->getColorPaletteFunctionRscript(), $script);
+
+        $params = ['color_pal', 'ptsize'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
+
+        return $script;
+    }
+
+
+    private function getDefaultSamplesToProcess() {
+        $workingDir = $this->workingDir();
+        $samples_fovs = Storage::get($workingDir . "slide_x_fov_table.csv");
+
+        // Convert the CSV string to an array of rows
+        $rows = explode("\n", $samples_fovs);
+
+        // Extract column names from the first row
+        $columns = explode(",", array_shift($rows));
+
+        // Initialize an empty array to store data
+        $data = [];
+
+        // Process each row and create associative array
+        foreach ($rows as $row) {
+            if(!strlen(trim($row))) continue;
+            // Parse the row into an associative array
+            $rowData = array_combine($columns, explode(",", $row));
+            // Add the row data to the main array
+            $data[] = $rowData;
+        }
+
+        $slides = array_unique(array_column($data, 'slide'));
+        $max_fovs = count($slides) > 4 ? 2 : 3;
+
+        $samples = [];
+        foreach($slides as $slide) {
+            $n_fovs = 0;
+            foreach($data as $row) {
+                if($row['slide'] === $slide) {
+                    $samples[] = $row['fov_name'];
+                    $n_fovs++;
+                }
+                if($n_fovs === $max_fovs) break;
+            }
+        }
+
+        return $samples;
+
+    }
+
+    private function getSampleList($_samples, $as_array = false) {
+
+        $samples = 'NULL';
+        if(is_array($_samples) && count($_samples)) {
+            $samples = $_samples;
+        }
+        else {
+            //$samples = "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
+
+            if(!$this->isCosmxPlatform()) {
+                $samples = $this->samples()->pluck('samples.name')->toArray();
+            } else {
+                $samples = $this->getDefaultSamplesToProcess();
+            }
+
+            //$samples = "c('" . implode("','", $samples) . "')";
+        }
+        $samples = count($samples) > 10 ? array_slice($samples, 0, 10) : $samples;
+
+        return $as_array ? $samples : $samples = "c('" . join("','", $samples) . "')";
+
+    }
+
 
     private function getSavePlotFunctionRscript()
+    {
+
+        return Storage::get("/common/templates/_save_plots.R");
+    }
+
+    private function getColorPaletteFunctionRscript()
     {
 
         return Storage::get("/common/templates/_save_plots.R");

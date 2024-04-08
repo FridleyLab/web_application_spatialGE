@@ -261,6 +261,7 @@ import Multiselect from '@vueform/multiselect';
                 this.$enableWizardStep('sthet-spatial-het');
                 this.$enableWizardStep('stenrich');
                 this.$enableWizardStep('spatial-domain-detection');
+                this.$enableWizardStep('phenotyping');
             },
 
             normalizedPlots() {

@@ -116,6 +116,8 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects/{project}/phenotyping/STdeconvolve', [ProjectController::class, 'STdeconvolve'])->name('STdeconvolve')->middleware('project');
     Route::post('/projects/{project}/phenotyping/STdeconvolve2', [ProjectController::class, 'STdeconvolve2'])->name('STdeconvolve2')->middleware('project');
     Route::post('/projects/{project}/phenotyping/STdeconvolve3', [ProjectController::class, 'STdeconvolve3'])->name('STdeconvolve3')->middleware('project');
+    Route::post('/projects/{project}/phenotyping/InSituType', [ProjectController::class, 'InSituType'])->name('InSituType')->middleware('project');
+    Route::post('/projects/{project}/phenotyping/InSituType2', [ProjectController::class, 'InSituType2'])->name('InSituType2')->middleware('project');
 
 });
 

@@ -58,9 +58,9 @@
                                 <label class="text-lg">
                                     Point size:&nbsp;
                                 </label>
-                                <input type="number" class="text-end text-md border border-1 rounded w-25 w-md-20 w-xl-15" size="3" v-model="params2.user_radius">
+                                <input type="number" class="text-end text-md border border-1 rounded w-25 w-md-20 w-xl-15" size="3" v-model="params2.ptsize">
                             </div>
-                            <input type="range" :min="1" :max="1000" step="1" class="w-100" v-model="params2.user_radius">
+                            <input type="range" :min="1" :max="8" step="1" class="w-100" v-model="params2.ptsize">
                         </div>
                     </div>
 
@@ -93,25 +93,22 @@ import Multiselect from '@vueform/multiselect';
         props: {
             project: Object,
             samples: Object,
-            stDeconvolveUrl: String,
-            stDeconvolve2Url: String,
-            stDeconvolve3Url: String,
+            inSituTypeUrl: String,
+            inSituType2Url: String,
             colorPalettes: Object,
         },
 
         data() {
             return {
 
-                STdeconvolve: ('STdeconvolve' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve) : {},
-                STdeconvolve2: ('STdeconvolve2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve2) : {},
+                inSituType: ('inSituType' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.inSituType) : {},
+                inSituType2: ('inSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.inSituType2) : {},
 
                 processing: false,
                 processing2: false,
-                processing3: false,
 
                 textOutput: '',
 
-                dynamicTreeCuts: false,
                 params: {
                     cell_profile: '',
                     refine_cells: true
@@ -120,72 +117,66 @@ import Multiselect from '@vueform/multiselect';
                 filter_variable: '',
 
                 gene_signatures: [
-                    {value: 'HUMAN-Brain_AllenBrainAtlas', label: 'HUMAN-Brain_AllenBrainAtlas'},
-                    {value: 'HUMAN-Brain_Darmanis', label: 'HUMAN-Brain_Darmanis'},
-                    {value: 'HUMAN-Colon_HCA', label: 'HUMAN-Colon_HCA'},
-                    {value: 'HUMAN-Decidua_HCA', label: 'HUMAN-Decidua_HCA'},
-                    {value: 'HUMAN-Esophagus_HCA', label: 'HUMAN-Esophagus_HCA'},
-                    {value: 'HUMAN-Gut_HCA', label: 'HUMAN-Gut_HCA'},
-                    {value: 'HUMAN-Heart_HCA', label: 'HUMAN-Heart_HCA'},
-                    {value: 'HUMAN-Ileum_Wang', label: 'HUMAN-Ileum_Wang'},
-                    {value: 'HUMAN-ImmuneCensus_HCA', label: 'HUMAN-ImmuneCensus_HCA'},
-                    {value: 'HUMAN-ImmuneTumor_safeTME', label: 'HUMAN-ImmuneTumor_safeTME'},
-                    {value: 'HUMAN-Kidney_HCA', label: 'HUMAN-Kidney_HCA'},
-                    {value: 'HUMAN-Liver_HCA', label: 'HUMAN-Liver_HCA'},
-                    {value: 'HUMAN-Lung_Control_Adams', label: 'HUMAN-Lung_Control_Adams'},
-                    {value: 'HUMAN-Lung_COPD_Adams', label: 'HUMAN-Lung_COPD_Adams'},
-                    {value: 'HUMAN-Lung_HCA', label: 'HUMAN-Lung_HCA'},
-                    {value: 'HUMAN-Lung_IPF_Adams', label: 'HUMAN-Lung_IPF_Adams'},
-                    {value: 'HUMAN-Muscle_DeMicheli', label: 'HUMAN-Muscle_DeMicheli'},
-                    {value: 'HUMAN-Pancreas_HCA', label: 'HUMAN-Pancreas_HCA'},
-                    {value: 'HUMAN-Placenta_HCA', label: 'HUMAN-Placenta_HCA'},
-                    {value: 'HUMAN-Prostate_Henry', label: 'HUMAN-Prostate_Henry'},
-                    {value: 'HUMAN-Rectum_Wang', label: 'HUMAN-Rectum_Wang'},
-                    {value: 'HUMAN-Retina_HCA', label: 'HUMAN-Retina_HCA'},
-                    {value: 'HUMAN-Skin_HCA', label: 'HUMAN-Skin_HCA'},
-                    {value: 'HUMAN-Spleen_HCA', label: 'HUMAN-Spleen_HCA'},
-                    {value: 'HUMAN-Testis_Guo', label: 'HUMAN-Testis_Guo'},
+                    {value: 'Human-Brain_AllenBrainAtlas', label: 'Human-Brain_AllenBrainAtlas'},
+                    {value: 'Human-Brain_Darmanis', label: 'Human-Brain_Darmanis'},
+                    {value: 'Human-Colon_HCA', label: 'Human-Colon_HCA'},
+                    {value: 'Human-Decidua_HCA', label: 'Human-Decidua_HCA'},
+                    {value: 'Human-Esophagus_HCA', label: 'Human-Esophagus_HCA'},
+                    {value: 'Human-Gut_HCA', label: 'Human-Gut_HCA'},
+                    {value: 'Human-Heart_HCA', label: 'Human-Heart_HCA'},
+                    {value: 'Human-Ileum_Wang', label: 'Human-Ileum_Wang'},
+                    {value: 'Human-ImmuneCensus_HCA', label: 'Human-ImmuneCensus_HCA'},
+                    {value: 'Human-ImmuneTumor_safeTME', label: 'Human-ImmuneTumor_safeTME'},
+                    {value: 'Human-Kidney_HCA', label: 'Human-Kidney_HCA'},
+                    {value: 'Human-Liver_HCA', label: 'Human-Liver_HCA'},
+                    {value: 'Human-Lung_Control_Adams', label: 'Human-Lung_Control_Adams'},
+                    {value: 'Human-Lung_COPD_Adams', label: 'Human-Lung_COPD_Adams'},
+                    {value: 'Human-Lung_HCA', label: 'Human-Lung_HCA'},
+                    {value: 'Human-Lung_IPF_Adams', label: 'Human-Lung_IPF_Adams'},
+                    {value: 'Human-Muscle_DeMicheli', label: 'Human-Muscle_DeMicheli'},
+                    {value: 'Human-Pancreas_HCA', label: 'Human-Pancreas_HCA'},
+                    {value: 'Human-Placenta_HCA', label: 'Human-Placenta_HCA'},
+                    {value: 'Human-Prostate_Henry', label: 'Human-Prostate_Henry'},
+                    {value: 'Human-Rectum_Wang', label: 'Human-Rectum_Wang'},
+                    {value: 'Human-Retina_HCA', label: 'Human-Retina_HCA'},
+                    {value: 'Human-Skin_HCA', label: 'Human-Skin_HCA'},
+                    {value: 'Human-Spleen_HCA', label: 'Human-Spleen_HCA'},
+                    {value: 'Human-Testis_Guo', label: 'Human-Testis_Guo'},
 
-                    {value: 'MOUSE-Bladder_MCA', label: 'MOUSE-Bladder_MCA'},
-                    {value: 'MOUSE-BoneMarrow_cKit_MCA', label: 'MOUSE-BoneMarrow_cKit_MCA'},
-                    {value: 'MOUSE-BoneMarrow_MCA', label: 'MOUSE-BoneMarrow_MCA'},
-                    {value: 'MOUSE-Brain_AllenBrainAtlas', label: 'MOUSE-Brain_AllenBrainAtlas'},
-                    {value: 'MOUSE-Brain_MCA', label: 'MOUSE-Brain_MCA'},
-                    {value: 'MOUSE-ImmuneAtlas_ImmGen_cellFamily', label: 'MOUSE-ImmuneAtlas_ImmGen_cellFamily'},
-                    {value: 'MOUSE-ImmuneAtlas_ImmGen', label: 'MOUSE-ImmuneAtlas_ImmGen'},
-                    {value: 'MOUSE-Kidney_MCA', label: 'MOUSE-Kidney_MCA'},
-                    {value: 'MOUSE-Liver_MCA', label: 'MOUSE-Liver_MCA'},
-                    {value: 'MOUSE-Lung_MCA', label: 'MOUSE-Lung_MCA'},
-                    {value: 'MOUSE-MammaryGland_Involution_MCA', label: 'MOUSE-MammaryGland_Involution_MCA'},
-                    {value: 'MOUSE-MammaryGland_Lactation_MCA', label: 'MOUSE-MammaryGland_Lactation_MCA'},
-                    {value: 'MOUSE-MammaryGland_Pregnancy_MCA', label: 'MOUSE-MammaryGland_Pregnancy_MCA'},
-                    {value: 'MOUSE-MammaryGland_Virgin_MCA', label: 'MOUSE-MammaryGland_Virgin_MCA'},
-                    {value: 'MOUSE-Muscle_MCA', label: 'MOUSE-Muscle_MCA'},
-                    {value: 'MOUSE-Ovary_MCA', label: 'MOUSE-Ovary_MCA'},
-                    {value: 'MOUSE-Pancreas_MCA', label: 'MOUSE-Pancreas_MCA'},
-                    {value: 'MOUSE-PeripheralBlood_MCA', label: 'MOUSE-PeripheralBlood_MCA'},
-                    {value: 'MOUSE-Placenta_MCA', label: 'MOUSE-Placenta_MCA'},
-                    {value: 'MOUSE-Prostate_MCA', label: 'MOUSE-Prostate_MCA'},
-                    {value: 'MOUSE-SmallIntestine_MCA', label: 'MOUSE-SmallIntestine_MCA'},
-                    {value: 'MOUSE-Spleen_MCA', label: 'MOUSE-Spleen_MCA'},
-                    {value: 'MOUSE-Stomach_MCA', label: 'MOUSE-Stomach_MCA'},
-                    {value: 'MOUSE-Testis_MCA', label: 'MOUSE-Testis_MCA'},
-                    {value: 'MOUSE-Thymus_MCA', label: 'MOUSE-Thymus_MCA'},
-                    {value: 'MOUSE-Uterus_MCA', label: 'MOUSE-Uterus_MCA'},
-
+                    {value: 'Mouse-Bladder_MCA', label: 'Mouse-Bladder_MCA'},
+                    {value: 'Mouse-BoneMarrow_cKit_MCA', label: 'Mouse-BoneMarrow_cKit_MCA'},
+                    {value: 'Mouse-BoneMarrow_MCA', label: 'Mouse-BoneMarrow_MCA'},
+                    {value: 'Mouse-Brain_AllenBrainAtlas', label: 'Mouse-Brain_AllenBrainAtlas'},
+                    {value: 'Mouse-Brain_MCA', label: 'Mouse-Brain_MCA'},
+                    {value: 'Mouse-ImmuneAtlas_ImmGen_cellFamily', label: 'Mouse-ImmuneAtlas_ImmGen_cellFamily'},
+                    {value: 'Mouse-ImmuneAtlas_ImmGen', label: 'Mouse-ImmuneAtlas_ImmGen'},
+                    {value: 'Mouse-Kidney_MCA', label: 'Mouse-Kidney_MCA'},
+                    {value: 'Mouse-Liver_MCA', label: 'Mouse-Liver_MCA'},
+                    {value: 'Mouse-Lung_MCA', label: 'Mouse-Lung_MCA'},
+                    {value: 'Mouse-MammaryGland_Involution_MCA', label: 'Mouse-MammaryGland_Involution_MCA'},
+                    {value: 'Mouse-MammaryGland_Lactation_MCA', label: 'Mouse-MammaryGland_Lactation_MCA'},
+                    {value: 'Mouse-MammaryGland_Pregnancy_MCA', label: 'Mouse-MammaryGland_Pregnancy_MCA'},
+                    {value: 'Mouse-MammaryGland_Virgin_MCA', label: 'Mouse-MammaryGland_Virgin_MCA'},
+                    {value: 'Mouse-Muscle_MCA', label: 'Mouse-Muscle_MCA'},
+                    {value: 'Mouse-Ovary_MCA', label: 'Mouse-Ovary_MCA'},
+                    {value: 'Mouse-Pancreas_MCA', label: 'Mouse-Pancreas_MCA'},
+                    {value: 'Mouse-PeripheralBlood_MCA', label: 'Mouse-PeripheralBlood_MCA'},
+                    {value: 'Mouse-Placenta_MCA', label: 'Mouse-Placenta_MCA'},
+                    {value: 'Mouse-Prostate_MCA', label: 'Mouse-Prostate_MCA'},
+                    {value: 'Mouse-SmallIntestine_MCA', label: 'Mouse-SmallIntestine_MCA'},
+                    {value: 'Mouse-Spleen_MCA', label: 'Mouse-Spleen_MCA'},
+                    {value: 'Mouse-Stomach_MCA', label: 'Mouse-Stomach_MCA'},
+                    {value: 'Mouse-Testis_MCA', label: 'Mouse-Testis_MCA'},
+                    {value: 'Mouse-Thymus_MCA', label: 'Mouse-Thymus_MCA'},
+                    {value: 'Mouse-Uterus_MCA', label: 'Mouse-Uterus_MCA'},
 
                 ],
 
                 params2: {
-                    user_radius: 100,
+                    ptsize: 2,
                     color_pal: 'discreterainbow'
                 },
 
-                plots_visible: [],
-
-                showSuggestedKs: false,
-
-                topicNamesChanged: false,
             }
         },
 
@@ -200,9 +191,7 @@ import Multiselect from '@vueform/multiselect';
         },
 
         mounted() {
-            this.diplicateTopicNames();
 
-            console.log(this.STdeconvolve2);
         },
 
         methods: {
@@ -210,7 +199,7 @@ import Multiselect from '@vueform/multiselect';
             runInSituType() {
                 this.processing = true;
 
-                axios.post(this.stDeconvolveUrl, this.params)
+                axios.post(this.inSituTypeUrl, this.params)
                     .then((response) => {})
                     .catch((error) => {
                         this.processing = false;
@@ -220,22 +209,14 @@ import Multiselect from '@vueform/multiselect';
 
             processCompleted() {
                 //console.log(this.project.project_parameters);
-                this.STdeconvolve = ('STdeconvolve' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve) : {};
+                this.inSituType = ('inSituType' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.inSituType) : {};
                 this.processing = false;
             },
 
-            runSTdeconvolve2() {
+            runInSituType2() {
                 this.processing2 = true;
 
-                let params = {
-                    selected_k: this.STdeconvolve.selected_k,
-                    celltype_markers: this.params2.celltype_markers,
-                    q_val: this.params2.q_val,
-                    user_radius: this.params2.user_radius,
-                    color_pal: this.params2.color_pal
-                };
-
-                axios.post(this.stDeconvolve2Url, params)
+                axios.post(this.inSituType2Url, this.params)
                     .then((response) => {})
                     .catch((error) => {
                         this.processing2 = false;
@@ -245,32 +226,8 @@ import Multiselect from '@vueform/multiselect';
 
             processCompleted2() {
                 //console.log(this.project.project_parameters);
-                this.STdeconvolve2 = ('STdeconvolve2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve2) : {};
-                this.diplicateTopicNames();
+                this.inSituType2 = ('inSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.inSituType2) : {};
                 this.processing2 = false;
-            },
-
-
-            runSTdeconvolve3() {
-                this.processing3 = true;
-
-                let params = {
-                    logfold_plots: this.STdeconvolve2['logfold_plots'],
-                };
-
-                axios.post(this.stDeconvolve3Url, params)
-                    .then((response) => {})
-                    .catch((error) => {
-                        this.processing3 = false;
-                        console.log(error.message);
-                    })
-            },
-
-            processCompleted3() {
-                //console.log(this.project.project_parameters);
-                this.STdeconvolve2 = ('STdeconvolve2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve2) : {};
-                this.diplicateTopicNames();
-                this.processing3 = false;
             },
 
         },
