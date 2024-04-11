@@ -54,7 +54,7 @@
                                     <show-modal tag="importdata_coordinates_file"></show-modal>
                                     <file-upload-drag-drop code="coordinates" :project="project" :samples="samples" caption="Coordinates" :required="true" @fileSelected="coordinatesFileAdded" @fileRemoved="coordinatesFileRemoved" tooltip="A .csv file containing the spot x and y coordinates. Accepted formats include the “tissue_positions” file from space ranger or a three-column file with spot names in the first column and y, x coordinates in the second and third columns"></file-upload-drag-drop>
                                 </div>
-                                <div class="col-3 text-center">
+                                <div class="col-3 text-center" v-if="project.platform_name !== 'COSMX'">
                                     <show-modal tag="importdata_tissue_image_file"></show-modal>
                                     <file-upload-drag-drop code="image" :project="project" :samples="samples" caption="Tissue image" @fileSelected="imageFileAdded" @fileRemoved="imageFileRemoved" tooltip="Optional. A PNG, JPEG, TIFF image of the Visium capture area. Usually a H&E image"></file-upload-drag-drop>
                                 </div>
