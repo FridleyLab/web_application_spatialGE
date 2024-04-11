@@ -1706,6 +1706,10 @@ $export_files_side_by_side
     public function getSTplotExpressionSurfaceScript($parameters): string
     {
 
+        $samples = $this->getSampleList(NULL, true);
+        $sample_list = $this->getSampleList(NULL);
+        $samples = $this->samples()->whereIn('name', $samples)->get();
+
         $genes = $parameters['genes'];
         $col_pal = array_key_exists('col_pal', $parameters) ? $parameters['col_pal'] : '';
         $col_pal = ($col_pal !== null && strlen($col_pal)) ? $col_pal : 'sunset';
@@ -1714,7 +1718,7 @@ $export_files_side_by_side
 
         $export_files = '';
         foreach ($genes as $gene)
-            foreach ($this->samples as $sample)
+            foreach (/*$this->samples*/ $samples as $sample)
                 $export_files .= $this->getExportFilesCommands("stplot-expression-surface-$gene-" . $sample->name, "krp\$" . $gene . "_" . $sample->name);
 
         $script = "
@@ -1728,11 +1732,11 @@ library('spatialGE')
 {$this->_loadStList('normalized_stlist')}
 
 
-stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes)
+stlist_expression_surface = gene_interpolation(normalized_stlist, genes=$_genes, samples=$sample_list)
 
 {$this->_saveStList('stlist_expression_surface')}
 
-krp = STplot_interpolation(stlist_expression_surface, genes=$_genes, color_pal='$col_pal')
+krp = STplot_interpolation(stlist_expression_surface, samples=$sample_list, genes=$_genes, color_pal='$col_pal')
 
 $export_files
 
@@ -2148,7 +2152,8 @@ for(p in n_plots) {
         foreach ($params as $param) {
             $scriptContents = str_replace("{param_$param}", $parameters[$param], $scriptContents);
         }
-        $sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
+        //$sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
+        $sampleList = "'" . join("','", $this->getSampleList(NULL, true)) . "'";
         $scriptContents = str_replace("{param_sample_list}", $sampleList, $scriptContents);
         Storage::put("$workingDir/$scriptName", $scriptContents);
         $output .= $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');
@@ -2221,6 +2226,8 @@ for(p in n_plots) {
 
     public function getSpaGCN_SimpleSTlistScript(): string
     {
+        //$samples = 'names(normalized_stlist@tr_counts)';
+        $samples = $this->getSampleList(NULL);
 
         $script = "
 setwd('/spatialGE')
@@ -2230,7 +2237,7 @@ library('spatialGE')
 # Load normalized STList
 {$this->_loadStList('normalized_stlist')}
 
-for(i in names(normalized_stlist@tr_counts)){
+for(i in $samples){
     tr_counts = as.matrix(normalized_stlist@tr_counts[[i]])
     spatial_meta = normalized_stlist@spatial_meta[[i]][, 1:3]
     col_names = colnames(normalized_stlist@tr_counts[[i]])
@@ -2249,6 +2256,10 @@ for(i in names(normalized_stlist@tr_counts)){
     public function getSpaGCN_ImportClassifications($parameters): string
     {
 
+        $samples = $this->getSampleList(NULL, true);
+        $sample_list = $this->getSampleList(NULL);
+        $samples = $this->samples()->whereIn('name', $samples)->get();
+
         $col_pal = $parameters['col_pal'];
 
         $stlist = 'stclust_stlist';
@@ -2256,7 +2267,7 @@ for(i in names(normalized_stlist@tr_counts)){
 
         $samples_with_tissue = '';
         $samples_with_tissue_image_files = 'tissues <- c(';
-        foreach ($this->samples as $sample) {
+        foreach (/*$this->samples*/ $samples as $sample) {
             if ($sample->has_image) {
                 if (strlen($samples_with_tissue)) {
                     $samples_with_tissue .= ',';
@@ -2281,7 +2292,8 @@ spagcn_preds = './'
 spagcn_preds = list.files(spagcn_preds, pattern='spagcn_predicted_domains_sample_', full.names=T)
 
 stclust_stlist = $stlist
-for(i in names(stclust_stlist@spatial_meta)){
+#for(i in names(stclust_stlist@spatial_meta)){
+for(i in $sample_list){
   spagcn_tmp = read.csv(grep(paste0(i, '.csv'), spagcn_preds, value=T))
   # Convert doain classifications to factor
   spagcn_tmp[, -1] = lapply(spagcn_tmp[, -1], as.factor)

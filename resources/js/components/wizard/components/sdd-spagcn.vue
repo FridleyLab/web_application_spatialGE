@@ -225,7 +225,7 @@ import Multiselect from '@vueform/multiselect';
 
                 dynamicTreeCuts: false,
                 params: {
-                    p: 0.5,
+                    p: this.project.platform_name === 'COSMX' ? 0.7 : 0.5,
                     user_seed: 12345,
                     refine_clusters: this.project.platform_name === 'VISIUM',
                     number_of_domains_min: 2,

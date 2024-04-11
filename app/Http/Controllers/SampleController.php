@@ -96,6 +96,14 @@ class SampleController extends Controller
                             $file->storeAs($sampleFolderSpatial, $fileName);
                         }
                     }
+                    elseif($project->platform_name === 'COSMX') {
+                        if ($fileType === 'expressionFile') {
+                            $file->storeAs($sampleFolder, $fileName);
+                        }
+                        if ($fileType === 'coordinatesFile') {
+                            $file->storeAs($sampleFolderSpatial, $fileName);
+                        }
+                    }
 
                     $fileModel->filename = $fileName;
                     $fileModel->save();

@@ -77,9 +77,9 @@
         <div class="mt-4" v-if="!generating_quilt && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
 
 
-            <!-- <div class="my-4">
+            <div class="my-4">
                 <project-summary-table :data="project.project_parameters.initial_stlist_summary" :url="project.project_parameters.initial_stlist_summary_url" :selected-keys="visibleSamples" @selected="(keys) => visibleSamples = keys"></project-summary-table>
-            </div> -->
+            </div>
 
             <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
 
