@@ -15,8 +15,8 @@
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div class="me-3">Number of most variable genes to calculate PCA: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"><show-modal tag="qcpca_number_variable_genes"></show-modal></div>
-                    <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="100" class="w-100" v-model="params.n_genes">
+                    <div class="me-3 mb-3">Number of most variable genes to calculate PCA: <input type="number" class="text-end text-sm border border-1 rounded w-25 w-md-35 w-xxl-15" v-model="params.n_genes"><show-modal tag="qcpca_number_variable_genes"></show-modal></div>
+                    <input type="range" min="0" :max="project.project_parameters.pca_max_var_genes" step="10" class="w-100" v-model="params.n_genes">
                 </div>
             </div>
 
@@ -135,8 +135,8 @@ import Multiselect from '@vueform/multiselect';
             'params.n_genes'(newValue) {
                 if(this.params.n_genes > this.project.project_parameters.pca_max_var_genes)
                     this.params.n_genes = this.project.project_parameters.pca_max_var_genes;
-                if(this.params.n_genes < 0)
-                    this.params.n_genes = 0;
+                if(this.params.n_genes < 2)
+                    this.params.n_genes = 2;
             },
 
             'params.hm_display_genes'(newValue) {

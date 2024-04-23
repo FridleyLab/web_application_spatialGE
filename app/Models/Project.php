@@ -2084,12 +2084,12 @@ stclust_stlist = STclust(x=$stlist,
                          deepSplit={$parameters['deepSplit']})
 
 #annot_variables used for Differential Expression analyses
-annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_', colnames(i), value=T); return(var_cols) })))
+annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_|insitutype_cell_types', colnames(i), value=T); return(var_cols) })))
 write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 ##clusters_by_annot_variables used for Differential Expression analyses
 cluster_values = tibble::tibble()
 for(i in names(stclust_stlist@spatial_meta)){
-  for(cl in grep('spagcn_|stclust_', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
+  for(cl in grep('spagcn_|stclust_|insitutype_cell_types', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
     cluster_values = dplyr::bind_rows(cluster_values,
                                       tibble::tibble(cluster=unique(stclust_stlist@spatial_meta[[i]][[cl]])) %>%
                                         tibble::add_column(annotation=cl))
@@ -2309,12 +2309,12 @@ for(i in $sample_list){
 }
 
 # Annotation names for dropdown selection
-annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_', colnames(i), value=T); return(var_cols) })))
+annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_|insitutype_cell_types', colnames(i), value=T); return(var_cols) })))
 write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 # Save tables with spot/cell domain assigments (used in SpaGCN-SVG analysis to avoid reading STlist again)
 for(i in names(stclust_stlist@spatial_meta)){
-  df_tmp = stclust_stlist@spatial_meta[[i]] %>% dplyr::select(1, grep('stclust_|spagcn_', colnames(stclust_stlist@spatial_meta[[i]]), value=T))
+  df_tmp = stclust_stlist@spatial_meta[[i]] %>% dplyr::select(1, grep('spagcn_|stclust_|insitutype_cell_types', colnames(stclust_stlist@spatial_meta[[i]]), value=T))
   write.csv(df_tmp, paste0(i, '_domain_annotations_deg_svg.csv'), row.names=F, quote=F)
   rm(df_tmp) # Clean env
 }
@@ -2322,7 +2322,7 @@ for(i in names(stclust_stlist@spatial_meta)){
 # Save unique lables for each annotation (to display in dropdowns)
 cluster_values = tibble::tibble()
 for(i in names(stclust_stlist@spatial_meta)){
-  for(cl in grep('spagcn_|stclust_', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
+  for(cl in grep('spagcn_|stclust_|insitutype_cell_types', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
     cluster_values = dplyr::bind_rows(cluster_values,
                                         tibble::tibble(cluster=as.vector(unique(stclust_stlist@spatial_meta[[i]][[cl]]))) %>%
                                         tibble::add_column(annotation=as.vector(cl)))
@@ -3308,10 +3308,13 @@ lapply(names(grad_res), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
-        $file = $workingDir . 'insitutype_results.csv';
+        $file = $workingDir . 'insitutype_results.RData';
         if (Storage::fileExists($file)) {
             ProjectParameter::updateOrCreate(['parameter' => 'InSituType', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters])]);
         }
+
+        $this->current_step = 8;
+        $this->save();
 
         return ['output' => $output, 'script' => $scriptContents];
     }
@@ -3347,14 +3350,37 @@ lapply(names(grad_res), function(i){
 
         $script = $workingDir . $scriptName;
 
-        $scriptContents = $this->getInSituTypeScript($parameters);
+        $scriptContents = $this->getInSituType2Script($parameters);
         Storage::put($script, $scriptContents);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
-        $file = $workingDir . 'insitutype_results.csv';
+        $file = $workingDir . 'insitutype_results.RData';
         if (Storage::fileExists($file)) {
-            ProjectParameter::updateOrCreate(['parameter' => 'InSituType', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters])]);
+
+            $workingDirPublic = $this->workingDirPublicURL();
+
+            $samples = $this->getSampleList(NULL, true);
+            $plots = [];
+            foreach($samples as $sample) {
+
+                $plot = 'insitutype_plot_spatial_' . $sample . '_insitutype_cell_types';
+                $plots[$sample] = $workingDirPublic . $plot;
+
+                $file_extensions = ['svg', 'pdf', 'png'];
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $plot . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                    }
+                }
+            }
+
+
+            ProjectParameter::updateOrCreate(['parameter' => 'InSituType2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['plots' => $plots, 'parameters' => $parameters])]);
         }
 
         return ['output' => $output, 'script' => $scriptContents];
@@ -3364,8 +3390,11 @@ lapply(names(grad_res), function(i){
     {
         $script = Storage::get("/common/templates/InSituType2.R");
 
+        $samples = $this->getSampleList(NULL);
+
         $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
         $script = $this->replaceRscriptParameter('_color_palette_function', $this->getColorPaletteFunctionRscript(), $script);
+        $script = $this->replaceRscriptParameter('_samples', $samples, $script);
 
         $params = ['color_pal', 'ptsize'];
         foreach ($params as $param) {
@@ -3450,7 +3479,7 @@ lapply(names(grad_res), function(i){
     private function getColorPaletteFunctionRscript()
     {
 
-        return Storage::get("/common/templates/_save_plots.R");
+        return Storage::get("/common/templates/_get_color_palette.R");
     }
 
     private function replaceRscriptParameter($parameter, $value, $script)

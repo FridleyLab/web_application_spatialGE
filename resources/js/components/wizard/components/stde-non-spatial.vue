@@ -221,7 +221,7 @@ import 'vue3-easy-data-table/dist/style.css';
                 params: {
 
                     samples: this.samples.map(sample => sample.name),
-                    test_type: 'wilcoxon',
+                    test_type: 'mm',
                     pairwise: false,
                     annotation: '',
                     n_genes: (('pca_max_var_genes' in this.project.project_parameters) && this.project.project_parameters.pca_max_var_genes >= 100) ? 100 : ('pca_max_var_genes' in this.project.project_parameters) ? this.project.project_parameters.pca_max_var_genes/2 : 0,

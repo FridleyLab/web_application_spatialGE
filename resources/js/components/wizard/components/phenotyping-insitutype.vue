@@ -8,13 +8,13 @@
             </div>
 
             <div class="text-justify mb-4">
-                The InSituType method ...
+                The InSituType algorithm is a Bayesian classifier that uses a cell profile matrix to assign cell types to single-cell spatial transcriptomics data (e.g., CosMx). The
+                 cell profile matrix is a representation of the expected gene expression for a series of cell types. In spatialGE, the cell profile matrices are provided via the
+                 <a class="link-info" href="https://bioconductor.org/packages/release/bioc/html/SpatialDecon.html" target="_blank">SpatialDecon package</a>. In addition to spatial plots showing the
+                 location of the classified cells, spatialGE provides an UMAP of based on the gene expression and a “flight path” plot, to assess the confidence of
+                 InSituType in classifying the cells. For more information on InSituType please
+                 <a class="link-info" href="https://www.biorxiv.org/content/10.1101/2022.10.19.512902v1" target="_blank">click here</a>.
             </div>
-
-
-
-
-
 
             <div class="row justify-content-center text-center m-3">
 
@@ -72,6 +72,45 @@
                     </div>
                 </div>
 
+                <div class="text-center mt-3">
+                    <send-job-button label="Run InSituType - 2" :disabled="processing || processing2" :project-id="project.id" job-name="InSituType2" @started="runInSituType2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
+                </div>
+
+
+
+
+                <!-- <div v-if="inSituType2.plots">
+                    <template v-for="(plot, sample, index) in inSituType2.plots">
+                        {{ plot }} - {{ sample }} - {{ index }} <br />
+                    </template>
+                </div> -->
+
+
+                <div class="mt-4" v-if="!processing && !processing2">
+                    <ul class="nav nav-tabs" id="inSituTypePlots" role="tablist">
+                        <template v-for="(image, sample, index) in inSituType2.plots">
+                            <li class="nav-item" role="presentation" v-if="true || visibleSamples.includes(sample)">
+                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'inSituType-' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#inSituType-' + sample" type="button" role="tab" :aria-controls="'inSituType-' + sample" aria-selected="true">{{ sample }}</button>
+                            </li>
+                        </template>
+                    </ul>
+                    <div class="tab-content" id="inSituTypePlotsContent">
+                        <template v-for="(image, sample, index) in inSituType2.plots">
+                            <div v-if="true || visibleSamples.includes(sample)" class="tab-pane fade" :class="index === 0 ? 'show active' : ''"
+                                 :id="'inSituType-' + sample" role="tabpanel" :aria-labelledby="'inSituType-' + sample + '-tab'">
+                                <div>
+                                    <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true" side-by-side-tool-tip="vis_quilt_plot_side_by_side"></show-plot>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+
+
+
+
+
             </div>
 
         </div>
@@ -101,8 +140,8 @@ import Multiselect from '@vueform/multiselect';
         data() {
             return {
 
-                inSituType: ('inSituType' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.inSituType) : {},
-                inSituType2: ('inSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.inSituType2) : {},
+                inSituType: ('InSituType' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.InSituType) : {},
+                inSituType2: ('InSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.InSituType2) : {},
 
                 processing: false,
                 processing2: false,
@@ -180,21 +219,15 @@ import Multiselect from '@vueform/multiselect';
             }
         },
 
-        watch: {
-
-            'params.p'(newValue) {
-                if(this.params.p > 1)
-                    this.params.p = 1;
-                else if(this.params.p < 0.05)
-                    this.params.p = 0.05;
-            },
-        },
-
         mounted() {
 
         },
 
         methods: {
+
+            getSampleByName(nameToFind) {
+                return this.samples.find( sample => sample.name === nameToFind);
+            },
 
             runInSituType() {
                 this.processing = true;
@@ -216,7 +249,7 @@ import Multiselect from '@vueform/multiselect';
             runInSituType2() {
                 this.processing2 = true;
 
-                axios.post(this.inSituType2Url, this.params)
+                axios.post(this.inSituType2Url, this.params2)
                     .then((response) => {})
                     .catch((error) => {
                         this.processing2 = false;
@@ -226,7 +259,7 @@ import Multiselect from '@vueform/multiselect';
 
             processCompleted2() {
                 //console.log(this.project.project_parameters);
-                this.inSituType2 = ('inSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.inSituType2) : {};
+                this.inSituType2 = ('InSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.InSituType2) : {};
                 this.processing2 = false;
             },
 

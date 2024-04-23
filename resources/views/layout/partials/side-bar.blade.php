@@ -113,10 +113,22 @@
                             </a>
                         </li>
 
+
+
+                        <li class="nav-item ps-2">
+                            <a id="phenotyping-a" class="nav-link text-white @if(url()->current() === route('phenotyping', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) disabled @endif" style="@if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) background-color: transparent !important @endif" href="{{ route('phenotyping', ['project' => session('project_id')]) }}">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i id="phenotyping-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) text-secondary @endif">filter_7</i>
+                                </div>
+                                <span id="phenotyping-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) text-secondary @endif text-bold">Phenotyping</span>
+                            </a>
+                        </li>
+
+
                         <li class="nav-item ps-2">
                             <a id="differential-expression-a" class="nav-link text-white @if(url()->current() === route('differential-expression', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 7) disabled @endif" style="@if(getActiveProject()->current_step < 6) background-color: transparent !important @endif" href="{{ route('differential-expression', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i id="differential-expression-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 7) text-secondary @endif">filter_7</i>
+                                    <i id="differential-expression-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 7) text-secondary @endif">filter_8</i>
                                 </div>
                                 <span id="differential-expression-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 7) text-secondary @endif text-bold">Differential expression</span>
                             </a>
@@ -125,18 +137,9 @@
                         <li class="nav-item ps-2">
                             <a id="spatial-gradients-a" class="nav-link text-white @if(url()->current() === route('spatial-gradients', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 8) disabled @endif" style="@if(getActiveProject()->current_step < 7) background-color: transparent !important @endif" href="{{ route('spatial-gradients', ['project' => session('project_id')]) }}">
                                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i id="spatial-gradients-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 8) text-secondary @endif">filter_8</i>
+                                    <i id="spatial-gradients-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 8) text-secondary @endif">filter_9</i>
                                 </div>
                                 <span id="spatial-gradients-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 8) text-secondary @endif text-bold">Spatial gradients</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item ps-2">
-                            <a id="phenotyping-a" class="nav-link text-white @if(url()->current() === route('phenotyping', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 6 || getActiveProject()->platform_name === 'COSMX') disabled @endif" style="@if(getActiveProject()->current_step < 6 || getActiveProject()->platform_name === 'COSMX') background-color: transparent !important @endif" href="{{ route('phenotyping', ['project' => session('project_id')]) }}">
-                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                    <i id="phenotyping-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 6 || getActiveProject()->platform_name === 'COSMX') text-secondary @endif">filter_9</i>
-                                </div>
-                                <span id="phenotyping-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 6 || getActiveProject()->platform_name === 'COSMX') text-secondary @endif text-bold">Phenotyping</span>
                             </a>
                         </li>
 

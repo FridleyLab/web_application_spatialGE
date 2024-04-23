@@ -29,8 +29,8 @@
                                 <stde-non-spatial :project="project" :samples="samples" :non-spatial-url="nonSpatialUrl" :color-palettes="colorPalettes"></stde-non-spatial>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-spagcn" role="tabpanel" aria-labelledby="sdd-spagcn-tab">
-                                Coming soon
-<!--                                <stde-spatial :project="project" :samples="samples" :spatial-url="spatialUrl" :color-palettes="colorPalettes"></stde-spatial>-->
+                                <!-- Coming soon -->
+                               <stde-spatial :project="project" :samples="samples" :spatial-url="spatialUrl" :color-palettes="colorPalettes"></stde-spatial>
                             </div>
                         </div>
                     </div>

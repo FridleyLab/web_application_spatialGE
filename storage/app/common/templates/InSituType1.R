@@ -41,11 +41,11 @@ STlist = #{_stlist}#
 # Iterate over STlist and merge counts... (Hoping this doesnt burn the memory)
 i = names(STlist@counts)[1]
 merged_cts = STlist@counts[[i]]
-colnames(merged_cts) = paste0(gsub('_fov[0-9]+$', '', i), '_', colnames(merged_cts)) # Add slide IDs
+colnames(merged_cts) = paste0(gsub('_fov_[0-9]+$', '', i), '_', colnames(merged_cts)) # Add slide IDs
 if(length(STlist@counts) > 1){
   for(i in names(STlist@counts)[-1]){
     df_tmp = STlist@counts[[i]]
-    colnames(df_tmp) = paste0(gsub('_fov[0-9]+$', '', i), '_', colnames(df_tmp))
+    colnames(df_tmp) = paste0(gsub('_fov_[0-9]+$', '', i), '_', colnames(df_tmp))
     common_tmp = intersect(rownames(merged_cts), rownames(df_tmp))
     merged_cts = merged_cts[common_tmp, ]
     df_tmp = df_tmp[common_tmp, ]
@@ -84,6 +84,14 @@ cell_prof = download_profile_matrix(species=species, age_group=age_grp, matrixna
 # Read cell profile matrix
 # cell_prof = read_delim('../../data/cellprofilemtx_choilab_scrnaseq.csv', delim=',', show_col_types=F) %>% column_to_rownames(var='gene_name')
 
+# Remove cells with zero counts (cells with negative probe counts will be unusable after deleting the probes from matrix)
+zero_ct_cells = which(Matrix::rowSums(merged_cts == 0) == ncol(merged_cts))
+if(length(zero_ct_cells) > 0){
+  merged_cts = merged_cts[-zero_ct_cells, ]
+  negmean = negmean[-zero_ct_cells]
+}
+merged_cts = as.matrix(merged_cts)
+
 # Supervised algorithm using complete signature matrix generated from Choi Lab data set
 if(length(negmean) == 1){
   sup = insitutypeML(x=merged_cts, bg=negmean, reference_profiles=cell_prof)
@@ -102,8 +110,13 @@ sup_df = sup_df %>% tibble::rownames_to_column('complete_cell_id')
 
 # Add cell type labels to STlist
 insitutype_stlist = STlist
-for(i in names(insitutype_stlist@spatial_meta)){
-  slide_name = gsub('_fov[0-9]+$', '', i)
+for(i in names(insitutype_stlist@spatial_meta)) {
+  if(any(colnames(insitutype_stlist@spatial_meta[[i]]) == 'insitutype_cell_types')) {
+    col_rm = which(colnames(insitutype_stlist@spatial_meta[[i]]) == 'insitutype_cell_types')
+    insitutype_stlist@spatial_meta[[i]] = insitutype_stlist@spatial_meta[[i]][, -col_rm]
+    rm(col_rm) # Clean env
+  }
+  slide_name = gsub('_fov_[0-9]+$', '', i)
   insitutype_stlist@spatial_meta[[i]] = insitutype_stlist@spatial_meta[[i]] %>%
     dplyr::mutate(complete_cell_id=paste0(slide_name, '_', libname)) %>%
     dplyr::left_join(., sup_df, by='complete_cell_id') %>%
@@ -126,4 +139,5 @@ cluster_values = dplyr::distinct(cluster_values) %>%
 write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F, row.names=F, col.names=F, sep=',')
 
 ###*******#####save sup as stclust_stlist RData
-save(insitutype_stlist, file='stclust_stlist.RData')
+stclust_stlist = insitutype_stlist
+save(stclust_stlist, file='stclust_stlist.RData')
