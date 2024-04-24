@@ -72,7 +72,7 @@
                     </div>
                 </div>
 
-                <div class="text-center mt-3">
+                <div v-if="'InSituType' in this.project.project_parameters" class="text-center mt-3">
                     <send-job-button label="Run InSituType - 2" :disabled="processing || processing2" :project-id="project.id" job-name="InSituType2" @started="runInSituType2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
                 </div>
 

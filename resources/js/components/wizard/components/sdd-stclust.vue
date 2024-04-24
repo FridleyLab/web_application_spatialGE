@@ -129,17 +129,21 @@
                 <div v-for="k in parseInt(stclust.parameters.number_of_domains_max)" class="tab-pane fade min-vh-50" :class="k === parseInt(stclust.parameters.number_of_domains_min) ? 'show active' : ''" :id="'K_' + k" role="tabpanel" :aria-labelledby="'K_' + k + '-tab'">
 
                     <ul class="nav nav-tabs" :id="'myTab' + k" role="tablist">
-                        <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
-                            <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'K_' + k + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'K_' + k" type="button" role="tab" :aria-controls="sample.name + 'K_' + k" aria-selected="true">{{ sample.name }}</button>
-                        </li>
+                        <template v-for="(sample, index) in samples">
+                            <li v-if="showSample(sample.name)" class="nav-item" role="presentation">
+                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'K_' + k + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'K_' + k" type="button" role="tab" :aria-controls="sample.name + 'K_' + k" aria-selected="true">{{ sample.name }}</button>
+                            </li>
+                        </template>
                     </ul>
 
                     <div class="tab-content" :id="'myTabContent' + k">
-                        <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'K_' + k + '-tab'">
-                            <div v-for="image in stclust.plots">
-                                <show-plot v-if="image.includes('stclust') && image.includes(sample.name) && image.endsWith('k' + k)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                        <template v-for="(sample, index) in samples">
+                            <div v-if="showSample(sample.name)" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'K_' + k + '-tab'">
+                                <div v-for="image in stclust.plots">
+                                    <show-plot v-if="image.includes('stclust') && image.includes(sample.name) && image.endsWith('k' + k)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="false"></show-plot>
+                                </div>
                             </div>
-                        </div>
+                        </template>
                     </div>
 
                 </div>
@@ -227,6 +231,16 @@ import Multiselect from '@vueform/multiselect';
         },
 
         methods: {
+
+            showSample(sampleName) {
+                for(let plot in this.stclust.plots) {
+                    if(this.stclust.plots[plot].includes(sampleName)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            },
 
             SDD_STclust() {
                 this.processing = true;

@@ -2052,9 +2052,13 @@ $export_files
         $stlist = 'stclust_stlist';
         if (!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
 
+        $samples = $this->getSampleList(NULL, true);
+        $samples_list = $this->getSampleList(NULL);
+        $samples = $this->samples()->whereIn('name', $samples)->get();
+
         $samples_with_tissue = '';
         $samples_with_tissue_image_files = 'tissues <- c(';
-        foreach ($this->samples as $sample) {
+        foreach (/*$this->samples*/ $samples as $sample) {
             if ($sample->has_image) {
                 if (strlen($samples_with_tissue)) {
                     $samples_with_tissue .= ',';
@@ -2101,7 +2105,7 @@ write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F,
 
 {$this->_saveStList('stclust_stlist')}
 
-ps = STplot(x=stclust_stlist, ks={$parameters['ks']}, ws={$parameters['ws']}, ptsize=2, txsize=14, color_pal='smoothrainbow')
+ps = STplot(x=stclust_stlist, ks={$parameters['ks']}, ws={$parameters['ws']}, ptsize=2, txsize=14, color_pal='smoothrainbow', samples=$samples_list)
 n_plots = names(ps)
 write.table(n_plots, 'stclust_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 library('svglite')
@@ -2112,7 +2116,8 @@ for(p in n_plots) {
     svglite(paste(p,'.svg', sep=''), width = 8, height = 6)
     print(ps[[p]])
     dev.off()
-
+" .
+    /*
     #generate side-by-side for samples with tissue image
     $samples_with_tissue_image_files
     for(sample in list($samples_with_tissue)) {
@@ -2121,8 +2126,8 @@ for(p in n_plots) {
             ptp = ggpubr::ggarrange(ps[[p]], tp, ncol=2)
             {$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
         }
-    }
-}
+    }*/
+"}
 ";
 
         return $script;
