@@ -37,6 +37,7 @@ all_ldas = readRDS('./stdeconvolve_lda_models.RDS')
 ps = list()
 sctr_p = list()
 topic_props = list()
+#sample_col_pal = list()
 possible_celltypes = c()
 for(i in suggested_k[['sample_name']]){
   opt_k = suggested_k[['suggested_k']][ suggested_k[['sample_name']] == i ]
@@ -53,20 +54,17 @@ for(i in suggested_k[['sample_name']]){
 
   rm(opt_k, optlda, results) # Clean env
 
-  # Check at least 90% of genes in topic expression matrix are in the gene sets
-  prop_in_gs = sum(colnames(decon_expr) %in% unique(unlist(celltype_markers))) / ncol(decon_expr) < 0.9
-  if(prop_in_gs){
-    stop('STdeconvolve -> Less than 90% of genes in sample match genes in gene sets. Is the correct gene set and species being used?')
-  }
-  # Apply GSEA to topics
   set.seed(12345)
+  # Apply GSEA to topics
   celltype_annotations = annotateCellTypesGSEA(beta=decon_expr, gset=celltype_markers, qval=q_val)
 
   # Save GSEA results to display
   lapply(names(celltype_annotations[['results']]), function(j){
     celltype_annotations[['results']][[j]] %>% dplyr::select(-edge) %>% dplyr::filter(sscore > 0) %>%
       tibble::rownames_to_column('gene_set') %>%
-      write.csv(., paste0('./gsea_results_', i, '_', j, '.csv'), row.names=F)
+      write.csv(., paste0('gsea_results_', i, '_', j, '.csv'), row.names=F)
+    # Save all possible cell types according to GSEA results
+    #possible_celltypes = unique(append(possible_celltypes, rownames(celltype_annotations[['results']][[j]])))
   })
 
   # Change NAs to 'unknown'
@@ -82,7 +80,7 @@ for(i in suggested_k[['sample_name']]){
   topic_ann = tibble::enframe(celltype_annotations[['predictions']])
   colnames(topic_ann) = c('topic', 'annotation')
   topic_ann[['new_annotation']] = topic_ann[['annotation']]
-  write.csv(topic_ann, paste0('./topic_annotations_', i, '.csv'), row.names=F)
+  write.csv(topic_ann, paste0('topic_annotations_', i, '.csv'), row.names=F)
 
   # Find gene markers defined as those with highest log-fold change per topic from
   # the comparison of a given topic to the others' average
@@ -138,23 +136,41 @@ for(i in suggested_k[['sample_name']]){
     dplyr::left_join(normalized_stlist@spatial_meta[[i]] %>%
                        dplyr::select(c('libname', 'ypos', 'xpos')), by='libname')
 
+  # Change color palette names
+  # col_pal_tmp = unlist(lapply(1:length(celltype_annotations[['predictions']]), function(t){
+  #   topic_col = col_pal[names(col_pal) == celltype_annotations[['predictions']][t]]
+  #   names(topic_col) = paste0(names(celltype_annotations[['predictions']][t]), ' (', names(topic_col), ')')
+  #   return(topic_col)
+  # }))
 
   cols_prop = colnames(decon_prop_sctr %>% dplyr::select(-c('libname', 'dummycol', 'xpos', 'ypos', 'radius')))
   sctr_p[[i]] = ggplot() +
     scatterpie::geom_scatterpie(data=decon_prop_sctr, aes(x=xpos, y=ypos, group=libname, r=radius), color=NA, cols=cols_prop) +
     ggtitle(i) +
+    #scale_fill_manual(values=col_pal_tmp) +
     guides(fill=guide_legend(ncol=3)) +
     scale_y_reverse() +
     coord_equal() +
     theme_void() +
     theme(legend.position="bottom", legend.title=element_blank())
 
+  # Distribute rows of topics if more than 9 (so that they dont get cropped out
+  # if(length(celltype_annotations[['predictions']]) > 9 & length(celltype_annotations[['predictions']]) <= 12){
+  #   sctr_p[[i]] = sctr_p[[i]] +
+  #     guides(fill=guide_legend(nrow=4))
+  # } else if(length(celltype_annotations[['predictions']]) > 12 ){
+  #   sctr_p[[i]] = sctr_p[[i]] +
+  #     guides(fill=guide_legend(nrow=5))
+  # }
+
   # Save per-spot topic proportions in case user decides to change plots
   topic_props[[i]] = decon_prop_sctr
+  # Save color palette
+  #sample_col_pal[[i]] = col_pal_tmp
 
- rm(decon_expr, decon_prop, cols_prop, decon_prop_sctr, celltype_annotations, topic_ann) # Clean env
+  rm(decon_expr, decon_prop, cols_prop, #col_pal_tmp,
+     decon_prop_sctr, celltype_annotations, topic_ann) # Clean env
 }
-
 
 # Create base color palette
 col_pal = sample(as.vector(khroma::color(color_pal, force=T)(length(possible_celltypes))))
@@ -165,7 +181,7 @@ if(any(names(col_pal) == 'unknown')){
   col_pal = c(col_pal, unknown='gray40')
 }
 # Save general color palette
-saveRDS(col_pal, './general_color_palette_stdeconvolve.RDS')
+saveRDS(col_pal, 'general_color_palette_stdeconvolve.RDS')
 
 # Change color palette names per sample
 # Also change colors in scatterpies and save sample color palette
@@ -207,13 +223,13 @@ for(i in names(sctr_p)){
 
 # Scatterpie AND tissue images
 #for(sample in list($samples_with_tissue)) {
-for(i in list(samples_with_tissue)) {
-  if(grepl(i, names(sctr_p), fixed=TRUE)) {
-    tp = cowplot::ggdraw() + cowplot::draw_image(paste0(i,'/spatial/', i, '.png'))
-    ptp = ggpubr::ggarrange(sctr_p[[i]], tp, ncol=2)
+#for(i in list(samples_with_tissue)) {
+#  if(grepl(i, names(sctr_p), fixed=TRUE)) {
+#    tp = cowplot::ggdraw() + cowplot::draw_image(paste0(i,'/spatial/', i, '.png'))
+#    ptp = ggpubr::ggarrange(sctr_p[[i]], tp, ncol=2)
     #{$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
-  }
-}
+#  }
+#}
 
 write.table(plotnames, 'stdeconvolve2_scatterpie_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
