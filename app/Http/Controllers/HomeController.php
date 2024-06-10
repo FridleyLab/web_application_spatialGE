@@ -187,7 +187,7 @@ class HomeController extends Controller
                 $folder = Storage::path('users/' . $row->user_id . '/' . $row->project_id);
                 $filteredFiles = [];
                 if(is_dir($folder)) {
-                    $extensions = ['R', 'RData'];
+                    $extensions = ['R', 'RData', 'csv', 'RDS'];
 
                     $files = scandir($folder);
 
