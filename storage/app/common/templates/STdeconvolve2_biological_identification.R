@@ -63,8 +63,6 @@ for(i in suggested_k[['sample_name']]){
     celltype_annotations[['results']][[j]] %>% dplyr::select(-edge) %>% dplyr::filter(sscore > 0) %>%
       tibble::rownames_to_column('gene_set') %>%
       write.csv(., paste0('gsea_results_', i, '_', j, '.csv'), row.names=F)
-    # Save all possible cell types according to GSEA results
-    #possible_celltypes = unique(append(possible_celltypes, rownames(celltype_annotations[['results']][[j]])))
   })
 
   # Change NAs to 'unknown'
@@ -136,13 +134,6 @@ for(i in suggested_k[['sample_name']]){
     dplyr::left_join(normalized_stlist@spatial_meta[[i]] %>%
                        dplyr::select(c('libname', 'ypos', 'xpos')), by='libname')
 
-  # Change color palette names
-  # col_pal_tmp = unlist(lapply(1:length(celltype_annotations[['predictions']]), function(t){
-  #   topic_col = col_pal[names(col_pal) == celltype_annotations[['predictions']][t]]
-  #   names(topic_col) = paste0(names(celltype_annotations[['predictions']][t]), ' (', names(topic_col), ')')
-  #   return(topic_col)
-  # }))
-
   cols_prop = colnames(decon_prop_sctr %>% dplyr::select(-c('libname', 'dummycol', 'xpos', 'ypos', 'radius')))
   sctr_p[[i]] = ggplot() +
     scatterpie::geom_scatterpie(data=decon_prop_sctr, aes(x=xpos, y=ypos, group=libname, r=radius), color=NA, cols=cols_prop) +
@@ -154,26 +145,21 @@ for(i in suggested_k[['sample_name']]){
     theme_void() +
     theme(legend.position="bottom", legend.title=element_blank())
 
-  # Distribute rows of topics if more than 9 (so that they dont get cropped out
-  # if(length(celltype_annotations[['predictions']]) > 9 & length(celltype_annotations[['predictions']]) <= 12){
-  #   sctr_p[[i]] = sctr_p[[i]] +
-  #     guides(fill=guide_legend(nrow=4))
-  # } else if(length(celltype_annotations[['predictions']]) > 12 ){
-  #   sctr_p[[i]] = sctr_p[[i]] +
-  #     guides(fill=guide_legend(nrow=5))
-  # }
-
   # Save per-spot topic proportions in case user decides to change plots
   topic_props[[i]] = decon_prop_sctr
-  # Save color palette
-  #sample_col_pal[[i]] = col_pal_tmp
 
   rm(decon_expr, decon_prop, cols_prop, #col_pal_tmp,
      decon_prop_sctr, celltype_annotations, topic_ann) # Clean env
 }
 
 # Create base color palette
-col_pal = sample(as.vector(khroma::color(color_pal, force=T)(length(possible_celltypes))))
+khroma_cols = khroma::info()
+khroma_cols = khroma_cols[['palette']]
+if(color_pal[1] %in% khroma_cols){
+  col_pal = sample(as.vector(khroma::color(color_pal[1], force=T)(length(possible_celltypes))))
+} else{
+  col_pal = colorRampPalette(RColorBrewer::brewer.pal(length(possible_celltypes), color_pal[1]))(length(possible_celltypes))
+}
 names(col_pal) = possible_celltypes
 if(any(names(col_pal) == 'unknown')){
   col_pal[['unknown']] = 'gray40'
@@ -199,8 +185,6 @@ for(i in names(topic_props)){
 
   sctr_p[[i]] = sctr_p[[i]] + scale_fill_manual(values=sample_col_pal[[i]])
 }
-
-
 
 # Save log-fold change plots
 plotnames = list()

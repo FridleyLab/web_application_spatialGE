@@ -50,7 +50,13 @@ for(i in sample_annots){
         sample_col_pal[[sample_name]][new_topic_name] = sample_col_pal[[sample_name]][existing_tmp][[1]]
         rm(existing_tmp) # Clean env
       } else{
-        sample_col_pal[[sample_name]][new_topic_name] = sample(khroma::color(color_pal, force=T)(100), 1)
+        khroma_cols = khroma::info()
+        khroma_cols = khroma_cols[['palette']]
+        if(color_pal[1] %in% khroma_cols){
+          sample_col_pal[[sample_name]][new_topic_name] = sample(khroma::color(color_pal[1], force=T)(50), 1)
+        } else{
+          sample_col_pal[[sample_name]][new_topic_name] = sample(colorRampPalette(RColorBrewer::brewer.pal(50, color_pal[1]))(50), 1)
+        }
       }
 
       # Change title in logFC plot
@@ -102,14 +108,14 @@ for (i in names(sctr_p)) {
 
 # Scatterpie AND tissue images
 #for(sample in list($samples_with_tissue)) {
-for(i in list(samples_with_tissue)) {
-  if(grepl(i, names(sctr_p), fixed=TRUE)) {
-    tp = cowplot::ggdraw() + cowplot::draw_image(paste0(i,'/spatial/', i, '.png'))
-    ptp = ggpubr::ggarrange(sctr_p[[i]], tp, ncol=2)
+# for(i in list(samples_with_tissue)) {
+#   if(grepl(i, names(sctr_p), fixed=TRUE)) {
+#     tp = cowplot::ggdraw() + cowplot::draw_image(paste0(i,'/spatial/', i, '.png'))
+#     ptp = ggpubr::ggarrange(sctr_p[[i]], tp, ncol=2)
     #{$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
-  }
-}
-  
+#   }
+# }
+
 # Read logFC plots
 saveRDS(ps, './topic_logfc_all_plots.RDS')
 
