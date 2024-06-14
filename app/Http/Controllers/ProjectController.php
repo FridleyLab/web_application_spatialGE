@@ -209,7 +209,7 @@ class ProjectController extends Controller
             File::copyDirectory(Storage::path("$_basepath/samples"), Storage::path($projectFolder));
             File::copy(Storage::path("$_basepath/initial_stlist.RData"), Storage::path("$projectFolder/initial_stlist.RData"));
             File::copy(Storage::path("$_basepath/initial_stlist_summary.csv"), Storage::path("$projectFolder/initial_stlist_summary.csv"));
-            if($platform === Project::COSMX_PLATFORM) File::copy(Storage::path("$_basepath/slide_x_fov_table.csv"), Storage::path("$projectFolder/slide_x_fov_table.csv"));
+            if($_platform === Project::COSMX_PLATFORM) File::copy(Storage::path("$_basepath/slide_x_fov_table.csv"), Storage::path("$projectFolder/slide_x_fov_table.csv"));
 
             //Add parameter to indicate that this is the 'Demo project'
             ProjectParameter::updateOrCreate(['parameter' => 'isDemoProject', 'project_id' => $project->id, 'tag' => ''], ['type' => 'number', 'value' => 1]);
