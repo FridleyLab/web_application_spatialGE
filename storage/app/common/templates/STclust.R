@@ -38,15 +38,10 @@ annot_variables = lapply(names(stclust_stlist@spatial_meta), function(i){
 annot_variables = dplyr::bind_rows(annot_variables)
 
 # Check if annot_variables file already exists, then keep annotations from other methods but remove those from STclust
-#if(file.exists('../../../results_and_intermediate_files/stclust/visium/stdiff_annotation_variables_clusters.csv')){
 if(file.exists('stdiff_annotation_variables_clusters.csv')){
-  #annot_variables_tmp = data.table::fread('../../../results_and_intermediate_files/stclust/visium/stdiff_annotation_variables_clusters.csv', header=F)
   annot_variables_tmp = data.table::fread('stdiff_annotation_variables_clusters.csv', header=F)
   annot_variables_tmp = annot_variables_tmp[annot_variables_tmp[[2]] != annot_variables_tmp[[3]], ]
   if(nrow(annot_variables_tmp) > 0){
-    # if(any(annot_variables_tmp[[3]] %in% annot_variables[[2]])){
-    #   annot_variables = annot_variables[!(annot_variables[[2]] %in% unique(annot_variables_tmp[[3]])), ]
-    # }
     annot_variables_tmp = annot_variables_tmp[!grepl('stclust_spw', annot_variables_tmp[[2]]), ]
     annot_variables = rbind(annot_variables, annot_variables_tmp)
   }
@@ -72,13 +67,14 @@ annot_test = unique(gsub(paste0('^', samplenames, '_', collapse='|'), '', names(
 for(i in annot_test){
   deg_res = STdiff(stclust_stlist, samples=samplenames, annot=i, topgenes=50, test_type='wilcoxon')
   for(j in names(deg_res)){
-    deg_tmp = deg_res[[j]] %>%
-      dplyr::arrange(cluster_1, adj_p_val, desc(avg_log2fc)) %>%
-      dplyr::group_by(cluster_1) %>% dplyr::slice_head(n=10) %>% dplyr::ungroup()
+    deg_tmp1 = deg_res[[j]] %>% dplyr::arrange(cluster_1, adj_p_val, desc(avg_log2fc)) %>% dplyr::group_by(cluster_1) %>% dplyr::slice_head(n=10) %>% dplyr::ungroup()
+    deg_tmp2 = deg_res[[j]] %>% dplyr::filter(adj_p_val < 0.05) %>% dplyr::arrange(cluster_1, adj_p_val, avg_log2fc) %>% dplyr::group_by(cluster_1) %>% dplyr::slice_head(n=10) %>% dplyr::ungroup()
+    deg_tmp = rbind(deg_tmp1, deg_tmp2) %>% dplyr::arrange(cluster_1, adj_p_val, desc(avg_log2fc))
+    deg_tmp = deg_tmp[!duplicated(deg_tmp), ]
     file_name <- paste0('stclust_', j, '_', i, '_top_deg')
     write.csv(deg_tmp, paste0(file_name, '.csv'), quote=F, row.names=F)
     file_list <- c(file_list, list(file_name))
-    rm(deg_tmp) # Clean env
+    rm(deg_tmp, deg_tmp1, deg_tmp2) # Clean env
   }
 }
 write.table(file_list, 'stclust_top_deg.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
