@@ -55,7 +55,6 @@ save(stclust_stlist, file='stclust_stlist.RData')
 ps = STplot(x=stclust_stlist, ks=user_ks, ws=user_ws, ptsize=2, txsize=14, color_pal='smoothrainbow', samples=samplenames)
 n_plots = names(ps)
 write.table(n_plots, 'stclust_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
-library('svglite')
 for(p in n_plots) {
     saveplot(p, ps[[p]])
 }

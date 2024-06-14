@@ -69,3 +69,45 @@ write.table(file_list, 'insitutype_cell_types_top_deg.csv',sep=',', row.names = 
 end_t = difftime(Sys.time(), start_t, units='min')
 cat(paste0('Differential expression analysis completed in ', round(end_t, 2), ' min.'))
 
+
+# Read previsouly generated UMAP reduction
+load('insitutype_umap_object.RData')
+
+# Create data frame to plot UMAP embeddings
+umap_df = as.data.frame(umap_obj) %>%
+  dplyr::rename(UMAP1=1, UMAP2=2) %>%
+  tibble::rownames_to_column('complete_cell_id') %>%
+  dplyr::left_join(., as.data.frame(sup[['clust']]) %>%
+                     dplyr::rename(insitutype_cell_types=1) %>%
+                     tibble::rownames_to_column('complete_cell_id'), by='complete_cell_id')
+
+# Create UMAP plot
+umap_p = ggplot2::ggplot(umap_df) +
+  ggplot2::geom_point(ggplot2::aes(x=UMAP1, y=UMAP2, color=insitutype_cell_types), size=0.1) +
+  ggplot2::scale_color_manual(values=master_color_p) +
+  ggplot2::guides(color=ggplot2::guide_legend(override.aes=list(size=1))) +
+  ggplot2::labs(x='UMAP1', y='UMAP2') +
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill=NA, color=NA),
+                 legend.key=ggplot2::element_rect(colour=NA, fill=NA),
+                 axis.text.x=ggplot2::element_blank(), axis.ticks.x=ggplot2::element_blank(),
+                 axis.text.y=ggplot2::element_blank(), axis.ticks.y=ggplot2::element_blank())
+
+# Create flightpath plot
+fl_res = InSituType::flightpath_layout(logliks=sup[['logliks']])
+fp_col = data.frame(celltype=fl_res[['clust']]) %>%
+  dplyr::left_join(., as.data.frame(master_color_p) %>% tibble::rownames_to_column('celltype'), by='celltype') %>%
+  dplyr::select(2) %>% unlist() %>% as.vector()
+
+fl_p = InSituType::flightpath_plot(flightpath_result=fl_res, col=fp_col) +
+  ggplot2::labs(x='Dimension 1', y='Dimension 2', title='Clustering of cell type assignment probabilities (Flightpath plot)') +
+  ggplot2::theme(panel.background=ggplot2::element_rect(fill=NA, color=NA),
+                 axis.text.x=ggplot2::element_blank(), axis.ticks.x=ggplot2::element_blank(),
+                 axis.text.y=ggplot2::element_blank(), axis.ticks.y=ggplot2::element_blank())
+# OR
+# fl_p = InSituType::flightpath_plot(insitutype_result=sup, col=master_color_p) # When data set contains NegPrb
+
+saveplot('insitutype_umap', umap_p, 1400, 600)
+saveplot('insitutype_flightpath', fl_p, 1400, 600)
+
+apocalypse_t = difftime(Sys.time(), genesis_t, units='min')
+cat(paste0('Plotting completed in ', round(apocalypse_t, 2), ' min.\n'))

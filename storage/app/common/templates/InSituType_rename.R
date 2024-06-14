@@ -52,7 +52,7 @@ for(i in unique(master_ann[[1]])){
     stclust_stlist@spatial_meta[[i]] = spatial_meta_tmp
 
     ps = STplot(x=stclust_stlist, plot_meta=colnames(df_tmp2)[2], ptsize=2, txsize=14, color_pal='smoothrainbow', samples=i)
-    library('svglite')
+
     for(p in names(ps)){
       saveplot(paste('insitutype_plot_spatial_' ,i, '_', j, sep=''), ps[[p]])
     }
