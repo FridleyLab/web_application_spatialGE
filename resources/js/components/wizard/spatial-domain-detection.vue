@@ -29,7 +29,7 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="sdd-stclust" role="tabpanel" aria-labelledby="sdd-stclust-tab">
-                                <sdd-stclust :project="project" :samples="samples" :sdd-stclust-url="sddStclustUrl" :color-palettes="colorPalettes"></sdd-stclust>
+                                <sdd-stclust :project="project" :samples="samples" :sdd-stclust-url="sddStclustUrl" :sdd-stclust-rename-url="sddStclustRenameUrl" :color-palettes="colorPalettes"></sdd-stclust>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-spagcn" role="tabpanel" aria-labelledby="sdd-spagcn-tab">
                                 <sdd-spagcn :project="project" :samples="samples" :sdd-spagcn-url="sddSpagcnUrl" :sdd-spagcn-svg-url="sddSpagcnSvgUrl" :color-palettes="colorPalettes"></sdd-spagcn>
@@ -56,6 +56,7 @@
             samples: Object,
             colorPalettes: Object,
             sddStclustUrl: String,
+            sddStclustRenameUrl: String,
             sddSpagcnUrl: String,
             sddSpagcnSvgUrl: String,
         },

@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
-use Monolog\Logger;
 
 class Project extends Model
 {
@@ -109,28 +108,58 @@ class Project extends Model
         return $this->project_platform_id === self::COSMX_PLATFORM;
     }
 
-    public function getProjectParametersAttribute()
-    {
-        $params = [];
-        foreach ($this->parameters as $param)
-            $params[$param->parameter] = $param->type === 'number' ? intval($param->value) : $param->value;
+    private function setSTdiffData($data) {
 
-        $params['total_genes'] = $this->genes()->count();
+        sort($data);
 
-        if (array_key_exists('metadata', $params)) {
-            $names = [];
-            foreach (json_decode($params['metadata']) as $meta)
-                $names[] = ['label' => $meta->name, 'value' => $meta->name];
-            $params['metadata_names'] = $names;
+        $fileName = $this->workingDir() . 'stdiff_annotation_variables_clusters.csv';
+
+        $file = fopen(Storage::path($fileName), 'w');
+
+        foreach ($data as $row) {
+            fputcsv($file, $row);
         }
 
-        $fileName = $this->workingDir() . 'stdiff_annotation_variables.csv';
+        fclose($file);
+    }
+
+    private function getSTdiffData() {
+
+        $data = [];
+
+        $fileName = $this->workingDir() . 'stdiff_annotation_variables_clusters.csv';
         if (Storage::fileExists($fileName)) {
-            $data = Storage::read($fileName);
-            $lines = explode("\n", $data);
+
+            $_data = Storage::read($fileName);
+            $lines = explode("\n", $_data);
             sort($lines);
+
+            foreach($lines as $line) {
+                if(strlen(trim($line))) {
+                    $data[] = explode(',', $line);
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public function getSTdiffAnnotations() {
+
+        $params = [];
+        $params['annotation_variables'] = [];
+        $params['annotation_variables_clusters'] = [];
+
+        $data = $this->getSTdiffData();
+        if (count($data)) {
+
+            $_annotations = array_column($data, 2);
+            $_annotations = array_unique($_annotations);
+            // $_annotations = array_values(array_unique($_annotations));
+
             $annotations = [];
-            foreach ($lines as $annotation) {
+            $annotations_clusters = [];
+            foreach ($_annotations as $index_annotation => $annotation) {
                 if (strlen(trim($annotation))) {
                     $label = '';
                     $parts = explode('_', $annotation);
@@ -156,28 +185,85 @@ class Project extends Model
                             $label .= '; Refined clusters';
                     }
 
-                    if ($label === '') $label = $annotation;
+                    if ($label === '') {
+                        $parts = explode('_', $data[$index_annotation][1]);
+                        if(count($parts) > 1) $label = $parts[0] . '; ';
+                        $label .= $annotation;
+                    }
 
                     $annotations[] = ['label' => $label, 'value' => $annotation];
+
+                    //Obtain clusters for this annotation
+                    $_clusters = array_filter($data, function ($row) use($annotation) {
+                        return count($row) > 2 && $row[2] === $annotation;
+                    });
+                    $clusters = array_column($_clusters, 4);
+                    $clusters = array_values(array_unique($clusters));
+                    foreach($clusters as $cluster) {
+                        $annotations_clusters[] = ['annotation' => $annotation, 'cluster' => $cluster];
+                    }
+
                 }
             }
             sort($annotations);
             $params['annotation_variables'] = $annotations;
+            $params['annotation_variables_clusters'] = $annotations_clusters;
         }
 
-        $fileName = $this->workingDir() . 'stdiff_annotation_variables_clusters.csv';
-        if (Storage::fileExists($fileName)) {
-            $data = Storage::read($fileName);
-            $lines = explode("\n", $data);
-            $annotations_clusters = [];
-            foreach ($lines as $annotation) {
-                if (strlen(trim($annotation))) {
-                    $values = explode(',', $annotation);
-                    $annotations_clusters[] = ['annotation' => $values[0], 'cluster' => $values[1]];
-                    //$annotations_clusters[] = ['annotation' => $values[0], 'cluster' => $values[1]];
-                }
+        return $params;
+
+    }
+
+    public function getSTdiffAnnotationsBySample($sddMethod = 'stclust') {
+
+        $data = $this->getSTdiffData();
+
+        if(!count($data)) return [];
+
+        $result = [];
+        foreach($this->samples as $sample) {
+            $sampleName = $sample->name;
+            $result[$sampleName] = [];
+
+            //filter the annotations based on the method/module (stclust, insitutype)
+            $annotationData = array_filter($data, function($annot) use($sampleName, $sddMethod) {
+                return $annot[0] === $sampleName && str_starts_with($annot[1], $sddMethod);
+            });
+
+            $annotations = array_unique(array_column($annotationData, 1));
+            foreach($annotations as $annotation) {
+
+                $annotationName = '';
+                $_clusters = array_filter($annotationData, function($annot) use($annotation, &$annotationName) {
+                    if($annot[1] === $annotation) $annotationName = $annot[2];
+                    return $annot[1] === $annotation;
+                });
+                $clusters = array_map(function ($cluster) {
+                    return ['originalName' => $cluster[3], 'modifiedName' => $cluster[4]];
+                }, $_clusters);
+                $clusters = array_values($clusters);
+
+                $result[$sampleName][$annotation] = ['originalName' => $annotation, 'modifiedName' => $annotationName, 'clusters' => $clusters];
             }
-            $params['annotation_variables_clusters'] = $annotations_clusters;
+        }
+
+        return $result;
+
+    }
+
+    public function getProjectParametersAttribute()
+    {
+        $params = [];
+        foreach ($this->parameters as $param)
+            $params[$param->parameter] = $param->type === 'number' ? intval($param->value) : $param->value;
+
+        $params['total_genes'] = $this->genes()->count();
+
+        if (array_key_exists('metadata', $params)) {
+            $names = [];
+            foreach (json_decode($params['metadata']) as $meta)
+                $names[] = ['label' => $meta->name, 'value' => $meta->name];
+            $params['metadata_names'] = $names;
         }
 
 
@@ -205,8 +291,9 @@ class Project extends Model
             $params['STdeconvolve'] = json_encode($STdeconvolve);
         }
 
-        $params['downloadable'] = ProjectProcessFiles::where('project_id', $this->id)->select('process')->distinct()->get()->pluck(['process']);
 
+
+        $params['downloadable'] = ProjectProcessFiles::where('project_id', $this->id)->select('process')->distinct()->get()->pluck(['process']);
 
         return $params;
     }
@@ -1645,10 +1732,8 @@ library('spatialGE')
 qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pal', data_type='$data_type', samples=$samples)
 
 $export_files
-
-$export_files_side_by_side
-
 ";
+//$export_files_side_by_side
 
         return $script;
     }
@@ -1994,9 +2079,52 @@ $export_files
         return $script;
     }
 
+    private function stdiff_top_deg($csv_file) {
+
+        $workingDir = $this->workingDir();
+
+        $column_names = [
+            'gene' => 'Gene',
+            'avg_log2fc' => 'Average log-Fold Change',
+            'cluster_1' => 'Cluster 1',
+            'cluster_2' => 'Cluster 2',
+            'wilcox_p_val' => 'Wilcoxon’s p-value',
+            'ttest_p_val' => 'T-test p-value',
+            'mm_p_val' => 'Mixed model p-value',
+            'adj_p_val' => 'Adjusted p-value'
+        ];
+
+
+        $file = $workingDir . $csv_file;
+        if (Storage::fileExists($file)) {
+            // info('****-----EXISTS------*****');
+            $data = trim(Storage::read($file));
+            // info('****-----DATA------*****' . $data);
+            foreach (explode(',', $data) as $file) {
+                if (Storage::fileExists($workingDir . $file . '.csv')) {
+                    // info('****-----EXISTS------*****' . $file);
+                    $this->csv2json($workingDir . $file . '.csv', 1, $column_names);
+                    $files = [];
+                    $files[] = $file . '.csv';
+                    $files[] = $file . '.json';
+                    foreach ($files as $file) {
+                        if (Storage::fileExists($workingDir . $file)) {
+                            $file_public = $this->workingDirPublic() . $file;
+                            $file_to_move = $workingDir . $file;
+                            Storage::delete($file_public);
+                            Storage::move($file_to_move, $file_public);
+                        }
+                    }
+
+                }
+            }
+        }
+    }
 
     public function STclust($parameters)
     {
+        $parameters['samples'] = $this->getSampleList(NULL);
+
         $workingDir = $this->workingDir();
 
         $scriptName = 'STclust.R';
@@ -2039,99 +2167,138 @@ $export_files
             ProjectProcessFiles::updateOrCreate(['process' => 'STclust', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 
+        $this->stdiff_top_deg('stclust_top_deg.csv');
+
         $this->current_step = 8;
         $this->save();
 
         return ['output' => $output, 'script' => $scriptContents];
     }
 
-    public function getSTclustScript($parameters): string
+
+    private function getSTclustScript($parameters)
     {
 
+        $script = Storage::get("/common/templates/STclust.R");
+
         //If there's no stclust_stlist use the normalized_stlist
-        $stlist = 'stclust_stlist';
-        if (!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
 
-        $samples = $this->getSampleList(NULL, true);
-        $samples_list = $this->getSampleList(NULL);
-        $samples = $this->samples()->whereIn('name', $samples)->get();
+        $parameters['_stlist'] = $_stlist;
 
-        $samples_with_tissue = '';
-        $samples_with_tissue_image_files = 'tissues <- c(';
-        foreach (/*$this->samples*/ $samples as $sample) {
-            if ($sample->has_image) {
-                if (strlen($samples_with_tissue)) {
-                    $samples_with_tissue .= ',';
-                    $samples_with_tissue_image_files .= ',';
-                }
-                $samples_with_tissue .= "'" . $sample->name . "'";
-                $samples_with_tissue_image_files .= $sample->name . "='" . $sample->image_file->filename . "'";
-            }
+        $params = ['_stlist', 'ws', 'ks', 'topgenes', 'deepSplit', 'samples'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
         }
-        $samples_with_tissue_image_files .= ")";
 
-
-        $script = "
-
-setwd('/spatialGE')
-# Load the package
-library('spatialGE')
-library('magrittr')
-
-# Load normalized STList
-{$this->_loadStList($stlist)}
-
-stclust_stlist = STclust(x=$stlist,
-                         ws={$parameters['ws']},
-                         ks={$parameters['ks']},
-                         topgenes={$parameters['topgenes']},
-                         deepSplit={$parameters['deepSplit']})
-
-#annot_variables used for Differential Expression analyses
-annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_|insitutype_cell_types', colnames(i), value=T); return(var_cols) })))
-write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
-##clusters_by_annot_variables used for Differential Expression analyses
-cluster_values = tibble::tibble()
-for(i in names(stclust_stlist@spatial_meta)){
-  for(cl in grep('spagcn_|stclust_|insitutype_cell_types', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
-    cluster_values = dplyr::bind_rows(cluster_values,
-                                      tibble::tibble(cluster=unique(stclust_stlist@spatial_meta[[i]][[cl]])) %>%
-                                        tibble::add_column(annotation=cl))
-  }}
-cluster_values = dplyr::distinct(cluster_values) %>%
-  dplyr::select(annotation, cluster)
-write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F, row.names=F, col.names=F, sep=',')
-
-
-{$this->_saveStList('stclust_stlist')}
-
-ps = STplot(x=stclust_stlist, ks={$parameters['ks']}, ws={$parameters['ws']}, ptsize=2, txsize=14, color_pal='smoothrainbow', samples=$samples_list)
-n_plots = names(ps)
-write.table(n_plots, 'stclust_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
-library('svglite')
-for(p in n_plots) {
-    #print(p)
-    ggpubr::ggexport(filename = paste(p,'.png', sep=''), ps[[p]], width = 800, height = 600)
-    ggpubr::ggexport(filename = paste(p,'.pdf', sep=''), ps[[p]], width = 8, height = 6)
-    svglite(paste(p,'.svg', sep=''), width = 8, height = 6)
-    print(ps[[p]])
-    dev.off()
-" .
-    /*
-    #generate side-by-side for samples with tissue image
-    $samples_with_tissue_image_files
-    for(sample in list($samples_with_tissue)) {
-        if(grepl(sample, p, fixed=TRUE)) {
-            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample,'/spatial/', tissues[sample]))
-            ptp = ggpubr::ggarrange(ps[[p]], tp, ncol=2)
-            {$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
-        }
-    }*/
-"}
-";
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
 
         return $script;
     }
+
+    private function saveSTdiffAnnotationChanges($_annotations) {
+        $data = $this->getSTdiffData();
+
+        $samples = [];
+        $annotations = [];
+        $changes = false;
+        foreach($_annotations as $change) {
+
+            $samples[] = $change['sampleName'];
+            $annotations[] = $change['originalName'];
+
+            foreach($data as $index => $row) {
+                if($change['sampleName'] === $row[0] && $change['originalName'] === $row[1]) {
+                    foreach($change['clusters'] as $cluster) {
+                        if($row[3] === $cluster['originalName'] && $row[4] !== $cluster['newName']) {
+                            $data[$index][4] = $cluster['newName'];
+                            $changes = true;
+                        }
+                    }
+
+                    if($change['newName'] !== $row[2]) {
+                        $data[$index][2] = $change['newName'];
+                        $changes = true;
+                    }
+
+                    if($changes && $row[1] === $data[$index][2]) {
+                        $data[$index][2] = $row[1] . '_mod';
+                    }
+                }
+            }
+
+        }
+
+        if($changes) {
+            $this->setSTdiffData($data);
+        }
+
+        $samples = array_unique($samples);
+        $annotations = array_unique($annotations);
+
+        return ['annotations' => $annotations, 'samples' => $samples];
+    }
+
+
+    public function STclustRename($parameters)
+    {
+        $workingDir = $this->workingDir();
+
+        $result = $this->saveSTdiffAnnotationChanges($parameters['annotations']);
+
+        $parameters['_samples'] = "c('" . join("','", $result['samples']) . "')";
+        $parameters['_annotations'] = "c('" . join("','", $result['annotations']) . "')";
+
+
+        $scriptName = 'STclustRename.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getSTclustRenameScript($parameters);
+        Storage::put($script, $scriptContents);
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+
+        foreach($parameters['annotations'] as $change) {
+            $file_extensions = ['svg', 'pdf', 'png'];
+            $plot_file = $change['sampleName'] . '_' . $change['originalName'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $plot_file . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                }
+            }
+        }
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function getSTclustRenameScript($parameters)
+    {
+
+        $script = Storage::get("/common/templates/STclust2_rename.R");
+
+        //If there's no stclust_stlist use the normalized_stlist
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
+        $parameters['_stlist'] = $_stlist;
+
+        $params = ['_stlist', '_samples', '_annotations'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
+
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+
+        return $script;
+    }
+
+
 
 
 
@@ -2297,9 +2464,10 @@ spagcn_preds = './'
 spagcn_preds = list.files(spagcn_preds, pattern='spagcn_predicted_domains_sample_', full.names=T)
 
 stclust_stlist = $stlist
-#for(i in names(stclust_stlist@spatial_meta)){
+new_cols = c()
 for(i in $sample_list){
   spagcn_tmp = read.csv(grep(paste0(i, '.csv'), spagcn_preds, value=T))
+  new_cols = unique(c(new_cols, colnames(spagcn_tmp)[-1]))
   # Convert doain classifications to factor
   spagcn_tmp[, -1] = lapply(spagcn_tmp[, -1], as.factor)
 
@@ -3365,7 +3533,7 @@ lapply(names(grad_res), function(i){
 
             $workingDirPublic = $this->workingDirPublicURL();
 
-            $samples = $this->getSampleList(NULL, true);
+            $samples = $this->getSampleList($parameters['samples'], true);
             $plots = [];
             foreach($samples as $sample) {
 
@@ -3384,6 +3552,25 @@ lapply(names(grad_res), function(i){
                 }
             }
 
+            $files = ['insitutype_flightpath', 'insitutype_umap'];
+            foreach($files as $plot) {
+
+                $plots[$plot] = $workingDirPublic . $plot;
+
+                $file_extensions = ['svg', 'pdf', 'png'];
+                foreach ($file_extensions as $file_extension) {
+                    $fileName = $plot . '.' . $file_extension;
+                    $file = $workingDir . $fileName;
+                    $file_public = $this->workingDirPublic() . $fileName;
+                    if (Storage::fileExists($file)) {
+                        Storage::delete($file_public);
+                        Storage::move($file, $file_public);
+                    }
+                }
+            }
+
+            $this->stdiff_top_deg('insitutype_cell_types_top_deg.csv');
+
 
             ProjectParameter::updateOrCreate(['parameter' => 'InSituType2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['plots' => $plots, 'parameters' => $parameters])]);
         }
@@ -3395,7 +3582,7 @@ lapply(names(grad_res), function(i){
     {
         $script = Storage::get("/common/templates/InSituType2.R");
 
-        $samples = $this->getSampleList(NULL);
+        $samples =  $this->getSampleList($parameters['samples']);
 
         $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
         $script = $this->replaceRscriptParameter('_color_palette_function', $this->getColorPaletteFunctionRscript(), $script);
@@ -3405,6 +3592,65 @@ lapply(names(grad_res), function(i){
         foreach ($params as $param) {
             $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
         }
+
+        return $script;
+    }
+
+
+
+    public function InSituTypeRename($parameters)
+    {
+        $workingDir = $this->workingDir();
+
+        $result = $this->saveSTdiffAnnotationChanges($parameters['annotations']);
+
+        $parameters['_samples'] = "c('" . join("','", $result['samples']) . "')";
+        $parameters['_annotations'] = "c('" . join("','", $result['annotations']) . "')";
+
+
+        $scriptName = 'InSituTypeRename.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getInSituTypeRenameScript($parameters);
+        Storage::put($script, $scriptContents);
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+
+        foreach($parameters['annotations'] as $change) {
+            $file_extensions = ['svg', 'pdf', 'png'];
+            $plot_file = 'insitutype_plot_spatial_' . $change['sampleName'] . '_' . $change['originalName'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $plot_file . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                }
+            }
+        }
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function getInSituTypeRenameScript($parameters)
+    {
+
+        $script = Storage::get("/common/templates/InSituType_rename.R");
+
+        //If there's no stclust_stlist use the normalized_stlist
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
+        $parameters['_stlist'] = $_stlist;
+
+        $params = ['_stlist', '_samples', '_annotations'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
+
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
 
         return $script;
     }
@@ -3679,7 +3925,9 @@ lapply(names(grad_res), function(i){
 
         if($return_string) return $contents;
 
-        Storage::put(explode('.', $file)[0] . '.json', $contents);
+        $_parts = explode('.', $file);
+        array_pop($_parts);
+        Storage::put(join('.', $_parts) . '.json', $contents);
     }
 
     public function getJobPositionInQueue($jobId): int

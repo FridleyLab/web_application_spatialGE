@@ -223,8 +223,8 @@ import Multiselect from '@vueform/multiselect';
 
         methods: {
 
-            getSampleByName(nameToFInd) {
-                return this.samples.find( sample => sample.name === nameToFInd);
+            getSampleByName(nameToFind) {
+                return this.samples.find( sample => sample.name === nameToFind);
             },
 
             quiltPlot() {

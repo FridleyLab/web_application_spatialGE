@@ -18,7 +18,7 @@
 
             <div class="row justify-content-center text-center m-3">
 
-                <div class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2) ? 'disabled-clicks' : ''">
+                <div class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2 || renaming) ? 'disabled-clicks' : ''">
 
                     <div class="row justify-content-center text-center m-3">
                         <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
@@ -48,10 +48,11 @@
                 </div>
 
                 <div class="text-center mt-3">
-                    <send-job-button label="Run InSituType" :disabled="processing || processing2" :project-id="project.id" job-name="InSituType" @started="runInSituType" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+                    <send-job-button label="Run InSituType" :disabled="!params.cell_profile || processing || processing2 || renaming" :project-id="project.id" job-name="InSituType" @started="runInSituType" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
                 </div>
 
-                <div v-if="'InSituType' in this.project.project_parameters" class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2) ? 'disabled-clicks' : ''">
+
+                <div v-if="'InSituType' in this.project.project_parameters" class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2 || renaming) ? 'disabled-clicks' : ''">
                     <div class="row justify-content-center text-center m-4">
                         <div class="w-100">
                             <div class="me-3">
@@ -70,46 +71,87 @@
                             <div><Multiselect :options="colorPalettes" v-model="params2.color_pal"></Multiselect></div>
                         </div>
                     </div>
+
+                    <div class="my-4">
+                        <project-summary-table :data="project.project_parameters.initial_stlist_summary" :url="project.project_parameters.initial_stlist_summary_url" :selected-keys="visibleSamples" @selected="(keys) => visibleSamples = keys"></project-summary-table>
+                    </div>
+
                 </div>
 
                 <div v-if="'InSituType' in this.project.project_parameters" class="text-center mt-3">
-                    <send-job-button label="Run InSituType - 2" :disabled="processing || processing2" :project-id="project.id" job-name="InSituType2" @started="runInSituType2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
+                    <send-job-button label="Generate Plots" :disabled="processing || processing2 || renaming || !visibleSamples.length" :project-id="project.id" job-name="InSituType2" @started="runInSituType2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
                 </div>
 
 
-
-
-                <!-- <div v-if="inSituType2.plots">
-                    <template v-for="(plot, sample, index) in inSituType2.plots">
-                        {{ plot }} - {{ sample }} - {{ index }} <br />
-                    </template>
-                </div> -->
-
-
-                <div class="mt-4" v-if="!processing && !processing2">
-                    <ul class="nav nav-tabs" id="inSituTypePlots" role="tablist">
-                        <template v-for="(image, sample, index) in inSituType2.plots">
-                            <li class="nav-item" role="presentation" v-if="true || visibleSamples.includes(sample)">
-                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'inSituType-' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#inSituType-' + sample" type="button" role="tab" :aria-controls="'inSituType-' + sample" aria-selected="true">{{ sample }}</button>
-                            </li>
-                        </template>
-                    </ul>
-                    <div class="tab-content" id="inSituTypePlotsContent">
-                        <template v-for="(image, sample, index) in inSituType2.plots">
-                            <div v-if="true || visibleSamples.includes(sample)" class="tab-pane fade" :class="index === 0 ? 'show active' : ''"
-                                 :id="'inSituType-' + sample" role="tabpanel" :aria-labelledby="'inSituType-' + sample + '-tab'">
-                                <div>
-                                    <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true" side-by-side-tool-tip="vis_quilt_plot_side_by_side"></show-plot>
-                                </div>
-                            </div>
-                        </template>
+                <div v-if="!processing && !processing2 && annotations_renamed" class="row mt-3">
+                    <div class="p-3 text-end">
+                        <send-job-button label="Complete renaming" :disabled="processing || renaming" :project-id="project.id" job-name="InSituTypeRename" @started="runInSituTypeRename" @completed="runInSituTypeRenameCompleted" :project="project" ></send-job-button>
                     </div>
                 </div>
 
 
+                <div class="mt-4" v-if="!processing && !processing2 && !renaming && annotations !== null">
 
+                    <ul class="nav nav-tabs" id="inSituTypePlots" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="inSituType-SpatialPlots-tab'" data-bs-toggle="tab" data-bs-target="#inSituType-SpatialPlots" type="button" role="tab" aria-controls="inSituType-SpatialPlots" aria-selected="true">Spatial plots</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="inSituType-OtherPlots-tab'" data-bs-toggle="tab" data-bs-target="#inSituType-OtherPlots" type="button" role="tab" aria-controls="inSituType-OtherPlots" aria-selected="true">UMAP & Flight plot</button>
+                        </li>
+                    </ul>
 
+                    <div class="tab-content" id="inSituTypePlotsContent">
 
+                        <div class="tab-pane fade show active mt-4" id="inSituType-SpatialPlots" role="tabpanel" aria-labelledby="inSituType-SpatialPlots-tab">
+                            <ul class="nav nav-tabs" id="inSituTypeSpatialPlots" role="tablist">
+                                <template v-for="(image, sample, index) in inSituType2.plots">
+                                    <li class="nav-item" role="presentation" v-if="!['insitutype_umap', 'insitutype_flightpath'].includes(sample) /*visibleSamples.includes(sample)*/">
+                                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="'inSituType-' + sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#inSituType-' + sample" type="button" role="tab" :aria-controls="'inSituType-' + sample" aria-selected="true">{{ sample }}</button>
+                                    </li>
+                                </template>
+                            </ul>
+                            <div class="tab-content" id="inSituTypeSpatialPlotsContent">
+                                <template v-for="(image, sample, index) in inSituType2.plots">
+                                    <div v-if="!['insitutype_umap', 'insitutype_flightpath'].includes(sample) /*visibleSamples.includes(sample)*/" class="tab-pane fade" :class="index === 0 ? 'show active' : ''"
+                                         :id="'inSituType-' + sample" role="tabpanel" :aria-labelledby="'inSituType-' + sample + '-tab'">
+                                        <div>
+                                            <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true" side-by-side-tool-tip="vis_quilt_plot_side_by_side"></show-plot>
+                                            <stdiff-rename-annotations-clusters :annotation="annotations[sample][getAnnotation(sample, image)]" :sample-name="sample" :file-path="image" prefix="insitutype_cell_types_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
+                                            <!-- <stdiff-rename-annotations-clusters :annotation="getAnnotation(sample, image)" :file-path="image" prefix="insitutype_" suffix="_top_deg"></stdiff-rename-annotations-clusters> -->
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade mt-4" id="inSituType-OtherPlots" role="tabpanel" aria-labelledby="inSituType-OtherPlots-tab">
+
+                            <ul class="nav nav-tabs" id="inSituTypeAdditionalPlots" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="inSituType-UMAP-plot-tab'" data-bs-toggle="tab" data-bs-target="#inSituType-UMAP-plot" type="button" role="tab" aria-controls="inSituType-UMAP-plot" aria-selected="true">UMAP plot</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="inSituType-Flight-plot-tab'" data-bs-toggle="tab" data-bs-target="#inSituType-Flight-plot" type="button" role="tab" aria-controls="inSituType-Flight-plot" aria-selected="true">Flight plot</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="inSituTypeAdditionalPlotsContent">
+
+                                <div class="tab-pane fade show active mt-4" id="inSituType-UMAP-plot" role="tabpanel" aria-labelledby="inSituType-UMAP-plot-tab">
+                                    <show-plot :src="inSituType2.plots['insitutype_umap']" file-extension="png" :show-image="false"></show-plot>
+                                </div>
+
+                                <div class="tab-pane fade mt-4" id="inSituType-Flight-plot" role="tabpanel" aria-labelledby="inSituType-Flight-plot-tab">
+                                    <show-plot :src="inSituType2.plots['insitutype_flightpath']" file-extension="png" :show-image="false"></show-plot>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
 
             </div>
 
@@ -134,17 +176,21 @@ import Multiselect from '@vueform/multiselect';
             samples: Object,
             inSituTypeUrl: String,
             inSituType2Url: String,
+            inSituTypeRenameUrl: String,
             colorPalettes: Object,
         },
 
         data() {
             return {
 
+                visibleSamples: [],
+
                 inSituType: ('InSituType' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.InSituType) : {},
                 inSituType2: ('InSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.InSituType2) : {},
 
                 processing: false,
                 processing2: false,
+                renaming: false,
 
                 textOutput: '',
 
@@ -212,18 +258,64 @@ import Multiselect from '@vueform/multiselect';
                 ],
 
                 params2: {
-                    ptsize: 2,
+                    ptsize: 1,
                     color_pal: 'discreterainbow'
                 },
+
+                annotations: null,
+
+                active_annotations: [],
+
+                annotations: null,
+                active_annotations: [],
+                annotations_renamed: false,
 
             }
         },
 
-        mounted() {
-
+        async mounted() {
+            await this.loadAnnotations();
         },
 
         methods: {
+
+            async loadAnnotations() {
+                this.annotations =  await this.$getProjectSTdiffAnnotationsBySample(this.project.id, 'insitutype');
+            },
+
+            getAnnotation(sampleName, reference) {
+
+                let items = this.annotations[sampleName];
+
+                for(let key in items) {
+                    if(reference.includes(key)) {
+
+                        let alreadyAdded = this.active_annotations.filter(item => item.sampleName === sampleName && item.annotation === key);
+                        if(!alreadyAdded.length) {
+                            this.active_annotations.push({sampleName: sampleName, annotation: key, changed: false});
+                        }
+
+                        return key;
+                    }
+                }
+
+                return null;
+            },
+
+            annotationChanges(sampleName, annotation, changed) {
+
+                this.annotations[sampleName][annotation.originalName]['newName'] = annotation.newName;
+                this.annotations[sampleName][annotation.originalName]['changed'] = changed;
+
+                // this.annotationChangesDetected = false;
+                this.active_annotations.forEach(aa => {
+                    if(aa.sampleName === sampleName && aa.annotation === annotation.originalName) {
+                        aa.changed = changed
+                    };
+                });
+
+                this.annotations_renamed = this.active_annotations.some(aa => aa.changed);
+            },
 
             getSampleByName(nameToFind) {
                 return this.samples.find( sample => sample.name === nameToFind);
@@ -249,6 +341,8 @@ import Multiselect from '@vueform/multiselect';
             runInSituType2() {
                 this.processing2 = true;
 
+                this.params2['samples'] = this.visibleSamples;
+
                 axios.post(this.inSituType2Url, this.params2)
                     .then((response) => {})
                     .catch((error) => {
@@ -261,6 +355,45 @@ import Multiselect from '@vueform/multiselect';
                 //console.log(this.project.project_parameters);
                 this.inSituType2 = ('InSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.InSituType2) : {};
                 this.processing2 = false;
+            },
+
+
+            runInSituTypeRename() {
+
+                this.renaming = true;
+
+                let modified = [];
+                this.active_annotations.map(item => {
+                    if(item.changed) {
+                        modified.push({
+                            sampleName: item.sampleName,
+                            originalName: item.annotation,
+                            newName: this.annotations[item.sampleName][item.annotation]['newName'],
+                            clusters: this.annotations[item.sampleName][item.annotation]['clusters']
+                        });
+                    }
+                });
+
+                let parameters = {
+                    annotations: modified,
+                };
+
+                console.log(parameters);
+
+                axios.post(this.inSituTypeRenameUrl, parameters)
+                    .then((response) => {
+                    })
+                    .catch((error) => {
+                        this.renaming = false;
+                        console.log(error);
+                    })
+
+            },
+
+            async runInSituTypeRenameCompleted() {
+                //this.inSituType2 = ('InSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
+                await this.loadAnnotations();
+                this.renaming = false;
             },
 
         },

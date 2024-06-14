@@ -10,6 +10,7 @@
         st-deconvolve3-url="{{ route('STdeconvolve3', ['project' => $project->id]) }}"
         in-situ-type-url="{{ route('InSituType', ['project' => $project->id]) }}"
         in-situ-type2-url="{{ route('InSituType2', ['project' => $project->id]) }}"
+        in-situ-type-rename-url="{{ route('InSituTypeRename', ['project' => $project->id]) }}"
         :color-palettes="{{ json_encode($color_palettes) }}"
     >
     </phenotyping>

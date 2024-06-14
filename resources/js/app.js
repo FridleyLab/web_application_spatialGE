@@ -28,9 +28,12 @@ import showModalContent from "./components/common/show-modal-content.vue";
 import showVignette from "./components/common/show-vignette.vue";
 import contactUs from "./components/ui/contact-us.vue";
 import dataGrid from "./components/common/data-grid.vue";
+import stDiffRenameAnnotationsClusters from './components/common/stdiff-rename-annotations-clusters.vue';
+
 import showStats from "./components/common/show-stats.vue";
 import showStatsPlot from "./components/common/show-stats-plot.vue";
 import showStatsPlotDetail from "./components/common/show-stats-plot-detail.vue";
+
 
 
 import stplotVisualization from "./components/wizard/stplot-visualization.vue";
@@ -81,6 +84,7 @@ const vuetify = createVuetify({
 
 
 import {createApp} from "vue";
+import StdiffRenameAnnotationsClusters from './components/common/stdiff-rename-annotations-clusters.vue';
 
 
 const app = createApp({})/*.use(vuetify)*/;
@@ -117,6 +121,8 @@ app.component('show-modal-content', showModalContent);
 app.component('show-vignette', showVignette);
 app.component('contact-us', contactUs);
 app.component('data-grid', dataGrid);
+app.component('stdiff-rename-annotations-clusters', StdiffRenameAnnotationsClusters);
+
 app.component('show-stats', showStats);
 app.component('show-stats-plot', showStatsPlot);
 app.component('show-stats-plot-detail', showStatsPlot);
@@ -175,6 +181,18 @@ const getProjectParameters = async (projectId) => {
 
 }
 app.config.globalProperties.$getProjectParameters = getProjectParameters;
+
+const getProjectSTdiffAnnotations = async (projectId) => {
+    const response = await  axios.get('/projects/' + projectId + '/get-stdiff-annotations');
+    return response.data;
+}
+app.config.globalProperties.$getProjectSTdiffAnnotations = getProjectSTdiffAnnotations;
+
+const getProjectSTdiffAnnotationsBySample = async (projectId, method) => {
+    const response = await  axios.get('/projects/' + projectId + '/get-stdiff-annotations-by-sample/' + method);
+    return response.data;
+}
+app.config.globalProperties.$getProjectSTdiffAnnotationsBySample = getProjectSTdiffAnnotationsBySample;
 
 const getJobPositionInQueue = async (projectId, command) => {
     const response = await axios.get('/projects/' + projectId + '/get-job-position-in-queue', {params :{'command': command}});

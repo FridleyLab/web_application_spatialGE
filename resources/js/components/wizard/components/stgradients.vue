@@ -81,7 +81,7 @@
                     </div>
                     <div>
                         <span>
-                            <Multiselect :options="project.project_parameters.annotation_variables" v-model="params.annot"></Multiselect>
+                            <Multiselect :options="annotation_variables" v-model="params.annot"></Multiselect>
                         </span>
                     </div>
                 </div>
@@ -245,9 +245,11 @@ import 'vue3-easy-data-table/dist/style.css';
 
         data() {
             return {
-
+                annotation_variables: [],
+                all_annotation_variables_clusters: [],
                 annotation_variables_clusters: [],
                 annotation_variables_clusters_exclude: [],
+
                 distsumm_options: [{'label': 'Minimum distance', 'value': 'min'}, {'label': 'Average distance', 'value': 'avg'}],
 
                 stgradients: ('stgradients' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stgradients) : {},
@@ -276,8 +278,12 @@ import 'vue3-easy-data-table/dist/style.css';
             }
         },
 
-        mounted() {
-            this.loadResults();
+        async mounted() {
+            await this.loadResults();
+
+            let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
+            this.annotation_variables = stdiff['annotation_variables'];
+            this.all_annotation_variables_clusters = stdiff['annotation_variables_clusters'];
         },
 
         watch: {
@@ -288,7 +294,7 @@ import 'vue3-easy-data-table/dist/style.css';
                 this.annotation_variables_clusters = [];
                 this.annotation_variables_clusters_exclude = [];
 
-                this.project.project_parameters.annotation_variables_clusters.map(annot => {if(annot.annotation === newValue) this.annotation_variables_clusters.push({'label': annot.cluster, 'value': annot.cluster})});
+                this.all_annotation_variables_clusters.map(annot => {if(annot.annotation === newValue) this.annotation_variables_clusters.push({'label': annot.cluster, 'value': annot.cluster})});
 
                 this.annotation_variables_clusters.sort((a,b) => a.value - b.value);
 
@@ -300,7 +306,7 @@ import 'vue3-easy-data-table/dist/style.css';
 
                 this.annotation_variables_clusters_exclude = [];
 
-                this.project.project_parameters.annotation_variables_clusters.map(annot => {if(annot.annotation === this.params.annot && annot.cluster !== this.params.ref) this.annotation_variables_clusters_exclude.push({'label': annot.cluster, 'value': annot.cluster})});
+                this.all_annotation_variables_clusters.map(annot => {if(annot.annotation === this.params.annot && annot.cluster !== this.params.ref) this.annotation_variables_clusters_exclude.push({'label': annot.cluster, 'value': annot.cluster})});
 
                 this.annotation_variables_clusters_exclude.sort((a,b) => a.value - b.value);
             },
@@ -364,7 +370,7 @@ import 'vue3-easy-data-table/dist/style.css';
                 this.loadResults();
             },
 
-            loadResults() {
+            async loadResults() {
                 this.stdiff_ns = ('stgradients' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stgradients) : {};
 
                 if(!('base_url' in this.stgradients))

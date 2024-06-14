@@ -29,7 +29,7 @@
                                 <stdeconvolve :project="project" :samples="samples" :st-deconvolve-url="stDeconvolveUrl" :st-deconvolve2-url="stDeconvolve2Url" :st-deconvolve3-url="stDeconvolve3Url" :color-palettes="colorPalettes"></stdeconvolve>
                             </div>
                             <div v-if="project.platform_name === 'COSMX'" class="tab-pane fade show active min-vh-50" id="insitutype" role="tabpanel" aria-labelledby="insitutype-tab">
-                                <insitutype :project="project" :samples="samples" :in-situ-type-url="inSituTypeUrl" :in-situ-type2-url="inSituType2Url" :color-palettes="colorPalettes"></insitutype>
+                                <insitutype :project="project" :samples="samples" :in-situ-type-url="inSituTypeUrl" :in-situ-type2-url="inSituType2Url" :in-situ-type-rename-url="inSituTypeRenameUrl" :color-palettes="colorPalettes"></insitutype>
                             </div>
                         </div>
                     </div>
@@ -53,6 +53,7 @@
             stDeconvolve3Url: String,
             inSituTypeUrl: String,
             inSituType2Url: String,
+            inSituTypeRenameUrl: String,
         },
 
     }

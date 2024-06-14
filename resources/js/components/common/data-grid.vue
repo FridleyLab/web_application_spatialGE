@@ -15,7 +15,7 @@
 
                   :column-auto-width="true"
 
-                  :data-source="data"
+                  :data-source="_data"
 
                   :word-wrap-enabled="false"
 
@@ -58,7 +58,7 @@
 
         <DxScrolling :mode="scrollingMode" use-native="true" />
 
-        <DxColumn v-for="(column, index) in headers"
+        <DxColumn v-for="(column, index) in _headers"
                   :data-field="column.value"
                   :cell-template="showGeneCard && ['gene', 'genes'].includes(column.value) ? (column.value + '-cell') : ''"
                   :data-type="is_numeric_column(column.value) ? 'number' : ''"
@@ -142,8 +142,8 @@ export default {
     },
 
     props: {
-        headers: Array,
-        data: Array,
+        headers: {type: Array, default: []},
+        data: {type: Array, default: []},
         scrollingToggle: {type: Boolean, default: true},
         showFilterRow: {type: Boolean, default: true},
         showColumnChooser: {type: Boolean, default: true},
@@ -154,17 +154,30 @@ export default {
         keyAttribute: {type: String, default: ''},
         pageSize: {type: Number, default: 15},
         selectedKeys: {type: Object, default: []},
+        src: {type: String, default: ''},
     },
 
     data() {
         return {
             scrollingMode: 'standard',
-            selectedRowKeys: []
+            selectedRowKeys: [],
+            _headers: this.headers,
+            _data: this.data,
         }
     },
 
     mounted() {
+        if(this.src.length) {
 
+            axios.get(this.src + '?' + Date.now())
+                .then((response) => {
+                    this._data = response.data.items;
+                    this._headers = response.data.headers;
+                })
+                .catch((error) => {
+                    console.log(error.message);
+                })
+        }
     },
 
     watch: {

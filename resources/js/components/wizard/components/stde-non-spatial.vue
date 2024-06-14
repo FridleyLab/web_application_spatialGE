@@ -62,7 +62,7 @@
                     <div>Annotation to test <show-modal tag="stdiff_non_spatial_annotation"></show-modal></div>
                     <div>
                         <span>
-                            <Multiselect id="multiselect_annotation_variables" :options="project.project_parameters.annotation_variables" v-model="params.annotation"></Multiselect>
+                            <Multiselect id="multiselect_annotation_variables" :options="annotation_variables" v-model="params.annotation"></Multiselect>
                         </span>
                     </div>
                 </div>
@@ -206,7 +206,8 @@ import 'vue3-easy-data-table/dist/style.css';
 
         data() {
             return {
-
+                annotation_variables: [],
+                all_annotation_variables_clusters: [],
                 annotation_variables_clusters: [],
 
                 test_types: [{'label': 'Wilcoxon\'s test', 'value': 'wilcoxon'}, {'label': 'T-test', 'value': 't_test'}, {'label': 'Mixed models', 'value': 'mm'}],
@@ -232,11 +233,12 @@ import 'vue3-easy-data-table/dist/style.css';
             }
         },
 
-        mounted() {
-            //console.log(this.project.project_parameters.annotation_variables_clusters);
-            this.loadResults();
+        async mounted() {
+            await this.loadResults();
 
-            console.log(this.project.project_parameters.annotation_variables);
+            let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
+            this.annotation_variables = stdiff['annotation_variables'];
+            this.all_annotation_variables_clusters = stdiff['annotation_variables_clusters'];
         },
 
         watch: {
@@ -247,7 +249,7 @@ import 'vue3-easy-data-table/dist/style.css';
 
                 this.params.clusters = ['NULL'];
 
-                this.project.project_parameters.annotation_variables_clusters.map(annot => {if(annot.annotation === newValue) this.annotation_variables_clusters.push({'label': annot.cluster, 'value': annot.cluster})});
+                this.all_annotation_variables_clusters.map(annot => {if(annot.annotation === newValue) this.annotation_variables_clusters.push({'label': annot.cluster, 'value': annot.cluster})});
 
                 this.annotation_variables_clusters.sort((a,b) => a.value - b.value);
 
@@ -305,7 +307,7 @@ import 'vue3-easy-data-table/dist/style.css';
                 this.loadResults();
             },
 
-            loadResults() {
+            async loadResults() {
 
                 this.stdiff_ns = ('stdiff_ns' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stdiff_ns) : {};
 

@@ -256,6 +256,17 @@ class ProjectController extends Controller
 
     }
 
+    public function getSTdiffAnnotations(Project $project) {
+
+        return $project->getSTdiffAnnotations();
+
+    }
+
+    public function getSTdiffAnnotationsBySample(Project $project, $method = 'stclust') {
+
+        return $project->getSTdiffAnnotationsBySample($method);
+
+    }
 
     public function import_data(Project $project): View
     {
@@ -608,6 +619,11 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function sdd_stclust_rename(Project $project) {
+        $jobId = $project->createJob('Spatial Domain Detection - STclust (annotation renaming)', 'STclustRename', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
     public function sdd_spagcn(Project $project) {
         $jobId = $project->createJob('Spatial Domain Detection - SpaGCN', 'SpaGCN', request()->all());
         return $project->getJobPositionInQueue($jobId);
@@ -682,6 +698,11 @@ class ProjectController extends Controller
 
     public function InSituType2(Project $project) {
         $jobId = $project->createJob('Phenotyping - InSituType2', 'InSituType2', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
+    public function InSituTypeRename(Project $project) {
+        $jobId = $project->createJob('Phenotyping - InSituType (Rename)', 'InSituTypeRename', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 

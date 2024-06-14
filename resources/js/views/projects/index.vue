@@ -34,11 +34,13 @@
                                 <div class="col-4">{{ project.description }}</div>
                                 <div class="col-2 text-center">{{ project.created_on }}</div>
                                 <div class="col-2 text-center">
-                                    <i v-if="!deleting" class="material-icons opacity-10 text-info cursor-pointer ms-2" title="Delete" @click="editProject(project)">edit</i>
+                                    <i v-if="!deleting" class="material-icons opacity-10 text-info cursor-pointer ms-2" title="Edit" @click="editProject(project)">edit</i>
                                     <i v-if="!deleting" class="material-icons opacity-10 text-danger cursor-pointer" title="Delete" @click="deleting = project.id">delete</i>
 
-                                    <input v-if="deleting === project.id" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deleting = 0" title="Cancel deletion attempt" />
-                                    <input v-if="deleting === project.id" type="button" class="btn btn-sm btn-outline-danger text-xxs" value="Delete" title="Confirm deletion of this sample" @click="deleteProject(project)" />
+                                    <input v-if="deleting === project.id" type="button" class="btn btn-sm btn-outline-success text-xxs" value="Cancel" @click="deleting = 0; deletingName = ''" title="Cancel deletion attempt" />
+                                    <input v-if="deleting === project.id" type="text" class="w-100 text-xs border rounded rounded-2 border-danger" v-model="deletingName" placeholder="Type project name" title="Type in the project name to confirm and proceed">
+                                    <div v-if="deleting === project.id" class="text-xs text-danger">All data will be deleted!</div>
+                                    <input v-if="deleting === project.id && deletingName === project.name" type="button" class="btn btn-sm btn-outline-danger text-xxs" value="Delete" title="Confirm deletion of this sample" @click="deleteProject(project)" />
                                 </div>
                             </div>
                             <hr class="dark horizontal my-0">
@@ -79,6 +81,7 @@ export default {
             errorMessage: '',
 
             deleting: 0,
+            deletingName: '',
         }
     },
 

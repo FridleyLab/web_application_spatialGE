@@ -45,6 +45,8 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/edit',[ProjectController::class, 'edit'])->name('edit-project')->middleware('project');
     Route::patch('/projects/{project}',[ProjectController::class, 'update'])->name('update-project')->middleware('project');
     Route::get('/projects/{project}/get-project-parameters',[ProjectController::class, 'getProjectParameters'])->name('get-project-parameters')->middleware('project');
+    Route::get('/projects/{project}/get-stdiff-annotations',[ProjectController::class, 'getSTdiffAnnotations'])->name('get-stdiff-annotations')->middleware('project');
+    Route::get('/projects/{project}/get-stdiff-annotations-by-sample/{method}',[ProjectController::class, 'getSTdiffAnnotationsBySample'])->name('get-stdiff-annotations-by-sample')->middleware('project');
 
     Route::get('/projects/{project}/go-to-step/{step}',[ProjectController::class, 'go_to_step'])->name('go-to-step')->middleware('project');
 
@@ -99,6 +101,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('/projects/{project}/spatial-domain-detection',[ProjectController::class, 'spatial_domain_detection'])->name('spatial-domain-detection')->middleware('project');
     Route::post('/projects/{project}/sdd/stclust', [ProjectController::class, 'sdd_stclust'])->name('sdd-stclust')->middleware('project');
+    Route::post('/projects/{project}/sdd/stclust-rename', [ProjectController::class, 'sdd_stclust_rename'])->name('sdd-stclust-rename')->middleware('project');
     Route::post('/projects/{project}/sdd/spagcn', [ProjectController::class, 'sdd_spagcn'])->name('sdd-spagcn')->middleware('project');
     Route::post('/projects/{project}/sdd/spagcn-svg', [ProjectController::class, 'sdd_spagcn_svg'])->name('sdd-spagcn-svg')->middleware('project');
 
@@ -118,6 +121,7 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects/{project}/phenotyping/STdeconvolve3', [ProjectController::class, 'STdeconvolve3'])->name('STdeconvolve3')->middleware('project');
     Route::post('/projects/{project}/phenotyping/InSituType', [ProjectController::class, 'InSituType'])->name('InSituType')->middleware('project');
     Route::post('/projects/{project}/phenotyping/InSituType2', [ProjectController::class, 'InSituType2'])->name('InSituType2')->middleware('project');
+    Route::post('/projects/{project}/phenotyping/InSituTypeRename', [ProjectController::class, 'InSituTypeRename'])->name('InSituTypeRename')->middleware('project');
 
 });
 

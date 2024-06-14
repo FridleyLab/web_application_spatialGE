@@ -2,7 +2,7 @@
 <div class="m-4">
     <form>
 
-        <div :class="processing ? 'disabled-clicks' : ''">
+        <div :class="processing || renaming ? 'disabled-clicks' : ''">
             <div class="my-3 text-bold">
                 Spatial Domain Detection with STclust
             </div>
@@ -69,50 +69,51 @@
         </div>
 
         <div class="p-3 text-center mt-4">
-            <send-job-button label="Run STclust" :disabled="processing" :project-id="project.id" job-name="STclust" @started="SDD_STclust" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button label="Run STclust" :disabled="processing || annotations_renamed || renaming" :project-id="project.id" job-name="STclust" @started="SDD_STclust" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 
-        <div v-if="!processing && 'SDD_STclust' in project.project_parameters">
-
-            <div class="row justify-content-center text-center m-4">
-                <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-                    <div>Color palette</div>
-                    <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
-                </div>
-            </div>
-
-
+        <div v-if="!processing && annotations_renamed">
             <div class="row mt-3">
                 <div class="p-3 text-end">
-                    <send-job-button label="Generate plots" :disabled="processing || !params.col_pal.length" :project-id="project.id" job-name="STplotExpressionSurfacePlots" @started="generatePlots" @completed="processCompleted" :project="project" ></send-job-button>
+                    <send-job-button label="Complete renaming" :disabled="processing || renaming || !params.col_pal.length" :project-id="project.id" job-name="STclustRename" @started="STclustRename" @completed="STclustRenameCompleted" :project="project" ></send-job-button>
                 </div>
             </div>
         </div>
 
 
         <!-- Create tabs for each sample-->
-        <div v-if="!processing && ('stclust' in project.project_parameters) && stclust.parameters.ks.includes('dtc')">
+        <div v-if="!processing && !renaming && ('stclust' in project.project_parameters) && stclust.parameters.ks.includes('dtc') && annotations !== null">
             <div>
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
-                    <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
-                        <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>
-                    </li>
+                    <template v-for="(sample, index) in samples">
+                        <li v-if="showSample(sample.name)" class="nav-item" role="presentation">
+                            <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name" type="button" role="tab" :aria-controls="sample.name" aria-selected="true">{{ sample.name }}</button>
+                        </li>
+                    </template>
                 </ul>
 
                 <div class="tab-content" id="myTabContent">
-                    <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">
-                        <div v-for="image in stclust.plots">
-                            <show-plot v-if="image.includes(sample.name)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                    <template v-for="(sample, index) in samples">
+                        <div v-if="showSample(sample.name)" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name" role="tabpanel" :aria-labelledby="sample.name + '-tab'">
+                            <div v-for="image in stclust.plots">
+                                <template v-if="image.includes(sample.name)">
+
+                                    <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="false"></show-plot>
+
+                                    <stdiff-rename-annotations-clusters :annotation="annotations[sample.name][getAnnotation(sample.name, image)]" :sample-name="sample.name" :file-path="image" prefix="stclust_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
+
+                                </template>
+                            </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
 
 
         <!-- Create tabs for each K value and sub-tabs for each sample -->
-        <div v-if="!processing && ('stclust' in project.project_parameters) && !stclust.parameters.ks.includes('dtc')">
+        <div v-if="!processing && !renaming && ('stclust' in project.project_parameters) && !stclust.parameters.ks.includes('dtc') && annotations !== null">
 
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <template v-for="index in parseInt(stclust.parameters.number_of_domains_max)">
@@ -140,7 +141,10 @@
                         <template v-for="(sample, index) in samples">
                             <div v-if="showSample(sample.name)" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'K_' + k + '-tab'">
                                 <div v-for="image in stclust.plots">
-                                    <show-plot v-if="image.includes('stclust') && image.includes(sample.name) && image.endsWith('k' + k)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="false"></show-plot>
+                                    <template v-if="image.includes('stclust') && image.includes(sample.name) && image.endsWith('k' + k)">
+                                        <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="false"></show-plot>
+                                        <stdiff-rename-annotations-clusters :annotation="annotations[sample.name][getAnnotation(sample.name, image)]" :sample-name="sample.name" :file-path="image" prefix="stclust_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
+                                    </template>
                                 </div>
                             </div>
                         </template>
@@ -169,6 +173,7 @@ import Multiselect from '@vueform/multiselect';
             project: Object,
             samples: Object,
             sddStclustUrl: String,
+            sddStclustRenameUrl: String,
             colorPalettes: Object,
         },
 
@@ -178,6 +183,7 @@ import Multiselect from '@vueform/multiselect';
                 stclust: ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {},
 
                 processing: false,
+                renaming: false,
 
                 textOutput: '',
 
@@ -197,8 +203,19 @@ import Multiselect from '@vueform/multiselect';
 
                 filter_variable: '',
 
-                plots_visible: []
+                plots_visible: [],
+
+                annotations: null,
+                active_annotations: [],
+                annotations_renamed: false,
+
+
             }
+        },
+
+        async mounted() {
+            await this.loadAnnotations();
+            //console.log(this.annotations);
         },
 
         watch: {
@@ -217,6 +234,30 @@ import Multiselect from '@vueform/multiselect';
                     this.params.ws = 0;
             },
 
+            /*annotations: {
+                handler(newValue, oldValue) {
+
+                    this.rename_annotations = [];
+
+                    if(!this.active_annotations.length) return;
+
+                    this.active_annotations.forEach(item => {
+
+                        let annotation = this.annotations[item.sampleName][item.annotation];
+
+                        if(annotation.changed || annotation.clusters.some(cluster => cluster.changed)) {
+                            this.rename_annotations.push({sample: item.sampleName, annotation: item.annotation, clusters: annotation.clusters});
+                        }
+
+                    });
+
+                    console.log(this.rename_annotations);
+
+
+                },
+                deep: true
+            }*/
+
             /*stclust: {
                 handler: function(value) {
                     for (const [gene, samples] of Object.entries(this.stclust)) {
@@ -230,7 +271,71 @@ import Multiselect from '@vueform/multiselect';
             }*/
         },
 
+        // computed: {
+        //     annotationChangesDetected() {
+
+        //         if(this.annotations === null) return false;
+
+        //         return Object.keys(this.annotations).some(key => this.annotations[key].changed);
+
+        //         // const filteredData = Object.keys(this.annotations)
+        //         //     .filter(key => this.annotations[key].changed)
+        //         //     .reduce((result, key) => {
+        //         //         result[key] = this.annotations[key];
+        //         //         return result;
+        //         //     }, {});
+
+        //         console.log(filteredData);
+
+
+        //         if(this.annotations) {
+        //             return this.annotations.some(item => item.changed);
+        //         }
+        //         return false;
+        //     },
+        // },
+
         methods: {
+
+            async loadAnnotations() {
+                this.annotations =  await this.$getProjectSTdiffAnnotationsBySample(this.project.id, 'stclust');
+            },
+
+            getAnnotation(sampleName, reference) {
+
+                let items = this.annotations[sampleName];
+
+                for(let key in items) {
+                    if(reference.includes(key)) {
+
+                        let alreadyAdded = this.active_annotations.filter(item => item.sampleName === sampleName && item.annotation === key);
+                        if(!alreadyAdded.length) {
+                            this.active_annotations.push({sampleName: sampleName, annotation: key, changed: false});
+                        }
+
+                        return key;
+                    }
+                }
+
+                return null;
+            },
+
+            annotationChanges(sampleName, annotation, changed) {
+
+                this.annotations[sampleName][annotation.originalName]['newName'] = annotation.newName;
+                this.annotations[sampleName][annotation.originalName]['changed'] = changed;
+
+                // this.annotationChangesDetected = false;
+                this.active_annotations.forEach(aa => {
+                    if(aa.sampleName === sampleName && aa.annotation === annotation.originalName) {
+                        aa.changed = changed
+                    };
+                });
+
+                this.annotations_renamed = this.active_annotations.some(aa => aa.changed);
+            },
+
+
 
             showSample(sampleName) {
                 for(let plot in this.stclust.plots) {
@@ -270,6 +375,44 @@ import Multiselect from '@vueform/multiselect';
                 this.processing = false;
                 this.$enableWizardStep('differential-expression');
                 this.$enableWizardStep('spatial-gradients');
+            },
+
+            STclustRename() {
+
+                this.renaming = true;
+
+                let modified = [];
+                this.active_annotations.map(item => {
+                    if(item.changed) {
+                        modified.push({
+                            sampleName: item.sampleName,
+                            originalName: item.annotation,
+                            newName: this.annotations[item.sampleName][item.annotation]['newName'],
+                            clusters: this.annotations[item.sampleName][item.annotation]['clusters']
+                        });
+                    }
+                });
+
+                let parameters = {
+                    annotations: modified,
+                };
+
+                console.log(parameters);
+
+                axios.post(this.sddStclustRenameUrl, parameters)
+                    .then((response) => {
+                    })
+                    .catch((error) => {
+                        this.renaming = false;
+                        console.log(error);
+                    })
+
+            },
+
+            async STclustRenameCompleted() {
+                this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
+                await this.loadAnnotations();
+                this.renaming = false;
             },
 
             generatePlots() {
