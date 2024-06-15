@@ -72,6 +72,9 @@ export default {
     },
 
     mounted() {
+
+        if(this.annotation === null || this.annotation === undefined) return;
+
         for(let i = 0; i < this.clusters.length; i++) {
             this.clusters[i]['changed'] = false;
             this.clusters[i]['newName'] = this.clusters[i]['modifiedName'];

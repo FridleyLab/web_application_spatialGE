@@ -410,7 +410,7 @@ import Multiselect from '@vueform/multiselect';
             },
 
             async STclustRenameCompleted() {
-                this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
+                //this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
                 await this.loadAnnotations();
                 this.renaming = false;
             },

@@ -634,6 +634,11 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function sdd_spagcn_rename(Project $project) {
+        $jobId = $project->createJob('Spatial Domain Detection - SpaGCN (annotation renaming)', 'SpaGCNRename', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
     public function differential_expression(Project $project) {
         $samples = $project->samples;
         return view('wizard.differential-expression')->with(compact('project', 'samples'));

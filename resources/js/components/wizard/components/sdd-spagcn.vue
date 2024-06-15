@@ -68,8 +68,16 @@
                         </div>
 
 
+                        <div v-if="!processing && annotations_renamed">
+                            <div class="row mt-3">
+                                <div class="p-3 text-end">
+                                    <send-job-button label="Complete renaming" :disabled="processing || renaming || !params.col_pal.length" :project-id="project.id" job-name="SpaGCNRename" @started="SpaGCNRename" @completed="SpaGCNRenameCompleted" :project="project" ></send-job-button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Create tabs for each K value and sub-tabs for each sample -->
-                        <div v-if="!processing && ('spagcn' in project.project_parameters)">
+                        <div v-if="!processing && !renaming && ('spagcn' in project.project_parameters)">
 
                 <!--            <div class="">-->
                 <!--                <a :href="project.assets_url + 'SpaGCN.zip'" class="float-end btn btn-sm btn-outline-info" download>Download all results (ZIP)</a>-->
@@ -92,20 +100,25 @@
                                     <div v-for="k in parseInt(spagcn.parameters.number_of_domains_max)" class="tab-pane fade min-vh-50" :class="k === parseInt(spagcn.parameters.number_of_domains_min) ? 'show active' : ''" :id="'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="'SPAGCN_K_' + k + '-tab'">
 
                                         <ul class="nav nav-tabs" :id="'SPAGCN_myTab' + k" role="tablist">
-                                            <li v-for="(sample, index) in samples" class="nav-item" role="presentation">
-                                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_K_' + k + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_K_' + k" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_K_' + k" aria-selected="true">{{ sample.name }}</button>
-                                            </li>
+                                            <template v-for="(sample, index) in samples">
+                                                <li v-if="showSample(sample.name)" class="nav-item" role="presentation">
+                                                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_K_' + k + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_K_' + k" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_K_' + k" aria-selected="true">{{ sample.name }}</button>
+                                                </li>
+                                            </template>
                                         </ul>
 
                                         <div class="tab-content" :id="'SPAGCN_myTabContent' + k">
-                                            <div v-for="(sample, index) in samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_K_' + k + '-tab'">
-                                                <div v-for="image in spagcn.plots">
-                                                    <template v-if="image.includes('spagcn') && image.includes(sample.name) && (image.endsWith('k' + k) || image.endsWith('k' + k + '_refined'))">
-                                                        <h4 class="text-center" v-if="image.includes('refined')">Refined clusters</h4>
-                                                        <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
-                                                    </template>
+                                            <template v-for="(sample, index) in samples">
+                                                <div v-if="showSample(sample.name)" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_K_' + k + '-tab'">
+                                                    <div v-for="image in spagcn.plots">
+                                                        <template v-if="image.includes('spagcn') && image.includes(sample.name) && (image.endsWith('k' + k) || image.endsWith('k' + k + '_refined'))">
+                                                            <h4 class="text-center" v-if="image.includes('refined')">Refined clusters</h4>
+                                                            <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                                                            <stdiff-rename-annotations-clusters v-if="annotations !== null" :annotation="annotations[sample.name][getAnnotation(sample.name, image)]" :sample-name="sample.name" :file-path="image" prefix="spagcn_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
+                                                        </template>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </template>
                                         </div>
 
                                     </div>
@@ -209,6 +222,7 @@ import Multiselect from '@vueform/multiselect';
             samples: Object,
             sddSpagcnUrl: String,
             sddSpagcnSvgUrl: String,
+            sddSpagcnRenameUrl: String,
             colorPalettes: Object,
         },
 
@@ -220,6 +234,7 @@ import Multiselect from '@vueform/multiselect';
 
                 processing: false,
                 processing_svg: false,
+                renaming: false,
 
                 textOutput: '',
 
@@ -242,12 +257,17 @@ import Multiselect from '@vueform/multiselect';
                 plots_visible: [],
 
                 svg_data: {},
+
+                annotations: null,
+                active_annotations: [],
+                annotations_renamed: false,
             }
         },
 
-        mounted() {
-            this.loadSVG();
-            console.log(this.project.project_parameters.annotation_variables);
+        async mounted() {
+            await this.loadAnnotations();
+            await this.loadSVG();
+            //console.log(this.project.project_parameters.annotation_variables);
         },
 
         watch: {
@@ -273,6 +293,55 @@ import Multiselect from '@vueform/multiselect';
         },
 
         methods: {
+
+            async loadAnnotations() {
+                this.annotations =  await this.$getProjectSTdiffAnnotationsBySample(this.project.id, 'spagcn');
+                console.log(this.annotations);
+            },
+
+            getAnnotation(sampleName, reference) {
+
+                let items = this.annotations[sampleName];
+
+                for(let key in items) {
+                    if(reference.includes(key)) {
+
+                        let alreadyAdded = this.active_annotations.filter(item => item.sampleName === sampleName && item.annotation === key);
+                        if(!alreadyAdded.length) {
+                            this.active_annotations.push({sampleName: sampleName, annotation: key, changed: false});
+                        }
+
+                        return key;
+                    }
+                }
+
+                return null;
+            },
+
+            annotationChanges(sampleName, annotation, changed) {
+
+                this.annotations[sampleName][annotation.originalName]['newName'] = annotation.newName;
+                this.annotations[sampleName][annotation.originalName]['changed'] = changed;
+
+                // this.annotationChangesDetected = false;
+                this.active_annotations.forEach(aa => {
+                    if(aa.sampleName === sampleName && aa.annotation === annotation.originalName) {
+                        aa.changed = changed
+                    };
+                });
+
+                this.annotations_renamed = this.active_annotations.some(aa => aa.changed);
+            },
+
+            showSample(sampleName) {
+                for(let plot in this.spagcn.plots) {
+                    if(this.spagcn.plots[plot].includes(sampleName)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            },
 
             SDD_SpaGCN() {
                 this.processing = true;
@@ -302,6 +371,43 @@ import Multiselect from '@vueform/multiselect';
                 this.$enableWizardStep('differential-expression');
                 this.$enableWizardStep('spatial-gradients');
             },
+
+
+            SpaGCNRename() {
+
+                this.renaming = true;
+
+                let modified = [];
+                this.active_annotations.map(item => {
+                    if(item.changed) {
+                        modified.push({
+                            sampleName: item.sampleName,
+                            originalName: item.annotation,
+                            newName: this.annotations[item.sampleName][item.annotation]['newName'],
+                            clusters: this.annotations[item.sampleName][item.annotation]['clusters']
+                        });
+                    }
+                });
+
+                let parameters = {
+                    annotations: modified,
+                };
+
+                axios.post(this.sddSpagcnRenameUrl, parameters)
+                    .then((response) => {
+                    })
+                    .catch((error) => {
+                        this.renaming = false;
+                        console.log(error);
+                    })
+
+            },
+
+            async SpaGCNRenameCompleted() {
+                await this.loadAnnotations();
+                this.renaming = false;
+            },
+
 
             generatePlots() {
                 this.processing = true;
@@ -337,7 +443,7 @@ import Multiselect from '@vueform/multiselect';
                 this.loadSVG();
             },
 
-            loadSVG() {
+            async loadSVG() {
 
                 if(!('spagcn_svg' in this.project.project_parameters)) return;
 

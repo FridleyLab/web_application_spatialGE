@@ -2308,12 +2308,14 @@ $export_files
     public function SpaGCN($parameters)
     {
 
+        $parameters['_samples'] = $this->getSampleList(NULL);
+
         $workingDir = $this->workingDir();
 
         //Create simple STlist as input for SpaGCN
         $scriptName = 'SpaGCN_1_simpleSTlist.R';
         $script = $workingDir . $scriptName;
-        $scriptContents = $this->getSpaGCN_SimpleSTlistScript();
+        $scriptContents = $this->getSpaGCN_SimpleSTlistScript($parameters);
         Storage::put($script, $scriptContents);
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
@@ -2386,6 +2388,9 @@ $export_files
             ProjectProcessFiles::updateOrCreate(['process' => 'SpaGCN', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 
+
+        $this->stdiff_top_deg('spagcn_top_deg.csv');
+
         $this->current_step = 8;
         $this->save();
 
@@ -2395,148 +2400,45 @@ $export_files
     }
 
 
-
-    public function getSpaGCN_SimpleSTlistScript(): string
+    private function getSpaGCN_SimpleSTlistScript($parameters)
     {
-        //$samples = 'names(normalized_stlist@tr_counts)';
-        $samples = $this->getSampleList(NULL);
 
-        $script = "
-setwd('/spatialGE')
-# Load the package
-library('spatialGE')
+        $script = Storage::get("/common/templates/SpaGCN1_simple_stlist.R");
 
-# Load normalized STList
-{$this->_loadStList('normalized_stlist')}
+        //If there's no stclust_stlist use the normalized_stlist
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
+        $parameters['_stlist'] = $_stlist;
 
-for(i in $samples){
-    tr_counts = as.matrix(normalized_stlist@tr_counts[[i]])
-    spatial_meta = normalized_stlist@spatial_meta[[i]][, 1:3]
-    col_names = colnames(normalized_stlist@tr_counts[[i]])
-    gene_names = rownames(normalized_stlist@tr_counts[[i]])
-    sample_name = i
-    save('tr_counts', 'spatial_meta', 'col_names', 'gene_names', 'sample_name',
-         file=paste0(i, '_simplestlist_example.RData'))
-  }
+        $params = ['_stlist', '_samples'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
 
-";
         return $script;
     }
 
 
-
-    public function getSpaGCN_ImportClassifications($parameters): string
+    private function getSpaGCN_ImportClassifications($parameters)
     {
 
-        $samples = $this->getSampleList(NULL, true);
-        $sample_list = $this->getSampleList(NULL);
-        $samples = $this->samples()->whereIn('name', $samples)->get();
+        $script = Storage::get("/common/templates/SpaGCN1_import_classifications.R");
 
-        $col_pal = $parameters['col_pal'];
+        //If there's no stclust_stlist use the normalized_stlist
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
 
-        $stlist = 'stclust_stlist';
-        if (!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'normalized_stlist';
+        $parameters['_stlist'] = $_stlist;
 
-        $samples_with_tissue = '';
-        $samples_with_tissue_image_files = 'tissues <- c(';
-        foreach (/*$this->samples*/ $samples as $sample) {
-            if ($sample->has_image) {
-                if (strlen($samples_with_tissue)) {
-                    $samples_with_tissue .= ',';
-                    $samples_with_tissue_image_files .= ',';
-                }
-                $samples_with_tissue .= "'" . $sample->name . "'";
-                $samples_with_tissue_image_files .= $sample->name . "='" . $sample->image_file->filename . "'";
-            }
+        $params = ['_stlist', '_samples'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
         }
-        $samples_with_tissue_image_files .= ")";
 
-        $script = "
-setwd('/spatialGE')
-# Load the package
-library('spatialGE')
-library('magrittr')
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
 
-# Load normalized STList
-{$this->_loadStList($stlist)}
-
-spagcn_preds = './'
-spagcn_preds = list.files(spagcn_preds, pattern='spagcn_predicted_domains_sample_', full.names=T)
-
-stclust_stlist = $stlist
-new_cols = c()
-for(i in $sample_list){
-  spagcn_tmp = read.csv(grep(paste0(i, '.csv'), spagcn_preds, value=T))
-  new_cols = unique(c(new_cols, colnames(spagcn_tmp)[-1]))
-  # Convert doain classifications to factor
-  spagcn_tmp[, -1] = lapply(spagcn_tmp[, -1], as.factor)
-
-  # Check for repeated columns in STlist
-  duplicated_cols = colnames(stclust_stlist@spatial_meta[[i]])[ colnames(stclust_stlist@spatial_meta[[i]]) %in% colnames(spagcn_tmp[, -1]) ]
-  if(length(duplicated_cols) > 0){
-    stclust_stlist@spatial_meta[[i]] = stclust_stlist@spatial_meta[[i]][, !(colnames(stclust_stlist@spatial_meta[[i]]) %in% duplicated_cols) ]
-  }
-
-  stclust_stlist@spatial_meta[[i]] = stclust_stlist@spatial_meta[[i]] %>%
-    dplyr::left_join(., spagcn_tmp, by='libname')
-}
-
-# Annotation names for dropdown selection
-annot_variables = unique(unlist(lapply(stclust_stlist@spatial_meta, function(i){ var_cols=grep('spagcn_|stclust_|insitutype_cell_types', colnames(i), value=T); return(var_cols) })))
-write.table(annot_variables, 'stdiff_annotation_variables.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
-
-# Save tables with spot/cell domain assigments (used in SpaGCN-SVG analysis to avoid reading STlist again)
-for(i in names(stclust_stlist@spatial_meta)){
-  df_tmp = stclust_stlist@spatial_meta[[i]] %>% dplyr::select(1, grep('spagcn_|stclust_|insitutype_cell_types', colnames(stclust_stlist@spatial_meta[[i]]), value=T))
-  write.csv(df_tmp, paste0(i, '_domain_annotations_deg_svg.csv'), row.names=F, quote=F)
-  rm(df_tmp) # Clean env
-}
-
-# Save unique lables for each annotation (to display in dropdowns)
-cluster_values = tibble::tibble()
-for(i in names(stclust_stlist@spatial_meta)){
-  for(cl in grep('spagcn_|stclust_|insitutype_cell_types', colnames(stclust_stlist@spatial_meta[[i]]), value=T)){
-    cluster_values = dplyr::bind_rows(cluster_values,
-                                        tibble::tibble(cluster=as.vector(unique(stclust_stlist@spatial_meta[[i]][[cl]]))) %>%
-                                        tibble::add_column(annotation=as.vector(cl)))
-                                        #tibble::tibble(cluster=as.character(unique(stclust_stlist@spatial_meta[[i]][[cl]]))) %>%
-                                        #tibble::add_column(annotation=as.character(cl)))
-  }}
-cluster_values = dplyr::distinct(cluster_values) %>%
-  dplyr::select(annotation, cluster)
-write.table(cluster_values, 'stdiff_annotation_variables_clusters.csv', quote=F, row.names=F, col.names=F, sep=',')
-
-{$this->_saveStList('stclust_stlist')}
-
-ps = STplot(stclust_stlist, plot_meta = annot_variables, ptsize = 2, txsize=14, color_pal = '$col_pal')
-
-n_plots = names(ps)
-write.table(n_plots, 'spagcn_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
-library('svglite')
-for(p in n_plots) {
-    #print(p)
-    ggpubr::ggexport(filename = paste(p,'.png', sep=''), ps[[p]], width = 800, height = 600)
-    ggpubr::ggexport(filename = paste(p,'.pdf', sep=''), ps[[p]], width = 8, height = 6)
-    svglite(paste(p,'.svg', sep=''), width = 8, height = 6)
-    print(ps[[p]])
-    dev.off()
-
-    #generate side-by-side for samples with tissue image
-    $samples_with_tissue_image_files
-    for(sample in list($samples_with_tissue)) {
-        if(grepl(sample, p, fixed=TRUE)) {
-            tp = cowplot::ggdraw() + cowplot::draw_image(paste0(sample,'/spatial/', tissues[sample]))
-            ptp = ggpubr::ggarrange(ps[[p]], tp, ncol=2)
-            {$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
-        }
-    }
-}
-
-";
         return $script;
     }
-
-
 
 
     public function SpaGCN_SVG($parameters)
@@ -2613,6 +2515,65 @@ for(p in n_plots) {
         ProjectProcessFiles::updateOrCreate(['process' => 'SpaGCN_SVG', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
+    }
+
+
+
+    public function SpaGCNRename($parameters)
+    {
+        $workingDir = $this->workingDir();
+
+        $result = $this->saveSTdiffAnnotationChanges($parameters['annotations']);
+
+        $parameters['_samples'] = "c('" . join("','", $result['samples']) . "')";
+        $parameters['_annotations'] = "c('" . join("','", $result['annotations']) . "')";
+
+
+        $scriptName = 'SpaGCNRename.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getSpaGCNRenameScript($parameters);
+        Storage::put($script, $scriptContents);
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+
+        foreach($parameters['annotations'] as $change) {
+            $file_extensions = ['svg', 'pdf', 'png'];
+            $plot_file = $change['sampleName'] . '_' . $change['originalName'];
+            foreach ($file_extensions as $file_extension) {
+                $fileName = $plot_file . '.' . $file_extension;
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                }
+            }
+        }
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function getSpaGCNRenameScript($parameters)
+    {
+
+        $script = Storage::get("/common/templates/SpaGCN1_rename.R");
+
+        //If there's no stclust_stlist use the normalized_stlist
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
+        $parameters['_stlist'] = $_stlist;
+
+        $params = ['_stlist', '_samples', '_annotations'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
+
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+
+        return $script;
     }
 
 

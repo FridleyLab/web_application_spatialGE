@@ -104,6 +104,7 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects/{project}/sdd/stclust-rename', [ProjectController::class, 'sdd_stclust_rename'])->name('sdd-stclust-rename')->middleware('project');
     Route::post('/projects/{project}/sdd/spagcn', [ProjectController::class, 'sdd_spagcn'])->name('sdd-spagcn')->middleware('project');
     Route::post('/projects/{project}/sdd/spagcn-svg', [ProjectController::class, 'sdd_spagcn_svg'])->name('sdd-spagcn-svg')->middleware('project');
+    Route::post('/projects/{project}/sdd/spagcn-rename', [ProjectController::class, 'sdd_spagcn_rename'])->name('sdd-spagcn-rename')->middleware('project');
 
     Route::get('/projects/{project}/differential-expression',[ProjectController::class, 'differential_expression'])->name('differential-expression')->middleware('project');
     Route::post('/projects/{project}/differential-expression/non-spatial', [ProjectController::class, 'differential_expression_non_spatial'])->name('differential-expression-non-spatial')->middleware('project');

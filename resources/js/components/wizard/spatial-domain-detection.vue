@@ -32,7 +32,7 @@
                                 <sdd-stclust :project="project" :samples="samples" :sdd-stclust-url="sddStclustUrl" :sdd-stclust-rename-url="sddStclustRenameUrl" :color-palettes="colorPalettes"></sdd-stclust>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-spagcn" role="tabpanel" aria-labelledby="sdd-spagcn-tab">
-                                <sdd-spagcn :project="project" :samples="samples" :sdd-spagcn-url="sddSpagcnUrl" :sdd-spagcn-svg-url="sddSpagcnSvgUrl" :color-palettes="colorPalettes"></sdd-spagcn>
+                                <sdd-spagcn :project="project" :samples="samples" :sdd-spagcn-url="sddSpagcnUrl" :sdd-spagcn-svg-url="sddSpagcnSvgUrl" :sdd-spagcn-rename-url="sddSpagcnRenameUrl" :color-palettes="colorPalettes"></sdd-spagcn>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-milwrm" role="tabpanel" aria-labelledby="sdd-milwrm-tab">
                                 Coming soon
@@ -59,6 +59,7 @@
             sddStclustRenameUrl: String,
             sddSpagcnUrl: String,
             sddSpagcnSvgUrl: String,
+            sddSpagcnRenameUrl: String,
         },
 
         mounted() {
