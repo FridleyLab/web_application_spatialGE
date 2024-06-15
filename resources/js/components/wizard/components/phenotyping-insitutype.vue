@@ -90,7 +90,7 @@
                 </div>
 
 
-                <div class="mt-4" v-if="!processing && !processing2 && !renaming && annotations !== null">
+                <div class="mt-4" v-if="('InSituType2' in this.project.project_parameters) && !processing && !processing2 && !renaming && annotations !== null">
 
                     <ul class="nav nav-tabs" id="inSituTypePlots" role="tablist">
                         <li class="nav-item" role="presentation">
