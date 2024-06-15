@@ -164,7 +164,8 @@ if(file.exists('stdiff_annotation_variables_clusters.csv')){
 write.table(annot_variables, 'stdiff_annotation_variables_clusters.csv', quote=F, row.names=F, col.names=F, sep=',')
 
 ###*******#####save new STlist as RData
-save(insitutype_stlist, file='insitutype_stlist.RData')
+stclust_stlist = insitutype_stlist
+save(stclust_stlist, file='stclust_stlist.RData')
 
 # PCA/UMAP
 start_t = Sys.time()
