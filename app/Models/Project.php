@@ -153,16 +153,25 @@ class Project extends Model
         $data = $this->getSTdiffData();
         if (count($data)) {
 
-            $_annotations = array_column($data, 2);
-            $_annotations = array_unique($_annotations);
+            //$_annotations = array_column($data, 1);
+            //$_annotations = array_unique($_annotations);
             // $_annotations = array_values(array_unique($_annotations));
+
+            //Log::info(json_encode($_annotations));
+
+            $tmp_annot = [];
 
             $annotations = [];
             $annotations_clusters = [];
-            foreach ($_annotations as $index_annotation => $annotation) {
-                if (strlen(trim($annotation))) {
+            foreach ($data as $index_annotation => $_row) {
+
+                $annotation = $_row[1];
+
+                if (strlen(trim($annotation)) && (!in_array($_row[1], $tmp_annot) || !in_array($_row[2], $tmp_annot))) {
+
                     $label = '';
                     $parts = explode('_', $annotation);
+
                     if (sizeof($parts) > 2 && $parts[0] === 'stclust') {
 
                         $label .= 'STclust; ';
@@ -184,24 +193,63 @@ class Project extends Model
                         if (sizeof($parts) > 2 && $parts[2] === 'refined')
                             $label .= '; Refined clusters';
                     }
+                    elseif ($parts[0] === 'insitutype') {
+                        $label .= 'InSituType';
+                    }
 
-                    if ($label === '') {
+
+                    if(!in_array($_row[1], $tmp_annot)) {
+                        array_push($tmp_annot, $_row[1]);
+
+
+
+                        /*if ($label === '') {
                         $parts = explode('_', $data[$index_annotation][1]);
                         if(count($parts) > 1) $label = $parts[0] . '; ';
                         $label .= $annotation;
+                        }*/
+
+                        $annotations[] = ['label' => $label, 'value' => $annotation];
+
+                        //Obtain clusters for this annotation
+                        $_clusters = array_filter($data, function ($row) use($annotation, $_row) {
+                            return count($row) > 2 && $row[0] === $_row[0] && $row[1] === $annotation;
+                        });
+                        $clusters = array_column($_clusters, 3);
+                        $clusters = array_values(array_unique($clusters));
+                        foreach($clusters as $cluster) {
+                            $annotations_clusters[] = ['annotation' => $annotation, 'cluster' => $cluster];
+                        }
+
+
                     }
 
-                    $annotations[] = ['label' => $label, 'value' => $annotation];
 
-                    //Obtain clusters for this annotation
-                    $_clusters = array_filter($data, function ($row) use($annotation) {
-                        return count($row) > 2 && $row[2] === $annotation;
-                    });
-                    $clusters = array_column($_clusters, 4);
-                    $clusters = array_values(array_unique($clusters));
-                    foreach($clusters as $cluster) {
-                        $annotations_clusters[] = ['annotation' => $annotation, 'cluster' => $cluster];
+                    if(!in_array($_row[2], $tmp_annot)) {
+
+                        $parts = explode('_', $annotation);
+
+                        array_push($tmp_annot, $_row[2]);
+
+                        //If the annotation was manually changed by the user, add a second option to the list
+                        if($data[$index_annotation][1] !== $data[$index_annotation][2]) {
+                            $annotations[] = ['label' => $label . ' - ' . $_row[2], 'value' => $_row[2]];
+                        }
+
+
+                        //Obtain clusters for this annotation
+                        $_clusters = array_filter($data, function ($row) use($annotation, $_row) {
+                            return count($row) > 3 && $row[0] === $_row[0] && $row[1] === $annotation;
+                        });
+                        $clusters = array_column($_clusters, 4);
+                        $clusters = array_values(array_unique($clusters));
+                        foreach($clusters as $cluster) {
+                            $annotations_clusters[] = ['annotation' => $_row[2], 'cluster' => $cluster];
+                        }
+
                     }
+
+
 
                 }
             }

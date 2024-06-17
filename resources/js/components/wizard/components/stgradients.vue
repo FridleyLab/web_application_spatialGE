@@ -350,7 +350,7 @@ import 'vue3-easy-data-table/dist/style.css';
 
                 data.samples_array = data.samples;
                 data.samples = data.samples.length !== this.samples.length ? "c('" + data.samples.join("','") + "')" : 'NULL';
-                data.exclude_string = data.exclude.length ? "c(" + data.exclude.join(",") + ")" : 'NULL';
+                data.exclude_string = data.exclude.length ? "c('" + data.exclude.join("','") + "')" : 'NULL';
 
                 this.processing = true;
 
