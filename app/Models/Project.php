@@ -110,7 +110,7 @@ class Project extends Model
 
     private function setSTdiffData($data) {
 
-        sort($data);
+        //sort($data);
 
         $fileName = $this->workingDir() . 'stdiff_annotation_variables_clusters.csv';
 
@@ -132,7 +132,7 @@ class Project extends Model
 
             $_data = Storage::read($fileName);
             $lines = explode("\n", $_data);
-            sort($lines);
+            //sort($lines);
 
             foreach($lines as $line) {
                 if(strlen(trim($line))) {
