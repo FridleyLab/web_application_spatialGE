@@ -25,9 +25,8 @@ stclust_stlist = STclust(x=STlist,
                          topgenes=user_topgenes,
                          deepSplit=user_deepsplit)
 
-# annot_variables used for differential expression and STgradient analyses
+# annot_variables used for differential expression and STdiff/STgradient analyses
 annot_variables = lapply(names(stclust_stlist@spatial_meta), function(i){
-  #var_cols=grep('spagcn_|stclust_|insitutype_cell_types', colnames(stclust_stlist@spatial_meta[[i]]), value=T)
   var_cols=colnames(stclust_stlist@spatial_meta[[i]])[-c(1:5)]
   df_tmp = tibble::tibble()
   for(v in var_cols){
@@ -35,15 +34,14 @@ annot_variables = lapply(names(stclust_stlist@spatial_meta), function(i){
     df_tmp = dplyr::bind_rows(df_tmp, tibble::tibble(V1=i, V2=v, V3=v, V4=cluster_values, V5=cluster_values))
   }
   return(df_tmp) })
-annot_variables = dplyr::bind_rows(annot_variables)
+annot_variables = dplyr::bind_rows(annot_variables) %>% dplyr::filter(stringr::str_detect(V2, '^stclust_spw'))
 
 # Check if annot_variables file already exists, then keep annotations from other methods but remove those from STclust
 if(file.exists('stdiff_annotation_variables_clusters.csv')){
   annot_variables_tmp = data.table::fread('stdiff_annotation_variables_clusters.csv', header=F)
-  annot_variables_tmp = annot_variables_tmp[annot_variables_tmp[[2]] != annot_variables_tmp[[3]], ]
+  annot_variables_tmp = annot_variables_tmp[!grepl('^stclust_spw', annot_variables_tmp[['V2']]), ]
   if(nrow(annot_variables_tmp) > 0){
-    annot_variables_tmp = annot_variables_tmp[!grepl('stclust_spw', annot_variables_tmp[[2]]), ]
-    annot_variables = rbind(annot_variables, annot_variables_tmp)
+    annot_variables = rbind(annot_variables_tmp, annot_variables)
   }
   rm(annot_variables_tmp) # Clean env
 }

@@ -48,10 +48,9 @@ annot_variables = dplyr::bind_rows(annot_variables)
 # Check if annot_variables file already exists, then keep annotations from other methods but remove those from SpaGCN that have been modified
 if(file.exists('stdiff_annotation_variables_clusters.csv')){
   annot_variables_tmp = data.table::fread('stdiff_annotation_variables_clusters.csv', header=F)
-  annot_variables_tmp = annot_variables_tmp[annot_variables_tmp[[2]] != annot_variables_tmp[[3]], ]
+  annot_variables_tmp = annot_variables_tmp[!grepl('^spagcn_k', annot_variables_tmp[['V2']]), ]
   if(nrow(annot_variables_tmp) > 0){
-    annot_variables_tmp = annot_variables_tmp[!grepl('spagcn_k', annot_variables_tmp[[2]]), ]
-    annot_variables = rbind(annot_variables, annot_variables_tmp)
+    annot_variables = rbind(annot_variables_tmp, annot_variables)
   }
   rm(annot_variables_tmp) # Clean env
 }

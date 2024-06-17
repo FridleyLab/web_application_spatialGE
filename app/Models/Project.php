@@ -328,8 +328,8 @@ class Project extends Model
 
                 $values = json_decode($task->payload);
 
-                Log::info($jobName);
-                Log::info(json_encode($values));
+                // Log::info($jobName);
+                // Log::info(json_encode($values));
 
                 if($values !== null && property_exists($values, 'parameters')) {
 

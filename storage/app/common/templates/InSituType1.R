@@ -123,7 +123,6 @@ sup_df = sup_df %>% tibble::rownames_to_column('complete_cell_id')
 # Add cell type labels to STlist
 insitutype_stlist = STlist
 for(i in names(insitutype_stlist@spatial_meta)){
-
   if(any(colnames(insitutype_stlist@spatial_meta[[i]]) == 'insitutype_cell_types')){
     insitutype_stlist@spatial_meta[[i]] = insitutype_stlist@spatial_meta[[i]][, !grepl('insitutype_cell_types', colnames(insitutype_stlist@spatial_meta[[i]]), fixed=T)]
   }
@@ -138,7 +137,6 @@ for(i in names(insitutype_stlist@spatial_meta)){
 
 # annot_variables used for Differential Expression analyses and STgradient analyses
 annot_variables = lapply(names(insitutype_stlist@spatial_meta), function(i){
-  #var_cols=grep('spagcn_|stclust_|insitutype_cell_types', colnames(stclust_stlist@spatial_meta[[i]]), value=T)
   var_cols=colnames(insitutype_stlist@spatial_meta[[i]])[-c(1:5)]
   df_tmp = tibble::tibble()
   for(v in var_cols){
@@ -146,18 +144,14 @@ annot_variables = lapply(names(insitutype_stlist@spatial_meta), function(i){
     df_tmp = dplyr::bind_rows(df_tmp, tibble::tibble(V1=i, V2=v, V3=v, V4=cluster_values, V5=cluster_values))
   }
   return(df_tmp) })
-annot_variables = dplyr::bind_rows(annot_variables)
+annot_variables = dplyr::bind_rows(annot_variables) %>% dplyr::filter(V2 == 'insitutype_cell_types')
 
 # Check if annot_variables file already exists, to avoid rewriting previous manual annotations
 if(file.exists('stdiff_annotation_variables_clusters.csv')){
   annot_variables_tmp = data.table::fread('stdiff_annotation_variables_clusters.csv', header=F)
-  annot_variables_tmp = annot_variables_tmp[annot_variables_tmp[[2]] != annot_variables_tmp[[3]], ]
+  annot_variables_tmp = annot_variables_tmp[!grepl('insitutype_cell_types', annot_variables_tmp[['V2']]), ]
   if(nrow(annot_variables_tmp) > 0){
-    # if(any(annot_variables_tmp[[3]] %in% annot_variables[[2]])){
-    #   annot_variables = annot_variables[!(annot_variables[[2]] %in% unique(annot_variables_tmp[[3]])), ]
-    # }
-    annot_variables_tmp = annot_variables_tmp[annot_variables_tmp[[2]] == 'insitutype_cell_types', ]
-    annot_variables = rbind(annot_variables, annot_variables_tmp)
+    annot_variables = rbind(annot_variables_tmp, annot_variables)
   }
   rm(annot_variables_tmp) # Clean env
 }
@@ -223,3 +217,4 @@ save(umap_obj, file='insitutype_umap_object.RData')
 
 apocalypse_t = difftime(Sys.time(), genesis_t, units='min')
 cat(paste0('Insitutype Part 1 completed in ', round(apocalypse_t, 2), ' min.\n'))
+
