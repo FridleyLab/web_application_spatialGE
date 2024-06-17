@@ -288,7 +288,7 @@ import 'vue3-easy-data-table/dist/style.css';
                     topgenes: this.params.n_genes,
                     test_type: this.params.test_type,
                     pairwise: this.params.pairwise ? 'T' : 'F',
-                    clusters: this.params.clusters[0] === 'NULL' ? 'NULL' : "c(" + this.params.clusters.join(",") + ")"
+                    clusters: this.params.clusters[0] === 'NULL' ? 'NULL' : "c('" + this.params.clusters.join("','") + "')"
                 };
 
                 axios.post(this.nonSpatialUrl, parameters)
