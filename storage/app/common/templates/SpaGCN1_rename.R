@@ -18,18 +18,15 @@ load("#{_stlist}#.RData")
 stclust_stlist = #{_stlist}#
 
 # Read master annotation file
-master_ann_orig = 'stdiff_annotation_variables_clusters.csv'
-master_ann_orig = data.table::fread(master_ann_orig, header=F)
-mod_annots = which(master_ann_orig[[1]] %in% renamed_samples & master_ann_orig[[2]] %in% renamed_ann & master_ann_orig[[2]] != master_ann_orig[[3]])
-master_ann = master_ann_orig[mod_annots, ]
+master_ann = 'stdiff_annotation_variables_clusters.csv'
+#master_ann = '../../../results_and_intermediate_files/stclust/cosmx/stdiff_annotation_variables_clusters.csv'
+master_ann = data.table::fread(master_ann, header=F)
+master_ann = master_ann[ master_ann[[1]] %in% renamed_samples & master_ann[[2]] %in% renamed_ann & master_ann[[2]] != master_ann[[3]], ]
 
 # ERROR IF COULDNT DETECT CHANGES IN ANNOTATION FILE
-if(nrow(master_ann_orig) == 0){
+if(nrow(master_ann) == 0){
   stop('No new annotations were found...')
 }
-
-# Add original cluster to user annotations
-master_ann[['V5']] = paste0('c', master_ann[['V4']], '_', master_ann[['V5']])
 
 # Add new annotations to STlist
 for(i in unique(master_ann[[1]])){

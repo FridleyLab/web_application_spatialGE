@@ -2667,6 +2667,33 @@ $export_files
     private function getSTDiffNonSpatialScript($parameters)
     {
 
+        $params = [
+            '_stlist' => 'stclust_stlist',
+            'samples' => $parameters['samples'],
+            'topgenes' => $parameters['topgenes'],
+            'annot' => $parameters['annotation'],
+            'test_type' => $parameters['test_type'],
+            'pairwise' => $parameters['pairwise'],
+            'clusters' => $parameters['clusters']
+        ];
+
+
+
+        $script = Storage::get("/common/templates/STdiff_nonSpatial.R");
+
+        foreach ($params as $param => $value) {
+            $script = $this->replaceRscriptParameter($param, $value, $script);
+        }
+
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+
+        return $script;
+    }
+
+
+    private function DELETE_getSTDiffNonSpatialScript($parameters)
+    {
+
         $samples = $parameters['samples'];
         $annotation = $parameters['annotation'];
         $topgenes = $parameters['topgenes'];
@@ -3063,6 +3090,35 @@ lapply(names(sp_enrichment), function(i){
 
 
     private function getSTGradientsScript($parameters)
+    {
+
+        $params = [
+            '_stlist' => 'stclust_stlist',
+            'samples' => $parameters['samples'],
+            'topgenes' => $parameters['topgenes'],
+            'annot' => $parameters['annot'],
+            'ref' => $parameters['ref'],
+            'exclude_string' => $parameters['exclude_string'],
+            'out_rm' => $parameters['out_rm'] ? 'T' : 'F',
+            'limit' => is_numeric($parameters['limit']) && floatval($parameters['limit']) > 0 ? $parameters['limit'] : 'NULL',
+            'distsumm' => $parameters['distsumm'],
+            'min_nb' => is_numeric($parameters['min_nb']) && intval($parameters['min_nb']) >= 0 ? intval($parameters['min_nb']) : '0',
+            'robust' => $parameters['robust'] ? 'T' : 'F'
+        ];
+
+
+
+        $script = Storage::get("/common/templates/STgradients.R");
+
+        foreach ($params as $param => $value) {
+            $script = $this->replaceRscriptParameter($param, $value, $script);
+        }
+
+        return $script;
+    }
+
+
+    private function DELETE_getSTGradientsScript($parameters)
     {
 
         $samples = $parameters['samples'];

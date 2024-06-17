@@ -261,7 +261,7 @@ import 'vue3-easy-data-table/dist/style.css';
 
                 params: {
 
-                    samples: this.samples.map(sample => sample.name),
+                    samples: [], // this.samples.map(sample => sample.name),
                     samples_array: [],
                     topgenes: 3000,
                     annot: '',
