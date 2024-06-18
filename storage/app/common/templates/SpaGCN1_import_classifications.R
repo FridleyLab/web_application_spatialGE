@@ -43,7 +43,7 @@ annot_variables = lapply(names(stclust_stlist@spatial_meta), function(i){
     df_tmp = dplyr::bind_rows(df_tmp, tibble::tibble(V1=i, V2=v, V3=v, V4=cluster_values, V5=cluster_values))
   }
   return(df_tmp) })
-annot_variables = dplyr::bind_rows(annot_variables)
+annot_variables = dplyr::bind_rows(annot_variables) %>% dplyr::filter(stringr::str_detect(V2, '^spagcn_k'))
 
 # Check if annot_variables file already exists, then keep annotations from other methods but remove those from SpaGCN that have been modified
 if(file.exists('stdiff_annotation_variables_clusters.csv')){
