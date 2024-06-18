@@ -2667,7 +2667,7 @@ $export_files
             if (Storage::fileExists($workingDir . $file)) {
 
                 if (explode('.', $file)[1] === 'csv')
-                    $this->csv2json($workingDir . $file, 2, $column_names);
+                    $this->csv2json($workingDir . $file, 1, $column_names);
 
                 $file_public = $workingDirPublic . $file;
                 $file_to_move = $workingDir . $file;
