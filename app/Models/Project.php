@@ -2657,8 +2657,9 @@ $export_files
         ];
 
 
-        $files = ['stdiff_ns_results.xlsx'];
+        $files = [];
         foreach ($parameters['samples_array'] as $sample) {
+            $files[] = 'stdiff_ns_results_' . $sample . '.xlsx';
             $files[] = 'stdiff_ns_' . $sample . '.csv';
             $files[] = 'stdiff_ns_' . $sample . '.json';
         }
@@ -2685,8 +2686,7 @@ $export_files
         $vps = [];
         if (Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            foreach (preg_split("/((\r?\n)|(\r\n?))/", $data) as $_plot) {
-                $plot = 'stdiff_ns_vp_' . $_plot;
+            foreach (explode(',', $data) as $plot) {
                 $vps[] = $this->workingDirPublicURL() . $plot;
                 $file_extensions = ['svg', 'pdf', 'png'];
                 foreach ($file_extensions as $file_extension) {

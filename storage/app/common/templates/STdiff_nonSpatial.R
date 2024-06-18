@@ -48,6 +48,8 @@ for(i in samples_test){
 
       rm(master_ann_tmp, annot_tmp)
     }
+  } else{
+    new_annot_test = c(new_annot_test, annot_test)
   }
 }
 
@@ -55,6 +57,7 @@ if(length(samples_test_tmp) > 0){
   samples_test = samples_test_tmp
 }
 
+file_list <- list()
 for(i in new_annot_test){
   for(j in samples_test){
     if(i %in% colnames(stclust_stlist@spatial_meta[[j]])){
@@ -70,24 +73,27 @@ for(i in new_annot_test){
 
       ### Save non-spatial tests
       # Get workbook with results (samples in spreadsheets)
-      openxlsx::write.xlsx(de_genes_results, file=paste0('./stdiff_ns_results', i, '.xlsx'))
+      openxlsx::write.xlsx(de_genes_results, file=paste0('./stdiff_ns_results_', j, '.xlsx'))
 
       # Each sample as a CSV
       lapply(names(de_genes_results), function(i){
         write.csv(de_genes_results[[i]], paste0('./stdiff_ns_', i, '.csv'), row.names=F, quote=F)
       })
 
-      # Create volcano plots
-      ps = STdiff_volcano(de_genes_results, samples=samples_test, clusters=clusters, pval_thr=0.05, color_pal=NULL)
-      write.table(names(ps), 'stdiff_ns_volcano_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
+      # Create volcano plots
+      ps = STdiff_volcano(de_genes_results, samples=j, clusters=clusters, pval_thr=0.05, color_pal=NULL)
 
       # Save plots to file
       lapply(names(ps), function(s){
-        saveplot(paste0('./stdiff_ns_vp_', s, '_', i, '.pdf'), ps[[paste0(s, '_', i)]])
+        file_name <- paste0('stdiff_ns_vp_', s, '_', i)
+        saveplot(file_name, ps[[s]])
+        file_list <<- c(file_list, list(file_name))
       })
 
     }
   }
 }
+
+write.table(file_list, 'stdiff_ns_volcano_plots.csv', sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 

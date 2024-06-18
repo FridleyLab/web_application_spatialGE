@@ -112,9 +112,6 @@
                     <li><strong>Adjusted p-value:</strong> The False Discovery Rate (FDR) adjusted p-value. These adjusted p-values can be used to decide whether a gene is differentially expressed.</li>
                 </ul>
             </div>
-
-
-            <a :href="stdiff_ns.base_url + 'stdiff_ns_results.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Excel results - All samples</a>
         </div>
 
 
@@ -143,6 +140,11 @@
 
                                 <div class="tab-pane fade show active" :id="'stdiff_ns_' + sample + 'table'" role="tabpanel" :aria-labelledby="'stdiff_ns_' + sample + 'table' + '-tab'">
                                     <div class="m-4" v-if="(sample in results) && results[sample].loaded">
+
+
+                                        <div>
+                                            <a :href="stdiff_ns.base_url + 'stdiff_ns_results_' + sample + '.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Excel results - All samples</a>
+                                        </div>
 
                                         <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
 <!--                                        <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"-->
