@@ -7,6 +7,7 @@
 
 # Load the package
 library('spatialGE')
+library('SeuratObject')
 library('magrittr')
 
 
@@ -23,8 +24,12 @@ test_type = '#{test_type}#'
 pairwise = #{pairwise}#
 clusters = #{clusters}#
 
+if(is.null(samples_test)){
+  samples_test = names(stclust_stlist@spatial_meta)
+}
 
 new_annot_test = c()
+samples_test_tmp = c()
 for(i in samples_test){
   if(!(annot_test %in% colnames(stclust_stlist@spatial_meta[[i]]))){
     master_ann = 'stdiff_annotation_variables_clusters.csv'
@@ -39,10 +44,15 @@ for(i in samples_test){
         dplyr::left_join(., master_ann_tmp, by=j)
 
       new_annot_test = c(new_annot_test, annot_tmp)
+      samples_test_tmp = c(samples_test_tmp, i)
 
       rm(master_ann_tmp, annot_tmp)
     }
   }
+}
+
+if(length(samples_test_tmp) > 0){
+  samples_test = samples_test_tmp
 }
 
 for(i in new_annot_test){

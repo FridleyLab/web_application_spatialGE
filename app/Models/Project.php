@@ -3109,8 +3109,9 @@ lapply(names(sp_enrichment), function(i){
             'avg_pval_comment' => 'Comment'
         ];
 
-        $files = ['stgradients_results.xlsx'];
+        $files = [];
         foreach ($parameters['samples_array'] as $sample) {
+            $files[] = 'stgradients_results_' . $sample . '.xlsx';
             $files[] = 'stgradients_' . $sample . '.csv';
             $files[] = 'stgradients_' . $sample . '.json';
         }

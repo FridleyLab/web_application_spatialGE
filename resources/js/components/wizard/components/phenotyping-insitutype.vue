@@ -351,9 +351,10 @@ import Multiselect from '@vueform/multiselect';
                     })
             },
 
-            processCompleted2() {
+            async processCompleted2() {
                 //console.log(this.project.project_parameters);
                 this.inSituType2 = ('InSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.InSituType2) : {};
+                await this.loadAnnotations();
                 this.processing2 = false;
             },
 

@@ -5,6 +5,7 @@
 
 # Load the package
 library('spatialGE')
+library('SeuratObject')
 library('magrittr')
 
 
@@ -24,7 +25,9 @@ distsumm = '#{distsumm}#'
 min_nb = #{min_nb}#
 robust = #{robust}#
 
-
+if(is.null(samples_test)){
+  samples_test = names(stclust_stlist@spatial_meta)
+}
 
 new_annot_test = c()
 for(i in samples_test){
@@ -71,7 +74,7 @@ for(i in new_annot_test){
 
       ### Save non-spatial tests
       # Get workbook with results (samples in spreadsheets)
-      openxlsx::write.xlsx(grad_res, file=paste0('./stgradients_results_', i, '.xlsx'))
+      openxlsx::write.xlsx(grad_res, file=paste0('./stgradients_results_', j, '.xlsx'))
 
       # Each sample as a CSV
       lapply(names(grad_res), function(i){

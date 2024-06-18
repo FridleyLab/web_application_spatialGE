@@ -174,7 +174,7 @@
                 </ul>
             </div>
 
-            <a :href="stgradients.base_url + 'stgradients_results.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Download results (Excel)</a>
+            <!-- <a :href="stgradients.base_url + 'stgradients_results.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Download results (Excel)</a> -->
         </div>
 
 
@@ -193,6 +193,7 @@
                     <div v-for="(sample, index) in stgradients.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
                         <div class="m-4">
 
+                            <a :href="stgradients.base_url + 'stgradients_results_' + sample + '.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Download results (Excel)</a>
 
                             <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
 

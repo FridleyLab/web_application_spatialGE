@@ -369,9 +369,10 @@ import Multiselect from '@vueform/multiselect';
                     })
             },
 
-            processCompleted() {
+            async processCompleted() {
                 //console.log(this.project.project_parameters);
                 this.stclust = ('stclust' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
+                await this.loadAnnotations();
                 this.processing = false;
                 this.$enableWizardStep('differential-expression');
                 this.$enableWizardStep('spatial-gradients');
