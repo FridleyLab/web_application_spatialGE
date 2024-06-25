@@ -297,6 +297,7 @@ import Multiselect from '@vueform/multiselect';
                     {value: 'CellMarker2.0_Mouse_Brain__Nov162023', label: 'CellMarker signatures (v2.0, Mouse-Brain)'},
                     {value: 'celltype_markers_25perc_200toplogFC_blueprint_Nov142023', label: 'BluePrint signatures (200 top genes, highest logFC)'},
                     {value: 'CellMarker2.0_Mouse_Bone__Nov162023_Curated_Feb262024', label: 'CellMarker signatures (v2.0, Mouse-Bone - curated)'},
+                    {value: 'cell_typing_czi_sc_seq_KN_tmp', label: 'cell typing czi_sc_seq_KN'},
                 ],
 
                 params2: {
