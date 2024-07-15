@@ -23,7 +23,8 @@ stclust_stlist = STclust(x=STlist,
                          ws=user_ws,
                          ks=user_ks,
                          topgenes=user_topgenes,
-                         deepSplit=user_deepsplit)
+                         deepSplit=user_deepsplit,
+                         cores=4)
 
 # annot_variables used for differential expression and STdiff/STgradient analyses
 annot_variables = lapply(names(stclust_stlist@spatial_meta), function(i){
