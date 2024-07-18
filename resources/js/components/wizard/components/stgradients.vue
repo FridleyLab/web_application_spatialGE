@@ -187,33 +187,56 @@
                     <li v-for="(sample, index) in stgradients.samples" class="nav-item" role="presentation">
                         <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample" type="button" role="tab" :aria-controls="sample" aria-selected="true">{{ sample }}</button>
                     </li>
+                    <li v-if="'heatmap' in stgradients" class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-heatmap" data-bs-toggle="tab" data-bs-target="#heatmap" type="button" role="tab" aria-controls="heatmap" aria-selected="true">Heatmap</button>
+                    </li>
                 </ul>
 
                 <div class="tab-content" id="myTabContent">
                     <div v-for="(sample, index) in stgradients.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
                         <div class="m-4">
 
-                            <div>
-                                <a :href="stgradients.base_url + 'stgradients_results_' + sample + '.xlsx'" class="btn btn-sm btn-outline-info me-2" download>Download results (Excel)</a>
-                            </div>
-
-                            <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
 
 
-<!--                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"-->
-<!--                                                  :headers="results[sample].data.headers"-->
-<!--                                                  :items="results[sample].data.items"-->
-<!--                                                  alternating-->
-<!--                                                  border-cell-->
-<!--                                                  body-text-direction="center"-->
-<!--                                                  header-text-direction="center"-->
-<!--                            >-->
-<!--                                <template #item-gene="{ gene }">-->
-<!--                                    <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" target="_blank" class="text-info">{{ gene }}</a>-->
-<!--                                </template>-->
-<!--                            </vue3-easy-data-table>-->
+                            <!-- <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid> -->
+
+
+                            <!-- <ul class="nav nav-tabs" :id="'myTab-' + sample" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" :id="sample + '-tab-data'" data-bs-toggle="tab" :data-bs-target="'#' + sample + '-data'" type="button" role="tab" :aria-controls="sample + '-data'" aria-selected="true">Results</button>
+                                </li>
+                                <li v-if="'heatmap' in stgradients" class="nav-item" role="presentation">
+                                    <button class="nav-link" :id="sample + '-tab-heatmap'" data-bs-toggle="tab" :data-bs-target="'#' + sample + '-heatmap'" type="button" role="tab" :aria-controls="sample + '-heatmap'" aria-selected="true">Heatmap</button>
+                                </li>
+                            </ul> -->
+
+                            <!-- <div class="tab-content" :id="'myTabContent-' + sample">
+                                <div class="tab-pane fade min-vh-50 show active" :id="sample + '-data'" role="tabpanel" :aria-labelledby="sample + '-tab-data'">
+                                    <div class="m-4"> -->
+                                        <a :href="stgradients.base_url + 'stgradients_results_' + sample + '.xlsx'" class="btn btn-sm btn-outline-info me-2 float-end" download>Download results (Excel)</a>
+                                        <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
+                                    <!-- </div>
+                                </div>
+                                <div class="tab-pane fade min-vh-50" :id="sample + '-heatmap'" role="tabpanel" :aria-labelledby="sample + '-tab-heatmap'">
+                                    <div class="m-4">
+                                        <show-plot :src="stgradients.base_url + stgradients.heatmap" :show-image="false" :sample="getSampleByName(sample)" :side-by-side="false"></show-plot>
+                                    </div>
+                                </div>
+                            </div> -->
+
+
+
+
                         </div>
                     </div>
+
+
+                    <div v-if="'heatmap' in stgradients" class="tab-pane fade min-vh-50" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
+                        <div class="m-4">
+                            <show-plot :src="stgradients.base_url + stgradients.heatmap" :show-image="false" :side-by-side="false"></show-plot>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -331,6 +354,10 @@ import 'vue3-easy-data-table/dist/style.css';
         },
 
         methods: {
+
+            getSampleByName(nameToFind) {
+                return this.samples.find( sample => sample.name === nameToFind);
+            },
 
             checkNotAllSelected(option) {
                 if(this.params.exclude.length && this.params.exclude.length === this.annotation_variables_clusters_exclude.length)  //this.params.ref.length && (this.params.exclude.length - 1) === this.annotation_variables_clusters)

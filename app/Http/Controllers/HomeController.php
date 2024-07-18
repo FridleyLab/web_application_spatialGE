@@ -157,8 +157,11 @@ class HomeController extends Controller
                 ->select('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.completed','tasks.attempts','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at','tasks.cancelled_at', DB::raw('max(task_stats.memory) as max_ram'))
                 ->groupBy('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.completed','tasks.attempts','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.cancelled_at')
                 ->orderBy('tasks.id', 'desc')
+                ->limit(30)
                 ->get();
 
+
+            $projectFiles = [];
             foreach ($data as $key => $row) {
                 $scheduled = Carbon::parse($row->scheduled_at);
                 $started = Carbon::parse($row->started_at);
@@ -184,25 +187,28 @@ class HomeController extends Controller
 
 
 
-                $folder = Storage::path('users/' . $row->user_id . '/' . $row->project_id);
-                $filteredFiles = [];
-                if(is_dir($folder)) {
-                    $extensions = ['R', 'RData', 'csv', 'RDS'];
+                if(!in_array($row->project_id, $projectFiles)) {
+                    $folder = Storage::path('users/' . $row->user_id . '/' . $row->project_id);
+                    $filteredFiles = [];
+                    if(is_dir($folder)) {
+                        $extensions = ['R', 'RData', 'csv', 'RDS'];
 
-                    $files = scandir($folder);
+                        $files = scandir($folder);
 
-                    foreach ($files as $file) {
-                        $filePath = $folder . '/' . $file;
-                        if (is_file($filePath)) {
-                            $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
-                            if (in_array($fileExtension, $extensions)) {
-                                $filteredFiles[] = basename($filePath);
+                        foreach ($files as $file) {
+                            $filePath = $folder . '/' . $file;
+                            if (is_file($filePath)) {
+                                $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
+                                if (in_array($fileExtension, $extensions)) {
+                                    $filteredFiles[] = basename($filePath);
+                                }
                             }
-                        }
 
+                        }
                     }
+                    //$row->downloadable = $filteredFiles;
+                    $projectFiles[$row->project_id] = $filteredFiles;
                 }
-                $row->downloadable = $filteredFiles;
 
 
             }
@@ -243,14 +249,16 @@ class HomeController extends Controller
                         ->where('process', $process->process)
                         ->get();
 
-                    $item['samples_' . $sample->samples] = round($_data[0]->ram);
+                    if($_data[0]->ram > 0) {
+                        $item['samples_' . $sample->samples] = round($_data[0]->ram);
+                    }
                 }
 
                 $plot_data[] = $item;
             }
 
 
-            return view('stats.summary' , compact('headers', 'data', 'plot_data'));
+            return view('stats.summary' , compact('headers', 'data', 'plot_data', 'projectFiles'));
         }
         catch(\Exception $e) {
             return response($e->getMessage());

@@ -88,7 +88,8 @@
 
                         <div class="container">
                             <div class="row row-cols-4">
-                                <div v-for="file in process.data.downloadable" class="col my-2">
+                                <!-- <div v-for="file in process.data.downloadable" class="col my-2"> -->
+                                <div v-for="file in projectFiles[process.data.project_id]" class="col my-2">
                                     <a class="border rounded rounded-2 border-1 px-2 py-1" :href="'/admin-download-file/' + process.data.project_id + '/' + file" download>{{ file }}</a>
                                 </div>
                             </div>
@@ -106,6 +107,10 @@
     <div class="my-6">
         <show-stats-plot :plot-data="plotData"></show-stats-plot>
     </div>
+
+    <pre>
+        {{ plotData }}
+    </pre>
 
 </template>
 <script>
@@ -173,6 +178,7 @@ export default {
         headers: Object,
         data: Array,
         plotData: Array,
+        projectFiles: Array,
     },
 
     data() {

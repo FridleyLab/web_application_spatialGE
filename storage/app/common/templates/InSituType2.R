@@ -13,7 +13,7 @@ ptsize = #{ptsize}#
 
 library('InSituType')
 library('spatialGE')
-library('umap')
+#library('umap')
 library('magrittr')
 
 # Load Insitutype stclust STlist
@@ -111,3 +111,24 @@ saveplot('insitutype_flightpath', fl_p, 1400, 600)
 
 apocalypse_t = difftime(Sys.time(), genesis_t, units='min')
 cat(paste0('Plotting completed in ', round(apocalypse_t, 2), ' min.\n'))
+
+# File to create barplots
+bps_df = dplyr::bind_rows(lapply(names(stclust_stlist@spatial_meta), function(i){
+  df_tmp = stclust_stlist@spatial_meta[[i]] %>%
+    dplyr::mutate(insitutype_cell_types=tidyr::replace_na(insitutype_cell_types, 'unknown')) %>%
+    dplyr::mutate(fov_id=i) %>%
+    dplyr::select(c('fov_id', 'insitutype_cell_types')) %>%
+    dplyr::group_by(insitutype_cell_types) %>%
+    dplyr::summarize(number_cells=dplyr::n()) %>%
+    dplyr::ungroup() %>%
+    tibble::add_column(fov_id=i, .before=1) %>%
+  return(df_tmp)
+}))
+# Make wide table (cell types in columns, FOVs in rows)
+bps_df = bps_df %>%
+  tidyr::pivot_wider(names_from='insitutype_cell_types', values_from='number_cells') %>%
+  dplyr::mutate(unknown=tidyr::replace_na(unknown, 0))
+# Write file
+write.csv(bps_df, 'insitutype_cell_types_barplot_data.csv', row.names=F)
+
+

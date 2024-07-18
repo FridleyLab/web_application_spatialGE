@@ -38,6 +38,7 @@ for(i in unique(master_ann[[1]])){
     df_tmp2 = df_tmp[df_tmp[[2]] == j, ]
     colnames(df_tmp2)[c(4,5)] = c(j, unique(df_tmp2[[3]]))
     df_tmp2[[4]] = as.character(df_tmp2[[4]])
+    df_tmp2[[5]] = as.character(df_tmp2[[5]])
     df_tmp2 = df_tmp2[, c(4,5)]
 
     spatial_meta_tmp = stclust_stlist@spatial_meta[[i]]

@@ -1730,6 +1730,17 @@ $plots_initial
                         }
                     }
                 }
+
+                //process CSV files for client-side plotting
+                $fileName = $sample->name . '_expr_quilt_data.csv';
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    $result['plot_data'][$sample->name] = $this->workingDirPublicURL() . $fileName;
+                }
+
             }
         }
 
@@ -1773,15 +1784,30 @@ setwd('/spatialGE')
 library('spatialGE')
 
 # Load normalized STList
-" .
-            $this->_loadStList('normalized_stlist')
-            . "
+{$this->_loadStList('normalized_stlist')}
 
 qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pal', data_type='$data_type', samples=$samples)
 
 $export_files
+
+
+{$this->getSTplotQuiltScript_exportCSV(['_stlist' => 'normalized_stlist', 'genes' => $_genes, 'samples' => $samples, 'data_type' => $data_type])}
+
 ";
 //$export_files_side_by_side
+
+        return $script;
+    }
+
+
+
+    private function getSTplotQuiltScript_exportCSV($params)
+    {
+        $script = Storage::get("/common/templates/STplot_quilt_export_data.R");
+
+        foreach ($params as $key => $param) {
+            $script = $this->replaceRscriptParameter($key, $param, $script);
+        }
 
         return $script;
     }
@@ -2350,7 +2376,23 @@ $export_files
 
 
 
+    private function getSimpleSTlistScript($parameters)
+    {
 
+        $script = Storage::get("/common/templates/_simple_stlist.R");
+
+        //If there's no stclust_stlist use the normalized_stlist
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
+        $parameters['_stlist'] = $_stlist;
+
+        $params = ['_stlist', '_samples'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
+
+        return $script;
+    }
 
 
     public function SpaGCN($parameters)
@@ -2363,7 +2405,7 @@ $export_files
         //Create simple STlist as input for SpaGCN
         $scriptName = 'SpaGCN_1_simpleSTlist.R';
         $script = $workingDir . $scriptName;
-        $scriptContents = $this->getSpaGCN_SimpleSTlistScript($parameters);
+        $scriptContents = $this->getSimpleSTlistScript($parameters);
         Storage::put($script, $scriptContents);
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
@@ -2445,25 +2487,6 @@ $export_files
 
 
         return ['output' => $output, 'script' => $scriptContents];
-    }
-
-
-    private function getSpaGCN_SimpleSTlistScript($parameters)
-    {
-
-        $script = Storage::get("/common/templates/SpaGCN1_simple_stlist.R");
-
-        //If there's no stclust_stlist use the normalized_stlist
-        $_stlist = 'stclust_stlist';
-        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
-        $parameters['_stlist'] = $_stlist;
-
-        $params = ['_stlist', '_samples'];
-        foreach ($params as $param) {
-            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
-        }
-
-        return $script;
     }
 
 
@@ -2622,6 +2645,55 @@ $export_files
         $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
 
         return $script;
+    }
+
+
+
+    public function MILWRM($parameters)
+    {
+        $workingDir = $this->workingDir();
+
+        //Create simple STlist as input for MILWRM
+        $scriptName = 'MILWRM_1_simpleSTlist.R';
+        $script = $workingDir . $scriptName;
+        $parameters['_samples'] = $this->getSampleList($parameters['samples']);
+        $scriptContents = $this->getSimpleSTlistScript($parameters);
+        Storage::put($script, $scriptContents);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+        //Run MILWRM on the simple STList
+        $scriptName = 'MILWRM_script.py';
+        $scriptContents = Storage::get("/common/templates/$scriptName");
+        $parameters['sample_list'] = "'" . join("','", $this->getSampleList($parameters['samples'], true)) . "'";
+        $params = ['alpha', 'max_pc', 'sample_list'];
+        foreach ($params as $param) {
+            $scriptContents = str_replace("{param_$param}", $parameters[$param], $scriptContents);
+        }
+        Storage::put("$workingDir/$scriptName", $scriptContents);
+        $output .= $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'MILWRM');
+
+        $_process_files = [];
+        $data_files = [];
+        foreach ($this->getSampleList($parameters['samples'], true) as $sample) {
+            $fileName = 'milwrm_predicted_domains_sample_' . $sample . '.csv';
+            $file = $workingDir . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if (Storage::fileExists($file)) {
+                Storage::delete($file_public);
+                Storage::move($file, $file_public);
+                $data_files[$sample] = $fileName;
+
+                $_process_files[] = $fileName;
+            }
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'milwrm', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'data_files' => $data_files])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'MILWRM', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
+
+        //$this->current_step = 8;
+        $this->save();
+
+        return ['output' => $output, 'script' => $scriptContents];
     }
 
 
@@ -2973,6 +3045,12 @@ lapply(names(ps), function(i){
             $files[] = 'stenrich_' . $sample . '.csv';
             $files[] = 'stenrich_' . $sample . '.json';
         }
+
+        //Heatmap
+        $files[] = 'stenrich_heatmap.svg';
+        $files[] = 'stenrich_heatmap.pdf';
+        $files[] = 'stenrich_heatmap.png';
+
         foreach ($files as $file) {
             if (Storage::fileExists($workingDir . $file)) {
 
@@ -2990,14 +3068,47 @@ lapply(names(ps), function(i){
             }
         }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $this->samples->pluck('name')])]);
+        ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'heatmap' => 'stenrich_heatmap', 'samples' => $this->samples->pluck('name')])]);
         ProjectProcessFiles::updateOrCreate(['process' => 'STEnrich', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
     }
 
 
+
     private function getSTEnrichScript($parameters)
+    {
+
+        $gene_sets_file = 'common/stenrich/' . $parameters['gene_sets'] . '.gmt';
+        Storage::copy($gene_sets_file, $this->workingDir() . $parameters['gene_sets'] . '.gmt');
+
+        $params = [
+            '_stlist' => 'normalized_stlist',
+            'permutations' => $parameters['permutations'],
+            'num_sds' => $parameters['num_sds'],
+            'min_spots' => $parameters['min_spots'],
+            'min_genes' => $parameters['min_genes'],
+            'seed' => $parameters['seed'],
+            'gene_sets_file' => $parameters['gene_sets'] . '.gmt'
+        ];
+
+
+
+        $script = Storage::get("/common/templates/STenrich.R");
+
+        foreach ($params as $param => $value) {
+            $script = $this->replaceRscriptParameter($param, $value, $script);
+        }
+
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+
+        return $script;
+    }
+
+
+
+
+    private function DELETE_getSTEnrichScript($parameters)
     {
 
         $gene_sets_file = 'common/stenrich/' . $parameters['gene_sets'] . '.gmt';
@@ -3115,6 +3226,12 @@ lapply(names(sp_enrichment), function(i){
             $files[] = 'stgradients_' . $sample . '.csv';
             $files[] = 'stgradients_' . $sample . '.json';
         }
+
+        //Heatmap
+        $files[] = 'stgradients_heatmap.svg';
+        $files[] = 'stgradients_heatmap.pdf';
+        $files[] = 'stgradients_heatmap.png';
+
         foreach ($files as $file)
             if (Storage::fileExists($workingDir . $file)) {
 
@@ -3131,7 +3248,7 @@ lapply(names(sp_enrichment), function(i){
                 }
             }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'stgradients', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(),  'samples' => $parameters['samples_array']])]);
+        ProjectParameter::updateOrCreate(['parameter' => 'stgradients', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'heatmap' => 'stgradients_heatmap', 'samples' => $parameters['samples_array']])]);
         ProjectProcessFiles::updateOrCreate(['process' => 'STGradients', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
@@ -3162,6 +3279,8 @@ lapply(names(sp_enrichment), function(i){
         foreach ($params as $param => $value) {
             $script = $this->replaceRscriptParameter($param, $value, $script);
         }
+
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
 
         return $script;
     }

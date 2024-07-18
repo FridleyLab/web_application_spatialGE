@@ -639,6 +639,11 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function sdd_milwrm(Project $project) {
+        $jobId = $project->createJob('Spatial Domain Detection - MILWRM', 'MILWRM', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
     public function differential_expression(Project $project) {
         $samples = $project->samples;
         return view('wizard.differential-expression')->with(compact('project', 'samples'));

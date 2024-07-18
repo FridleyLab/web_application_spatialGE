@@ -115,6 +115,9 @@
                     <li v-for="(sample, index) in stenrich.samples" class="nav-item" role="presentation">
                         <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample" type="button" role="tab" :aria-controls="sample" aria-selected="true">{{ sample }}</button>
                     </li>
+                    <li v-if="'heatmap' in stenrich" class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-heatmap" data-bs-toggle="tab" data-bs-target="#heatmap" type="button" role="tab" aria-controls="heatmap" aria-selected="true">Heatmap</button>
+                    </li>
                 </ul>
 
                 <div class="tab-content" id="myTabContent">
@@ -122,19 +125,38 @@
                         <div class="m-4">
 <!--                            <a :href="stenrich.base_url + 'stenrich_' + sample + '.csv'" class="btn btn-sm btn-outline-info my-3" download>CSV results</a>-->
 
+                            <!-- <ul class="nav nav-tabs" :id="'myTab-' + sample" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" :id="sample + '-tab-data'" data-bs-toggle="tab" :data-bs-target="'#' + sample + '-data'" type="button" role="tab" :aria-controls="sample + '-data'" aria-selected="true">Results</button>
+                                </li>
+                                <li v-if="'heatmap' in stenrich" class="nav-item" role="presentation">
+                                    <button class="nav-link" :id="sample + '-tab-heatmap'" data-bs-toggle="tab" :data-bs-target="'#' + sample + '-heatmap'" type="button" role="tab" :aria-controls="sample + '-heatmap'" aria-selected="true">Heatmap</button>
+                                </li>
+                            </ul> -->
 
-                            <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
+                            <!-- <div class="tab-content" :id="'myTabContent-' + sample">
+                                <div class="tab-pane fade min-vh-50 show active" :id="sample + '-data'" role="tabpanel" :aria-labelledby="sample + '-tab-data'">
+                                    <div class="m-4"> -->
+                                        <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
+                                    <!-- </div>
+                                </div>
+                                <div class="tab-pane fade min-vh-50" :id="sample + '-heatmap'" role="tabpanel" :aria-labelledby="sample + '-tab-heatmap'">
+                                    <div class="m-4">
+                                        <show-plot :src="stenrich.base_url + stenrich.heatmap" :show-image="false" :sample="getSampleByName(sample)" :side-by-side="false"></show-plot>
+                                    </div>
+                                </div>
+                            </div> -->
 
-<!--                            <vue3-easy-data-table v-if="(sample in results) && results[sample].loaded"-->
-<!--                                                  :headers="results[sample].data.headers"-->
-<!--                                                  :items="results[sample].data.items"-->
-<!--                                                  alternating-->
-<!--                                                  border-cell-->
-<!--                                                  body-text-direction="center"-->
-<!--                                                  header-text-direction="center"-->
-<!--                            />-->
                         </div>
                     </div>
+
+                    <div v-if="'heatmap' in stenrich" class="tab-pane fade min-vh-50" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
+                        <div class="m-4">
+                            <show-plot :src="stenrich.base_url + stenrich.heatmap" :show-image="false" :side-by-side="false"></show-plot>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </div>
@@ -216,6 +238,10 @@ import 'vue3-easy-data-table/dist/style.css';
         },
 
         methods: {
+
+            getSampleByName(nameToFind) {
+                return this.samples.find( sample => sample.name === nameToFind);
+            },
 
             STEnrich() {
 

@@ -170,7 +170,8 @@ class spatialContainer {
                 Storage::put($storage_path . $script_file, $script);
                 $command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name sh $script_file";
             }
-            elseif ($container === 'SPAGCN') {
+            // elseif ($container === 'SPAGCN') {
+            else {
                 $command = "$exe container run -i -v $workingDir:/spatialGE --rm --memory $physical_memory --memory-swap $total_memory --name $container_id $image_name $docker_command";
             }
 
