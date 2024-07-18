@@ -74,7 +74,7 @@
         </div>
 
 
-        <div class="mt-4" v-if="!generating_quilt && Object.keys(plots).length /*('stplot_quilt' in project.project_parameters)*/">
+        <div class="mt-4" v-if="!generating_quilt && Object.keys(plots).length && loaded /*('stplot_quilt' in project.project_parameters)*/">
 
 
             <div class="my-4">
@@ -87,33 +87,35 @@
                     <button class="nav-link active" :id="'quilt-' + 'all_plots' + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + 'all_plots'" type="button" role="tab" :aria-controls="'quilt-' + 'all_plots'" aria-selected="true">All plots</button>
                 </li>
 
-                <li v-for="(samples, gene, index) in plots" class="nav-item" role="presentation">
-                    <button class="nav-link" :class="(Object.keys(plots).length === 1 && index === 0) ? 'active' : ''" :id="'quilt-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene" type="button" role="tab" :aria-controls="'quilt-' + gene" aria-selected="true">{{ gene }}</button>
-                </li>
+                <template v-for="(samples, gene, index) in plots">
+                    <li v-if="gene !== 'plot_data'" class="nav-item" role="presentation">
+                        <button class="nav-link" :class="(Object.keys(plots).length === 1 && index === 0) ? 'active' : ''" :id="'quilt-' + gene + '-tab'" data-bs-toggle="tab" :data-bs-target="'#quilt-' + gene" type="button" role="tab" :aria-controls="'quilt-' + gene" aria-selected="true">{{ gene }}</button>
+                    </li>
+                </template>
             </ul>
             <div class="tab-content" id="stplotQuiltContent">
 
                 <div v-if="Object.keys(plots).length > 1" class="tab-pane fade show active" :id="'quilt-' + 'all_plots'" role="tabpanel" :aria-labelledby="'quilt-' + 'all_plots' + '-tab'">
 
-                    <div v-for="sample_object in samples" class="mt-4 ms-4">
-                        <div>
+                    <template v-for="sample_object in samples">
+                        <div v-if="Object.keys(plots).filter(gene => sample_object.name in plots[gene]).length" class="mt-4 ms-4">
                             <div class="text-primary text-bold text-lg">{{ sample_object.name }}</div>
                             <div class="d-xxl-flex">
                                 <template v-for="(samples, gene, index) in plots">
                                     <template v-for="(image, sample, index) in samples">
-                                        <div v-if="sample === sample_object.name && plots_visible[gene][sample]" class="text-center w-xxl-50">
+                                        <div v-if="sample === sample_object.name && plots_visible[gene][sample] && gene !== 'plot_data'" class="text-center w-xxl-50">
                                             <show-plot :src="image" :downloadable="false"></show-plot>
                                         </div>
                                     </template>
                                 </template>
                             </div>
                         </div>
-                    </div>
+                    </template>
 
                 </div>
 
                 <template v-for="(samples, gene, index) in plots">
-                    <div class="tab-pane fade" :class="(Object.keys(plots).length === 1 && index === 0) ? 'show active' : ''" :id="'quilt-' + gene" role="tabpanel" :aria-labelledby="'quilt-' + gene + '-tab'">
+                    <div v-if="gene !== 'plot_data'" class="tab-pane fade" :class="(Object.keys(plots).length === 1 && index === 0) ? 'show active' : ''" :id="'quilt-' + gene" role="tabpanel" :aria-labelledby="'quilt-' + gene + '-tab'">
 
                         <div class="mt-4">
                             <ul class="nav nav-tabs" id="stplotQuilt" role="tablist">
@@ -148,6 +150,21 @@
                                     <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'quilt-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + sample + '-tab'">
                                         <div>
                                             <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true" side-by-side-tool-tip="vis_quilt_plot_side_by_side"></show-plot>
+
+                                            <!-- <div v-if="'plot_data' in plots" style="width: 100%; height: 600px">
+                                            <side-by-side-plot
+                                                src="sample_093d_plot"
+                                                :base="(getSampleByName(sample)).image_file_url"
+                                                :csv="plot_data[sample][gene]"
+                                                :expression="gene"
+                                                :title="sample + ' - ' + gene"
+                                                :palette="['blue', 'orange', 'red']"
+                                                :legend-min="0"
+                                                :legend-max="10"
+                                            ></side-by-side-plot>
+                                            </div> -->
+
+
                                         </div>
                                     </div>
                                 </template>
@@ -204,6 +221,10 @@ import Multiselect from '@vueform/multiselect';
                 plots_visible: [],
 
                 visibleSamples: [],
+
+                loaded: false,
+
+                plot_data: {},
             }
         },
 
@@ -221,7 +242,44 @@ import Multiselect from '@vueform/multiselect';
             }
         },
 
+        async mounted() {
+
+            if(!('plot_data' in this.plots)) {
+                this.loaded = true;
+                return;
+            }
+
+            for(let sample in this.plots.plot_data) {
+                let data = await axios.get(this.plots.plot_data[sample]);
+                this.plot_data[sample] = {};
+                this.processPlotFile(sample, data.data);
+            }
+
+            console.log(this.plot_data)
+
+            this.loaded = true;
+
+        },
+
         methods: {
+
+            processPlotFile(sampleName, data) {
+                const columnNames = data.split('\n')[0].split(',');
+                for(let i = 2; i < columnNames.length; i++) {
+                    this.plot_data[sampleName][columnNames[i]] = this.extractColumnsFromCSV(data, [1, 2, i+1]);
+                    //console.log(this.plot_data[sampleName][columnNames[i]]);
+                }
+            },
+
+            extractColumnsFromCSV(csv, columns) {
+                const rows = csv.split('\n');
+                const extractedRows = rows.map(row => {
+                    const cells = row.split(',');
+                    const extractedCells = columns.map(index => cells[index - 1]);
+                    return extractedCells.join(',');
+                });
+                return extractedRows.join('\n');
+            },
 
             getSampleByName(nameToFind) {
                 return this.samples.find( sample => sample.name === nameToFind);
