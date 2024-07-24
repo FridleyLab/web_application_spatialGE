@@ -184,19 +184,29 @@
         <div v-if="!processing && ('stgradients' in project.project_parameters)">
             <div>
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
+
+                    <li v-if="'heatmap' in stgradients" class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tab-heatmap" data-bs-toggle="tab" data-bs-target="#heatmap" type="button" role="tab" aria-controls="heatmap" aria-selected="true">Heatmap</button>
+                    </li>
+
                     <template v-for="(sample, index) in stgradients.samples">
                         <li v-if="(sample in results) && results[sample].loaded" class="nav-item" role="presentation">
-                            <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample" type="button" role="tab" :aria-controls="sample" aria-selected="true">{{ sample }}</button>
+                            <button class="nav-link" :class="index === 0 ? /*'active'*/ '' : ''" :id="sample + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample" type="button" role="tab" :aria-controls="sample" aria-selected="true">{{ sample }}</button>
                         </li>
                     </template>
-                    <li v-if="'heatmap' in stgradients" class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-heatmap" data-bs-toggle="tab" data-bs-target="#heatmap" type="button" role="tab" aria-controls="heatmap" aria-selected="true">Heatmap</button>
-                    </li>
+
                 </ul>
 
                 <div class="tab-content" id="myTabContent">
+
+                    <div v-if="'heatmap' in stgradients" class="tab-pane fade min-vh-50 show active" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
+                        <div class="m-4">
+                            <show-plot :src="stgradients.base_url + stgradients.heatmap" :show-image="false" :side-by-side="false"></show-plot>
+                        </div>
+                    </div>
+
                     <template v-for="(sample, index) in stgradients.samples">
-                        <div v-if="(sample in results) && results[sample].loaded" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
+                        <div v-if="(sample in results) && results[sample].loaded" class="tab-pane fade min-vh-50" :class="index === 0 ? /*'show active'*/ '' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
                             <div class="m-4">
                                 <a :href="stgradients.base_url + 'stgradients_results_' + sample + '.xlsx'" class="btn btn-sm btn-outline-info me-2 float-end" download>Download results (Excel)</a>
                                 <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
@@ -205,11 +215,7 @@
                     </template>
 
 
-                    <div v-if="'heatmap' in stgradients" class="tab-pane fade min-vh-50" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
-                        <div class="m-4">
-                            <show-plot :src="stgradients.base_url + stgradients.heatmap" :show-image="false" :side-by-side="false"></show-plot>
-                        </div>
-                    </div>
+
 
                 </div>
             </div>

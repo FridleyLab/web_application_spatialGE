@@ -160,6 +160,7 @@
                                                 :palette="['blue', 'orange', 'red']"
                                                 :legend-min="0"
                                                 :legend-max="3"
+                                                :inverted="project.project_platform_id === 3"
                                             ></side-by-side-plot>
                                             </div>
 
