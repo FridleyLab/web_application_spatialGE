@@ -168,10 +168,11 @@ export default {
         processedData: { type: Array, required: true },
         expression: { type: String, required: true },
         title: { type: String, required: true },
-        colorPalette: { type: String, required: true },
+        colorPalette: { type: Object, required: true },
         legendMin: { type: Number, required: true },
         legendMax: { type: Number, required: true },
         isPanZoomLocked: { type: Boolean, required: true },
+        isYAxisInverted: { type: Boolean, required: true },
     },
 
     setup() {
@@ -191,7 +192,7 @@ export default {
             plotWidth: this.sharedState.plotWidth,
             plotHeight: this.sharedState.plotHeight,
             showControls: true,
-            increaseRatio: 5,
+            increaseRatio: 8,
         };
     },
 
@@ -231,7 +232,6 @@ export default {
 
         createPlot() {
             if (this.data.length === 0) return;
-            // console.log("PLOT SHARED", this.sharedState);
 
             d3.select(this.$refs.plotSvgRef).selectAll("*").remove();
 
@@ -254,7 +254,11 @@ export default {
 
             this.yScale = d3
                 .scaleLinear()
-                .domain([d3.max(this.data, (d) => d.y), 0])
+                .domain(
+                    this.isYAxisInverted
+                        ? [0, d3.max(this.data, (d) => d.y)]
+                        : [d3.max(this.data, (d) => d.y), 0]
+                )
                 .range([height - padding, padding]);
 
             this.colorScale = d3
@@ -328,14 +332,25 @@ export default {
 
             this.resetZoom();
 
+            const originalWidth = svgElement.getAttribute("width");
+            const originalHeight = svgElement.getAttribute("height");
+
+            const bbox = svgElement.getBBox();
+            svgElement.setAttribute(
+                "viewBox",
+                `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`
+            );
+            svgElement.setAttribute("width", bbox.width);
+            svgElement.setAttribute("height", bbox.height);
+
             const serializer = new XMLSerializer();
             const svgString = serializer.serializeToString(svgElement);
 
             this.$emit("update-svg", svgString);
 
+            svgElement.setAttribute("width", originalWidth);
+            svgElement.setAttribute("height", originalHeight);
             this.applyZoomTransform(originalTransform);
-
-            this.$emit("update-svg", svgString);
         },
 
         updatePoints(g = d3.select(this.$refs.plotSvgRef).select("g")) {
@@ -694,7 +709,7 @@ export default {
 
 .plot-svg {
     width: 80%;
-    height: 100%;
+    height: 90%;
     cursor: move;
 }
 

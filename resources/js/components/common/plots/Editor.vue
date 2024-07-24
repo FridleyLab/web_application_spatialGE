@@ -1,9 +1,9 @@
 <template>
     <div class="main-container">
-        <div class="left-container">
+        <div class="left-container" ref="plotContainer">
             <PlotViewer
                 ref="plotViewer"
-                v-if="processedData"
+                v-if="isPlotVisible && processedData"
                 :processedData="processedData"
                 :expression="expression"
                 :title="title"
@@ -11,6 +11,7 @@
                 :legendMin="legendMin"
                 :legendMax="legendMax"
                 :isPanZoomLocked="isPanZoomLocked"
+                :isYAxisInverted="inverted"
                 @update-svg="handleSvgUpdate"
             ></PlotViewer>
         </div>
@@ -32,6 +33,7 @@
             </div>
             <OverlayEditor
                 ref="overlayEditor"
+                v-if="isPlotVisible && svgData"
                 :base="base"
                 :overlay="svgData"
                 :show-image="showImage"
@@ -46,9 +48,9 @@
 
 <script>
 import * as d3 from "d3";
+import { ref, onMounted, watch } from "vue";
 // import PlotViewer from "./PlotViewer.vue";
 // import OverlayEditor from "./OverlayEditor.vue";
-import { sharedState } from "./state.js";
 
 export default {
     name: "editorPlot",
@@ -88,6 +90,41 @@ export default {
             required: true,
         },
         showImage: { type: Boolean, default: true },
+        inverted: { type: Boolean, default: false },
+    },
+
+    setup() {
+        const plotContainer = ref(null);
+        const isPlotVisible = ref(false);
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                isPlotVisible.value = entry.isIntersecting;
+            },
+            { threshold: 0.1 }
+        );
+
+        onMounted(() => {
+            if (plotContainer.value) {
+                observer.observe(plotContainer.value);
+            }
+        });
+
+        watch(
+            () => plotContainer.value,
+            (newValue) => {
+                if (newValue) {
+                    observer.observe(newValue);
+                } else {
+                    observer.disconnect();
+                }
+            }
+        );
+
+        return {
+            plotContainer,
+            isPlotVisible,
+        };
     },
 
     data() {
@@ -98,19 +135,37 @@ export default {
             processedData: null,
             isOverlayLocked: false,
             isPanZoomLocked: false,
+            sharedState: {
+                plotWidth: 0,
+                plotHeight: 0,
+            },
         };
     },
 
     provide() {
         return {
-            sharedState,
+            sharedState: this.sharedState,
         };
     },
 
     async mounted() {
-        // const data = await d3.csv(`./${this.csv}`);
-        const data = await d3.csvParse(this.csv);
-        this.processedData = data;
+        const baseImage = new Image();
+        baseImage.src = this.base;
+
+        baseImage.onload = async () => {
+            const width = baseImage.naturalWidth;
+            const height = baseImage.naturalHeight;
+            const aspectRatio = width / height;
+            const containerWidth = window.innerWidth;
+            const desiredWidth = containerWidth * 0.6;
+            const desiredHeight = desiredWidth / aspectRatio;
+            this.sharedState.plotWidth = desiredWidth;
+            this.sharedState.plotHeight = desiredHeight;
+
+            // const data = await d3.csv(`./${this.csv}`);
+            const data = await d3.csvParse(this.csv);
+            this.processedData = data;
+        };
     },
 
     methods: {

@@ -182,7 +182,7 @@
                                         <ul class="nav nav-tabs" :id="sample.name + 'SPAGCN_SVG_MyTab'" role="tablist">
                                             <template v-for="(i, index) in parseInt(spagcn_svg.k)">
                                                 <li class="nav-item" role="presentation">
-                                                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_SVG_K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_SVG_K_' + index" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_SVG_K_' + index" aria-selected="true">Domain {{ index }}</button>
+                                                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_SVG_K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_SVG_K_' + index" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_SVG_K_' + index" aria-selected="true">Domain {{ index + 1 }}</button>
                                                 </li>
                                             </template>
                                         </ul>

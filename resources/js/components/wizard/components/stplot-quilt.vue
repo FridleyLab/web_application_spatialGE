@@ -153,7 +153,6 @@
 
                                             <div v-if="'plot_data' in plots" class="my-4" style="width: 100%; height: 750px">
                                             <side-by-side-plot
-                                                src="sample_093d_plot"
                                                 :base="(getSampleByName(sample)).image_file_url"
                                                 :csv="plot_data[sample][gene]"
                                                 :expression="gene"

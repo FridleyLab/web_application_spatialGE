@@ -32,11 +32,8 @@
                         class="overlay-img-fluid"
                         :style="{
                             position: 'absolute',
-                            top: '30%',
-                            left: '40%',
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover',
                         }"
                     />
                 </div>
@@ -44,7 +41,11 @@
                     :src="base"
                     id="baseImage"
                     class="img-fluid"
-                    style="position: relative; z-index: -1"
+                    :style="{
+                        position: 'relative',
+                        zIndex: '-1',
+                        opacity: baseOpacity,
+                    }"
                 />
             </div>
         </div>
@@ -169,6 +170,15 @@
                     step="0.1"
                     v-model="overlayOpacity"
                 />
+                <label for="baseSlider">Base Opacity</label>
+                <input
+                    id="baseOpacity"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    v-model="baseOpacity"
+                />
             </div>
         </div>
 
@@ -225,9 +235,10 @@ export default {
         const elem = ref(null);
         const elemTwo = ref(null);
         const panzoomParent = ref(null);
-        const overlayWidth = ref(sharedState.plotWidth);
-        const overlayHeight = ref(sharedState.plotHeight);
+        const overlayWidth = ref(sharedState.plotWidth / 1.5);
+        const overlayHeight = ref(sharedState.plotHeight / 1.5);
         const overlayOpacity = ref(1);
+        const baseOpacity = ref(1);
         const isLocked = ref(false);
         const isMinimapHidden = ref(true);
         const minimap = ref(null);
@@ -249,6 +260,7 @@ export default {
             left: "0px",
         });
 
+        // TODO: Review this when we need to make it responsive
         // const updateOverlaySize = () => {
         //     if (panzoomParent.value) {
         //         const parentRect = panzoomParent.value.getBoundingClientRect();
@@ -308,7 +320,6 @@ export default {
         };
 
         onMounted(() => {
-            // console.log("Shared", sharedState);
             // updateOverlaySize();
             // window.addEventListener("resize", updateOverlaySize);
             nextTick(() => {
@@ -336,7 +347,18 @@ export default {
                     updateMinimapViewport
                 );
 
-                elem.value.addEventListener("wheel", panzoom.zoomWithWheel);
+                elem.value.addEventListener("wheel", function (event) {
+                    if (!event.shiftKey) return;
+                    panzoom.zoomWithWheel(event);
+                });
+
+                const parentRect = elem.value.getBoundingClientRect();
+                const elemTwoRect = elemTwo.value.getBoundingClientRect();
+
+                const centerX = (parentRect.width - elemTwoRect.width) / 2;
+                const centerY = (parentRect.height - elemTwoRect.height) / 2;
+
+                panzoom2.pan(centerX, centerY, { force: true });
 
                 updateMinimapViewport();
 
@@ -488,6 +510,7 @@ export default {
                 overlayWidth: overlayWidth.value,
                 overlayHeight: overlayHeight.value,
                 overlayOpacity: overlayOpacity.value,
+                baseOpacity: baseOpacity.value,
                 plotHeight: sharedState.plotHeight,
                 plotWidth: sharedState.plotWidth,
                 pan: panzoom.getPan(),
@@ -505,6 +528,7 @@ export default {
                 overlayWidth: 478.5949300130208,
                 overlayHeight: 478.5949300130208,
                 overlayOpacity: 1,
+                baseOpacity: 1,
                 plotHeight: 480,
                 plotWidth: 520,
                 pan: { x: 0, y: 0 },
@@ -517,6 +541,7 @@ export default {
             overlayWidth.value = state.overlayWidth;
             overlayHeight.value = state.overlayHeight;
             overlayOpacity.value = state.overlayOpacity;
+            baseOpacity.value = state.baseOpacity;
             sharedState.plotHeight = state.plotHeight;
             sharedState.plotWidth = state.plotWidth;
             isLocked.value = state.isLocked;
@@ -541,6 +566,7 @@ export default {
             overlayWidth,
             overlayHeight,
             overlayOpacity,
+            baseOpacity,
             increaseOverlayWidth,
             decreaseOverlayWidth,
             isLocked,
@@ -633,7 +659,7 @@ export default {
 }
 
 .img-fluid {
-    max-width: 60% !important;
+    max-width: 80% !important;
 }
 
 .minimap {

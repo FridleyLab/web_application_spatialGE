@@ -11,7 +11,7 @@
             </div>
 
 
-            <div class="accordion row justify-content-center text-center my-4 mx-3" id="accordionFilterTab" :class="processing ? 'disabled-clicks' : ''">
+            <!-- <div class="accordion row justify-content-center text-center my-4 mx-3" id="accordionFilterTab" :class="processing ? 'disabled-clicks' : ''">
                 <div class="accordion-item w-100 w-lg-80 w-xxl-70">
                     <h2 class="accordion-header d-flex" id="headingSelectSamples">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSelectSamples" aria-expanded="false" aria-controls="collapseSelectSamples">
@@ -38,6 +38,10 @@
 
                     </div>
                 </div>
+            </div> -->
+
+            <div class="my-4">
+                <project-summary-table :data="project.project_parameters.initial_stlist_summary" :url="project.project_parameters.initial_stlist_summary_url" :selected-keys="params.samples" @selected="(keys) => params.samples = keys"></project-summary-table>
             </div>
 
 
