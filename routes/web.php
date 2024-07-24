@@ -89,7 +89,6 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/get-jobs-in-queue',[ProjectController::class, 'getJobsInQueue'])->name('get-jobs-in-queue')->middleware('project');
 
 
-
     Route::get('/projects/{project}/stplot-visualization',[ProjectController::class, 'stplot_visualization'])->name('stplot-visualization')->middleware('project');
     Route::post('/projects/{project}/stplot/quilt', [ProjectController::class, 'stplot_quilt'])->name('stplot-quilt')->middleware('project');
     Route::post('/projects/{project}/stplot/expression-surface', [ProjectController::class, 'stplot_expression_surface'])->name('stplot-expression-surface')->middleware('project');
@@ -105,6 +104,7 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects/{project}/sdd/spagcn', [ProjectController::class, 'sdd_spagcn'])->name('sdd-spagcn')->middleware('project');
     Route::post('/projects/{project}/sdd/spagcn-svg', [ProjectController::class, 'sdd_spagcn_svg'])->name('sdd-spagcn-svg')->middleware('project');
     Route::post('/projects/{project}/sdd/spagcn-rename', [ProjectController::class, 'sdd_spagcn_rename'])->name('sdd-spagcn-rename')->middleware('project');
+    Route::post('/projects/{project}/sdd/MILWRM', [ProjectController::class, 'sdd_milwrm'])->name('sdd-milwrm')->middleware('project');
 
     Route::get('/projects/{project}/differential-expression',[ProjectController::class, 'differential_expression'])->name('differential-expression')->middleware('project');
     Route::post('/projects/{project}/differential-expression/non-spatial', [ProjectController::class, 'differential_expression_non_spatial'])->name('differential-expression-non-spatial')->middleware('project');

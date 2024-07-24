@@ -26,14 +26,6 @@
 
 
 
-
-
-
-
-
-
-
-
         </div>
         <div v-if="downloadable" class="mt-2">
             <button v-if="isSVG" type="button" class="btn btn-sm me-4" :class="zoomEnabled ? 'btn-success' : 'btn-outline-secondary'" @click="zoomEnabled = !zoomEnabled">Zoom</button>

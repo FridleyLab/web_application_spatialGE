@@ -30,7 +30,7 @@ for i in range(len(samples)):
     # Read AnnData object
     adata = sc.read("anndata_" + samples[i] + ".h5ad")
     # Read domain assignments
-    res_fp = samples[i] + "_domain_annotations_deg_svg.csv"
+    res_fp = "spagcn_predicted_domains_sample_" + samples[i] + ".csv"
     domains = pd.read_csv(res_fp)
     domains = domains[['libname', preds]]
 

@@ -134,7 +134,7 @@
                             <div>Annotation to test <show-modal tag="spagcn_spavargenes_annotation"></show-modal></div>
                             <div>
                                 <span>
-                                    <Multiselect id="multiselect_annotation_variables" :options="project.project_parameters.annotation_variables" v-model="params_svg.annotation_to_test"></Multiselect>
+                                    <Multiselect id="multiselect_annotation_variables" :options="annotation_variables.filter(ann => ann.value.startsWith('spagcn'))" v-model="params_svg.annotation_to_test"></Multiselect>
                                 </span>
                             </div>
                         </div>
@@ -168,30 +168,33 @@
 
                         <div>
                             <ul class="nav nav-tabs" id="SPAGCN_SVG_MyTab" role="tablist">
-                                <li v-for="(sample, indexSample) in samples" class="nav-item" role="presentation">
-                                    <button class="nav-link" :class="indexSample === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_SVG-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_SVG'" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_SVG'" aria-selected="true">{{ sample.name }}</button>
-                                </li>
+                                <template v-for="(sample, indexSample) in samples">
+                                    <li v-if="sample.name in svg_data" class="nav-item" role="presentation">
+                                        <button class="nav-link" :class="indexSample === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_SVG-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_SVG'" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_SVG'" aria-selected="true">{{ sample.name }}</button>
+                                    </li>
+                                </template>
                             </ul>
 
                             <div class="tab-content m-4" id="SPAGCN_SVG_MyTabContent">
+                                <template v-for="(sample, indexSample) in samples">
+                                    <div v-if="sample.name in svg_data" class="tab-pane fade min-vh-50" :class="indexSample === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_SVG'" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_SVG-tab'">
 
-                                <div v-for="(sample, indexSample) in samples" class="tab-pane fade min-vh-50" :class="indexSample === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_SVG'" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_SVG-tab'">
+                                        <ul class="nav nav-tabs" :id="sample.name + 'SPAGCN_SVG_MyTab'" role="tablist">
+                                            <template v-for="(i, index) in parseInt(spagcn_svg.k)">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_SVG_K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_SVG_K_' + index" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_SVG_K_' + index" aria-selected="true">Domain {{ index }}</button>
+                                                </li>
+                                            </template>
+                                        </ul>
 
-                                    <ul class="nav nav-tabs" :id="sample.name + 'SPAGCN_SVG_MyTab'" role="tablist">
-                                        <template v-for="(i, index) in parseInt(spagcn_svg.k)">
-                                            <li class="nav-item" role="presentation">
-                                                <button class="nav-link" :class="index === 0 ? 'active' : ''" :id="sample.name + 'SPAGCN_SVG_K_' + index + '-tab'" data-bs-toggle="tab" :data-bs-target="'#' + sample.name + 'SPAGCN_SVG_K_' + index" type="button" role="tab" :aria-controls="sample.name + 'SPAGCN_SVG_K_' + index" aria-selected="true">Domain {{ index }}</button>
-                                            </li>
-                                        </template>
-                                    </ul>
-
-                                    <div class="tab-content" :id="sample.name + 'SPAGCN_SVG_MyTabContent'">
-                                        <div v-for="(i, index) in parseInt(spagcn_svg.k)" class="tab-pane fade min-vh-50 mt-4" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_SVG_K_' + index" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_SVG_K_' + index + '-tab'">
-                                            <data-grid v-if="sample.name in svg_data && svg_data[sample.name].length > index" :headers="svg_data[sample.name][index].headers" :data="svg_data[sample.name][index].items"></data-grid>
+                                        <div class="tab-content" :id="sample.name + 'SPAGCN_SVG_MyTabContent'">
+                                            <div v-for="(i, index) in parseInt(spagcn_svg.k)" class="tab-pane fade min-vh-50 mt-4" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_SVG_K_' + index" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_SVG_K_' + index + '-tab'">
+                                                <data-grid v-if="sample.name in svg_data && svg_data[sample.name].length > index" :headers="svg_data[sample.name][index].headers" :data="svg_data[sample.name][index].items"></data-grid>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -261,6 +264,8 @@ import Multiselect from '@vueform/multiselect';
                 annotations: null,
                 active_annotations: [],
                 annotations_renamed: false,
+
+                annotation_variables: [],
             }
         },
 
@@ -268,6 +273,9 @@ import Multiselect from '@vueform/multiselect';
             await this.loadAnnotations();
             await this.loadSVG();
             //console.log(this.project.project_parameters.annotation_variables);
+
+            let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
+            this.annotation_variables = stdiff['annotation_variables'];
         },
 
         watch: {

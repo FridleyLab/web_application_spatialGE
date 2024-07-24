@@ -29,6 +29,9 @@
                                         </template>
                                     </select>
                                 </div>
+                                <div v-if="project_platform_id === 1" class="text-warning ms-5">
+                                    Please note: Visium HD is not currently supported.
+                                </div>
                             </div>
 
                             <div class="d-flex">

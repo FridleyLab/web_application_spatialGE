@@ -48,6 +48,7 @@ import sendJobButton from "./components/common/send-job-button.vue";
 import spatialDomainDetection from "./components/wizard/spatial-domain-detection.vue";
 import sddStclust from "./components/wizard/components/sdd-stclust.vue";
 import sddSpagcn from "./components/wizard/components/sdd-spagcn.vue";
+import sddMilwrm from "./components/wizard/components/sdd-milwrm.vue";
 
 import differentialExpression from "./components/wizard/differential-expression.vue";
 import stdeNonSpatial from "./components/wizard/components/stde-non-spatial.vue";
@@ -63,6 +64,12 @@ import phenotyping from "./components/wizard/phenotyping.vue";
 import stdeconvolve from "./components/wizard/components/phenotyping-stdeconvolve.vue";
 import stdeconvolve_suggested_ks from "./components/wizard/components/phenotyping-stdeconvolve-suggested-ks.vue";
 import insitutype from "./components/wizard/components/phenotyping-insitutype.vue";
+
+
+//Client-side Plots
+import SideBySidePlot from "./components/common/plots/Editor.vue";
+import OverlayEditor from "./components/common/plots/OverlayEditor.vue";
+import PlotViewer from "./components/common/plots/PlotViewer.vue";
 
 
 //Global event emitter
@@ -140,6 +147,7 @@ app.component('send-job-button', sendJobButton);
 app.component('spatial-domain-detection', spatialDomainDetection);
 app.component('sdd-stclust', sddStclust);
 app.component('sdd-spagcn', sddSpagcn);
+app.component('sdd-milwrm', sddMilwrm);
 
 app.component('differential-expression', differentialExpression);
 app.component('stde-non-spatial', stdeNonSpatial);
@@ -155,6 +163,11 @@ app.component('phenotyping', phenotyping);
 app.component('stdeconvolve', stdeconvolve);
 app.component('insitutype', insitutype);
 app.component('stdeconvolve-suggested-ks', stdeconvolve_suggested_ks);
+
+
+app.component('side-by-side-plot', SideBySidePlot);
+app.component('PlotViewer', PlotViewer);
+app.component('OverlayEditor', OverlayEditor);
 
 
 

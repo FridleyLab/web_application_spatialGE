@@ -2525,7 +2525,8 @@ $export_files
         foreach ($params as $param) {
             $scriptContents = str_replace("{param_$param}", $parameters[$param], $scriptContents);
         }
-        $sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
+        //$sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
+        $sampleList = "'" . implode("','", $this->getSampleList(NULL, true)) . "'";
         $scriptContents = str_replace("{param_sample_list}", $sampleList, $scriptContents);
         Storage::put("$workingDir/$scriptName", $scriptContents);
         $output = $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');

@@ -13,19 +13,31 @@
         "vite": "^4.0.0"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^6.6.0",
+        "@panzoom/panzoom": "^4.5.1",
         "@svgdotjs/svg.js": "^3.2.0",
         "@vueform/multiselect": "^2.6.1",
         "@vueform/slider": "^2.1.7",
+        "bootstrap": "^5.3.3",
+        "canvg": "^4.0.2",
+        "d3": "^7.9.0",
         "devextreme": "23.1.4",
         "devextreme-vue": "23.1.4",
         "exceljs": "^4.3.0",
         "file-saver": "^2.0.5",
+        "html2canvas": "^1.4.1",
         "jspdf": "^2.5.1",
         "jszip": "^3.10.1",
         "mitt": "^3.0.0",
+        "pdf-lib": "^1.17.1",
+        "svg.js": "^2.7.1",
         "svg2pdf.js": "^2.2.3",
+        "v-tooltip": "^2.1.3",
+        "vue-advanced-cropper": "^2.8.9",
+        "vue-cropperjs": "^5.0.0",
         "vue-svg-pan-zoom": "^2.1.0",
         "vue3-easy-data-table": "^1.5.42",
-        "vuetify": "^3.1.11"
+        "vuetify": "^3.1.11",
+        "xlsx": "^0.18.5"
     }
 }

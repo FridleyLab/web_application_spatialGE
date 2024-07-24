@@ -149,9 +149,9 @@
                                 <template v-for="(image, sample, index) in samples">
                                     <div class="tab-pane fade" :class="Object.keys(samples).length === 1 && index === 0 ? 'show active' : ''" :id="'quilt-' + gene + '_' + sample" role="tabpanel" :aria-labelledby="'quilt-' + gene + '_' + sample + '-tab'">
                                         <div>
-                                            <show-plot :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true" side-by-side-tool-tip="vis_quilt_plot_side_by_side"></show-plot>
+                                            <show-plot v-if="!('plot_data' in plots)" :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true" side-by-side-tool-tip="vis_quilt_plot_side_by_side"></show-plot>
 
-                                            <!-- <div v-if="'plot_data' in plots" style="width: 100%; height: 600px">
+                                            <div v-if="'plot_data' in plots" class="my-4" style="width: 100%; height: 750px">
                                             <side-by-side-plot
                                                 src="sample_093d_plot"
                                                 :base="(getSampleByName(sample)).image_file_url"
@@ -160,9 +160,9 @@
                                                 :title="sample + ' - ' + gene"
                                                 :palette="['blue', 'orange', 'red']"
                                                 :legend-min="0"
-                                                :legend-max="10"
+                                                :legend-max="3"
                                             ></side-by-side-plot>
-                                            </div> -->
+                                            </div>
 
 
                                         </div>

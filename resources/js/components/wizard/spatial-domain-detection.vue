@@ -35,7 +35,7 @@
                                 <sdd-spagcn :project="project" :samples="samples" :sdd-spagcn-url="sddSpagcnUrl" :sdd-spagcn-svg-url="sddSpagcnSvgUrl" :sdd-spagcn-rename-url="sddSpagcnRenameUrl" :color-palettes="colorPalettes"></sdd-spagcn>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-milwrm" role="tabpanel" aria-labelledby="sdd-milwrm-tab">
-                                Coming soon
+                                <sdd-milwrm :project="project" :samples="samples" :sdd-milwrm-url="sddMilwrmUrl" :color-palettes="colorPalettes"></sdd-milwrm>
                             </div>
 
                         </div>
@@ -60,6 +60,7 @@
             sddSpagcnUrl: String,
             sddSpagcnSvgUrl: String,
             sddSpagcnRenameUrl: String,
+            sddMilwrmUrl: String,
         },
 
         mounted() {

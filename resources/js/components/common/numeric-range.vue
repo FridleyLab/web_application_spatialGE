@@ -55,6 +55,9 @@ import Slider from '@vueform/slider'
         watch: {
             value: {
                 handler(newValue, oldValue) {
+                    if(this.value[0] < this.min) this.value[0] = this.min;
+                    if(this.value[1] > this.max) this.value[1] = this.max;
+                    if(this.value[0] > this.value[1]) this.value[1] = this.value[0];
                     this.$emit('updated', this.value[0], this.value[1]);
                 },
                 deep: true

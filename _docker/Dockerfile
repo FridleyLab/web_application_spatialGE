@@ -62,7 +62,7 @@ RUN Rscript -e "remotes::install_github('Nanostring-Biostats/InSituType')"
 RUN Rscript -e "install.packages('uwot')"
 
 #Install spatialGE library
-RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')  "
+RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')   "
 
 
 
