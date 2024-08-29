@@ -142,6 +142,11 @@ class HomeController extends Controller
 
     }
 
+    public function runNormalization() {
+        return $projects = Project::whereLike('email', 'ITCR2024_test_user_%')->get();
+        // $project->createJob('Data import', 'createStList', []);
+    }
+
 
     public function show_statistics() {
 

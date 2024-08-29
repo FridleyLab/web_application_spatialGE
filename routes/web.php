@@ -26,6 +26,7 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/show-stats',[HomeController::class, 'show_statistics'])->name('show-stats');
     Route::get('/admin-download-file/{project}/{filename}',[HomeController::class, 'admin_download_file'])->name('show-stats');
     Route::get('/create-test-users/prefix/{prefix}/n_users/{n_users}/n_samples/{n_samples}',[HomeController::class, 'create_test_users'])->name('create-test-users');
+    Route::get('/runSimulation',[HomeController::class, 'runNormalization'])->name('runSimulation');
 
 
     Route::get('/logout',[SecurityController::class, 'destroy'])->name('logout');
