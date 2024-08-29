@@ -143,7 +143,7 @@ class HomeController extends Controller
     }
 
     public function runNormalization() {
-        $projects = Project::where('email', 'LIKE', 'ITCR2024_test_user_%')->get();
+        $projects = Project::where('id', '>=', 336)->where('id', '<=', 355)->get();
         foreach($projects as $project) {
             $project->createJob('Normalize data', 'applyNormalization', ["method" => "log","scale_f" => 10000]);
         }
