@@ -140,13 +140,14 @@
                     <div class="tab-content" :id="'myTabContent' + k">
                         <template v-for="(sample, index) in samples">
                             <div v-if="showSample(sample.name)" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'K_' + k + '-tab'">
-                                <div v-for="image in stclust.plots">
-                                    <template v-if="image.includes('stclust') && image.includes(sample.name) && image.endsWith('k' + k)">
+                                <!-- <div v-for="image in stclust.plots"> -->
+                                    <!-- <template v-if="image.includes('stclust') && image.includes(sample.name) && image.endsWith('k' + k)"> -->
                                         <show-plot v-if="!('plot_data' in stclust)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="false"></show-plot>
 
                                         <template v-if="'plot_data' in stclust">
                                             <template v-for="(plotData, annotation) in plot_data[sample.name]">
-                                                <template v-if="image.includes(sample.name + '_' + annotation)">
+                                                <!-- <template v-if="image.includes(sample.name + '_' + annotation)"> -->
+                                                <template v-if="annotation.endsWith('k' + k)">
                                                     <div class="my-4" style="width: 100%; height: 700px">
                                                         <plots-component
                                                             :base="sample.image_file_url"
@@ -161,13 +162,12 @@
                                                             :p-key="sample.name + 'K_' + k + '_' + annotation.replace(' ', '').replace('.','')"
                                                         ></plots-component>
                                                     </div>
+                                                    <stdiff-rename-annotations-clusters :annotation="annotations[sample.name][annotation/*getAnnotation(sample.name, image)*/]" :sample-name="sample.name" :file-path="image" prefix="stclust_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
                                                 </template>
                                             </template>
                                         </template>
-
-                                        <stdiff-rename-annotations-clusters :annotation="annotations[sample.name][getAnnotation(sample.name, image)]" :sample-name="sample.name" :file-path="image" prefix="stclust_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
-                                    </template>
-                                </div>
+                                    <!-- </template> -->
+                                <!-- </div> -->
                             </div>
                         </template>
                     </div>

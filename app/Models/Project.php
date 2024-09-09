@@ -3703,8 +3703,20 @@ lapply(names(grad_res), function(i){
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $file = $workingDir . 'insitutype_results.RData';
+        $files = ['flightpath' => 'insitutype_flightpath_data.csv', 'flightpath_labels' => 'insitutype_flightpath_cloud_labels.csv', 'bar' => 'insitutype_cell_types_barplot_data.csv', 'umap' => 'insitutype_umap_data.csv'];
         if (Storage::fileExists($file)) {
-            ProjectParameter::updateOrCreate(['parameter' => 'InSituType', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters])]);
+
+            foreach($files as $key => $dataFile) {
+                $_file = $workingDir . $dataFile;
+                $file_public = $this->workingDirPublic() . $dataFile;
+                if (Storage::fileExists($_file)) {
+                    Storage::delete($file_public);
+                    Storage::move($_file, $file_public);
+                    $files[$key] = $this->workingDirPublicURL() . $dataFile;
+                }
+            }
+
+            ProjectParameter::updateOrCreate(['parameter' => 'InSituType', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plot_data' => $files])]);
         }
 
         $this->current_step = 8;
