@@ -162,7 +162,7 @@
                                                             :p-key="sample.name + 'K_' + k + '_' + annotation.replace(' ', '').replace('.','')"
                                                         ></plots-component>
                                                     </div>
-                                                    <stdiff-rename-annotations-clusters :annotation="annotations[sample.name][annotation/*getAnnotation(sample.name, image)*/]" :sample-name="sample.name" :file-path="image" prefix="stclust_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
+                                                    <!-- <stdiff-rename-annotations-clusters :annotation="annotations[sample.name][annotation/*getAnnotation(sample.name, image)*/]" :sample-name="sample.name" :file-path="image" prefix="stclust_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters> -->
                                                 </template>
                                             </template>
                                         </template>
