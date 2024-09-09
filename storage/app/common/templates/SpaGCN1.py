@@ -80,7 +80,16 @@ for i in range(len(samples)):
         # l: Length scale, how rapidly the weight decays as a function of distance (modulates p?)
         l = spg.search_l(p, adj, start=0.01, end=1000, tol=0.01, max_run=100)
 
-        pred_df = pd.DataFrame(adata.obs_names, columns=['libname'])
+        #pred_df = pd.DataFrame(adata.obs_names, columns=['libname'])
+        pred_df = adata.obs
+        pred_df = pred_df.rename(columns={'x_pixel':'xpos', 'y_pixel':'ypos'})
+
+        # Save index
+        res_fp = 'spagcn_index_sample_' + str(r['sample_name'].iloc[0, 0]) + '.csv'
+        idx_df = pd.DataFrame(adata.obs.index)
+        idx_df = idx_df.rename(columns={0:'libname'})
+        idx_df.to_csv(res_fp, index=False)
+        del res_fp, idx_df # Clean env
 
         for k in range(min_k, max_k+1):
             # Set the number of clusters

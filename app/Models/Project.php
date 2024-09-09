@@ -2198,6 +2198,7 @@ $export_files
     public function STclust($parameters)
     {
         $parameters['samples'] = $this->getSampleList(NULL);
+        $samples = $this->getSampleList(NULL, true);
 
         $workingDir = $this->workingDir();
 
@@ -2213,9 +2214,9 @@ $export_files
         $_process_files = [];
 
         $file = $workingDir . 'stclust_plots.csv';
+        $plots = [];
         if (Storage::fileExists($file)) {
             $data = trim(Storage::read($file));
-            $plots = [];
             foreach (preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
                 $plots[] = $this->workingDirPublicURL() . $plot;
                 $file_extensions = ['svg', 'pdf', 'png'];
@@ -2237,9 +2238,26 @@ $export_files
                     }
                 }
             }
-            ProjectParameter::updateOrCreate(['parameter' => 'stclust', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
-            ProjectProcessFiles::updateOrCreate(['process' => 'STclust', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
+
+
+        $file = $workingDir . 'stclust_quilt_data.csv';
+        $plot_data = [];
+        foreach ($samples as $sample) {
+            $fileName = $sample . '_stclust_quilt_data.csv';
+            $file = $workingDir . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if (Storage::fileExists($file)) {
+                Storage::delete($file_public);
+                Storage::move($file, $file_public);
+                $plot_data[$sample] = $this->workingDirPublicURL() . $fileName;
+                $_process_files[] = $fileName;
+            }
+        }
+
+
+        ProjectParameter::updateOrCreate(['parameter' => 'stclust', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots, 'plot_data' => $plot_data])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'STclust', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         $this->stdiff_top_deg('stclust_top_deg.csv');
 
@@ -2397,7 +2415,8 @@ $export_files
 
     public function SpaGCN($parameters)
     {
-
+        $samples = $this->getSampleList(NULL, true);
+        $sampleList = "'" . join("','", $samples) . "'";
         $parameters['_samples'] = $this->getSampleList(NULL);
 
         $workingDir = $this->workingDir();
@@ -2416,8 +2435,6 @@ $export_files
         foreach ($params as $param) {
             $scriptContents = str_replace("{param_$param}", $parameters[$param], $scriptContents);
         }
-        //$sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
-        $sampleList = "'" . join("','", $this->getSampleList(NULL, true)) . "'";
         $scriptContents = str_replace("{param_sample_list}", $sampleList, $scriptContents);
         Storage::put("$workingDir/$scriptName", $scriptContents);
         $output .= $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');
@@ -2430,6 +2447,20 @@ $export_files
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $_process_files = [];
+
+        $plot_data = [];
+        foreach ($samples as $sample) {
+            $fileName = 'spagcn_predicted_domains_sample_' . $sample . '.csv';
+            $file = $workingDir . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if (Storage::fileExists($file)) {
+                Storage::delete($file_public);
+                Storage::move($file, $file_public);
+                $plot_data[$sample] = $this->workingDirPublicURL() . $fileName;
+                $_process_files[] = $fileName;
+            }
+        }
+
 
         $file = $workingDir . 'spagcn_plots.csv';
         if (Storage::fileExists($file)) {
@@ -2474,7 +2505,7 @@ $export_files
                 $zip->close();
             }*/
 
-            ProjectParameter::updateOrCreate(['parameter' => 'spagcn', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots])]);
+            ProjectParameter::updateOrCreate(['parameter' => 'spagcn', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots, 'plot_data' => $plot_data])]);
             ProjectProcessFiles::updateOrCreate(['process' => 'SpaGCN', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 
@@ -2517,19 +2548,24 @@ $export_files
 
         $workingDir = $this->workingDir();
 
+        $sampleList = "'" . implode("','", $this->getSampleList(NULL, true)) . "'";
+
+        //Run R script to prepare annotations
+        $scriptName = 'SpaGCN2_SVG.R';
+        $scriptContents = Storage::get("/common/templates/$scriptName");
+        $scriptContents = $this->replaceRscriptParameter('_stlist', 'stclust_stlist', $scriptContents);
+        $scriptContents = $this->replaceRscriptParameter('annotation_to_test', $parameters['annotation_to_test'], $scriptContents);
+        $scriptContents = $this->replaceRscriptParameter('sample_list', $sampleList, $scriptContents);
+        Storage::put("$workingDir/$scriptName", $scriptContents);
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
         //Run SpaGCN_SVG on the simple STList
         $scriptName = 'SpaGCN2_SVG.py';
         $scriptContents = Storage::get("/common/templates/$scriptName");
-
-        $params = ['annotation_to_test'];
-        foreach ($params as $param) {
-            $scriptContents = str_replace("{param_$param}", $parameters[$param], $scriptContents);
-        }
-        //$sampleList = "'" . $this->samples()->pluck('samples.name')->join("','") . "'";
-        $sampleList = "'" . implode("','", $this->getSampleList(NULL, true)) . "'";
+        $scriptContents = str_replace("{param_annotation_to_test}", $parameters['annotation_to_test'], $scriptContents);
         $scriptContents = str_replace("{param_sample_list}", $sampleList, $scriptContents);
         Storage::put("$workingDir/$scriptName", $scriptContents);
-        $output = $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');
+        $output .= $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'SPAGCN');
 
         $_process_files = [];
 
@@ -2674,7 +2710,7 @@ $export_files
         $output .= $this->spatialExecute('python ' . $scriptName, $parameters['__task'], 'MILWRM');
 
         $_process_files = [];
-        $data_files = [];
+        $plot_data = [];
         foreach ($this->getSampleList($parameters['samples'], true) as $sample) {
             $fileName = 'milwrm_predicted_domains_sample_' . $sample . '.csv';
             $file = $workingDir . $fileName;
@@ -2682,13 +2718,12 @@ $export_files
             if (Storage::fileExists($file)) {
                 Storage::delete($file_public);
                 Storage::move($file, $file_public);
-                $data_files[$sample] = $fileName;
-
+                $plot_data[$sample] = $this->workingDirPublicURL() . $fileName;
                 $_process_files[] = $fileName;
             }
         }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'milwrm', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'data_files' => $data_files])]);
+        ProjectParameter::updateOrCreate(['parameter' => 'milwrm', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plot_data' => $plot_data])]);
         ProjectProcessFiles::updateOrCreate(['process' => 'MILWRM', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         //$this->current_step = 8;

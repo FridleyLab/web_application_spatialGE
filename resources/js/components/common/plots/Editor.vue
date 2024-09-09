@@ -7,11 +7,13 @@
                 :processedData="processedData"
                 :expression="expression"
                 :title="title"
+                :plotType="plotType"
                 :colorPalette="palette"
                 :legendMin="legendMin"
                 :legendMax="legendMax"
                 :isPanZoomLocked="isPanZoomLocked"
                 :isYAxisInverted="inverted"
+                :isGrouped="grouped"
                 @update-svg="handleSvgUpdate"
             ></PlotViewer>
         </div>
@@ -33,7 +35,7 @@
             </div>
             <OverlayEditor
                 ref="overlayEditor"
-                v-if="isPlotVisible && svgData"
+                v-if="svgData"
                 :base="base"
                 :overlay="svgData"
                 :show-image="showImage"
@@ -77,6 +79,10 @@ export default {
             type: String,
             required: true,
         },
+        plotType: {
+            type: String,
+            required: true,
+        },
         palette: {
             type: Object,
             required: true,
@@ -90,7 +96,8 @@ export default {
             required: true,
         },
         showImage: { type: Boolean, default: true },
-        inverted: { type: Boolean, default: false },
+        inverted: { type: Boolean, required: false },
+        grouped: { type: Boolean, default: true },
     },
 
     setup() {
@@ -100,6 +107,9 @@ export default {
         const observer = new IntersectionObserver(
             ([entry]) => {
                 isPlotVisible.value = entry.isIntersecting;
+                if (isPlotVisible.value) {
+                    observer.disconnect();
+                }
             },
             { threshold: 0.1 }
         );
@@ -109,17 +119,6 @@ export default {
                 observer.observe(plotContainer.value);
             }
         });
-
-        watch(
-            () => plotContainer.value,
-            (newValue) => {
-                if (newValue) {
-                    observer.observe(newValue);
-                } else {
-                    observer.disconnect();
-                }
-            }
-        );
 
         return {
             plotContainer,
@@ -157,7 +156,7 @@ export default {
             const height = baseImage.naturalHeight;
             const aspectRatio = width / height;
             const containerWidth = window.innerWidth;
-            const desiredWidth = containerWidth * 0.6;
+            const desiredWidth = containerWidth * 0.4;
             const desiredHeight = desiredWidth / aspectRatio;
             this.sharedState.plotWidth = desiredWidth;
             this.sharedState.plotHeight = desiredHeight;

@@ -235,8 +235,8 @@ export default {
         const elem = ref(null);
         const elemTwo = ref(null);
         const panzoomParent = ref(null);
-        const overlayWidth = ref(sharedState.plotWidth / 1.5);
-        const overlayHeight = ref(sharedState.plotHeight / 1.5);
+        const overlayWidth = ref(sharedState.plotWidth * 1.05);
+        const overlayHeight = ref(sharedState.plotHeight * 0.85);
         const overlayOpacity = ref(1);
         const baseOpacity = ref(1);
         const isLocked = ref(false);
@@ -271,8 +271,12 @@ export default {
 
         function applyZoomTransform(transform) {
             const { x, y, scale } = transform;
-            panzoom.zoom(scale);
             panzoom.pan(x, y, { force: true });
+            panzoom.zoom(scale, { animate: true });
+
+            const parentScale = panzoom.getScale();
+            panzoom2.pan(x / parentScale, y / parentScale, { force: true });
+            panzoom2.zoom(scale, { animate: true });
         }
 
         const updateMinimapViewport = () => {
@@ -291,18 +295,18 @@ export default {
             const scale = panzoom.getScale();
             const pan = panzoom.getPan();
 
-            const minimapViewportWidth =
-                ((minimapBaseImageWidth / scale) * 100) / minimapBaseImageWidth;
-            const minimapViewportHeight =
-                ((minimapBaseImageHeight / scale) * 100) /
-                minimapBaseImageHeight;
+            const visibleWidth = baseImage.clientWidth / scale;
+            const visibleHeight = baseImage.clientHeight / scale;
 
-            const minimapViewportLeft = -pan.x * scale * scaleX;
-            const minimapViewportTop = -pan.y * scale * scaleY;
+            const minimapViewportWidth = visibleWidth * scaleX;
+            const minimapViewportHeight = visibleHeight * scaleY;
+
+            const minimapViewportLeft = -pan.x * scaleX;
+            const minimapViewportTop = -pan.y * scaleY;
 
             minimapViewportStyle.value = {
-                width: `${minimapViewportWidth}%`,
-                height: `${minimapViewportHeight}%`,
+                width: `${minimapViewportWidth}px`,
+                height: `${minimapViewportHeight}px`,
                 top: `${minimapViewportTop}px`,
                 left: `${minimapViewportLeft}px`,
             };
@@ -659,13 +663,14 @@ export default {
 }
 
 .img-fluid {
-    max-width: 80% !important;
+    max-height: 70% !important;
+    max-width: 70% !important;
 }
 
 .minimap {
     position: relative;
     width: 100px;
-    height: 100px;
+    height: auto;
     overflow: hidden;
     border: 1px solid #ccc;
 }

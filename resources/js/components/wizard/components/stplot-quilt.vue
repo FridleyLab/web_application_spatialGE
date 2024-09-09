@@ -151,19 +151,20 @@
                                         <div>
                                             <show-plot v-if="!('plot_data' in plots)" :src="image" :show-image="Boolean(getSampleByName(sample))" :sample="getSampleByName(sample)" :side-by-side="true" side-by-side-tool-tip="vis_quilt_plot_side_by_side"></show-plot>
 
-                                            <div v-if="'plot_data' in plots" class="my-4" style="width: 100%; height: 750px">
-                                            <side-by-side-plot
-                                                :base="(getSampleByName(sample)).image_file_url"
-                                                :csv="plot_data[sample][gene]"
-                                                :expression="gene"
-                                                :title="sample + ' - ' + gene"
-                                                :palette="['blue', 'orange', 'red']"
-                                                :legend-min="0"
-                                                :legend-max="3"
-                                                :inverted="project.project_platform_id === 3"
-                                            ></side-by-side-plot>
+                                            <div v-if="'plot_data' in plots" class="my-4" style="width: 100%; height: 700px">
+                                                <plots-component
+                                                    :base="(getSampleByName(sample)).image_file_url"
+                                                    :csv="plot_data[sample][gene]"
+                                                    :title="sample + ' - ' + gene"
+                                                    plot-type="gradient"
+                                                    :color-palette="['blue', 'orange', 'red']"
+                                                    :legend-min="0"
+                                                    :legend-max="10"
+                                                    :is-y-axis-inverted="project.project_platform_id === 3"
+                                                    :is-grouped="false"
+                                                    :p-key="'quiltPlot-' + gene + '_' + sample"
+                                                ></plots-component>
                                             </div>
-
 
                                         </div>
                                     </div>
@@ -255,7 +256,7 @@ import Multiselect from '@vueform/multiselect';
                 this.processPlotFile(sample, data.data);
             }
 
-            console.log(this.plot_data)
+            console.log(this.plot_data);
 
             this.loaded = true;
 

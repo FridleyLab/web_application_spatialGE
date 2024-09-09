@@ -21,10 +21,10 @@
                                 <button class="nav-link active" id="sdd-stclust-tab" data-bs-toggle="tab" data-bs-target="#sdd-stclust" type="button" role="tab" aria-controls="sdd-stclust" aria-selected="true">STclust</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="sdd-spagcn-tab" data-bs-toggle="tab" data-bs-target="#sdd-spagcn" type="button" role="tab" aria-controls="sdd-spagcn" aria-selected="false">SpaGCN</button>
+                                <button class="nav-link" id="sdd-spagcn-tab" data-bs-toggle="tab" data-bs-target="#sdd-spagcn" type="button" role="tab" aria-controls="sdd-spagcn" aria-selected="false" @click.prevent="showSpaGcn = true">SpaGCN</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="sdd-milwrm-tab" data-bs-toggle="tab" data-bs-target="#sdd-milwrm" type="button" role="tab" aria-controls="sdd-milwrm" aria-selected="false">MILWRM</button>
+                                <button class="nav-link" id="sdd-milwrm-tab" data-bs-toggle="tab" data-bs-target="#sdd-milwrm" type="button" role="tab" aria-controls="sdd-milwrm" aria-selected="false" @click.prevent="showMilwrm = true">MILWRM</button>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
@@ -32,10 +32,10 @@
                                 <sdd-stclust :project="project" :samples="samples" :sdd-stclust-url="sddStclustUrl" :sdd-stclust-rename-url="sddStclustRenameUrl" :color-palettes="colorPalettes"></sdd-stclust>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-spagcn" role="tabpanel" aria-labelledby="sdd-spagcn-tab">
-                                <sdd-spagcn :project="project" :samples="samples" :sdd-spagcn-url="sddSpagcnUrl" :sdd-spagcn-svg-url="sddSpagcnSvgUrl" :sdd-spagcn-rename-url="sddSpagcnRenameUrl" :color-palettes="colorPalettes"></sdd-spagcn>
+                                <sdd-spagcn v-if="showSpaGcn" :project="project" :samples="samples" :sdd-spagcn-url="sddSpagcnUrl" :sdd-spagcn-svg-url="sddSpagcnSvgUrl" :sdd-spagcn-rename-url="sddSpagcnRenameUrl" :color-palettes="colorPalettes"></sdd-spagcn>
                             </div>
                             <div class="tab-pane fade min-vh-50" id="sdd-milwrm" role="tabpanel" aria-labelledby="sdd-milwrm-tab">
-                                <sdd-milwrm :project="project" :samples="samples" :sdd-milwrm-url="sddMilwrmUrl" :color-palettes="colorPalettes"></sdd-milwrm>
+                                <sdd-milwrm v-if="showMilwrm" :project="project" :samples="samples" :sdd-milwrm-url="sddMilwrmUrl" :color-palettes="colorPalettes"></sdd-milwrm>
                             </div>
 
                         </div>
@@ -61,6 +61,13 @@
             sddSpagcnSvgUrl: String,
             sddSpagcnRenameUrl: String,
             sddMilwrmUrl: String,
+        },
+
+        data() {
+            return {
+                showSpaGcn: false,
+                showMilwrm: false,
+            };
         },
 
         mounted() {

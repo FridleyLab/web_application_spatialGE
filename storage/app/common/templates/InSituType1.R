@@ -33,7 +33,6 @@ age_grp = "Adult"
 library('InSituType')
 library('SpatialDecon')
 library('spatialGE')
-#devtools::load_all('~/Dropbox (Moffitt Cancer Center)/SPATIAL_TRANSCRIPTOMICS/spatialGE/')
 library('magrittr')
 
 # Load STlist
@@ -121,14 +120,13 @@ colnames(sup_df) = 'insitutype_cell_types'
 sup_df = sup_df %>% tibble::rownames_to_column('complete_cell_id')
 
 # Add cell type labels to STlist
-insitutype_stlist = STlist
-for(i in names(insitutype_stlist@spatial_meta)){
-  if(any(colnames(insitutype_stlist@spatial_meta[[i]]) == 'insitutype_cell_types')){
-    insitutype_stlist@spatial_meta[[i]] = insitutype_stlist@spatial_meta[[i]][, !grepl('insitutype_cell_types', colnames(insitutype_stlist@spatial_meta[[i]]), fixed=T)]
+for(i in names(STlist@spatial_meta)){
+  if(any(colnames(STlist@spatial_meta[[i]]) == 'insitutype_cell_types')){
+    STlist@spatial_meta[[i]] = STlist@spatial_meta[[i]][, !grepl('insitutype_cell_types', colnames(STlist@spatial_meta[[i]]), fixed=T)]
   }
 
   slide_name = gsub('_fov_[0-9]+$', '', i)
-  insitutype_stlist@spatial_meta[[i]] = insitutype_stlist@spatial_meta[[i]] %>%
+  STlist@spatial_meta[[i]] = STlist@spatial_meta[[i]] %>%
     dplyr::mutate(complete_cell_id=paste0(slide_name, '_', libname)) %>%
     dplyr::left_join(., sup_df, by='complete_cell_id') %>%
     dplyr::select(-c('complete_cell_id')) %>%
@@ -136,11 +134,11 @@ for(i in names(insitutype_stlist@spatial_meta)){
 }
 
 # annot_variables used for Differential Expression analyses and STgradient analyses
-annot_variables = lapply(names(insitutype_stlist@spatial_meta), function(i){
-  var_cols=colnames(insitutype_stlist@spatial_meta[[i]])[-c(1:5)]
+annot_variables = lapply(names(STlist@spatial_meta), function(i){
+  var_cols=colnames(STlist@spatial_meta[[i]])[-c(1:5)]
   df_tmp = tibble::tibble()
   for(v in var_cols){
-    cluster_values = unique(insitutype_stlist@spatial_meta[[i]][[v]])
+    cluster_values = unique(STlist@spatial_meta[[i]][[v]])
     df_tmp = dplyr::bind_rows(df_tmp, tibble::tibble(V1=i, V2=v, V3=v, V4=cluster_values, V5=cluster_values))
   }
   return(df_tmp) })
@@ -158,20 +156,20 @@ if(file.exists('stdiff_annotation_variables_clusters.csv')){
 write.table(annot_variables, 'stdiff_annotation_variables_clusters.csv', quote=F, row.names=F, col.names=F, sep=',')
 
 ###*******#####save new STlist as RData
-stclust_stlist = insitutype_stlist
+stclust_stlist = STlist
 save(stclust_stlist, file='stclust_stlist.RData')
 
 # PCA/UMAP
 start_t = Sys.time()
 # Iterate over STlist and merge transformed counts... (Hoping this doesnt burn the memory)
 # Subset genes to those in Insitutype object cell profiles
-i = names(insitutype_stlist@tr_counts)[1]
-merged_cts = insitutype_stlist@tr_counts[[i]]
+i = names(STlist@tr_counts)[1]
+merged_cts = STlist@tr_counts[[i]]
 merged_cts = merged_cts[rownames(sup[['profiles']]), ]
 colnames(merged_cts) = paste0(gsub('_fov_[0-9]+$', '', i), '_', colnames(merged_cts)) # Add slide IDs
-if(length(insitutype_stlist@tr_counts) > 1){
-  for(i in names(insitutype_stlist@tr_counts)[-1]){
-    df_tmp = insitutype_stlist@tr_counts[[i]]
+if(length(STlist@tr_counts) > 1){
+  for(i in names(STlist@tr_counts)[-1]){
+    df_tmp = STlist@tr_counts[[i]]
     colnames(df_tmp) = paste0(gsub('_fov_[0-9]+$', '', i), '_', colnames(df_tmp))
     common_tmp = intersect(rownames(merged_cts), rownames(df_tmp))
     merged_cts = merged_cts[common_tmp, ]
@@ -190,13 +188,9 @@ start_t = Sys.time()
 merged_cts_scl = scale(Matrix::t(merged_cts))
 end_t = difftime(Sys.time(), start_t, units='min')
 cat(paste0('\tScaling and transpose (normalized expression - PCA/UMAP) completed in ', round(end_t, 2), ' min.\n'))
-rm(start_t, end_t) # Clean env
+rm(start_t, end_t, merged_cts) # Clean env
 
-# Calculate principal components
-# start_t=Sys.time()
-# pca_obj = prcomp(merged_cts_scl, scale.=F, center=F)
-# end_t = difftime(Sys.time(), start_t, units='min')
-
+# Calculate PCs
 start_t=Sys.time()
 pca_irlba_obj = irlba::prcomp_irlba(merged_cts_scl, n=20, retx=T, scale.=F, center=F)
 end_t = difftime(Sys.time(), start_t, units='min')
@@ -204,7 +198,6 @@ cat(paste0('\tAll FOVs PCA completed in ', round(end_t, 2), ' min.\n'))
 rm(start_t, end_t) # Clean env
 
 # Calculate UMAP embeddings
-#umap_obj = umap(pca_obj[['x']][, 1:30])
 start_t=Sys.time()
 umap_obj = uwot::umap(pca_irlba_obj[['x']], pca=NULL)
 rownames(umap_obj) = rownames(merged_cts_scl)
@@ -213,7 +206,74 @@ cat(paste0('\tAll FOVs UMAP completed in ', round(end_t, 2), ' min.\n'))
 rm(start_t, end_t) # Clean env
 
 ###*******#####save sup as stclust_stlist RData
-save(umap_obj, file='insitutype_umap_object.RData')
+#save(umap_obj, file='insitutype_umap_object.RData')
+
+rm(merged_cts_scl) # Clean env
+
+# Create data frame to plot UMAP embeddings
+umap_df = as.data.frame(umap_obj) %>%
+  dplyr::rename(UMAP1=1, UMAP2=2) %>%
+  tibble::rownames_to_column('complete_cell_id') %>%
+  dplyr::mutate_at(c('UMAP1', 'UMAP2'), format, scientific=F) %>%
+  dplyr::left_join(., as.data.frame(sup[['clust']]) %>%
+                     dplyr::rename(insitutype_cell_types=1) %>%
+                     tibble::rownames_to_column('complete_cell_id'), by='complete_cell_id') %>%
+  dplyr::mutate(sample_name=stringr::str_replace(complete_cell_id, '_cell_[0-9]+', '')) %>%
+  #dplyr::left_join(., STlist@sample_meta, by='sample_name') %>%
+  dplyr::select(-c('complete_cell_id'))
+data.table::fwrite(umap_df, file='insitutype_umap_data.csv', quote=T, row.names=F)
+
+# IN CASE WE WANT TO SUBSAMPLE UMAP PLOT
+#umap_df = umap_df[sample(1:nrow(umap_df), size=0.5*nrow(umap_df)), ]
+
+# Generate flightpath plot data
+fl_res = InSituType::flightpath_layout(logliks=sup[['logliks']])
+
+flp_df = as.data.frame(fl_res[['cellpos']])
+flp_df = flp_df %>% dplyr::mutate_at(c('x', 'y'), format, scientific=F)
+flp_df[['insitutype_cell_types']] = fl_res[['clust']]
+#flp_df = flp_df %>% dplyr::left_join(., tibble::enframe(fl_res[['meanconfidence']], name='insitutype_cell_types', value='conf'), by='insitutype_cell_types')
+#flp_df[['conf']] = round(flp_df[['conf']], 2)
+#flp_df[['insitutype_cell_types']] = paste0(flp_df[['insitutype_cell_types']], ' (', flp_df[['conf']], ')')
+#flp_df = flp_df[, -4]
+
+data.table::fwrite(flp_df, file='insitutype_flightpath_data.csv', quote=T, row.names=F)
+
+# Labels for flightpath plot clouds
+flp_labels = as.data.frame(fl_res[['clustpos']]) %>% tibble::rownames_to_column('insitutype_cell_types') %>%
+  dplyr::left_join(., tibble::enframe(fl_res[['meanconfidence']], name='insitutype_cell_types', value='conf'), by='insitutype_cell_types')
+flp_labels[['conf']] = round(flp_labels[['conf']], 2)
+flp_labels[['insitutype_cell_types']] = paste0(flp_labels[['insitutype_cell_types']], ' (', flp_labels[['conf']], ')')
+flp_labels = flp_labels[, c('x', 'y', 'insitutype_cell_types')]
+flp_labels = flp_labels %>% dplyr::mutate_at(c('x', 'y'), format, scientific=F)
+
+data.table::fwrite(flp_labels, file='insitutype_flightpath_cloud_labels.csv', quote=T, row.names=F)
+
+# File to create barplots
+bps_df = dplyr::bind_rows(lapply(names(STlist@spatial_meta), function(i){
+  df_tmp = STlist@spatial_meta[[i]] %>%
+    dplyr::mutate(insitutype_cell_types=tidyr::replace_na(insitutype_cell_types, 'unknown')) %>%
+    dplyr::mutate(fov_id=i) %>%
+    dplyr::select(c('fov_id', 'insitutype_cell_types')) %>%
+    dplyr::group_by(insitutype_cell_types) %>%
+    dplyr::summarize(number_cells=dplyr::n()) %>%
+    dplyr::ungroup() %>%
+    tibble::add_column(fov_id=i, .before=1) %>%
+    return(df_tmp)
+}))
+# Make wide table (cell types in columns, FOVs in rows)
+bps_df = bps_df %>%
+  tidyr::pivot_wider(names_from='insitutype_cell_types', values_from='number_cells') %>%
+  dplyr::mutate(unknown=tidyr::replace_na('unknown', 0))
+# Write file
+write.csv(bps_df, 'insitutype_cell_types_barplot_data.csv', row.names=F)
+
+# Create data frames for quilt plots
+lapply(1:length(names(STlist@spatial_meta)), function(i){
+  s = names(STlist@spatial_meta)[i]
+  df_tmp = STlist@spatial_meta[[s]][,  c('xpos', 'ypos', 'insitutype_cell_types')]
+  data.table::fwrite(df_tmp, file=paste0(s, '_insitutype_quilt_data.csv'), quote=F, row.names=F)
+})
 
 apocalypse_t = difftime(Sys.time(), genesis_t, units='min')
 cat(paste0('Insitutype Part 1 completed in ', round(apocalypse_t, 2), ' min.\n'))

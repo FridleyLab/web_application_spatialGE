@@ -139,10 +139,35 @@
                             <div class="tab-content" id="inSituTypeAdditionalPlotsContent">
 
                                 <div class="tab-pane fade show active mt-4" id="inSituType-UMAP-plot" role="tabpanel" aria-labelledby="inSituType-UMAP-plot-tab">
+
+                                    <div>
+                                        <umap-flight-plot
+                                            :csv="inSituType.plot_data.umap"
+                                            expression="Umap"
+                                            title="UMAP Plot"
+                                            plot-type="umap"
+                                            :inverted="false"
+                                            :palette="{'mast.cell': '#0a4b1c', 'muscle.cell': '#128c08', 'lymph.vessel.cell': '#0eb887', 'CD4+.T.cell': '#f0a97e', 'alveolar.epithelial.cell.type.1': '#4da0de', 'plasma.cell': '#d8b1ab', 'regulatory.T.cell': '#6934fb', 'B.cell': '#50f662', 'undefined': '#a94be1', 'monocyte': '#e7a662', 'activated.dendritic.cell': '#a866cf', 'alveolar.epithelial.cell.type.2': '#eca8db', 'dendritic.cell.type.2': '#86852f', 'ciliated.cell': '#a6104b', 'MARCOpos.macrophage': '#c5be06', 'natural.killer.cell': '#4ee933', 'MARCOneg.macrophage': '#b61410', 'plasmacytoid.dendritic.cell': '#151da5', 'CD8+.cytotoxic.T.cell': '#cb655c', 'dendritic.cell.type.1': '#18dfd3', 'blood.vessel.cell': '#f9cd72', 'fibroblast': '#9e03fe'}"
+                                        ></umap-flight-plot>
+                                    </div>
+
                                     <show-plot :src="inSituType2.plots['insitutype_umap']" file-extension="png" :show-image="false"></show-plot>
                                 </div>
 
                                 <div class="tab-pane fade mt-4" id="inSituType-Flight-plot" role="tabpanel" aria-labelledby="inSituType-Flight-plot-tab">
+
+                                    <div width="800" height="800">
+                                        <umap-flight-plot
+                                            :csv="inSituType.plot_dataflightpath"
+                                            expression="Flight"
+                                            title="Flight Path"
+                                            plot-type="flight"
+                                            :label-csv="inSituType.plot_dataflightpath"
+                                            :palette="{'mast.cell': '#0a4b1c', 'muscle.cell': '#128c08', 'lymph.vessel.cell': '#0eb887', 'CD4+.T.cell': '#f0a97e', 'alveolar.epithelial.cell.type.1': '#4da0de', 'plasma.cell': '#d8b1ab', 'regulatory.T.cell': '#6934fb', 'B.cell': '#50f662', 'undefined': '#a94be1', 'monocyte': '#e7a662', 'activated.dendritic.cell': '#a866cf', 'alveolar.epithelial.cell.type.2': '#eca8db', 'dendritic.cell.type.2': '#86852f', 'ciliated.cell': '#a6104b', 'MARCOpos.macrophage': '#c5be06', 'natural.killer.cell': '#4ee933', 'MARCOneg.macrophage': '#b61410', 'plasmacytoid.dendritic.cell': '#151da5', 'CD8+.cytotoxic.T.cell': '#cb655c', 'dendritic.cell.type.1': '#18dfd3', 'blood.vessel.cell': '#f9cd72', 'fibroblast': '#9e03fe'}"
+                                            :inverted="false"
+                                        ></umap-flight-plot>
+                                    </div>
+
                                     <show-plot :src="inSituType2.plots['insitutype_flightpath']" file-extension="png" :show-image="false"></show-plot>
                                 </div>
 

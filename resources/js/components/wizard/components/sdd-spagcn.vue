@@ -112,8 +112,30 @@
                                                 <div v-if="showSample(sample.name)" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_K_' + k + '-tab'">
                                                     <div v-for="image in spagcn.plots">
                                                         <template v-if="image.includes('spagcn') && image.includes(sample.name) && (image.endsWith('k' + k) || image.endsWith('k' + k + '_refined'))">
-                                                            <h4 class="text-center" v-if="image.includes('refined')">Refined clusters</h4>
-                                                            <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+                                                            <h4 class="pt-4 text-center" v-if="image.includes('refined')">Refined clusters</h4>
+                                                            <show-plot v-if="!('plot_data' in spagcn)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
+
+                                                            <template v-if="'plot_data' in spagcn">
+                                                                <template v-for="(plotData, annotation) in plot_data[sample.name]">
+                                                                    <template v-if="image.includes(sample.name + '_' + annotation) && (!image.includes('refined') || annotation.endsWith('refined'))">
+                                                                        <div class="my-4" style="width: 100%; height: 700px">
+                                                                            <plots-component
+                                                                                :base="sample.image_file_url"
+                                                                                :csv="plotData.data"
+                                                                                :title="annotation"
+                                                                                plot-type="cluster"
+                                                                                :color-palette="plot_data[sample.name][annotation]['palette']"
+                                                                                :legend-min="0"
+                                                                                :legend-max="10"
+                                                                                :is-y-axis-inverted="project.project_platform_id === 3"
+                                                                                :is-grouped="true"
+                                                                                :p-key="sample.name + 'K_' + k + '_' + annotation.replace(' ', '').replace('.','')"
+                                                                            ></plots-component>
+                                                                        </div>
+                                                                    </template>
+                                                                </template>
+                                                            </template>
+
                                                             <stdiff-rename-annotations-clusters v-if="annotations !== null" :annotation="annotations[sample.name][getAnnotation(sample.name, image)]" :sample-name="sample.name" :file-path="image" prefix="spagcn_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
                                                         </template>
                                                     </div>
@@ -266,6 +288,10 @@ import Multiselect from '@vueform/multiselect';
                 annotations_renamed: false,
 
                 annotation_variables: [],
+
+                loaded: false,
+                plot_data: {},
+                plot_show: {},
             }
         },
 
@@ -276,6 +302,18 @@ import Multiselect from '@vueform/multiselect';
 
             let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
             this.annotation_variables = stdiff['annotation_variables'];
+
+
+            if(!('plot_data' in this.spagcn)) {
+                this.loaded = true;
+                return;
+            }
+            for(let sample in this.spagcn.plot_data) {
+                let data = await axios.get(this.spagcn.plot_data[sample]);
+                this.processPlotFile(sample, data.data);
+            }
+            this.loaded = true;
+
         },
 
         watch: {
@@ -302,9 +340,48 @@ import Multiselect from '@vueform/multiselect';
 
         methods: {
 
+            getColorPalette(sampleName, annotation) {
+                // console.log(sampleName, annotation);
+                // console.log(this.annotations[sampleName][annotation]);
+
+                const colors = ['red', 'green', 'blue', 'yellow', 'cyan'];
+
+                let annotations = this.annotations[sampleName][annotation];
+                let colorPalette = {};
+                let i = 0;
+                for(let clusterName in annotations.clusters) {
+                    let cluster = annotations.clusters[clusterName];
+                    colorPalette[cluster.originalName] = {label: ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName, color: colors[i]};
+                    i++;
+                }
+
+                return colorPalette;
+            },
+
+            processPlotFile(sampleName, data) {
+                this.plot_data[sampleName] = {};
+                const columnNames = data.split('\n')[0].split(',');
+                for(let i = 2; i < columnNames.length; i++) {
+                    this.plot_data[sampleName][columnNames[i]] = {};
+                    this.plot_data[sampleName][columnNames[i]]['data'] = this.extractColumnsFromCSV(data, [1, 2, i+1]);
+                    this.plot_data[sampleName][columnNames[i]]['palette'] = this.getColorPalette(sampleName, columnNames[i]);
+
+                    //console.log(this.plot_data[sampleName][columnNames[i]]);
+                }
+            },
+
+            extractColumnsFromCSV(csv, columns) {
+                const rows = csv.split('\n');
+                const extractedRows = rows.map(row => {
+                    const cells = row.split(',');
+                    const extractedCells = columns.map(index => cells[index - 1]);
+                    return extractedCells.join(',');
+                });
+                return extractedRows.join('\n');
+            },
+
             async loadAnnotations() {
                 this.annotations =  await this.$getProjectSTdiffAnnotationsBySample(this.project.id, 'spagcn');
-                console.log(this.annotations);
             },
 
             getAnnotation(sampleName, reference) {
@@ -339,6 +416,8 @@ import Multiselect from '@vueform/multiselect';
                 });
 
                 this.annotations_renamed = this.active_annotations.some(aa => aa.changed);
+
+                this.plot_data[sampleName][annotation.originalName]['palette'] = this.getColorPalette(sampleName, annotation.originalName)
             },
 
             showSample(sampleName) {

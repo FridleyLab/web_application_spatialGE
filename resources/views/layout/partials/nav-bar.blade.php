@@ -10,6 +10,14 @@
             </div>
         @endif
 
+        <div class="ms-3 py-1 px-2 text-white text-xxl-center bg-primary rounded rounded-xl">
+            Registered users: {{ App\Models\User::all()->count() }}
+        </div>
+
+        <div class="ms-3 py-1 px-2 text-white text-xxl-center bg-success rounded rounded-xl">
+            Completed jobs: {{ App\Models\Task::all()->count() }}
+        </div>
+
 
 {{--        @auth--}}
 {{--        <nav aria-label="breadcrumb">--}}

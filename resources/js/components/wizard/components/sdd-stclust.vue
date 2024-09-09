@@ -142,7 +142,29 @@
                             <div v-if="showSample(sample.name)" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'K_' + k + '-tab'">
                                 <div v-for="image in stclust.plots">
                                     <template v-if="image.includes('stclust') && image.includes(sample.name) && image.endsWith('k' + k)">
-                                        <show-plot :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="false"></show-plot>
+                                        <show-plot v-if="!('plot_data' in stclust)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="false"></show-plot>
+
+                                        <template v-if="'plot_data' in stclust">
+                                            <template v-for="(plotData, annotation) in plot_data[sample.name]">
+                                                <template v-if="image.includes(sample.name + '_' + annotation)">
+                                                    <div class="my-4" style="width: 100%; height: 700px">
+                                                        <plots-component
+                                                            :base="sample.image_file_url"
+                                                            :csv="plotData.data"
+                                                            :title="annotation"
+                                                            plot-type="cluster"
+                                                            :color-palette="plot_data[sample.name][annotation]['palette']"
+                                                            :legend-min="0"
+                                                            :legend-max="10"
+                                                            :is-y-axis-inverted="project.project_platform_id === 3"
+                                                            :is-grouped="true"
+                                                            :p-key="sample.name + 'K_' + k + '_' + annotation.replace(' ', '').replace('.','')"
+                                                        ></plots-component>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </template>
+
                                         <stdiff-rename-annotations-clusters :annotation="annotations[sample.name][getAnnotation(sample.name, image)]" :sample-name="sample.name" :file-path="image" prefix="stclust_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
                                     </template>
                                 </div>
@@ -209,6 +231,14 @@ import Multiselect from '@vueform/multiselect';
                 active_annotations: [],
                 annotations_renamed: false,
 
+                loaded: false,
+                plot_data: {},
+                plot_show: {},
+
+
+                // colorPalette: {'1': {'color': 'red', 'label': 'cluster 1'}, '2': {'color': 'blue', 'label': 'cluster 2'}, '3': {'color': 'orange', 'label': 'cluster 3'}, '4': {'color': 'yellow', 'label': 'cluster 4'}, '5': {'color': 'cyan', 'label': 'cluster 5'}},
+
+
 
             }
         },
@@ -216,6 +246,20 @@ import Multiselect from '@vueform/multiselect';
         async mounted() {
             await this.loadAnnotations();
             //console.log(this.annotations);
+
+            if(!('plot_data' in this.stclust)) {
+                this.loaded = true;
+                return;
+            }
+
+            for(let sample in this.stclust.plot_data) {
+                let data = await axios.get(this.stclust.plot_data[sample]);
+                this.processPlotFile(sample, data.data);
+            }
+
+            //console.log(this.plot_data);
+
+            this.loaded = true;
         },
 
         watch: {
@@ -297,6 +341,46 @@ import Multiselect from '@vueform/multiselect';
 
         methods: {
 
+            getColorPalette(sampleName, annotation) {
+                // console.log(sampleName, annotation);
+                // console.log(this.annotations[sampleName][annotation]);
+
+                const colors = ['red', 'green', 'blue', 'yellow', 'cyan'];
+
+                let annotations = this.annotations[sampleName][annotation];
+                let colorPalette = {};
+                let i = 0;
+                for(let clusterName in annotations.clusters) {
+                    let cluster = annotations.clusters[clusterName];
+                    colorPalette[cluster.originalName] = {label: ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName, color: colors[i]};
+                    i++;
+                }
+
+                return colorPalette;
+            },
+
+            processPlotFile(sampleName, data) {
+                this.plot_data[sampleName] = {};
+                const columnNames = data.split('\n')[0].split(',');
+                for(let i = 2; i < columnNames.length; i++) {
+                    this.plot_data[sampleName][columnNames[i]] = {};
+                    this.plot_data[sampleName][columnNames[i]]['data'] = this.extractColumnsFromCSV(data, [1, 2, i+1]);
+                    this.plot_data[sampleName][columnNames[i]]['palette'] = this.getColorPalette(sampleName, columnNames[i]);
+
+                    //console.log(this.plot_data[sampleName][columnNames[i]]);
+                }
+            },
+
+            extractColumnsFromCSV(csv, columns) {
+                const rows = csv.split('\n');
+                const extractedRows = rows.map(row => {
+                    const cells = row.split(',');
+                    const extractedCells = columns.map(index => cells[index - 1]);
+                    return extractedCells.join(',');
+                });
+                return extractedRows.join('\n');
+            },
+
             async loadAnnotations() {
                 this.annotations =  await this.$getProjectSTdiffAnnotationsBySample(this.project.id, 'stclust');
             },
@@ -333,6 +417,8 @@ import Multiselect from '@vueform/multiselect';
                 });
 
                 this.annotations_renamed = this.active_annotations.some(aa => aa.changed);
+
+                this.plot_data[sampleName][annotation.originalName]['palette'] = this.getColorPalette(sampleName, annotation.originalName)
             },
 
 

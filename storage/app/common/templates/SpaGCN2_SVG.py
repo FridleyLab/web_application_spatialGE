@@ -1,5 +1,9 @@
-### SPATIALLY VARIABLE GENES
+##
+# SPATIALLY VARIABLE GENES USING SPAGCN
+#
 
+import os
+import re
 import scanpy as sc
 import pandas as pd
 import numpy as np
@@ -7,10 +11,13 @@ import SpaGCN as spg
 import json
 
 # User parameters
-preds = '{param_annotation_to_test}' # Same as in STdiff when selecting annotation to test
+preds = '{param_annotation_to_test}' # Same as the annotation selected ate the beginning
 
 ## PROCESSING BEGINS HERE
 samples = [{param_sample_list}]
+# samples = [f for f in  os.listdir('../../../results_and_intermediate_files/spagcn/visium/') if re.match(r'^spagcn_svg_annotations_', f)]
+# samples = [s.replace('spagcn_svg_annotations_sample_', '') for s in samples]
+# samples = [s.replace('.csv', '') for s in samples]
 
 #store the list of csv files generated for each sample
 files = {}
@@ -30,9 +37,11 @@ for i in range(len(samples)):
     # Read AnnData object
     adata = sc.read("anndata_" + samples[i] + ".h5ad")
     # Read domain assignments
-    res_fp = "spagcn_predicted_domains_sample_" + samples[i] + ".csv"
+    res_fp = "spagcn_svg_annotations_sample_" + samples[i] + ".csv"
     domains = pd.read_csv(res_fp)
-    domains = domains[['libname', preds]]
+    domains = domains[['libname', preds]] # This will return error if annotation is not present in the data
+
+    os.remove(res_fp) # Remove annotation file created by R container
 
     del res_fp  # Clean env
 

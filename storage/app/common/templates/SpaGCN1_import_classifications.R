@@ -12,15 +12,18 @@ color_pal = 'smoothrainbow'
 load("#{_stlist}#.RData")
 stclust_stlist = #{_stlist}#
 
-spagcn_preds = './'
-spagcn_preds = list.files(spagcn_preds, pattern='spagcn_predicted_domains_sample_', full.names=T)
+spagcn_fps = './'
+spagcn_preds = list.files(spagcn_fps, pattern='spagcn_predicted_domains_sample_', full.names=T)
+spagcn_idx = list.files(spagcn_fps, pattern='spagcn_index_sample_', full.names=T)
 
 samplenames = #{_samples}#
 
 new_cols = c()
 for(i in samplenames){
   spagcn_tmp = read.csv(grep(paste0(i, '.csv'), spagcn_preds, value=T))
+  spagcn_tmp = cbind(read.csv(grep(paste0(i, '.csv'), spagcn_idx, value=T)), spagcn_tmp[, -c(1:2)])
   new_cols = unique(c(new_cols, colnames(spagcn_tmp)[-1]))
+
   # Convert domain classifications to factor
   spagcn_tmp[, -1] = lapply(spagcn_tmp[, -1], as.factor)
 
@@ -32,6 +35,8 @@ for(i in samplenames){
 
   stclust_stlist@spatial_meta[[i]] = stclust_stlist@spatial_meta[[i]] %>%
     dplyr::left_join(., spagcn_tmp, by='libname')
+
+  rm(spagcn_tmp) # Clean env
 }
 
 # annot_variables used for differential expression and STdiff/STgradient analyses
@@ -58,17 +63,17 @@ write.table(annot_variables, 'stdiff_annotation_variables_clusters.csv', quote=F
 
 save(stclust_stlist, file='stclust_stlist.RData')
 
-ps = STplot(stclust_stlist, samples=samplenames, plot_meta=new_cols, ptsize=2, color_pal=color_pal)
-
-n_plots = names(ps)
-write.table(n_plots, 'spagcn_plots.csv', sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
-for(p in n_plots) {
-    saveplot(p, ps[[p]])
-}
+# ps = STplot(stclust_stlist, samples=samplenames, plot_meta=new_cols, ptsize=2, color_pal=color_pal)
+# n_plots = names(ps)
+# write.table(n_plots, 'spagcn_plots.csv', sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
+# for(p in n_plots) {
+#     saveplot(p, ps[[p]])
+# }
 
 # Run STdiff to get DEGs and help manual annotation
 start_t = Sys.time()
-annot_test = unique(gsub(paste0('^', samplenames, '_', collapse='|'), '', names(ps)))
+#annot_test = unique(gsub(paste0('^', samplenames, '_', collapse='|'), '', names(ps)))
+annot_test = new_cols
 file_list <- list()
 for(i in annot_test){
   deg_res = STdiff(stclust_stlist, samples=samplenames, annot=i, topgenes=50, test_type='wilcoxon')

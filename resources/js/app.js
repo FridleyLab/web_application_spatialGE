@@ -30,6 +30,8 @@ import contactUs from "./components/ui/contact-us.vue";
 import dataGrid from "./components/common/data-grid.vue";
 import stDiffRenameAnnotationsClusters from './components/common/stdiff-rename-annotations-clusters.vue';
 
+import ColorPalettes from "./components/common/color-palettes.vue";
+
 import showStats from "./components/common/show-stats.vue";
 import showStatsPlot from "./components/common/show-stats-plot.vue";
 import showStatsPlotDetail from "./components/common/show-stats-plot-detail.vue";
@@ -67,9 +69,11 @@ import insitutype from "./components/wizard/components/phenotyping-insitutype.vu
 
 
 //Client-side Plots
-import SideBySidePlot from "./components/common/plots/Editor.vue";
-import OverlayEditor from "./components/common/plots/OverlayEditor.vue";
-import PlotViewer from "./components/common/plots/PlotViewer.vue";
+import PlotsComponent from "./components/common/plots/PlotsComponent.vue";
+import UmapFlightPlot from "./components/common/plots/UmapFlightPlot.vue";
+// import SideBySidePlot from "./components/common/plots/Editor.vue";
+// import OverlayEditor from "./components/common/plots/OverlayEditor.vue";
+// import PlotViewer from "./components/common/plots/PlotViewer.vue";
 
 
 //Global event emitter
@@ -165,10 +169,13 @@ app.component('insitutype', insitutype);
 app.component('stdeconvolve-suggested-ks', stdeconvolve_suggested_ks);
 
 
-app.component('side-by-side-plot', SideBySidePlot);
-app.component('PlotViewer', PlotViewer);
-app.component('OverlayEditor', OverlayEditor);
+app.component('plots-component', PlotsComponent);
+app.component('umap-flight-plot', UmapFlightPlot);
+// app.component('side-by-side-plot', SideBySidePlot);
+// app.component('PlotViewer', PlotViewer);
+// app.component('OverlayEditor', OverlayEditor);
 
+app.component('color-palettes', ColorPalettes);
 
 
 //Register the window as a global variable, so it can be accessed everywhere
