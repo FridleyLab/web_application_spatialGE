@@ -150,6 +150,14 @@ class HomeController extends Controller
 
     }
 
+    public function runSTclust($from, $to) {
+        $projects = Project::where('id', '>=', $from)->where('id', '<=', $to)->get();
+        foreach($projects as $project) {
+            $project->createJob('Spatial Domain Detection - STclust', 'STclust', ["ws" => "c(0,0.02)","ks" => "c(2:6)","topgenes" => 3000,"deepSplit" => "F","number_of_domains_min" => 2,"number_of_domains_max" => 6,"ws_value" => 0.02]);
+        }
+
+    }
+
 
     public function show_statistics() {
 
