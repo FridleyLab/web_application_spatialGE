@@ -88,7 +88,7 @@ class HomeController extends Controller
         if(!auth()->user()->is_admin)
             return response('Forbidden', '403');
 
-        if(!(is_numeric($n_users) && is_numeric($n_samples) && $n_users > 0 && $n_samples > 0 && $n_users <= 20 & $n_samples <= 14))
+        if(!(is_numeric($n_users) && is_numeric($n_samples) && $n_users > 0 && $n_samples > 0 && $n_users <= 30 & $n_samples <= 14))
             return response('Wrong parameter values');
 
         $suffix = '_test_user_';

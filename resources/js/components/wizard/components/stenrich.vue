@@ -127,8 +127,15 @@
                 <div class="tab-content" id="myTabContent">
 
                     <div v-if="'heatmap' in stenrich" class="tab-pane fade min-vh-50 show active" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
-                        <div class="m-4">
-                            <show-plot :src="stenrich.base_url + stenrich.heatmap" :show-image="false" :side-by-side="false"></show-plot>
+                        <div class="m-4" style="width:100%; height:1000px">
+                            <!-- <show-plot :src="stenrich.base_url + stenrich.heatmap" :show-image="false" :side-by-side="false"></show-plot> -->
+                            <heatmap
+                                :color_palette="['blue', 'gray', 'red']"
+                                :csv_file="stenrich.base_url + stenrich.heatmap"
+                                heatmap_title="Test sample-gene heatmap"
+                                csv-header-gene-name="gene_set"
+                            >
+                            </heatmap>
                         </div>
                     </div>
 
@@ -275,7 +282,7 @@ import 'vue3-easy-data-table/dist/style.css';
                             this.results[sample] = {};
                             this.results[sample].data = response.data;
                             this.results[sample].loaded = true;
-                            console.log(this.results[sample].data);
+                            //console.log(this.results[sample].data);
                         })
                         .catch((error) => {
                             this.results[sample] = {};

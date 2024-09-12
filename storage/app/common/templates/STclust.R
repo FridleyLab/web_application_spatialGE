@@ -21,7 +21,7 @@ library('magrittr')
 #
 # @return a list with data frames containing the data
 #
-data_quilt_cluster = function(x=NULL, ks='dtc', ws=NULL, annot=NULL, samples=NULL){
+data_quilt_cluster = function(x=NULL, ks='dtc', ws=NULL, deepSplit=NULL, annot=NULL, samples=NULL){
   # The parameters ws and ks will be ignored if annot is specified
   # If annot is empty and k and w are specified, construct column name
   if(!is.null(annot) & (!is.null(ks) | !is.null(ws))){
@@ -63,7 +63,7 @@ data_quilt_cluster = function(x=NULL, ks='dtc', ws=NULL, annot=NULL, samples=NUL
     } else{
       # Remove samples for which none of the requested genes are available
       spatial_meta = spatial_meta[grep(i, names(spatial_meta), value=T, invert=T)]
-      warning(paste0('The requested annotations are not available for sample ', i, '.'))
+      warning(paste0('The requested annotations are not available for sample ', i, '.')) # nolint
     }
     rm(annot_tmp) # Clean env
   }
@@ -164,7 +164,7 @@ save(stclust_stlist, file='stclust_stlist.RData')
 # }
 
 # Extract data frames
-stplot_dfs = data_quilt_cluster(x=stclust_stlist, ks=user_ks, ws=user_ws, samples=samplenames)
+stplot_dfs = data_quilt_cluster(x=stclust_stlist, ks=user_ks, ws=user_ws, deepSplit=user_deepsplit, samples=samplenames)
 # Save to text file
 # file_list <- list()
 lapply(1:length(stplot_dfs), function(i){
@@ -177,7 +177,7 @@ lapply(1:length(stplot_dfs), function(i){
 # Run STdiff to get DEGs and help manual annotation
 start_t = Sys.time()
 file_list <- list()
-annot_test = annot_from_kws(ws=user_ws, ks=user_ks, deepSplit=deepSplit)
+annot_test = annot_from_kws(ws=user_ws, ks=user_ks, deepSplit=user_deepsplit)
 for(i in annot_test){
   deg_res = STdiff(stclust_stlist, samples=samplenames, annot=i, topgenes=50, test_type='wilcoxon')
   for(j in names(deg_res)){

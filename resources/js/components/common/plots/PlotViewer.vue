@@ -193,6 +193,7 @@ import regl from 'regl';
 import { Canvg } from 'canvg';
 import { UMAP2 } from 'umap-js'
 import { initTransform } from "umap-js/dist/umap";
+import { zoomTransform } from "d3";
 
 const PlotTypes = Object.freeze({
     GRADIENT: "gradient",
@@ -251,7 +252,8 @@ export default {
             xMin: null,
             yMin: null,
             yMax: null,
-            showAllClusters: true
+            showAllClusters: true,
+            initZoomScale: null
         };
     },
 
@@ -274,6 +276,7 @@ export default {
             this.loading = true
             this.isHeavyPlotType = true
             this.exportDefault = false
+            this.initZoomScale = this.plotType === PlotTypes.FLIGHT ? 0.6 : 0.7
         } else {
             this.maxPointSize = 5
             this.loading = false
@@ -282,10 +285,6 @@ export default {
         this.readData();
         this.createPlot();
         this.showPlot = true
-
-        console.log(this.plotWidth);
-        console.log(this.plotHeight);
-
     },
 
     methods: {
@@ -449,7 +448,7 @@ export default {
             if(this.isHeavyPlotType){
                 let yOffset = this.plotType === PlotTypes.FLIGHT ? 100 : 200
                 let scale = this.plotType === PlotTypes.FLIGHT ? 0.6 : 0.7
-                const initialTransform = d3.zoomIdentity.translate(this.plotWidth / 2, (this.plotHeight / 2) - yOffset).scale(scale)
+                const initialTransform = d3.zoomIdentity.translate(this.plotWidth / 2, (this.plotHeight / 2) - yOffset).scale(this.initZoomScale)
                 svg.call(this.zoom.transform, initialTransform)
                 this.zoomTransform = initialTransform
             }
@@ -1023,12 +1022,12 @@ export default {
             const legendContent = new XMLSerializer().serializeToString(legendSvg);
 
             const combinedSVG = `
-                <svg width="${this.isHeavyPlotType ? 1200: this.plotWidth}" height="${this.isHeavyPlotType ? this.plotHeight + 100 : this.plotHeight}"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <svg width="${this.isHeavyPlotType ? 1200: this.plotWidth}" height="${this.isHeavyPlotType ? parseInt(this.plotHeight) + 100 : this.plotHeight}"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <g id="combined">
                     <g transform="translate(0, 0)">
                     ${svg1Content}
                     </g>
-                    <g transform="translate(${this.isHeavyPlotType ? 150: 150}, ${this.isHeavyPlotType ? titleSvg.height.baseVal.value - 70 : titleSvg.height.baseVal.value - 70})">
+                    <g transform="translate(${this.isHeavyPlotType ? this.zoomTransform.k > this.initZoomScale ? 200 : 100 : 150}, ${this.isHeavyPlotType ? titleSvg.height.baseVal.value - 70 : titleSvg.height.baseVal.value - 70})">
                     ${plotContent}
                     </g>
                     <g transform="translate(20, ${titleSvg.height.baseVal.value})">
@@ -1040,13 +1039,13 @@ export default {
             return combinedSVG
         },
         exportToSVG(){
-            let svgPointer = this.exportDefault ? this.generateQuilt(true)[0] : this.$refs.plotSvgRef
+            let svgPointer = this.exportDefault && !this.isHeavyPlotType ? this.generateQuilt(true)[0] : this.$refs.plotSvgRef
             const combinedSVG = this.getSVG(this.exportDefault ? svgPointer.node() : svgPointer)
             const blob = new Blob([combinedSVG], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'quilt-plot.svg';
+            link.download = this.plotType + '-plot.svg';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

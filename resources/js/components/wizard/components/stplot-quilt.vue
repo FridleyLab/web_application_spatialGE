@@ -45,12 +45,14 @@
                 </div>
             </div>
 
-            <div class="row justify-content-center text-center m-4">
+            <!-- <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                     <div>Color palette <show-modal tag="vis_quilt_plot_color_palette"></show-modal></div>
                     <div><Multiselect :options="colorPalettes" v-model="params.col_pal" :searchable="true"></Multiselect></div>
                 </div>
-            </div>
+            </div> -->
+
+            <color-palettes @colors="colors => colorPalette = colors" palette-type="GRADIENT"></color-palettes>
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
@@ -157,11 +159,12 @@
                                                     :csv="plot_data[sample][gene]"
                                                     :title="sample + ' - ' + gene"
                                                     plot-type="gradient"
-                                                    :color-palette="['blue', 'orange', 'red']"
+                                                    :color-palette="colorPalette"
                                                     :legend-min="0"
                                                     :legend-max="10"
                                                     :is-y-axis-inverted="project.project_platform_id === 3"
                                                     :is-grouped="false"
+                                                    :aspect-ratio="project.project_platform_id === 3 ? '3:2': ''"
                                                     :p-key="'quiltPlot-' + gene + '_' + sample"
                                                 ></plots-component>
                                             </div>
@@ -226,6 +229,8 @@ import Multiselect from '@vueform/multiselect';
                 loaded: false,
 
                 plot_data: {},
+
+                colorPalette: [ "#E8ECFB", "#67B092", "#521A13" ],
             }
         },
 

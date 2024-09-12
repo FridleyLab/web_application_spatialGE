@@ -28,8 +28,11 @@
 
                 </tbody>
             </table>
-            <div v-if="hasChanged()" class="text-warning">
-                Changes detected, please use the "Complete renaming" button above
+            <div v-if="hasChanged()" class="text-center">
+                <div class="text-warning">
+                    Changes detected, please be sure to save them when ready
+                </div>
+                <button class="btn btn-sm btn-warning mt-2" @click.prevent="saveChanges">Save changes</button>
             </div>
         </div>
 
@@ -43,7 +46,7 @@
 export default {
     name: 'stDiffRenameAnnotationsClusters',
 
-    emits: ['changes'],
+    // emits: ['changes'],
 
     props: {
         annotation: Object,
@@ -51,6 +54,7 @@ export default {
         prefix: String,
         suffix: String,
         filePath: String,
+        renameUrl: String,
     },
 
     data() {
@@ -64,6 +68,8 @@ export default {
             clusters: this.annotation !== undefined ? this.annotation.clusters : [],
 
             loaded: false,
+
+            renaming: false,
         }
     },
 
@@ -89,14 +95,13 @@ export default {
     methods: {
 
         hasChanged() {
+            //console.log(this.annotation);
             return this.annotationChanged || this.clusters.some(cluster => cluster.changed);
         },
 
         informChanges() {
 
             let hasChanged = this.hasChanged();
-
-            //if(hasChanged && this.annotation.originalName === this.annotation.newName) this.annotation.newName += '_mod';
 
             this.$emit('changes', this.sampleName, this.annotation, hasChanged);
         },
@@ -113,27 +118,63 @@ export default {
             this.informChanges();
         },
 
+        saveChanges() {
+
+            this.renaming = true;
+
+            let changes = [
+                {
+                    sampleName: this.sampleName,
+                    originalName: this.annotation.originalName,
+                    newName: this.annotation['newName'],
+                    clusters: this.clusters
+                }];
+
+
+            let parameters = {
+                annotations: changes,
+            };
+
+            // console.log(this.renameUrl);
+            // console.log(parameters);
+
+            // return;
+
+            axios.post(this.renameUrl, parameters)
+                .then((response) => {
+                    console.log('OK')
+                    this.annotationChanged = false;
+                    this.clusters.forEach(cluster => cluster.changed = false);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+
+            this.renaming = false;
+
+        },
+
         getJsonPath() {
 
-        /*let prefix = 'stclust_';
-        let suffix = '_top_deg'*/
+            /*let prefix = 'stclust_';
+            let suffix = '_top_deg'*/
 
-        // Split the path by '/'
-        let parts = this.filePath.split('/');
+            // Split the path by '/'
+            let parts = this.filePath.split('/');
 
-        // Extract the filename (last part of the path)
-        let filename = parts.pop();
+            // Extract the filename (last part of the path)
+            let filename = parts.pop();
 
-        // Create the new filename with prefix and suffix
-        let newFilename = `${this.prefix}${filename}${this.suffix}` + '.json';
+            // Create the new filename with prefix and suffix
+            let newFilename = `${this.prefix}${filename}${this.suffix}` + '.json';
 
-        // Add the new filename back to the parts array
-        parts.push(newFilename);
+            // Add the new filename back to the parts array
+            parts.push(newFilename);
 
-        // Join the parts array back into a single string with '/' delimiter
-        let newPath = parts.join('/');
+            // Join the parts array back into a single string with '/' delimiter
+            let newPath = parts.join('/');
 
-        return newPath;
+            return newPath;
         },
 
     },

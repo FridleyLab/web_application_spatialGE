@@ -620,8 +620,13 @@ class ProjectController extends Controller
     }
 
     public function sdd_stclust_rename(Project $project) {
-        $jobId = $project->createJob('Spatial Domain Detection - STclust (annotation renaming)', 'STclustRename', request()->all());
-        return $project->getJobPositionInQueue($jobId);
+
+        $project->saveSTdiffAnnotationChanges(request('annotations'));
+
+        return 'OK';
+
+        // $jobId = $project->createJob('Spatial Domain Detection - STclust (annotation renaming)', 'STclustRename', request()->all());
+        // return $project->getJobPositionInQueue($jobId);
     }
 
     public function sdd_spagcn(Project $project) {

@@ -12,18 +12,20 @@ import Multiselect from '@vueform/multiselect';
 
 export default {
 
+    emits: ['colors'],
+
     components: {
         Multiselect
     },
 
     props: {
-
+        paletteType: {type: String, default: 'ALL'} // or GRADIENT
     },
 
     data() {
         return {
             colorPalettes: [],
-            selected: 'smoothrainbow',
+            selected: '',
         }
     },
 
@@ -31,12 +33,30 @@ export default {
 
         this.processData();
 
+        this.selected = 'smoothrainbow';
+
+        this.paletteSelected(this.selected);
+
     },
 
     methods: {
 
-        paletteSelected() {
-            console.log(this.colorPalettes.filter(palette => palette.value === this.selected));
+        paletteSelected(newValue) {
+
+            let palette = this.colorPalettes.filter(palette => palette.value === newValue);
+
+            if(!palette.length) return;
+
+            palette = palette[0].colors;
+
+            if(this.paletteType.toUpperCase() !== 'ALL') {
+                palette = [palette[0], palette[Math.trunc(palette.length / 2)], palette[palette.length-1]]
+            }
+
+            console.log(palette);
+
+            this.$emit('colors', palette);
+
         },
 
         processData() {
@@ -46,14 +66,6 @@ export default {
                 return {label: cols[0], value: cols[1], colors: cols.slice(2)};
             });
             this.colorPalettes = data;
-            console.log(data);
-
-            // const extractedRows = rows.map(row => {
-            //     const cells = row.split(',');
-            //     const extractedCells = columns.map(index => cells[index - 1]);
-            //     return extractedCells.join(',');
-            // });
-            // return extractedRows.join('\n');
         },
 
 

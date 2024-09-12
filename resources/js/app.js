@@ -70,7 +70,8 @@ import insitutype from "./components/wizard/components/phenotyping-insitutype.vu
 
 //Client-side Plots
 import PlotsComponent from "./components/common/plots/PlotsComponent.vue";
-import UmapFlightPlot from "./components/common/plots/UmapFlightPlot.vue";
+import PlotHolder from "./components/common/plots/PlotHolder.vue";
+import Heatmap from "./components/common/plots/heatmap.vue";
 // import SideBySidePlot from "./components/common/plots/Editor.vue";
 // import OverlayEditor from "./components/common/plots/OverlayEditor.vue";
 // import PlotViewer from "./components/common/plots/PlotViewer.vue";
@@ -170,7 +171,8 @@ app.component('stdeconvolve-suggested-ks', stdeconvolve_suggested_ks);
 
 
 app.component('plots-component', PlotsComponent);
-app.component('umap-flight-plot', UmapFlightPlot);
+app.component('plot-holder', PlotHolder);
+app.component('heatmap', Heatmap);
 // app.component('side-by-side-plot', SideBySidePlot);
 // app.component('PlotViewer', PlotViewer);
 // app.component('OverlayEditor', OverlayEditor);

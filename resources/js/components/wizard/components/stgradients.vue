@@ -200,8 +200,15 @@
                 <div class="tab-content" id="myTabContent">
 
                     <div v-if="'heatmap' in stgradients" class="tab-pane fade min-vh-50 show active" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
-                        <div class="m-4">
-                            <show-plot :src="stgradients.base_url + stgradients.heatmap" :show-image="false" :side-by-side="false"></show-plot>
+                        <div class="m-4" style="width:100%; height:1000px">
+                            <heatmap
+                                :color_palette="['blue', 'gray', 'red']"
+                                :csv_file="stgradients.base_url + stgradients.heatmap"
+                                heatmap_title="Test sample-gene heatmap"
+                                csv-header-gene-name="gene_name"
+                            >
+                            </heatmap>
+                            <!-- <show-plot :src="stgradients.base_url + stgradients.heatmap" :show-image="false" :side-by-side="false"></show-plot> -->
                         </div>
                     </div>
 

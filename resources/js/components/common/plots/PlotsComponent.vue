@@ -4,7 +4,10 @@
         :class="{ 'single-container': !base }"
         ref="mainContainer"
     >
-        <div class="toggle-controls-plot-viewer form-check form-switch">
+        <div
+            class="toggle-controls-plot-viewer form-check form-switch"
+            v-if="!isStatic"
+        >
             <input
                 style="cursor: pointer"
                 class="form-check-input"
@@ -109,6 +112,7 @@
                         :id="pKey + 'dragArea'"
                         width="100%"
                         height="100%"
+                        style="cursor: move"
                         fill="transparent"
                     ></rect>
                     <g
@@ -245,6 +249,27 @@
                     <i class="fas fa-arrow-right"></i>
                 </button>
 
+                <button
+                    class="btn btn-sm btn-secondary"
+                    :id="pKey + 'increaseWidthButton'"
+                    :class="{ disabled: isSynced }"
+                    @click.prevent="increaseWidth"
+                    title="Increase Width"
+                    v-if="base"
+                >
+                    <i class="fas fa-arrows-alt-h"></i>
+                </button>
+                <button
+                    class="btn btn-sm btn-secondary"
+                    :id="pKey + 'decreaseWidthButton'"
+                    :class="{ disabled: isSynced }"
+                    @click.prevent="decreaseWidth"
+                    title="Decrease Width"
+                    v-if="base"
+                >
+                    <i class="fas fa-compress-arrows-alt"></i>
+                </button>
+
                 <!-- <button
                     class="btn btn-sm btn-secondary"
                     :id="pKey + 'importPositionButton'"
@@ -257,7 +282,7 @@
 
                 <div class="btn-group export-group-plot-viewer">
                     <button
-                        class="btn btn-sm btn-secondary dropdown-toggle"
+                        class="btn btn-sm btn-info dropdown-toggle"
                         type="button"
                         :id="pKey + 'exportDropdown'"
                         data-bs-toggle="dropdown"
@@ -311,7 +336,6 @@
 import "@fortawesome/fontawesome-free/css/all.css";
 import "bootstrap/dist/js/bootstrap.js";
 import * as d3 from "d3";
-// import jsPDF from "jspdf";
 
 const PlotTypes = Object.freeze({
     GRADIENT: "gradient",
@@ -343,6 +367,8 @@ export default {
         legendMin: { type: Number, required: true },
         legendMax: { type: Number, required: true },
         pKey: { type: String, required: true },
+        aspectRatio: { type: String, required: false },
+        isStatic: { type: Boolean, required: false },
     },
 
     data() {
@@ -357,13 +383,17 @@ export default {
             containerHeight: 0,
             isMounted: false,
             showControls: true,
+
             baseImageWidth: 0,
             baseImageHeight: 0,
-            graphicWidth: 800,
-            graphicHeight: 600,
+            drawHeight: 0,
+            drawWidth: 0,
+            drawOffsetWidth: 0,
+            graphicWidth: 400,
+            graphicHeight: 300,
             overlayOpacity: 1,
             baseOpacity: 1,
-            pointSize: 2,
+            pointSize: 2.2,
             expressionThreshold: 0,
 
             activeColors: {},
@@ -378,7 +408,6 @@ export default {
 
             selectedGraphic: "left",
             selectedExportType: "svg",
-
 
             maxValue: 0,
         };
@@ -423,8 +452,16 @@ export default {
         },
 
         colorPalette() {
+
+            if (this.plotType === PlotTypes.GRADIENT) {
+                this.createGradientLegend();
+            } else if (this.plotType === PlotTypes.CLUSTER) {
+                this.createClusterLegend();
+            }
+
             this.initializeActiveColors();
             if (this.isGrouped) this.groupColorPalette();
+
             this.drawPoints("#" + this.pKey + "overlay");
             this.drawPoints("#" + this.pKey + "overlayLeft");
         },
@@ -467,10 +504,24 @@ export default {
             img.onload = () => {
                 this.baseImageWidth = img.width;
                 this.baseImageHeight = img.height;
+                this.drawWidth = this.baseImageWidth;
+                this.drawHeight = this.baseImageHeight;
 
                 if (this.baseImageWidth > 1000 || this.baseImageHeight > 1000) {
                     this.baseImageWidth = this.baseImageWidth / 10;
                     this.baseImageHeight = this.baseImageHeight / 10;
+
+                    this.drawWidth = this.baseImageWidth * 0.8;
+                    this.drawHeight = this.baseImageHeight * 0.8;
+
+                    d3.select("#" + this.pKey + "overlay").attr(
+                        "transform",
+                        `translate(100,100)`
+                    );
+                    d3.select("#" + this.pKey + "overlayLeft").attr(
+                        "transform",
+                        `translate(100,100)`
+                    );
                 }
 
                 d3.select("#" + this.pKey + "svgContainer")
@@ -510,18 +561,16 @@ export default {
 
             await this.loadCSVData();
 
-            this.drawPoints("#" + this.pKey + "overlay");
-            this.drawPoints("#" + this.pKey + "overlayLeft");
-
-            this.centerGraphics();
-
             if (!this.base) {
                 const mainContainer = this.$refs.mainContainer;
 
                 this.baseImageWidth = mainContainer.clientWidth;
                 this.baseImageHeight = mainContainer.clientHeight;
-
-                console.log(this.baseImageWidth, this.baseImageHeight);
+                this.drawWidth =
+                    this.aspectRatio === "3:2"
+                        ? mainContainer.clientWidth * 1.5
+                        : mainContainer.clientWidth;
+                this.drawHeight = mainContainer.clientHeight;
 
                 d3.select("#" + this.pKey + "svgContainerLeft")
                     .attr("width", this.baseImageWidth)
@@ -532,20 +581,42 @@ export default {
                     );
 
                 this.drawPoints("#" + this.pKey + "overlayLeft");
-                this.leftZoom = d3.zoom().on("zoom", (event) => {
-                    d3.select("#" + this.pKey + "overlayLeftGroup").attr(
-                        "transform",
-                        event.transform
+
+                if (!this.isStatic) {
+                    this.leftZoom = d3.zoom().on("zoom", (event) => {
+                        d3.select("#" + this.pKey + "overlayLeftGroup").attr(
+                            "transform",
+                            event.transform
+                        );
+                    });
+                    d3.select("#" + this.pKey + "svgContainerLeft").call(
+                        this.leftZoom
                     );
-                });
-                d3.select("#" + this.pKey + "svgContainerLeft").call(this.leftZoom);
+                    d3.select("#" + this.pKey + "dragAreaLeft").style(
+                        "cursor",
+                        "move"
+                    );
+                } else {
+                    this.showControls = false;
+                }
+
+                if (this.aspectRatio === "3:2") {
+                    this.adjustScaleToFitPoints();
+                } else {
+                    this.centerGraphics();
+                }
             } else {
                 this.drawPoints("#" + this.pKey + "overlay");
                 this.drawPoints("#" + this.pKey + "overlayLeft");
                 this.centerGraphics();
 
                 if (!this.isSynced) {
-                    d3.select("#" + this.pKey + "overlay").call(this.dragOverlay());
+                    d3.select("#" + this.pKey + "overlay").call(
+                        this.dragOverlay()
+                    );
+                    d3.select("#" + this.pKey + "dragArea").call(
+                        this.dragOverlay()
+                    );
                 }
             }
         },
@@ -562,11 +633,15 @@ export default {
             this.processedData = data.map((d) => ({
                 xpos: +d.xpos,
                 ypos: +d.ypos,
-                value: +Object.values(d)[2],
+                value: isNaN(Object.values(data[0])[2])
+                    ? Object.values(d)[2]
+                    : +Object.values(d)[2],
             }));
 
             this.filteredData = [...this.processedData];
-            this.maxValue = d3.max(this.processedData, (d) => d.value);
+
+            if (this.plotType === PlotTypes.GRADIENT)
+                this.maxValue = d3.max(this.processedData, (d) => d.value);
         },
 
         /**
@@ -628,8 +703,6 @@ export default {
          * Adjusts their position based on the current scale and container size.
          */
         centerGraphics() {
-            const centerX = this.containerWidth / 2;
-            const centerY = this.containerHeight / 2;
             const offsetX = -70;
             const offsetY = -30;
 
@@ -648,6 +721,36 @@ export default {
             );
         },
 
+        adjustScaleToFitPoints() {
+            const boundingBox = d3
+                .select(`#${this.pKey}overlayLeft`)
+                .node()
+                .getBBox();
+            const leftContainer = this.$refs.leftContainer;
+
+            const containerWidth = leftContainer.clientWidth;
+            const containerHeight = leftContainer.clientHeight;
+            const gradientWidth = 60;
+            const availableWidth = containerWidth - gradientWidth;
+
+            const scaleX = availableWidth / boundingBox.width;
+            const scaleY = containerHeight / boundingBox.height;
+            const scale = Math.min(scaleX, scaleY) * 0.9;
+
+            this.currentTransform = d3.zoomIdentity
+                .translate(
+                    (availableWidth - boundingBox.width * scale) / 2 +
+                        gradientWidth,
+                    (containerHeight - boundingBox.height * scale) / 2
+                )
+                .scale(scale);
+
+            d3.select(`#${this.pKey}overlayLeftGroup`).attr(
+                "transform",
+                this.currentTransform
+            );
+        },
+
         /**
          * Renders the data points onto the specified SVG element.
          * Uses the processed data and scaling functions to accurately position the points.
@@ -659,18 +762,16 @@ export default {
 
             const svg = d3
                 .select(svgId)
-                .attr("width", this.baseImageWidth)
-                .attr("height", this.baseImageHeight)
-                .attr(
-                    "viewBox",
-                    `0 0 ${this.baseImageWidth} ${this.baseImageHeight}`
-                );
+                .attr("width", this.drawWidth)
+                .attr("height", this.drawHeight)
+                .attr("viewBox", `0 0 ${this.drawWidth} ${this.drawHeight}`);
+
             svg.selectAll("g").remove();
 
             this.xScale = d3
                 .scaleLinear()
                 .domain([0, d3.max(this.processedData, (d) => d.xpos)])
-                .range([0, this.baseImageWidth]);
+                .range([0, this.drawWidth + this.drawOffsetWidth]);
 
             this.yScale = d3
                 .scaleLinear()
@@ -679,7 +780,7 @@ export default {
                         ? [0, d3.max(this.processedData, (d) => d.ypos)]
                         : [d3.max(this.processedData, (d) => d.ypos), 0]
                 )
-                .range([this.baseImageHeight, 0]);
+                .range([this.drawHeight, 0]);
 
             this.colorScale = d3
                 .scaleLinear()
@@ -732,9 +833,11 @@ export default {
                                 if (this.plotType === PlotTypes.GRADIENT) {
                                     return this.colorScale(d.value);
                                 } else if (this.isGrouped) {
-                                    return d.value in this.colorPalette ? groupedColors[
-                                        this.colorPalette[d.value].label
-                                    ] : 0;
+                                    return d.value in this.colorPalette
+                                        ? groupedColors[
+                                              this.colorPalette[d.value].label
+                                          ]
+                                        : 0;
                                 } else {
                                     return this.colorPalette[d.value].color;
                                 }
@@ -748,9 +851,11 @@ export default {
                                 if (this.plotType === PlotTypes.GRADIENT) {
                                     return this.colorScale(d.value);
                                 } else if (this.isGrouped) {
-                                    return d.value in this.colorPalette ? groupedColors[
-                                        this.colorPalette[d.value].label
-                                    ] : 0;
+                                    return d.value in this.colorPalette
+                                        ? groupedColors[
+                                              this.colorPalette[d.value].label
+                                          ]
+                                        : 0;
                                 } else {
                                     return this.colorPalette[d.value].color;
                                 }
@@ -819,10 +924,12 @@ export default {
          * Displays color gradients that correspond to data values.
          */
         createGradientLegend() {
-            const legendContainer = d3.select('#' + this.pKey + 'legend-container-plot-viewer');
+            const legendContainer = d3.select(
+                "#" + this.pKey + "legend-container-plot-viewer"
+            );
 
             if (!legendContainer.select("svg").empty()) {
-                return;
+                legendContainer.select("svg").remove();
             }
 
             const legendWidth = 40;
@@ -836,7 +943,13 @@ export default {
             const gradient = legendSvg
                 .append("defs")
                 .append("linearGradient")
-                .attr("id", `${this.pKey}-legend-gradient-${this.title.replace(/\s+/g, "")}`)
+                .attr(
+                    "id",
+                    `${this.pKey}-legend-gradient-${this.title.replace(
+                        /\s+/g,
+                        ""
+                    )}`
+                )
                 .attr("x1", "0%")
                 .attr("x2", "0%")
                 .attr("y1", "0%")
@@ -865,7 +978,10 @@ export default {
                 .attr("height", legendHeight)
                 .style(
                     "fill",
-                    `url(#${this.pKey}-legend-gradient-${this.title.replace(/\s+/g, "")})`
+                    `url(#${this.pKey}-legend-gradient-${this.title.replace(
+                        /\s+/g,
+                        ""
+                    )})`
                 );
 
             legendSvg
@@ -896,7 +1012,9 @@ export default {
          * Displays color-coded categories when working with grouped data.
          */
         createClusterLegend() {
-            const legendContainer = d3.select('#' + this.pKey + 'legend-container-plot-viewer');
+            const legendContainer = d3.select(
+                "#" + this.pKey + "legend-container-plot-viewer"
+            );
 
             if (!legendContainer.select("svg").empty()) {
                 legendContainer.select("svg").remove();
@@ -955,11 +1073,15 @@ export default {
             if (!this.isSynced) {
                 this.isSynced = true;
                 d3.select("#" + this.pKey + "overlay").on(".drag", null);
+                d3.select("#" + this.pKey + "dragArea").on(".drag", null);
                 this.syncAndMoveTogether();
                 this.exportPositions();
             } else {
                 this.isSynced = false;
                 d3.select("#" + this.pKey + "overlay").call(this.dragOverlay());
+                d3.select("#" + this.pKey + "dragArea").call(
+                    this.dragOverlay()
+                );
                 d3.select("#" + this.pKey + "svgContainer").on(".drag", null);
             }
         },
@@ -987,6 +1109,7 @@ export default {
                     const overlayTransform = overlay.attr("transform");
                     const overlayTranslate =
                         this.getTranslateFromElemet(overlayTransform);
+
                     currentTranslateX = overlayTranslate.translateX;
                     currentTranslateY = overlayTranslate.translateY;
 
@@ -1019,8 +1142,12 @@ export default {
          * Synchronizes the movements of the overlay and the base image when dragging.
          */
         syncAndMoveTogether() {
-            const baseAndOverlayGroup = d3.select("#" + this.pKey + "baseAndOverlayGroup");
-            const overlayLeftGroup = d3.select("#" + this.pKey + "overlayLeftGroup");
+            const baseAndOverlayGroup = d3.select(
+                "#" + this.pKey + "baseAndOverlayGroup"
+            );
+            const overlayLeftGroup = d3.select(
+                "#" + this.pKey + "overlayLeftGroup"
+            );
             const dragSync = d3.drag().on("drag", (event) => {
                 this.currentTransform = this.currentTransform.translate(
                     event.dx,
@@ -1049,7 +1176,6 @@ export default {
             if (this.isSynced || this.base) {
                 this.applyZoom(1.2, "#" + this.pKey + "baseAndOverlayGroup");
             } else {
-                console.log("zoom in");
                 d3.select("#" + this.pKey + "svgContainerLeft")
                     .transition()
                     .call(this.leftZoom.scaleBy, 1.2);
@@ -1153,6 +1279,26 @@ export default {
             if (!this.isSynced) {
                 this.pointScale *= 0.99;
                 this.applyTransform();
+            }
+        },
+
+        /**
+         * Increases the width of the points in the plot by adjusting the x scale.
+         */
+        increaseWidth() {
+            if (!this.isSynced) {
+                this.drawOffsetWidth += 5;
+                this.drawPoints(`#${this.pKey}overlay`);
+            }
+        },
+
+        /**
+         * Decreases the width of the points in the plot by adjusting the x scale.
+         */
+        decreaseWidth() {
+            if (!this.isSynced) {
+                this.drawOffsetWidth = Math.max(this.drawOffsetWidth - 5, 0);
+                this.drawPoints(`#${this.pKey}overlay`);
             }
         },
 
@@ -1261,7 +1407,9 @@ export default {
                 d3.select("#" + this.pKey + "overlay").attr("transform")
             );
             const baseTransform = this.getTranslateFromElemet(
-                d3.select("#" + this.pKey + "baseAndOverlayGroup").attr("transform")
+                d3
+                    .select("#" + this.pKey + "baseAndOverlayGroup")
+                    .attr("transform")
             );
 
             console.log("exported Positions", {
@@ -1312,8 +1460,14 @@ export default {
                 );
 
                 const overlayTransform = `translate(${positions.overlayPosition.translateX}, ${positions.overlayPosition.translateY}) scale(${this.pointScale})`;
-                d3.select("#" + this.pKey + "overlay").attr("transform", overlayTransform);
-                d3.select("#" + this.pKey + "overlayLeft").attr("transform", overlayTransform);
+                d3.select("#" + this.pKey + "overlay").attr(
+                    "transform",
+                    overlayTransform
+                );
+                d3.select("#" + this.pKey + "overlayLeft").attr(
+                    "transform",
+                    overlayTransform
+                );
                 this.centerGraphics();
                 this.toggleSync();
             }
@@ -1332,9 +1486,13 @@ export default {
             let svgToExport;
 
             if (this.selectedGraphic === "left") {
-                svgToExport = document.getElementById(this.pKey + "svgContainerLeft");
+                svgToExport = document.getElementById(
+                    this.pKey + "svgContainerLeft"
+                );
             } else if (this.selectedGraphic === "right") {
-                svgToExport = document.getElementById(this.pKey + "svgContainer");
+                svgToExport = document.getElementById(
+                    this.pKey + "svgContainer"
+                );
             } else if (this.selectedGraphic === "both") {
                 const leftSvg = document
                     .getElementById(this.pKey + "svgContainerLeft")
@@ -1347,16 +1505,17 @@ export default {
                     "http://www.w3.org/2000/svg",
                     "svg"
                 );
-                combinedSvg.setAttribute("width", this.containerWidth * 2); // Ajusta el ancho para ambos SVGs
+
+                combinedSvg.setAttribute("width", this.containerWidth * 2);
                 combinedSvg.setAttribute(
                     "height",
                     Math.max(this.baseImageHeight, this.containerHeight)
                 );
 
-                leftSvg.setAttribute("x", 0);
+                leftSvg.setAttribute("x", 50);
                 leftSvg.setAttribute("y", 0);
 
-                rightSvg.setAttribute("x", this.containerWidth / 2);
+                rightSvg.setAttribute("x", this.containerWidth - 100);
                 rightSvg.setAttribute("y", 0);
 
                 combinedSvg.appendChild(leftSvg);
@@ -1365,31 +1524,85 @@ export default {
                 svgToExport = combinedSvg;
             }
 
+            const svgClone = this.convertToSVG(svgToExport);
+
             if (this.selectedExportType === "png") {
-                this.exportAsPNG(svgToExport);
+                this.exportAsPNG(svgClone);
             } else if (this.selectedExportType === "pdf") {
                 this.exportAsPDF(svgToExport);
             } else if (this.selectedExportType === "svg") {
-                this.exportAsSVG(svgToExport);
+                this.downloadSvg(svgClone);
             }
 
             this.showControls = true;
         },
 
-        // TODO
-        exportAsPNG(svgElement) {},
+        /**
+         * Uses the converted SVG and converts it to a PNG file.
+         *
+         * @param {Element} svgElement - The SVG element to be downloaded as an PNG file.
+         */
+        exportAsPNG(svgElement) {
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const svgBlob = new Blob([svgData], {
+                type: "image/svg+xml;charset=utf-8",
+            });
+            const url = URL.createObjectURL(svgBlob);
+
+            const image = new Image();
+            image.src = url;
+
+            const scaleFactor = 4;
+
+            const canvas = document.createElement("canvas");
+
+            canvas.width =
+                this.selectedGraphic === "both"
+                    ? Math.max(this.baseImageWidth, this.containerWidth) *
+                      2 *
+                      scaleFactor
+                    : this.baseImageWidth * scaleFactor;
+            canvas.height =
+                this.selectedGraphic === "both"
+                    ? Math.max(this.baseImageHeight, this.containerHeight) *
+                      scaleFactor
+                    : this.baseImageHeight * scaleFactor;
+
+            const ctx = canvas.getContext("2d");
+
+            image.onload = () => {
+                ctx.scale(scaleFactor, scaleFactor);
+                ctx.drawImage(image, 0, 0);
+                URL.revokeObjectURL(url);
+
+                canvas.toBlob(
+                    (blob) => {
+                        const pngUrl = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = pngUrl;
+                        a.download = `${this.title}-${
+                            this.selectedGraphic
+                        }-${Date.now()}.png`;
+                        a.click();
+                        URL.revokeObjectURL(pngUrl);
+                    },
+                    "image/png",
+                    1.0
+                );
+            };
+        },
 
         // TODO
         exportAsPDF(svgElement) {},
 
         /**
-         * Exports the provided SVG element as an SVG file.
+         * Converts the provided SVG element as an SVG file.
          * This function clones the SVG element, modifies it if necessary,
          * and then creates a downloadable SVG file for the user.
          *
          * @param {Element} svgElement - The SVG element to be exported as an SVG file.
          */
-         exportAsSVG(svgElement) {
+        convertToSVG(svgElement) {
             let svgClone;
 
             if (this.selectedGraphic !== "both") {
@@ -1425,6 +1638,11 @@ export default {
                     `#${this.pKey}legend-container-plot-viewer svg`
                 );
 
+                svgClone.firstChild.setAttribute(
+                    "transform",
+                    "translate(-30,-30) scale(0.9)"
+                );
+
                 if (legendContainer) {
                     const legendClone = legendContainer.cloneNode(true);
                     svgClone.appendChild(legendClone);
@@ -1440,17 +1658,27 @@ export default {
                         "text"
                     );
                     titleClone.setAttribute("x", "100");
-                    titleClone.setAttribute("y", "30");
+                    titleClone.setAttribute("y", "20");
                     titleClone.setAttribute("font-size", "16");
                     titleClone.setAttribute("font-family", "Arial, sans-serif");
                     titleClone.setAttribute("font-weight", "bold");
+                    titleClone.setAttribute("dy", "1em");
                     titleClone.textContent = leftTitle.textContent;
                     svgClone.appendChild(titleClone);
                 }
             }
 
+            return svgClone;
+        },
+
+        /**
+         * Uses the converted SVG to download the SVG file.
+         *
+         * @param {Element} svgElement - The SVG element to be downloaded as an SVG file.
+         */
+        downloadSvg(svgElement) {
             const serializer = new XMLSerializer();
-            const svgString = serializer.serializeToString(svgClone);
+            const svgString = serializer.serializeToString(svgElement);
 
             const blob = new Blob([svgString], {
                 type: "image/svg+xml;charset=utf-8",
@@ -1481,6 +1709,7 @@ export default {
     position: relative;
     border: 1px solid #ccc;
     overflow: hidden;
+    min-height: 600px;
 }
 
 .main-container-plot-viewer.single-container {
@@ -1567,6 +1796,7 @@ svg {
     background-color: #f8f9fa;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
     font-size: 0.7rem;
+    z-index: 100;
 }
 
 .legend-container-plot-viewer {

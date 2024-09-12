@@ -911,10 +911,11 @@ lapply(names(tissues), function(i){
 
         $result['pca_max_var_genes'] = $this->pca_max_var_genes();
 
-        $parameterNames = ['filter_violin', 'filter_boxplot'];
+
+        $parameterNames = ['violin_box_plot_data', 'filter_violin', 'filter_boxplot'];
         foreach ($parameterNames as $parameterName) {
 
-            $file_extensions = ['svg', 'pdf', 'png'];
+            $file_extensions = ['csv', 'svg', 'pdf', 'png'];
 
             foreach ($file_extensions as $file_extension) {
                 $fileName = $parameterName . '.' . $file_extension;
@@ -978,6 +979,35 @@ lapply(names(tissues), function(i){
         $plots .= $this->getExportFilesCommands('filter_boxplot', 'bp');
 
         $script = "
+
+
+##
+# Extract data to generate violin and boxplots using D3
+#
+
+distribution_data = function(x=NULL, samples=NULL){
+
+  library('magrittr')
+
+  # Define samples to plot if NULL or numeric
+  if(is.null(samples)){
+    samples = names(x@counts)
+  } else if(is.numeric(samples)){
+    samples = names(x@counts)[samples]
+  }
+
+  # Subset samples if meta data not in all samples
+  df_tmp = tibble::tibble()
+  for(i in samples){
+    df_tmp = dplyr::bind_rows(df_tmp,
+                              x@spatial_meta[[i]] %>%
+                                dplyr::select(c('total_counts', 'total_genes')) %>%
+                                tibble::add_column(samplename=i, .before=1))
+  }
+  return(df_tmp)
+}
+
+
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
@@ -1011,6 +1041,11 @@ write.table(gene_names, 'genesFiltered.csv',sep=',', row.names = FALSE, col.name
 #source('summary.R')
 df_summary = summarize_STlist(filtered_stlist)
 write.csv(df_summary, 'filtered_stlist_summary.csv', row.names=FALSE, quote=FALSE)
+
+
+#### Extract data
+plot_data = distribution_data(filtered_stlist)
+write.csv(plot_data, 'violin_box_plot_data.csv', quote=T, row.names=F)
 
 #### Violin plot
 #library('magrittr')
@@ -1103,6 +1138,35 @@ $plots
         $plots .= $this->getExportFilesCommands('filter_boxplot', 'bp');
 
         $script = "
+
+##
+# Extract data to generate violin and boxplots using D3
+#
+
+distribution_data = function(x=NULL, samples=NULL){
+
+  library('magrittr')
+
+  # Define samples to plot if NULL or numeric
+  if(is.null(samples)){
+    samples = names(x@counts)
+  } else if(is.numeric(samples)){
+    samples = names(x@counts)[samples]
+  }
+
+  # Subset samples if meta data not in all samples
+  df_tmp = tibble::tibble()
+  for(i in samples){
+    df_tmp = dplyr::bind_rows(df_tmp,
+                              x@spatial_meta[[i]] %>%
+                                dplyr::select(c('total_counts', 'total_genes')) %>%
+                                tibble::add_column(samplename=i, .before=1))
+  }
+  return(df_tmp)
+}
+
+
+
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
@@ -1111,6 +1175,10 @@ library('spatialGE')
 " .
             $this->_loadStList('filtered_stlist')
             . "
+
+#### Extract data
+plot_data = distribution_data(filtered_stlist)
+write.csv(plot_data, 'violin_box_plot_data.csv', quote=T, row.names=F)
 
 #### Violin plot
 #library('magrittr')
@@ -2241,7 +2309,7 @@ $export_files
         }
 
 
-        $file = $workingDir . 'stclust_quilt_data.csv';
+        //$file = $workingDir . 'stclust_quilt_data.csv';
         $plot_data = [];
         foreach ($samples as $sample) {
             $fileName = $sample . '_stclust_quilt_data.csv';
@@ -2256,7 +2324,7 @@ $export_files
         }
 
 
-        ProjectParameter::updateOrCreate(['parameter' => 'stclust', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots, 'plot_data' => $plot_data])]);
+        ProjectParameter::updateOrCreate(['parameter' => 'stclust', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'base_path' => $this->workingDirPublicURL(), 'plot_data' => $plot_data])]);
         ProjectProcessFiles::updateOrCreate(['process' => 'STclust', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         $this->stdiff_top_deg('stclust_top_deg.csv');
@@ -2289,7 +2357,7 @@ $export_files
         return $script;
     }
 
-    private function saveSTdiffAnnotationChanges($_annotations) {
+    public function saveSTdiffAnnotationChanges($_annotations) {
         $data = $this->getSTdiffData();
 
         $samples = [];
@@ -2462,38 +2530,38 @@ $export_files
         }
 
 
-        $file = $workingDir . 'spagcn_plots.csv';
-        if (Storage::fileExists($file)) {
+        // $file = $workingDir . 'spagcn_plots.csv';
+        // if (Storage::fileExists($file)) {
 
-            /*$zip = new \ZipArchive();
-            $zipFileName = 'SpaGCN.zip';
-            $addToZip = $zip->open(Storage::path($this->workingDirPublic() . $zipFileName), \ZipArchive::CREATE) == TRUE;*/
+        //     /*$zip = new \ZipArchive();
+        //     $zipFileName = 'SpaGCN.zip';
+        //     $addToZip = $zip->open(Storage::path($this->workingDirPublic() . $zipFileName), \ZipArchive::CREATE) == TRUE;*/
 
-            $data = trim(Storage::read($file));
-            $plots = [];
-            foreach (preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
-                $plots[] = $this->workingDirPublicURL() . $plot;
-                $file_extensions = ['svg', 'pdf', 'png'];
+        //     $data = trim(Storage::read($file));
+        //     $plots = [];
+        //     foreach (preg_split("/((\r?\n)|(\r\n?))/", $data) as $plot) {
+        //         $plots[] = $this->workingDirPublicURL() . $plot;
+        //         $file_extensions = ['svg', 'pdf', 'png'];
 
-                $plot_files = [$plot, "$plot-sbs"];
-                foreach ($plot_files as $plot_file) {
-                    foreach ($file_extensions as $file_extension) {
-                        $fileName = $plot_file . '.' . $file_extension;
-                        $file = $workingDir . $fileName;
-                        $file_public = $this->workingDirPublic() . $fileName;
-                        if (Storage::fileExists($file)) {
-                            Storage::delete($file_public);
-                            Storage::move($file, $file_public);
+        //         $plot_files = [$plot, "$plot-sbs"];
+        //         foreach ($plot_files as $plot_file) {
+        //             foreach ($file_extensions as $file_extension) {
+        //                 $fileName = $plot_file . '.' . $file_extension;
+        //                 $file = $workingDir . $fileName;
+        //                 $file_public = $this->workingDirPublic() . $fileName;
+        //                 if (Storage::fileExists($file)) {
+        //                     Storage::delete($file_public);
+        //                     Storage::move($file, $file_public);
 
-                            if($file_extension === 'pdf') {
-                                $_process_files[] = $fileName;
-                            }
+        //                     if($file_extension === 'pdf') {
+        //                         $_process_files[] = $fileName;
+        //                     }
 
-                            //if ($addToZip) $zip->addFile(Storage::path($file_public), basename($file_public));
-                        }
-                    }
-                }
-            }
+        //                     //if ($addToZip) $zip->addFile(Storage::path($file_public), basename($file_public));
+        //                 }
+        //             }
+        //         }
+        //     }
 
             /*$task = Task::where('task', $parameters['__task'])->firstOrFail();
             $parameterLog = json_decode($task->payload)->parameters;
@@ -2504,10 +2572,10 @@ $export_files
                 $zip->addFile(Storage::path($logFileName), basename($logFileName));
                 $zip->close();
             }*/
+        // }
 
-            ProjectParameter::updateOrCreate(['parameter' => 'spagcn', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plots' => $plots, 'plot_data' => $plot_data])]);
-            ProjectProcessFiles::updateOrCreate(['process' => 'SpaGCN', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
-        }
+        ProjectParameter::updateOrCreate(['parameter' => 'spagcn', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'base_path' => $this->workingDirPublicURL(), 'plot_data' => $plot_data])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'SpaGCN', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
 
         $this->stdiff_top_deg('spagcn_top_deg.csv');
@@ -2723,7 +2791,7 @@ $export_files
             }
         }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'milwrm', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plot_data' => $plot_data])]);
+        ProjectParameter::updateOrCreate(['parameter' => 'milwrm', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'base_path' => $this->workingDirPublicURL(), 'plot_data' => $plot_data])]);
         ProjectProcessFiles::updateOrCreate(['process' => 'MILWRM', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         //$this->current_step = 8;
@@ -3083,14 +3151,15 @@ lapply(names(ps), function(i){
         }
 
         //Heatmap
-        $files[] = 'stenrich_heatmap.svg';
-        $files[] = 'stenrich_heatmap.pdf';
-        $files[] = 'stenrich_heatmap.png';
+        $files[] = 'stenrich_heatmap_matrix.csv';
+        // $files[] = 'stenrich_heatmap.svg';
+        // $files[] = 'stenrich_heatmap.pdf';
+        // $files[] = 'stenrich_heatmap.png';
 
         foreach ($files as $file) {
             if (Storage::fileExists($workingDir . $file)) {
 
-                if (explode('.', $file)[1] === 'csv')
+                if (explode('.', $file)[1] === 'csv' && !strpos($file, 'heatmap'))
                     $this->csv2json($workingDir . $file, 2, $column_names);
 
                 $file_public = $workingDirPublic . $file;
@@ -3104,7 +3173,7 @@ lapply(names(ps), function(i){
             }
         }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'heatmap' => 'stenrich_heatmap', 'samples' => $this->samples->pluck('name')])]);
+        ProjectParameter::updateOrCreate(['parameter' => 'stenrich', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'heatmap' => 'stenrich_heatmap_matrix.csv', 'samples' => $this->samples->pluck('name')])]);
         ProjectProcessFiles::updateOrCreate(['process' => 'STEnrich', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
@@ -3264,14 +3333,15 @@ lapply(names(sp_enrichment), function(i){
         }
 
         //Heatmap
-        $files[] = 'stgradients_heatmap.svg';
-        $files[] = 'stgradients_heatmap.pdf';
-        $files[] = 'stgradients_heatmap.png';
+        // $files[] = 'stgradients_heatmap.svg';
+        // $files[] = 'stgradients_heatmap.pdf';
+        // $files[] = 'stgradients_heatmap.png';
+        $files[] = 'stgradients_heatmap_matrix.csv';
 
         foreach ($files as $file)
             if (Storage::fileExists($workingDir . $file)) {
 
-                if (explode('.', $file)[1] === 'csv')
+                if (explode('.', $file)[1] === 'csv' && !strpos($file, 'heatmap'))
                     $this->csv2json($workingDir . $file, 1, $column_names);
 
                 $file_public = $workingDirPublic . $file;
@@ -3284,7 +3354,7 @@ lapply(names(sp_enrichment), function(i){
                 }
             }
 
-        ProjectParameter::updateOrCreate(['parameter' => 'stgradients', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'heatmap' => 'stgradients_heatmap', 'samples' => $parameters['samples_array']])]);
+        ProjectParameter::updateOrCreate(['parameter' => 'stgradients', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'heatmap' => 'stgradients_heatmap_matrix.csv', 'samples' => $parameters['samples_array']])]);
         ProjectProcessFiles::updateOrCreate(['process' => 'STGradients', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
 
         return ['output' => $output, 'script' => $scriptContents];
@@ -3766,46 +3836,68 @@ lapply(names(grad_res), function(i){
 
             $workingDirPublic = $this->workingDirPublicURL();
 
-            $samples = $this->getSampleList($parameters['samples'], true);
-            $plots = [];
-            foreach($samples as $sample) {
-
-                $plot = 'insitutype_plot_spatial_' . $sample . '_insitutype_cell_types';
-                $plots[$sample] = $workingDirPublic . $plot;
-
-                $file_extensions = ['svg', 'pdf', 'png'];
-                foreach ($file_extensions as $file_extension) {
-                    $fileName = $plot . '.' . $file_extension;
-                    $file = $workingDir . $fileName;
-                    $file_public = $this->workingDirPublic() . $fileName;
-                    if (Storage::fileExists($file)) {
-                        Storage::delete($file_public);
-                        Storage::move($file, $file_public);
-                    }
-                }
-            }
-
-            $files = ['insitutype_flightpath', 'insitutype_umap'];
-            foreach($files as $plot) {
-
-                $plots[$plot] = $workingDirPublic . $plot;
-
-                $file_extensions = ['svg', 'pdf', 'png'];
-                foreach ($file_extensions as $file_extension) {
-                    $fileName = $plot . '.' . $file_extension;
-                    $file = $workingDir . $fileName;
-                    $file_public = $this->workingDirPublic() . $fileName;
-                    if (Storage::fileExists($file)) {
-                        Storage::delete($file_public);
-                        Storage::move($file, $file_public);
-                    }
-                }
-            }
-
             $this->stdiff_top_deg('insitutype_cell_types_top_deg.csv');
 
 
-            ProjectParameter::updateOrCreate(['parameter' => 'InSituType2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['plots' => $plots, 'parameters' => $parameters])]);
+            $samples = $this->getSampleList($parameters['samples'], true);
+            $plot_data = [];
+            foreach($samples as $sample) {
+
+
+                $fileName = $sample . '_insitutype_quilt_data.csv';
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                }
+
+                if (Storage::fileExists($file_public)) {
+                    $plot_data[$sample] = $this->workingDirPublicURL() . $fileName;
+                }
+
+            }
+
+            // $samples = $this->getSampleList($parameters['samples'], true);
+            // $plots = [];
+            // foreach($samples as $sample) {
+
+            //     $plot = 'insitutype_plot_spatial_' . $sample . '_insitutype_cell_types';
+            //     $plots[$sample] = $workingDirPublic . $plot;
+
+            //     $file_extensions = ['svg', 'pdf', 'png'];
+            //     foreach ($file_extensions as $file_extension) {
+            //         $fileName = $plot . '.' . $file_extension;
+            //         $file = $workingDir . $fileName;
+            //         $file_public = $this->workingDirPublic() . $fileName;
+            //         if (Storage::fileExists($file)) {
+            //             Storage::delete($file_public);
+            //             Storage::move($file, $file_public);
+            //         }
+            //     }
+            // }
+
+            // $files = ['insitutype_flightpath', 'insitutype_umap'];
+            // foreach($files as $plot) {
+
+            //     $plots[$plot] = $workingDirPublic . $plot;
+
+            //     $file_extensions = ['svg', 'pdf', 'png'];
+            //     foreach ($file_extensions as $file_extension) {
+            //         $fileName = $plot . '.' . $file_extension;
+            //         $file = $workingDir . $fileName;
+            //         $file_public = $this->workingDirPublic() . $fileName;
+            //         if (Storage::fileExists($file)) {
+            //             Storage::delete($file_public);
+            //             Storage::move($file, $file_public);
+            //         }
+            //     }
+            // }
+
+
+
+
+            ProjectParameter::updateOrCreate(['parameter' => 'InSituType2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_path' => $this->workingDirPublicURL(), 'plot_data' => $plot_data, 'parameters' => $parameters])]);
         }
 
         return ['output' => $output, 'script' => $scriptContents];

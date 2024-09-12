@@ -7,10 +7,7 @@
 
 # Load the package
 library('spatialGE')
-library('SeuratObject')
 library('magrittr')
-library('ComplexHeatmap')
-
 
 # Load stclust/spagcn/insitutype STList
 load("#{_stlist}#.RData")
@@ -39,7 +36,7 @@ for(i in samples_test){
     master_ann = data.table::fread(master_ann, header=F) %>% dplyr::filter(V1 == i & V3 == annot_test)
     orig_annot = unique(master_ann[['V2']])
     for(j in orig_annot){
-      annot_tmp = paste0(annot_test, '__&&__', j) # TO BE REMOVED ONCE RESTRICTIONS OF ANNOTATION NAMING ARE IN PLACE  #### CHANGE!
+      annot_tmp = paste0(annot_test, '__&&__', j) # TO BE REMOVED ONCE RESTRICTIONS OF ANNOTATION NAMING ARE IN PLACE
       master_ann_tmp = master_ann[master_ann[['V2']] == j, c('V4', 'V5')]
       master_ann_tmp[['V4']] = as.character(master_ann_tmp[['V4']])
       colnames(master_ann_tmp) = c(j, annot_tmp)
@@ -61,14 +58,14 @@ if(length(new_annot_test) == 0){
 }
 
 all_res = tibble::tibble() # Store results temporarily for plotting
-for(i_mod in new_annot_test){  #### CHANGE!
-  i = unlist(strsplit(i_mod, '__&&__', fixed=T))[1] # TO BE REMOVED ONCE RESTRICTIONS OF ANNOTATION NAMING ARE IN PLACE  #### CHANGE!
+for(i_mod in new_annot_test){
+  i = unlist(strsplit(i_mod, '__&&__', fixed=T))[1] # TO BE REMOVED ONCE RESTRICTIONS OF ANNOTATION NAMING ARE IN PLACE
   for(j in samples_test){
-    if(i_mod %in% colnames(stclust_stlist@spatial_meta[[j]])){  #### CHANGE!
+    if(i_mod %in% colnames(stclust_stlist@spatial_meta[[j]])){
       grad_res = STgradient(x=stclust_stlist,
                             samples=j,
                             topgenes=topgenes,
-                            annot=i_mod,  #### CHANGE!
+                            annot=i_mod,
                             ref=ref,
                             exclude=exclude,
                             out_rm=out_rm,
@@ -87,7 +84,7 @@ for(i_mod in new_annot_test){  #### CHANGE!
         write.csv(grad_res[[i]], paste0('./stgradients_', i, '.csv'), row.names=F, quote=F)
       })
 
-      if(length(grad_res) > 0){  #### CHANGE!
+      if(length(grad_res) > 0){
         # Compile all results in single table for plotting
         all_res = dplyr::bind_rows(all_res, grad_res[[1]])
       }
@@ -96,7 +93,7 @@ for(i_mod in new_annot_test){  #### CHANGE!
   }
 }
 
-# In case no results could be computed  #### CHANGE!
+# In case no results could be computed
 if(nrow(all_res) == 0){
   warning('No results could be computed. Have you tried varying the min_nb?')
 } else{
@@ -117,43 +114,49 @@ if(nrow(all_res) == 0){
   # Order genes
   hm_mtx = hm_mtx[order(rowMeans(abs(hm_mtx), na.rm=T)), , drop=F]
 
-  # Create data frame for heatmap annotation
-  df_tmp = stclust_stlist@sample_meta
-  if(ncol(df_tmp) >= 2){
-    colnames(df_tmp)[1] = 'x_sample_name'
-  } else{
-    df_tmp[['sample_names']] = df_tmp[[1]]
-    colnames(df_tmp)[1] = 'x_sample_name'
-  }
-  df_tmp = df_tmp %>%
-    dplyr::filter(x_sample_name %in% colnames(hm_mtx)) %>%
-    dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
-    tibble::column_to_rownames(var='x_sample_name') %>%
-    dplyr::arrange(.[[1]])
 
-  # Make sure annotations and matrix are in the same order, the make annotation object
-  hm_mtx = hm_mtx[, match(rownames(df_tmp), colnames(hm_mtx)), drop=F]
-  hm_annot = ComplexHeatmap::HeatmapAnnotation(df=df_tmp)
+  # Save matrix for heatmap
+  hm_mtx = as.data.frame(hm_mtx)
+  hm_mtx = hm_mtx %>% tibble::rownames_to_column('gene_name')
+  write.csv(hm_mtx, 'stgradients_heatmap_matrix.csv', row.names=F, quote=F)
 
-  # Generate title for heatmap
-  hm_title = paste0('Spearman coefficients (STgradient)\n', ifelse(distsumm == 'min', 'Minimum ', 'Average '), 'distance | p value < 0.05')
+#   # Create data frame for heatmap annotation
+#   df_tmp = stclust_stlist@sample_meta
+#   if(ncol(df_tmp) >= 2){
+#     colnames(df_tmp)[1] = 'x_sample_name'
+#   } else{
+#     df_tmp[['sample_names']] = df_tmp[[1]]
+#     colnames(df_tmp)[1] = 'x_sample_name'
+#   }
+#   df_tmp = df_tmp %>%
+#     dplyr::filter(x_sample_name %in% colnames(hm_mtx)) %>%
+#     dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
+#     tibble::column_to_rownames(var='x_sample_name') %>%
+#     dplyr::arrange(.[[1]])
 
-  # If too many genes in matrix, subset
-  if(nrow(hm_mtx) > 30){
-    hm_mtx = rbind(hm_mtx[1:15, , drop=F], hm_mtx[(nrow(hm_mtx)-14):nrow(hm_mtx), , drop=F])
-    hm_title = paste0(hm_title, '\nTop and bottom 30 strongest correlations')
-  }
+#   # Make sure annotations and matrix are in the same order, the make annotation object
+#   hm_mtx = hm_mtx[, match(rownames(df_tmp), colnames(hm_mtx)), drop=F]
+#   hm_annot = ComplexHeatmap::HeatmapAnnotation(df=df_tmp)
 
-  # Plot and save heatmap
-  #pdf('../../../results_and_intermediate_files/stgradient/visium/stgradient_results_summary_heatmap.pdf', height=14)
-  heatmap_plot = Heatmap(hm_mtx,
-                         cluster_columns=F,
-                         cluster_rows=F,
-                         show_row_names=T,
-                         column_title=hm_title,
-                         heatmap_legend_param=list(title="Spearman's r"),
-                         bottom_annotation=hm_annot)
-  saveplot('stgradients_heatmap', heatmap_plot, 800, 1000)
-  #dev.off()
+#   # Generate title for heatmap
+#   hm_title = paste0('Spearman coefficients (STgradient)\n', ifelse(distsumm == 'min', 'Minimum ', 'Average '), 'distance | p value < 0.05')
+
+#   # If too many genes in matrix, subset
+#   if(nrow(hm_mtx) > 30){
+#     hm_mtx = rbind(hm_mtx[1:15, , drop=F], hm_mtx[(nrow(hm_mtx)-14):nrow(hm_mtx), , drop=F])
+#     hm_title = paste0(hm_title, '\nTop and bottom 30 strongest correlations')
+#   }
+
+#   # Plot and save heatmap
+#   #pdf('../../../results_and_intermediate_files/stgradient/visium/stgradient_results_summary_heatmap.pdf', height=14)
+#   heatmap_plot = Heatmap(hm_mtx,
+#                          cluster_columns=F,
+#                          cluster_rows=F,
+#                          show_row_names=T,
+#                          column_title=hm_title,
+#                          heatmap_legend_param=list(title="Spearman's r"),
+#                          bottom_annotation=hm_annot)
+#   saveplot('stgradients_heatmap', heatmap_plot, 800, 1000)
+#   #dev.off()
 }
 

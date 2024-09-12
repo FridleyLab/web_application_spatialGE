@@ -67,6 +67,8 @@
                             <send-job-button label="Run SpaGCN" :disabled="processing" :project-id="project.id" job-name="SpaGCN" @started="SDD_SpaGCN" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
                         </div>
 
+                        <color-palettes @colors="changeColorPalette"></color-palettes>
+
 
                         <div v-if="!processing && annotations_renamed">
                             <div class="row mt-3">
@@ -92,7 +94,7 @@
                                             </li>
                                         </template>
                                     </template>
-                                    <a :href="project.assets_url + 'SpaGCN.zip'" class="ms-3 btn btn-sm btn-outline-info" download>Download all results (ZIP)</a>
+                                    <!-- <a :href="project.assets_url + 'SpaGCN.zip'" class="ms-3 btn btn-sm btn-outline-info" download>Download all results (ZIP)</a> -->
                                 </ul>
 
                                 <div class="tab-content m-4" id="SPAGCN_myTabContent">
@@ -110,35 +112,35 @@
                                         <div class="tab-content" :id="'SPAGCN_myTabContent' + k">
                                             <template v-for="(sample, index) in samples">
                                                 <div v-if="showSample(sample.name)" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample.name + 'SPAGCN_K_' + k" role="tabpanel" :aria-labelledby="sample.name + 'SPAGCN_K_' + k + '-tab'">
-                                                    <div v-for="image in spagcn.plots">
-                                                        <template v-if="image.includes('spagcn') && image.includes(sample.name) && (image.endsWith('k' + k) || image.endsWith('k' + k + '_refined'))">
-                                                            <h4 class="pt-4 text-center" v-if="image.includes('refined')">Refined clusters</h4>
+                                                    <!-- <div v-for="image in spagcn.plots"> -->
+                                                        <!-- <template v-if="image.includes('spagcn') && image.includes(sample.name) && (image.endsWith('k' + k) || image.endsWith('k' + k + '_refined'))"> -->
+                                                            <!-- <h4 class="pt-4 text-center" v-if="image.includes('refined')">Refined clusters</h4> -->
                                                             <show-plot v-if="!('plot_data' in spagcn)" :src="image" :show-image="Boolean(sample.has_image)" :sample="sample" :side-by-side="true"></show-plot>
 
                                                             <template v-if="'plot_data' in spagcn">
                                                                 <template v-for="(plotData, annotation) in plot_data[sample.name]">
-                                                                    <template v-if="image.includes(sample.name + '_' + annotation) && (!image.includes('refined') || annotation.endsWith('refined'))">
+                                                                    <template v-if="annotation.endsWith('k' + k) || annotation.endsWith('k' + k + '_refined')">
+                                                                        <h4 v-if="annotation.includes('refined')" class="pt-4 text-center">Refined clusters</h4>
                                                                         <div class="my-4" style="width: 100%; height: 700px">
                                                                             <plots-component
                                                                                 :base="sample.image_file_url"
                                                                                 :csv="plotData.data"
-                                                                                :title="annotation"
+                                                                                :title="plot_data[sample.name][annotation]['title']"
                                                                                 plot-type="cluster"
                                                                                 :color-palette="plot_data[sample.name][annotation]['palette']"
                                                                                 :legend-min="0"
                                                                                 :legend-max="10"
                                                                                 :is-y-axis-inverted="project.project_platform_id === 3"
                                                                                 :is-grouped="true"
-                                                                                :p-key="sample.name + 'K_' + k + '_' + annotation.replace(' ', '').replace('.','')"
+                                                                                :p-key="sample.name.replaceAll(' ', '').replaceAll('.','') + 'K_' + k + '_' + annotation.replaceAll(' ', '').replaceAll('.','')"
                                                                             ></plots-component>
                                                                         </div>
+                                                                        <stdiff-rename-annotations-clusters v-if="annotations !== null" :annotation="annotations[sample.name][annotation]" :sample-name="sample.name" :file-path="spagcn.base_path + sample.name + '_' + annotation" prefix="spagcn_" suffix="_top_deg" :rename-url="this.sddSpagcnRenameUrl" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
                                                                     </template>
                                                                 </template>
                                                             </template>
-
-                                                            <stdiff-rename-annotations-clusters v-if="annotations !== null" :annotation="annotations[sample.name][getAnnotation(sample.name, image)]" :sample-name="sample.name" :file-path="image" prefix="spagcn_" suffix="_top_deg" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
-                                                        </template>
-                                                    </div>
+                                                        <!-- </template> -->
+                                                    <!-- </div> -->
                                                 </div>
                                             </template>
                                         </div>
@@ -292,6 +294,8 @@ import Multiselect from '@vueform/multiselect';
                 loaded: false,
                 plot_data: {},
                 plot_show: {},
+
+                colorPalette: [],
             }
         },
 
@@ -340,23 +344,73 @@ import Multiselect from '@vueform/multiselect';
 
         methods: {
 
-            getColorPalette(sampleName, annotation) {
-                // console.log(sampleName, annotation);
-                // console.log(this.annotations[sampleName][annotation]);
+            changeColorPalette(colors) {
 
-                const colors = ['red', 'green', 'blue', 'yellow', 'cyan'];
+                if(!this.loaded) return;
 
-                let annotations = this.annotations[sampleName][annotation];
+                this.colorPalette = colors;
+
+                for(let sampleName in this.plot_data) {
+                    for(let annotation in this.plot_data[sampleName]) {
+                        this.plot_data[sampleName][annotation]['palette'] = this.getColorPalette(sampleName, annotation);
+                    }
+                }
+            },
+
+                getColorPalette(sampleName, annotation) {
+
+                // const colors = ['red', 'green', 'blue', 'yellow', 'cyan'];
+
+                const colors = this.colorPalette.length ? this.colorPalette : ['#E8ECFB', '#E0DEF2', '#D8D0EA', '#D0C0E0', '#C7AFD5', '#BD9ECB', '#B48EC1', '#AB7EB8', '#A26FAE', '#9A60A6', '#8F539C', '#804D99', '#6D4D9C', '#6355A5', '#5B5FAF', '#5469B9', '#4F75C2', '#4D80C5', '#4D8BC4', '#4D93BE', '#5099B7', '#549FB1', '#58A3AA', '#5CA7A3', '#61AB9B', '#67B092', '#70B486', '#7AB779', '#88BB6B', '#99BD5D', '#AABD51', '#BBBC49', '#C8B844', '#D3B23F', '#DBAB3C', '#E1A23A', '#E49838', '#E68D35', '#E68033', '#E57330', '#E4642D', '#E05229', '#DD3D26', '#DA2322', '#C4221F', '#AD211D', '#95211B', '#7E1F18', '#671C15', '#521A13'];
+
+                //Get a list of all labels across all samples
+                let labels = [];
+                for(let sampleName in this.annotations) {
+                    for(let _annotation in this.annotations[sampleName]) {
+                        labels.push(...this.annotations[sampleName][_annotation].clusters.map(cluster => ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName));
+                    }
+                }
+                //Get unique labels list and their colors
+                const uniqueLabels = [...new Set(labels)];
+                let step = 1;
+                if(uniqueLabels.length <= colors.length/2) {
+                    step = Math.trunc(colors.length / uniqueLabels.length);
+                }
+                let labelColors = {};
+                for(let i = 0; i < uniqueLabels.length; i++) {
+                    labelColors[uniqueLabels[i]] = {label: uniqueLabels[i], color: colors[i*step]};
+                }
+
                 let colorPalette = {};
                 let i = 0;
+                let annotations = this.annotations[sampleName][annotation];
                 for(let clusterName in annotations.clusters) {
                     let cluster = annotations.clusters[clusterName];
-                    colorPalette[cluster.originalName] = {label: ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName, color: colors[i]};
+                    let label = ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName;
+                    colorPalette[cluster.originalName] = labelColors[label];
                     i++;
                 }
 
                 return colorPalette;
             },
+
+            // getColorPalette(sampleName, annotation) {
+            //     // console.log(sampleName, annotation);
+            //     // console.log(this.annotations[sampleName][annotation]);
+
+            //     const colors = ['red', 'green', 'blue', 'yellow', 'cyan'];
+
+            //     let annotations = this.annotations[sampleName][annotation];
+            //     let colorPalette = {};
+            //     let i = 0;
+            //     for(let clusterName in annotations.clusters) {
+            //         let cluster = annotations.clusters[clusterName];
+            //         colorPalette[cluster.originalName] = {label: ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName, color: colors[i]};
+            //         i++;
+            //     }
+
+            //     return colorPalette;
+            // },
 
             processPlotFile(sampleName, data) {
                 this.plot_data[sampleName] = {};
@@ -365,6 +419,7 @@ import Multiselect from '@vueform/multiselect';
                     this.plot_data[sampleName][columnNames[i]] = {};
                     this.plot_data[sampleName][columnNames[i]]['data'] = this.extractColumnsFromCSV(data, [1, 2, i+1]);
                     this.plot_data[sampleName][columnNames[i]]['palette'] = this.getColorPalette(sampleName, columnNames[i]);
+                    this.plot_data[sampleName][columnNames[i]]['title'] = this.annotations[sampleName][columnNames[i]]['modifiedName']
 
                     //console.log(this.plot_data[sampleName][columnNames[i]]);
                 }
@@ -408,6 +463,8 @@ import Multiselect from '@vueform/multiselect';
                 this.annotations[sampleName][annotation.originalName]['newName'] = annotation.newName;
                 this.annotations[sampleName][annotation.originalName]['changed'] = changed;
 
+                this.plot_data[sampleName][annotation.originalName]['title'] = annotation.newName;
+
                 // this.annotationChangesDetected = false;
                 this.active_annotations.forEach(aa => {
                     if(aa.sampleName === sampleName && aa.annotation === annotation.originalName) {
@@ -421,6 +478,9 @@ import Multiselect from '@vueform/multiselect';
             },
 
             showSample(sampleName) {
+
+                return sampleName in this.plot_data;
+
                 for(let plot in this.spagcn.plots) {
                     if(this.spagcn.plots[plot].includes(sampleName)) {
                         return true;
@@ -461,53 +521,53 @@ import Multiselect from '@vueform/multiselect';
             },
 
 
-            SpaGCNRename() {
+            // SpaGCNRename() {
 
-                this.renaming = true;
+            //     this.renaming = true;
 
-                let modified = [];
-                this.active_annotations.map(item => {
-                    if(item.changed) {
-                        modified.push({
-                            sampleName: item.sampleName,
-                            originalName: item.annotation,
-                            newName: this.annotations[item.sampleName][item.annotation]['newName'],
-                            clusters: this.annotations[item.sampleName][item.annotation]['clusters']
-                        });
-                    }
-                });
+            //     let modified = [];
+            //     this.active_annotations.map(item => {
+            //         if(item.changed) {
+            //             modified.push({
+            //                 sampleName: item.sampleName,
+            //                 originalName: item.annotation,
+            //                 newName: this.annotations[item.sampleName][item.annotation]['newName'],
+            //                 clusters: this.annotations[item.sampleName][item.annotation]['clusters']
+            //             });
+            //         }
+            //     });
 
-                let parameters = {
-                    annotations: modified,
-                };
+            //     let parameters = {
+            //         annotations: modified,
+            //     };
 
-                axios.post(this.sddSpagcnRenameUrl, parameters)
-                    .then((response) => {
-                    })
-                    .catch((error) => {
-                        this.renaming = false;
-                        console.log(error);
-                    })
+            //     axios.post(this.sddSpagcnRenameUrl, parameters)
+            //         .then((response) => {
+            //         })
+            //         .catch((error) => {
+            //             this.renaming = false;
+            //             console.log(error);
+            //         })
 
-            },
+            // },
 
-            async SpaGCNRenameCompleted() {
-                await this.loadAnnotations();
-                this.renaming = false;
-            },
+            // async SpaGCNRenameCompleted() {
+            //     await this.loadAnnotations();
+            //     this.renaming = false;
+            // },
 
 
-            generatePlots() {
-                this.processing = true;
-                console.log(this.stplotExpressionSurfacePlotsUrl);
-                axios.post(this.stplotExpressionSurfacePlotsUrl, this.params)
-                    .then((response) => {
-                    })
-                    .catch((error) => {
-                        this.processing = false;
-                        console.log(error.response);
-                    })
-            },
+            // generatePlots() {
+            //     this.processing = true;
+            //     console.log(this.stplotExpressionSurfacePlotsUrl);
+            //     axios.post(this.stplotExpressionSurfacePlotsUrl, this.params)
+            //         .then((response) => {
+            //         })
+            //         .catch((error) => {
+            //             this.processing = false;
+            //             console.log(error.response);
+            //         })
+            // },
 
             SDD_SpaGCN_SVG() {
                 this.processing_svg = true;
