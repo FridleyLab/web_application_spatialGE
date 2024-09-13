@@ -148,19 +148,7 @@
         },
 
         async mounted() {
-            if(!('plot_data' in this.milwrm)) {
-                this.loaded = true;
-                return;
-            }
-
-            for(let sample in this.milwrm.plot_data) {
-                let data = await axios.get(this.milwrm.plot_data[sample]);
-                this.processPlotFile(sample, data.data);
-            }
-
-            this.getColorPalette();
-
-            this.loaded = true;
+            await this.loadResults();
         },
 
         watch: {
@@ -182,6 +170,23 @@
         },
 
         methods: {
+
+            async loadResults() {
+                this.loaded = false;
+                if(!('plot_data' in this.milwrm)) {
+                    this.loaded = true;
+                    return;
+                }
+
+                for(let sample in this.milwrm.plot_data) {
+                    let data = await axios.get(this.milwrm.plot_data[sample]);
+                    this.processPlotFile(sample, data.data);
+                }
+
+                this.getColorPalette();
+
+                this.loaded = true;
+            },
 
             changeColorPalette(colors) {
 
@@ -290,6 +295,7 @@
 
             MILWRM_start() {
                 this.processing = true;
+                this.loaded = fals;
 
                 axios.post(this.sddMilwrmUrl, this.params)
                     .then((response) => {
@@ -301,8 +307,8 @@
             },
 
             async processCompleted() {
-                //console.log(this.project.project_parameters);
                 this.milwrm = ('milwrm' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.milwrm) : {};
+                this.loadResults();
                 this.processing = false;
             },
 

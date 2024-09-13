@@ -250,24 +250,29 @@ import Multiselect from '@vueform/multiselect';
 
         async mounted() {
 
-            if(!('plot_data' in this.plots)) {
-                this.loaded = true;
-                return;
-            }
-
-            for(let sample in this.plots.plot_data) {
-                let data = await axios.get(this.plots.plot_data[sample]);
-                this.plot_data[sample] = {};
-                this.processPlotFile(sample, data.data);
-            }
-
-            console.log(this.plot_data);
-
-            this.loaded = true;
+            await this.loadResults();
 
         },
 
         methods: {
+
+            async loadResults() {
+
+                this.loaded = false;
+
+                if(!('plot_data' in this.plots)) {
+                    this.loaded = true;
+                    return;
+                }
+
+                for(let sample in this.plots.plot_data) {
+                    let data = await axios.get(this.plots.plot_data[sample]);
+                    this.plot_data[sample] = {};
+                    this.processPlotFile(sample, data.data);
+                }
+
+                this.loaded = true;
+            },
 
             processPlotFile(sampleName, data) {
                 const columnNames = data.split('\n')[0].split(',');
@@ -293,6 +298,7 @@ import Multiselect from '@vueform/multiselect';
 
             quiltPlot() {
                 this.generating_quilt = true;
+                this.loaded = false;
                 axios.post(this.stplotQuiltUrl, this.params)
                     .then((response) => {
                         //this.plots = response.data;
@@ -304,9 +310,10 @@ import Multiselect from '@vueform/multiselect';
                     })
             },
 
-            processCompleted() {
+            async processCompleted() {
                 this.generating_quilt = false;
                 this.plots = ('stplot_quilt' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stplot_quilt) : {};
+                await this.loadResults();
             },
 
             hide_plot: function(gene, sample) {

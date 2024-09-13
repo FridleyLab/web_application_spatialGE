@@ -336,24 +336,27 @@ import Multiselect from '@vueform/multiselect';
         },
 
         async mounted() {
-            await this.loadAnnotations();
-
-            if(!('plot_data' in this.inSituType2)) {
-                this.loaded = true;
-                return;
-            }
-
-            for(let sample in this.inSituType2.plot_data) {
-                let data = await axios.get(this.inSituType2.plot_data[sample]);
-                this.processPlotFile(sample, data.data);
-            }
-
-            //console.log(this.plot_data);
-
-            this.loaded = true;
+            await this.loadResults();
         },
 
         methods: {
+
+            async loadResults() {
+                this.loaded = false;
+                await this.loadAnnotations();
+
+                if(!('plot_data' in this.inSituType2)) {
+                    this.loaded = true;
+                    return;
+                }
+
+                for(let sample in this.inSituType2.plot_data) {
+                    let data = await axios.get(this.inSituType2.plot_data[sample]);
+                    this.processPlotFile(sample, data.data);
+                }
+
+                this.loaded = true;
+            },
 
             changeColorPalette(colors) {
 
@@ -486,13 +489,13 @@ import Multiselect from '@vueform/multiselect';
             },
 
             processCompleted() {
-                //console.log(this.project.project_parameters);
                 this.inSituType = ('inSituType' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.inSituType) : {};
                 this.processing = false;
             },
 
             runInSituType2() {
                 this.processing2 = true;
+                this.loaded = false;
 
                 this.params2['samples'] = this.visibleSamples;
 
@@ -505,9 +508,9 @@ import Multiselect from '@vueform/multiselect';
             },
 
             async processCompleted2() {
-                //console.log(this.project.project_parameters);
                 this.inSituType2 = ('InSituType2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.InSituType2) : {};
-                await this.loadAnnotations();
+                // await this.loadAnnotations();
+                this.loadResults();
                 this.processing2 = false;
             },
 

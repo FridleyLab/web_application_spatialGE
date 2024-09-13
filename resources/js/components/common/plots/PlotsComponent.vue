@@ -25,8 +25,30 @@
             <div class="title-container-plot-viewer">
                 <label>{{ title }}</label>
             </div>
+
             <div
-                class="controls-left-container-plot-viewer px-4"
+                class="toggle-cluster-points-plot-viewer form-check form-switch"
+                v-if="plotType === 'cluster' && showControls"
+            >
+                <input
+                    style="cursor: pointer"
+                    class="form-check-input"
+                    type="checkbox"
+                    :id="pKey + 'toggleShowAllClusters'"
+                    @change="toggleShowAllClusters"
+                    :checked="showAllClusters"
+                />
+                <label class="form-check-label" :for="pKey + 'toggleClusters'">
+                    {{
+                        showAllClusters
+                            ? "Enable All Clusters"
+                            : "Disable All Clusters"
+                    }}
+                </label>
+            </div>
+
+            <div
+                class="controls-left-container-plot-viewer"
                 v-if="showControls"
             >
                 <div class="mb-1">
@@ -410,6 +432,9 @@ export default {
             selectedExportType: "svg",
 
             maxValue: 0,
+            clickTimeout: null,
+            isDoubleClick: false,
+            showAllClusters: true,
         };
     },
 
@@ -865,6 +890,29 @@ export default {
         },
 
         /**
+         * Handles the cluster click behavior
+         *
+         * @param {String} color - The color of the cluster
+         */
+         handleClick(color) {
+            if (!this.isDoubleClick) {
+                this.handleLegendClick(color);
+            }
+            this.isDoubleClick = false;
+        },
+
+        /**
+         * Handles the cluster double-click behavior
+         *
+         * @param {String} color - The color of the cluster
+         */
+        handleDoubleClick(color) {
+            this.isDoubleClick = true;
+            this.handleLegendDoubleClick(color);
+            this.isDoubleClick = false;
+        },
+
+        /**
          * Toggles the visibility of data points in the plot.
          * Responds to user interactions with the legend by adjusting the displayed data.
          * This is only necessesary when plotType is CLUSTER
@@ -904,6 +952,54 @@ export default {
                 );
             }
 
+            this.updatePointsAndRecreateClusterLegend();
+        },
+
+        /**
+         * Toggles the visibility of data points in the plot.
+         * By double clicking on the data point, the visibility of the other data points will be hidden.
+         * Responds to user interactions with the legend by adjusting the displayed data.
+         * This is only necessesary when plotType is CLUSTER
+         *
+         * @param {string} color - The color of the legend item that was clicked.
+         */
+        handleLegendDoubleClick(selectedColor) {
+            Object.keys(this.activeColors).forEach((color) => {
+                this.activeColors[color] = color === selectedColor;
+            });
+
+            this.filteredData = this.processedData.filter(
+                (d) => this.activeColors[this.colorPalette[d.value].color]
+            );
+
+            this.updatePointsAndRecreateClusterLegend();
+        },
+
+        /**
+         * Toggles the visibility of all clusters.
+         * * This is only necessesary when plotType is CLUSTER
+         */
+        toggleShowAllClusters() {
+            this.showAllClusters = !this.showAllClusters;
+
+            if (this.showAllClusters) {
+                Object.keys(this.activeColors).forEach((color) => {
+                    this.activeColors[color] = true;
+                });
+            } else {
+                Object.keys(this.activeColors).forEach((color) => {
+                    this.activeColors[color] = false;
+                });
+            }
+
+            this.filteredData = this.processedData.filter(
+                (d) => this.activeColors[this.colorPalette[d.value].color]
+            );
+
+            this.updatePointsAndRecreateClusterLegend();
+        },
+
+        updatePointsAndRecreateClusterLegend() {
             this.updatePoints(
                 d3.select("#" + this.pKey + "overlay").select("g"),
                 this.xScale,
@@ -916,6 +1012,7 @@ export default {
                 this.yScale,
                 this.colorScale
             );
+
             this.createClusterLegend();
         },
 
@@ -1045,9 +1142,17 @@ export default {
                     .attr("r", 10)
                     .style("fill", isActive ? colorObject.color : "grey")
                     .style("cursor", "pointer")
-                    .on("click", () =>
-                        this.handleLegendClick(colorObject.color)
-                    );
+                    .on("click", () => {
+                        if (this.clickTimeout) clearTimeout(this.clickTimeout);
+
+                        this.clickTimeout = setTimeout(() => {
+                            this.handleClick(colorObject.color);
+                        }, 200);
+                    })
+                    .on("dblclick", () => {
+                        if (this.clickTimeout) clearTimeout(this.clickTimeout);
+                        this.handleDoubleClick(colorObject.color);
+                    });
 
                 legendSvg
                     .append("text")
@@ -1059,9 +1164,17 @@ export default {
                     .style("fill", isActive ? "black" : "grey")
                     .text(`${colorObject.label}`)
                     .style("cursor", "pointer")
-                    .on("click", () =>
-                        this.handleLegendClick(colorObject.color)
-                    );
+                    .on("click", () => {
+                        if (this.clickTimeout) clearTimeout(this.clickTimeout);
+
+                        this.clickTimeout = setTimeout(() => {
+                            this.handleClick(colorObject.color);
+                        }, 200);
+                    })
+                    .on("dblclick", () => {
+                        if (this.clickTimeout) clearTimeout(this.clickTimeout);
+                        this.handleDoubleClick(colorObject.color);
+                    });
             });
         },
 
@@ -1768,6 +1881,15 @@ svg {
     right: 10px;
     align-items: center;
     border-radius: 8px;
+}
+
+.toggle-cluster-points-plot-viewer {
+    z-index: 1;
+    position: absolute;
+    bottom: 80px;
+    left: 10px;
+    z-index: 1050;
+    align-items: center;
 }
 
 .sliders-panel-plot-viewer {

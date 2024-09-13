@@ -300,23 +300,8 @@ import Multiselect from '@vueform/multiselect';
         },
 
         async mounted() {
-            await this.loadAnnotations();
-            await this.loadSVG();
-            //console.log(this.project.project_parameters.annotation_variables);
 
-            let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
-            this.annotation_variables = stdiff['annotation_variables'];
-
-
-            if(!('plot_data' in this.spagcn)) {
-                this.loaded = true;
-                return;
-            }
-            for(let sample in this.spagcn.plot_data) {
-                let data = await axios.get(this.spagcn.plot_data[sample]);
-                this.processPlotFile(sample, data.data);
-            }
-            this.loaded = true;
+            await this.loadResults();
 
         },
 
@@ -344,6 +329,25 @@ import Multiselect from '@vueform/multiselect';
 
         methods: {
 
+            async loadResults() {
+                this.loaded = false;
+                await this.loadAnnotations();
+                await this.loadSVG();
+
+                let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
+                this.annotation_variables = stdiff['annotation_variables'];
+
+                if(!('plot_data' in this.spagcn)) {
+                    this.loaded = true;
+                    return;
+                }
+                for(let sample in this.spagcn.plot_data) {
+                    let data = await axios.get(this.spagcn.plot_data[sample]);
+                    this.processPlotFile(sample, data.data);
+                }
+                this.loaded = true;
+            },
+
             changeColorPalette(colors) {
 
                 if(!this.loaded) return;
@@ -364,12 +368,14 @@ import Multiselect from '@vueform/multiselect';
                 const colors = this.colorPalette.length ? this.colorPalette : ['#E8ECFB', '#E0DEF2', '#D8D0EA', '#D0C0E0', '#C7AFD5', '#BD9ECB', '#B48EC1', '#AB7EB8', '#A26FAE', '#9A60A6', '#8F539C', '#804D99', '#6D4D9C', '#6355A5', '#5B5FAF', '#5469B9', '#4F75C2', '#4D80C5', '#4D8BC4', '#4D93BE', '#5099B7', '#549FB1', '#58A3AA', '#5CA7A3', '#61AB9B', '#67B092', '#70B486', '#7AB779', '#88BB6B', '#99BD5D', '#AABD51', '#BBBC49', '#C8B844', '#D3B23F', '#DBAB3C', '#E1A23A', '#E49838', '#E68D35', '#E68033', '#E57330', '#E4642D', '#E05229', '#DD3D26', '#DA2322', '#C4221F', '#AD211D', '#95211B', '#7E1F18', '#671C15', '#521A13'];
 
                 //Get a list of all labels across all samples
-                let labels = [];
-                for(let sampleName in this.annotations) {
-                    for(let _annotation in this.annotations[sampleName]) {
-                        labels.push(...this.annotations[sampleName][_annotation].clusters.map(cluster => ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName));
-                    }
-                }
+                // let labels = [];
+                // for(let sampleName in this.annotations) {
+                //     for(let _annotation in this.annotations[sampleName]) {
+                //         labels.push(...this.annotations[sampleName][_annotation].clusters.map(cluster => ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName));
+                //     }
+                // }
+
+                let labels = this.annotations[sampleName][annotation].clusters.map(cluster => ('newName' in cluster && cluster.newName.length) ? cluster.newName : cluster.modifiedName);
                 //Get unique labels list and their colors
                 const uniqueLabels = [...new Set(labels)];
                 let step = 1;
@@ -492,6 +498,7 @@ import Multiselect from '@vueform/multiselect';
 
             SDD_SpaGCN() {
                 this.processing = true;
+                this.loaded = false;
 
                 let parameters = {
                     p: this.params.p,
@@ -514,7 +521,8 @@ import Multiselect from '@vueform/multiselect';
             async processCompleted() {
                 //console.log(this.project.project_parameters);
                 this.spagcn = ('spagcn' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.spagcn) : {};
-                await this.loadAnnotations();
+                // await this.loadAnnotations();
+                this.loadResults();
                 this.processing = false;
                 this.$enableWizardStep('differential-expression');
                 this.$enableWizardStep('spatial-gradients');
