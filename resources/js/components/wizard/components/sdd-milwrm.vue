@@ -295,7 +295,7 @@
 
             MILWRM_start() {
                 this.processing = true;
-                this.loaded = fals;
+                this.loaded = false;
 
                 axios.post(this.sddMilwrmUrl, this.params)
                     .then((response) => {
