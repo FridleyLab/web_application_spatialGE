@@ -81,51 +81,51 @@ hm_mtx = hm_mtx %>% tibble::rownames_to_column(var='gene_set')
 write.csv(hm_mtx, file='stenrich_heatmap_matrix.csv', row.names=F, quote=F)
 
 
-# # If too many gene sets, then select those with the most standard deviation in p-values
-# if(nrow(hm_mtx) <= 30){
-#   hm_mtx = hm_mtx[order(apply(hm_mtx, 1, median, na.rm=T)), , drop=F]
-# } else{
-#   hm_mtx = hm_mtx[order(apply(hm_mtx, 1, sd, na.rm=T), decreasing=T), , drop=F]
-#   hm_mtx = hm_mtx[1:30, , drop=F]
-#   hm_mtx = hm_mtx[order(apply(hm_mtx, 1, median, na.rm=T)), , drop=F]
-# }
+# If too many gene sets, then select those with the most standard deviation in p-values
+if(nrow(hm_mtx) <= 30){
+  hm_mtx = hm_mtx[order(apply(hm_mtx, 1, median, na.rm=T)), , drop=F]
+} else{
+  hm_mtx = hm_mtx[order(apply(hm_mtx, 1, sd, na.rm=T), decreasing=T), , drop=F]
+  hm_mtx = hm_mtx[1:30, , drop=F]
+  hm_mtx = hm_mtx[order(apply(hm_mtx, 1, median, na.rm=T)), , drop=F]
+}
 
-# # Create data frame for heatmap annotation
-# df_tmp = normalized_stlist@sample_meta
-# if(ncol(df_tmp) >= 2){
-#   colnames(df_tmp)[1] = 'x_sample_name'
-# } else{
-#   df_tmp[['sample_names']] = df_tmp[[1]]
-#   colnames(df_tmp)[1] = 'x_sample_name'
-# }
-# df_tmp = df_tmp %>%
-#   dplyr::filter(x_sample_name %in% colnames(hm_mtx)) %>%
-#   dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
-#   tibble::column_to_rownames(var='x_sample_name') %>%
-#   dplyr::arrange(.[[1]])
+# Create data frame for heatmap annotation
+df_tmp = normalized_stlist@sample_meta
+if(ncol(df_tmp) >= 2){
+  colnames(df_tmp)[1] = 'x_sample_name'
+} else{
+  df_tmp[['sample_names']] = df_tmp[[1]]
+  colnames(df_tmp)[1] = 'x_sample_name'
+}
+df_tmp = df_tmp %>%
+  dplyr::filter(x_sample_name %in% colnames(hm_mtx)) %>%
+  dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
+  tibble::column_to_rownames(var='x_sample_name') %>%
+  dplyr::arrange(.[[1]])
 
-# hm_mtx = hm_mtx[, match(rownames(df_tmp), colnames(hm_mtx)), drop=F]
-# hm_annot = ComplexHeatmap::HeatmapAnnotation(df=df_tmp)
+hm_mtx = hm_mtx[, match(rownames(df_tmp), colnames(hm_mtx)), drop=F]
+hm_annot = ComplexHeatmap::HeatmapAnnotation(df=df_tmp)
 
-# # Generate title for heatmap
-# hm_title = paste0('STgradient FDR-adjusted p-values')
+# Generate title for heatmap
+hm_title = paste0('STgradient FDR-adjusted p-values')
 
-# # Generate heatmap
-# hm = ComplexHeatmap::Heatmap(hm_mtx,
-#                              cluster_columns=F,
-#                              cluster_rows=F,
-#                              show_row_names=T,
-#                              column_title=hm_title,
-#                              col=circlize::colorRamp2(c(0, 0.05, 1), c("firebrick1", "deepskyblue2", "deepskyblue2")),
-#                              bottom_annotation=hm_annot,
-#                              heatmap_legend_param=list(title="STenrich\nFDR"))
+# Generate heatmap
+hm = ComplexHeatmap::Heatmap(hm_mtx,
+                             cluster_columns=F,
+                             cluster_rows=F,
+                             show_row_names=T,
+                             column_title=hm_title,
+                             col=circlize::colorRamp2(c(0, 0.05, 1), c("firebrick1", "deepskyblue2", "deepskyblue2")),
+                             bottom_annotation=hm_annot,
+                             heatmap_legend_param=list(title="STenrich\nFDR"))
 
-# # Save heatmap
-# #pdf('../../../results_and_intermediate_files/spatial_gene_set_enrichment/visium/stenrich_results_summary_heatmap.pdf', width=10, height=12)
-# hm_plot = draw(hm, padding=unit(c(2, 2, 2, 60), "mm"),
-#      annotation_legend_side="bottom",
-#      heatmap_legend_side="bottom",
-#      merge_legend=T)
-# #dev.off()
+# Save heatmap
+#pdf('../../../results_and_intermediate_files/spatial_gene_set_enrichment/visium/stenrich_results_summary_heatmap.pdf', width=10, height=12)
+hm_plot = draw(hm, padding=unit(c(2, 2, 2, 60), "mm"),
+     annotation_legend_side="bottom",
+     heatmap_legend_side="bottom",
+     merge_legend=T)
+#dev.off()
 
-# saveplot('stenrich_heatmap', hm_plot, 800, 1000)
+saveplot('stenrich_heatmap', hm_plot, 800, 1000)

@@ -128,14 +128,14 @@
 
                     <div v-if="'heatmap' in stenrich" class="tab-pane fade min-vh-50 show active" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
                         <div class="m-4" style="width:100%; height:1000px">
-                            <!-- <show-plot :src="stenrich.base_url + stenrich.heatmap" :show-image="false" :side-by-side="false"></show-plot> -->
-                            <heatmap
+                            <show-plot :src="stenrich.base_url + stenrich.heatmap" :show-image="false" :side-by-side="false"></show-plot>
+                            <!-- <heatmap
                                 :color_palette="['blue', 'white', 'red']"
                                 :csv_file="stenrich.base_url + stenrich.heatmap"
                                 heatmap_title="Test sample-gene heatmap"
                                 csv-header-gene-name="gene_set"
                             >
-                            </heatmap>
+                            </heatmap> -->
                         </div>
                     </div>
 
