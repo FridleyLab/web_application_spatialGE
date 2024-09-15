@@ -155,6 +155,7 @@
 
                                             <div v-if="'plot_data' in plots" class="my-4" style="width: 100%; height: 700px">
                                                 <plots-component
+                                                    v-if="sample in plot_data && gene in plot_data[sample]"
                                                     :base="(getSampleByName(sample)).image_file_url"
                                                     :csv="plot_data[sample][gene]"
                                                     :title="sample + ' - ' + gene"
@@ -266,7 +267,8 @@ import Multiselect from '@vueform/multiselect';
                 }
 
                 for(let sample in this.plots.plot_data) {
-                    let data = await axios.get(this.plots.plot_data[sample]);
+                    const timestamp = new Date().getTime();
+                    let data = await axios.get(`${this.plots.plot_data[sample]}?cachebuster=${timestamp}`);
                     this.plot_data[sample] = {};
                     this.processPlotFile(sample, data.data);
                 }
