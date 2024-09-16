@@ -265,7 +265,7 @@ import 'vue3-easy-data-table/dist/style.css';
 
             processCompleted() {
                 //console.log(this.project.project_parameters);
-                this.stclust = ('stenrich' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stclust) : {};
+                this.stclust = ('stenrich' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stenrich) : {};
                 this.processing = false;
                 //this.$enableWizardStep('differential-expression');
 
