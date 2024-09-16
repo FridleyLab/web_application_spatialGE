@@ -351,7 +351,8 @@ import Multiselect from '@vueform/multiselect';
                 }
 
                 for(let sample in this.inSituType2.plot_data) {
-                    let data = await axios.get(this.inSituType2.plot_data[sample]);
+                    const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+                    let data = await axios.get(this.inSituType2.plot_data[sample] + '?cachebuster=' + timestamp);
                     this.processPlotFile(sample, data.data);
                 }
 

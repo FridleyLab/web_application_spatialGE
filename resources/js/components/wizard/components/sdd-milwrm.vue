@@ -179,7 +179,8 @@
                 }
 
                 for(let sample in this.milwrm.plot_data) {
-                    let data = await axios.get(this.milwrm.plot_data[sample]);
+                    const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+                    let data = await axios.get(this.milwrm.plot_data[sample] + '?cachebuster=' + timestamp);
                     this.processPlotFile(sample, data.data);
                 }
 

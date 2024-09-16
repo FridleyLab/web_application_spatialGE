@@ -3152,9 +3152,9 @@ lapply(names(ps), function(i){
 
         //Heatmap
         $files[] = 'stenrich_heatmap_matrix.csv';
-        // $files[] = 'stenrich_heatmap.svg';
-        // $files[] = 'stenrich_heatmap.pdf';
-        // $files[] = 'stenrich_heatmap.png';
+        $files[] = 'stenrich_heatmap.svg';
+        $files[] = 'stenrich_heatmap.pdf';
+        $files[] = 'stenrich_heatmap.png';
 
         foreach ($files as $file) {
             if (Storage::fileExists($workingDir . $file)) {
@@ -3333,9 +3333,9 @@ lapply(names(sp_enrichment), function(i){
         }
 
         //Heatmap
-        // $files[] = 'stgradients_heatmap.svg';
-        // $files[] = 'stgradients_heatmap.pdf';
-        // $files[] = 'stgradients_heatmap.png';
+        $files[] = 'stgradients_heatmap.svg';
+        $files[] = 'stgradients_heatmap.pdf';
+        $files[] = 'stgradients_heatmap.png';
         $files[] = 'stgradients_heatmap_matrix.csv';
 
         foreach ($files as $file)

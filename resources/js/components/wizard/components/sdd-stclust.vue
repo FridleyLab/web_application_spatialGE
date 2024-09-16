@@ -73,13 +73,13 @@
         </div>
 
 
-        <div v-if="!processing && annotations_renamed">
+        <!-- <div v-if="!processing && annotations_renamed">
             <div class="row mt-3">
                 <div class="p-3 text-end">
                     <send-job-button label="Complete renaming" :disabled="processing || renaming || !params.col_pal.length" :project-id="project.id" job-name="STclustRename" @started="STclustRename" @completed="STclustRenameCompleted" :project="project" ></send-job-button>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div v-if="!processing && !renaming && ('stclust' in project.project_parameters) && annotations !== null">
             <color-palettes @colors="changeColorPalette"></color-palettes>
@@ -355,7 +355,8 @@ import Multiselect from '@vueform/multiselect';
                 }
 
                 for(let sample in this.stclust.plot_data) {
-                    let data = await axios.get(this.stclust.plot_data[sample]);
+                    const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+                    let data = await axios.get(this.stclust.plot_data[sample] + '?cachebuster=' + timestamp);
                     this.processPlotFile(sample, data.data);
                 }
 

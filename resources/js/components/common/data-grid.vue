@@ -4,28 +4,30 @@
     <button v-if="scrollingToggle" type="button" class="btn btn-sm btn-outline-secondary" @click="scrollingMode = scrollingMode === 'standard' ? 'virtual' : 'standard'">{{ scrollingMode === 'standard' ? 'Continuous scrolling' : 'Paginated view' }}</button>
     <dx-data-grid
 
-                  :style="scrollingMode !== 'standard' ? 'height: 70vh;' : ''"
+        :style="scrollingMode !== 'standard' ? 'height: 70vh;' : ''"
 
-                  class="dx-card wide-card"
+        class="dx-card wide-card"
 
-                  :show-borders="true"
-                  :allow-column-resizing="true"
-                  :allow-column-reordering="true"
+        :show-borders="true"
+        :allow-column-resizing="true"
+        :allow-column-reordering="true"
+
+        :selected-row-keys="selectedKeys"
 
 
-                  :column-auto-width="true"
+        :column-auto-width="true"
 
-                  :data-source="_data"
+        :data-source="_data"
 
-                  :word-wrap-enabled="false"
+        :word-wrap-enabled="false"
 
-                  :row-alternation-enabled="true"
+        :row-alternation-enabled="true"
 
-                  :key-expr="keyAttribute"
+        :key-expr="keyAttribute"
 
-                  v-model:selected-row-keys="selectedRowKeys"
-                  @selection-changed="onSelectionChanged"
-                  @cell-prepared="onCellPrepared"
+        v-model:selected-row-keys="selectedRowKeys"
+        @selection-changed="onSelectionChanged"
+        @cell-prepared="onCellPrepared"
 
     >
 
@@ -199,8 +201,8 @@ export default {
             const allSelectedRowKeys = e.selectedRowKeys;
             const allSelectedRowsData = e.selectedRowsData;
 
-            console.log(currentSelectedRowKeys);
-            console.log(allSelectedRowKeys);
+            // console.log(currentSelectedRowKeys);
+            // console.log(allSelectedRowKeys);
 
             this.$emit('selected', allSelectedRowKeys);
 

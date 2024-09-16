@@ -211,7 +211,7 @@
                                 :metadata-values="{'patient': [{'Lung5_Rep2_fov_12': 'patient_1101'}, {'Lung5_Rep2_fov_13': 'patient_1102'}], 'therapy': [{'Lung5_Rep2_fov_12': 'adriamycin'}, {'Lung5_Rep2_fov_13': 'none'}]}"
                             >
                             </heatmap> -->
-                            <show-plot :src="stgradients.base_url + stgradients.heatmap" :show-image="false" :side-by-side="false"></show-plot>
+                            <show-plot :src="stgradients.base_url + 'stgradients_heatmap'" :show-image="false" :side-by-side="false"></show-plot>
                         </div>
                     </div>
 

@@ -8,6 +8,7 @@
 # Load the package
 library('spatialGE')
 library('magrittr')
+library('ComplexHeatmap')
 
 # Load stclust/spagcn/insitutype STList
 load("#{_stlist}#.RData")

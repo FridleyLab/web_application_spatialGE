@@ -18,6 +18,7 @@
 
                     <div class="text-center justify-content-center w-100 py-2">
 
+                        {{ params.samples }}
                         <project-summary-table :data="project.project_parameters.initial_stlist_summary" :url="project.project_parameters.initial_stlist_summary_url" :selected-keys="params.samples" @selected="(keys) => params.samples = keys"></project-summary-table>
 
                         <!-- <div class="m-4 gap-4">
@@ -433,6 +434,8 @@
             }
 
             this.loaded = true;
+
+            // console.log(this.params)
 
         //     this.setIntervalQueue();
         },

@@ -127,8 +127,8 @@ import Multiselect from '@vueform/multiselect';
         },
 
         mounted() {
-            console.log(this.project.project_parameters);
-            console.log(this.project.project_parameters.metadata_names);
+            // console.log(this.project.project_parameters);
+            // console.log(this.project.project_parameters.metadata_names);
         },
 
         watch: {

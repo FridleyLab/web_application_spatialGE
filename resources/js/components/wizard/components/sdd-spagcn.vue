@@ -54,12 +54,12 @@
                             </div>
 
 
-                            <div class="row justify-content-center text-center m-4">
+                            <!-- <div class="row justify-content-center text-center m-4">
                                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                                     <div>Color palette <show-modal tag="sdd_spagcn_color_palette"></show-modal></div>
                                     <div><Multiselect :options="colorPalettes" v-model="params.col_pal"></Multiselect></div>
                                 </div>
-                            </div>
+                            </div> -->
 
                         </div>
 
@@ -67,19 +67,21 @@
                             <send-job-button label="Run SpaGCN" :disabled="processing" :project-id="project.id" job-name="SpaGCN" @started="SDD_SpaGCN" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
                         </div>
 
-                        <color-palettes @colors="changeColorPalette"></color-palettes>
 
 
-                        <div v-if="!processing && annotations_renamed">
+
+                        <!-- <div v-if="!processing && annotations_renamed">
                             <div class="row mt-3">
                                 <div class="p-3 text-end">
                                     <send-job-button label="Complete renaming" :disabled="processing || renaming || !params.col_pal.length" :project-id="project.id" job-name="SpaGCNRename" @started="SpaGCNRename" @completed="SpaGCNRenameCompleted" :project="project" ></send-job-button>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- Create tabs for each K value and sub-tabs for each sample -->
                         <div v-if="!processing && !renaming && ('spagcn' in project.project_parameters)">
+
+                            <color-palettes @colors="changeColorPalette"></color-palettes>
 
                 <!--            <div class="">-->
                 <!--                <a :href="project.assets_url + 'SpaGCN.zip'" class="float-end btn btn-sm btn-outline-info" download>Download all results (ZIP)</a>-->
@@ -158,7 +160,7 @@
                             <div>Annotation to test <show-modal tag="spagcn_spavargenes_annotation"></show-modal></div>
                             <div>
                                 <span>
-                                    <Multiselect id="multiselect_annotation_variables" :options="annotation_variables.filter(ann => ann.value.startsWith('spagcn'))" v-model="params_svg.annotation_to_test"></Multiselect>
+                                    <Multiselect id="multiselect_annotation_variables" :options="annotation_variables.filter(ann => ann.label.toLowerCase().startsWith('spagcn'))" v-model="params_svg.annotation_to_test"></Multiselect>
                                 </span>
                             </div>
                         </div>
@@ -337,12 +339,14 @@ import Multiselect from '@vueform/multiselect';
                 let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
                 this.annotation_variables = stdiff['annotation_variables'];
 
+
                 if(!('plot_data' in this.spagcn)) {
                     this.loaded = true;
                     return;
                 }
                 for(let sample in this.spagcn.plot_data) {
-                    let data = await axios.get(this.spagcn.plot_data[sample]);
+                    const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+                    let data = await axios.get(this.spagcn.plot_data[sample] + '?cachebuster=' + timestamp);
                     this.processPlotFile(sample, data.data);
                 }
                 this.loaded = true;
@@ -427,7 +431,9 @@ import Multiselect from '@vueform/multiselect';
                     this.plot_data[sampleName][columnNames[i]]['palette'] = this.getColorPalette(sampleName, columnNames[i]);
                     this.plot_data[sampleName][columnNames[i]]['title'] = this.annotations[sampleName][columnNames[i]]['modifiedName']
 
-                    //console.log(this.plot_data[sampleName][columnNames[i]]);
+                    // console.log(sampleName);
+                    // console.log(columnNames[i]);
+                    //console.log(this.plot_data[sampleName][columnNames[i]]['data']);
                 }
             },
 

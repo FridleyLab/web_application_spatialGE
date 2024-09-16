@@ -72,7 +72,7 @@
             this.main_data = this.csvToJSON(this.data);
             this.reference_data = this.reference.length ? this.csvToJSON(this.reference) : {};
 
-            console.log(this.main_data);
+            //console.log(this.main_data);
         },
 
         methods: {
@@ -113,7 +113,7 @@
             },
 
             selectedKeysChanged: function (keys) {
-                console.log(keys);
+                //console.log(keys);
                 this.$emit('selected', keys);
             }
         }
