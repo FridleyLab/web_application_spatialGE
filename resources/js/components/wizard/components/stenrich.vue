@@ -265,11 +265,10 @@ import 'vue3-easy-data-table/dist/style.css';
 
             processCompleted() {
                 //console.log(this.project.project_parameters);
-                this.stclust = ('stenrich' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stenrich) : {};
-                this.processing = false;
+                this.stenrich = ('stenrich' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stenrich) : {};
                 //this.$enableWizardStep('differential-expression');
-
                 this.loadResults();
+                this.processing = false;
             },
 
             loadResults() {
@@ -277,7 +276,8 @@ import 'vue3-easy-data-table/dist/style.css';
                     return;
 
                 this.stenrich.samples?.forEach( sample => {
-                    axios.get(this.stenrich.base_url + 'stenrich_' + sample + '.json' + '?' + Date.now())
+                    const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+                    axios.get(this.stenrich.base_url + 'stenrich_' + sample + '.json' + '?cachebuster=' + timestamp)
                         .then((response) => {
                             this.results[sample] = {};
                             this.results[sample].data = response.data;

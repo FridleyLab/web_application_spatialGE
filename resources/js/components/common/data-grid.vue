@@ -169,7 +169,30 @@ export default {
     },
 
     mounted() {
-        if(this.src.length) {
+
+        this.loadData();
+
+    },
+
+    watch: {
+
+        headers() {
+            this.loadData();
+        },
+
+        data() {
+            this.loadData();
+        }
+    },
+
+    methods: {
+
+        loadData() {
+
+            this._headers = this.headers;
+            this._data = this.data;
+
+            if(this.src.length) {
 
             axios.get(this.src + '?' + Date.now())
                 .then((response) => {
@@ -179,14 +202,9 @@ export default {
                 .catch((error) => {
                     console.log(error.message);
                 })
-        }
-    },
+            }
+        },
 
-    watch: {
-
-    },
-
-    methods: {
         onCellPrepared(cell) {
             /*if(cell.rowType === 'data' && this.is_numeric_column(cell.column.dataField)) {
                 console.log(cell);

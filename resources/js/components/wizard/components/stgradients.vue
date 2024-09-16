@@ -397,7 +397,8 @@ import 'vue3-easy-data-table/dist/style.css';
                     return;
 
                 this.stgradients.samples.forEach( sample => {
-                    axios.get(this.stgradients.base_url + 'stgradients_' + sample + '.json' + '?' + Date.now())
+                    const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+                    axios.get(this.stgradients.base_url + 'stgradients_' + sample + '.json' + '?cachebuster=' + timestamp)
                         .then((response) => {
                             this.results[sample] = {};
                             this.results[sample].data = response.data;
