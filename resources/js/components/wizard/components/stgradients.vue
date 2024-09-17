@@ -201,19 +201,10 @@
 
                     <div v-if="'heatmap' in stgradients" class="tab-pane fade min-vh-50 show active" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
                         <div class="m-4" style="width:100%; height:100%">
-                            <!-- <heatmap
-                                :color_palette="['blue', 'white', 'red']"
-                                :csv-file="stgradients.base_url + stgradients.heatmap"
-                                heatmap-title="STgradient FDR-adjusted p-values"
-                                csv-header-gene-name="gene_name"
-                                :visible-samples="[]"
-                                :metadata-palette="{'patient': [{'patient_1101': 'red'}, {'patient_1102': '#0000FF'}], 'therapy': [{'adriamycin': 'yellow'}, {'none': '#00FF00'}]}"
-                                :metadata-values="{'patient': [{'Lung5_Rep2_fov_12': 'patient_1101'}, {'Lung5_Rep2_fov_13': 'patient_1102'}], 'therapy': [{'Lung5_Rep2_fov_12': 'adriamycin'}, {'Lung5_Rep2_fov_13': 'none'}]}"
-                            >
-                            </heatmap> -->
+
                             <show-plot :src="stgradients.base_url + 'stgradients_heatmap'" :show-image="false" :side-by-side="false"></show-plot>
 
-                            <heatmap
+                            <!-- <heatmap
                                 :color-palette="['blue', 'white', 'red']"
                                 :csv-file="stgradients.base_url + stgradients.heatmap"
                                 heatmap-title="STgradient FDR-adjusted p-values"
@@ -222,7 +213,7 @@
                                 :metadata-palette="metadataPalette"
                                 :metadata-values="metadataValues"
                             >
-                            </heatmap>
+                            </heatmap> -->
 
                         </div>
                     </div>
