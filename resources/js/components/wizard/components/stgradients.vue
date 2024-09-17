@@ -181,7 +181,7 @@
 
 
 <!--         Create tabs for each sample-->
-        <div v-if="!processing && ('stgradients' in project.project_parameters)">
+        <div v-if="!processing && loaded && ('stgradients' in project.project_parameters)">
             <div>
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
 
@@ -200,18 +200,30 @@
                 <div class="tab-content" id="myTabContent">
 
                     <div v-if="'heatmap' in stgradients" class="tab-pane fade min-vh-50 show active" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
-                        <div class="m-4" style="width:100%; height:1000px">
+                        <div class="m-4" style="width:100%; height:100%">
                             <!-- <heatmap
                                 :color_palette="['blue', 'white', 'red']"
-                                :csv_file="stgradients.base_url + stgradients.heatmap"
-                                heatmap_title="Test sample-gene heatmap"
+                                :csv-file="stgradients.base_url + stgradients.heatmap"
+                                heatmap-title="STgradient FDR-adjusted p-values"
                                 csv-header-gene-name="gene_name"
-                                :visible-samples="['Lung5_Rep2_fov_12','Lung5_Rep2_fov_13']"
+                                :visible-samples="[]"
                                 :metadata-palette="{'patient': [{'patient_1101': 'red'}, {'patient_1102': '#0000FF'}], 'therapy': [{'adriamycin': 'yellow'}, {'none': '#00FF00'}]}"
                                 :metadata-values="{'patient': [{'Lung5_Rep2_fov_12': 'patient_1101'}, {'Lung5_Rep2_fov_13': 'patient_1102'}], 'therapy': [{'Lung5_Rep2_fov_12': 'adriamycin'}, {'Lung5_Rep2_fov_13': 'none'}]}"
                             >
                             </heatmap> -->
                             <show-plot :src="stgradients.base_url + 'stgradients_heatmap'" :show-image="false" :side-by-side="false"></show-plot>
+
+                            <heatmap
+                                :color-palette="['blue', 'white', 'red']"
+                                :csv-file="stgradients.base_url + stgradients.heatmap"
+                                heatmap-title="STgradient FDR-adjusted p-values"
+                                csv-header-gene-name="gene_name"
+                                :visible-samples="[]"
+                                :metadata-palette="metadataPalette"
+                                :metadata-values="metadataValues"
+                            >
+                            </heatmap>
+
                         </div>
                     </div>
 
@@ -291,10 +303,16 @@ import 'vue3-easy-data-table/dist/style.css';
                     robust: true,
                 },
 
+                metadataPalette: {},
+                metadataValues: {},
+
+                loaded: false
+
             }
         },
 
         async mounted() {
+            this.processMetadata();
             await this.loadResults();
 
             let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
@@ -345,6 +363,43 @@ import 'vue3-easy-data-table/dist/style.css';
 
         methods: {
 
+            getColorPalette(values) {
+                let colors = ['#D8D0EA', '#D0C0E0', '#C7AFD5', '#BD9ECB', '#B48EC1', '#AB7EB8', '#A26FAE', '#9A60A6', '#8F539C', '#804D99', '#6D4D9C', '#6355A5', '#5B5FAF', '#5469B9', '#4F75C2', '#4D80C5', '#4D8BC4', '#4D93BE', '#5099B7', '#549FB1', '#58A3AA', '#5CA7A3', '#61AB9B', '#67B092', '#70B486', '#7AB779', '#88BB6B', '#99BD5D', '#AABD51', '#BBBC49', '#C8B844', '#D3B23F', '#DBAB3C', '#E1A23A', '#E49838', '#E68D35', '#E68033', '#E57330', '#E4642D', '#E05229', '#DD3D26', '#DA2322', '#C4221F', '#AD211D', '#95211B', '#7E1F18', '#671C15', '#521A13'];
+                let step = 1;
+                if(values.length <= colors.length/2) {
+                    step = Math.trunc(colors.length / values.length);
+                }
+                let palette = [];
+                for(let i = 0; i < values.length; i++) {
+                    let element = {};
+                    element[values[i]] = colors[i*step];
+                    palette.push(element);
+                }
+                return palette;
+            },
+
+            processMetadata() {
+                if(this.project.project_parameters && this.project.project_parameters.metadata && this.project.project_parameters.metadata.length) {
+                    let metadata = JSON.parse(this.project.project_parameters.metadata)
+                    metadata.forEach( meta => {
+                        this.metadataValues[meta.name] = [];
+                        let values = [];
+                        for(let val in meta.values) {
+                            values.push(meta.values[val]);
+                            let element = {};
+                            element[val] = meta.values[val];
+                            this.metadataValues[meta.name].push(element);
+
+                        };
+                        values = [...new Set(values)];
+                        // console.log(this.getColorPalette(values));
+                        this.metadataPalette[meta.name] = this.getColorPalette(values);
+                    });
+                    // console.log(JSON.stringify(this.metadataPalette));
+                    // console.log(JSON.stringify(this.metadataValues));
+                }
+            },
+
             getSampleByName(nameToFind) {
                 return this.samples.find( sample => sample.name === nameToFind);
             },
@@ -391,6 +446,9 @@ import 'vue3-easy-data-table/dist/style.css';
             },
 
             async loadResults() {
+
+                this.loaded = false;
+
                 this.stdiff_ns = ('stgradients' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stgradients) : {};
 
                 if(!('base_url' in this.stgradients))
@@ -412,6 +470,8 @@ import 'vue3-easy-data-table/dist/style.css';
                             console.log(error.message);
                         })
                 });
+
+                this.loaded = true;
             }
         },
 
