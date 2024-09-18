@@ -124,6 +124,7 @@
                         class="image-base-plot-viewer"
                         :href="base"
                         @load="onBaseImageLoad"
+                        @error="onBaseImageLoadError"
                         x="100"
                         y="100"
                         :width="baseImageWidth"
@@ -515,6 +516,15 @@ export default {
             );
 
             observer.observe(this.$el);
+        },
+
+
+        /**
+         * Handles errors while loading the base image.
+         */
+        onBaseImageLoadError() {
+            console.log('ERROR loading image');
+            //this.base = '';
         },
 
         /**

@@ -17,7 +17,7 @@ class Sample extends Model
 
     protected $fillable = ['name'];
 
-    protected $appends = ['file_list', 'has_image', 'image_file_url', 'expression_file', 'coordinates_file', 'image_file'];
+    protected $appends = ['file_list', 'has_image', 'image_file', 'image_file_url', 'expression_file', 'coordinates_file'];
 
 
 
@@ -101,7 +101,9 @@ class Sample extends Model
     }
 
     public function getImageFileUrlAttribute() {
-        return route('get-sample-image', ['sample' => $this->id]);
+
+        return $this->image_file !== null ? route('get-sample-image', ['sample' => $this->id]) : '';
+
     }
 
 }

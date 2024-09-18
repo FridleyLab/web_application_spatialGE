@@ -52,7 +52,7 @@
                 </div>
             </div> -->
 
-            <color-palettes @colors="colors => colorPalette = colors" palette-type="GRADIENT"></color-palettes>
+            <color-palettes @colors="colors => colorPalette = colors" palette-type="GRADIENT" default-palette="sunset"></color-palettes>
 
             <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
@@ -156,7 +156,7 @@
                                             <div v-if="'plot_data' in plots" class="my-4" style="width: 100%; height: 700px">
                                                 <plots-component
                                                     v-if="sample in plot_data && gene in plot_data[sample]"
-                                                    :base="(getSampleByName(sample)).image_file_url"
+                                                    :base="(getSampleByName(sample)).image_file_url !== null && (getSampleByName(sample)).image_file_url.length ? (getSampleByName(sample)).image_file_url : ''"
                                                     :csv="plot_data[sample][gene]"
                                                     :title="sample + ' - ' + gene"
                                                     plot-type="gradient"

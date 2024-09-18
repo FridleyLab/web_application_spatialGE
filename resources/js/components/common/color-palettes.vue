@@ -19,7 +19,8 @@ export default {
     },
 
     props: {
-        paletteType: {type: String, default: 'ALL'} // or GRADIENT
+        paletteType: {type: String, default: 'ALL'}, // or GRADIENT
+        defaultPalette: {type: String, default: 'smoothrainbow'}
     },
 
     data() {
@@ -33,7 +34,7 @@ export default {
 
         this.processData();
 
-        this.selected = 'smoothrainbow';
+        this.selected = this.defaultPalette;
 
         this.paletteSelected(this.selected);
 
