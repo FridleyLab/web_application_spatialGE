@@ -202,7 +202,7 @@
                     <div v-if="'heatmap' in stgradients" class="tab-pane fade min-vh-50 show active" id="heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
                         <div class="m-4" style="width:100%; height:100%">
 
-                            <show-plot :src="stgradients.base_url + 'stgradients_heatmap'" :show-image="false" :side-by-side="false"></show-plot>
+                            <!-- <show-plot :src="stgradients.base_url + 'stgradients_heatmap'" :show-image="false" :side-by-side="false"></show-plot> -->
 
                             <div>
                                 Sort samples by:
