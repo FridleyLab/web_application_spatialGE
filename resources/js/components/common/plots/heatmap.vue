@@ -346,7 +346,7 @@ export default {
                     }
 
                     //limit to 10 samples max
-                    this.xValues = this.xValues.length > 10 ? this.xValues.slice(10) : this.xValues;
+                    this.xValues = this.xValues.length > 10 ? this.xValues.slice(0,10) : this.xValues;
 
                     this.numSample = this.xValues.length;
                     console.log('|||||||||||||||\\\\\\\\\\\\\\\\\\------ ' + funcName + ': this.xValues = ' + String(this.xValues));

@@ -138,7 +138,7 @@
                                 </select>
                             </div>
                             <div class="my-4">
-                                Number of rows to show (half from top/half from bottom): <span class="text-primary text-lg text-bold">{{ numberOfRowsToShow }}</span>
+                                Number of rows to show: <span class="text-primary text-lg text-bold">{{ numberOfRowsToShow }}</span>
                                 <input type="range" min="0" max="200" step="10" class="w-100" v-model="numberOfRowsToShow">
                             </div>
                             <div>
