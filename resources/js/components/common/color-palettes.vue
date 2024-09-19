@@ -20,7 +20,7 @@ export default {
 
     props: {
         paletteType: {type: String, default: 'ALL'}, // or GRADIENT
-        defaultPalette: {type: String, default: 'smoothrainbow'}
+        defaultPalette: {type: String, default: 'discreterainbow'}
     },
 
     data() {

@@ -113,7 +113,8 @@ if(nrow(all_res) == 0){
     as.matrix()
 
   # Order genes
-  hm_mtx = hm_mtx[order(rowMeans(abs(hm_mtx), na.rm=T)), , drop=F]
+  #hm_mtx = hm_mtx[order(rowMeans(abs(hm_mtx), na.rm=T)), , drop=F]
+  hm_mtx = hm_mtx[order(rowMeans(hm_mtx, na.rm=T), decreasing=T), , drop=F]
 
 
   # Save matrix for heatmap

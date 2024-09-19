@@ -73,7 +73,7 @@ hm_mtx = sp_enrichment %>%
   as.matrix()
 
 # Order by median p-values
-hm_mtx = hm_mtx[order(apply(hm_mtx, 1, median, na.rm=T)), , drop=F]
+hm_mtx = hm_mtx[order(apply(hm_mtx, 1, mean, na.rm=T), decreasing=F), , drop=F]
 hm_mtx = as.data.frame(hm_mtx)
 hm_mtx = hm_mtx %>% tibble::rownames_to_column(var='gene_set')
 

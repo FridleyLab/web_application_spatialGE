@@ -27,6 +27,9 @@ export default {
         visibleSamples: { type: Array, required: false },
         metadataPalette: { type: Object, required: true },
         metadataValues: { type: Object, required: true },
+        numberOfRowsToShow: { type: Number, default: 0 },
+        showRowsFrom: { type: String, default: 'top' },
+        samplesOrder: { type: Array, default: [] },
     },
 
     data() {
@@ -66,61 +69,121 @@ export default {
         };
     },
 
+    watch: {
+        samplesOrder() {
+            this.initialize();
+        },
+
+        numberOfRowsToShow() {
+            this.initialize();
+        },
+    },
+
     async mounted() {
-        const funcName = 'mounted()';
-
-        console.log('>>>>>> ' + funcName + ': Loading CSV file ' + this.csvFile);
-
-        this.getMetadataColors();
-        this.getMetadataHeatmapValues();
-
-        let csvDataArray = await d3.csv(this.csvFile)
-            .then(data => {
-                // console.log('Loading CSV file ' + this.csvFile + '; Data = ' + data);
-                this.svgWidth = this.width + this.margin.left + this.margin.right;
-
-                const metaKeyCount = this.isEmpty(this.metadataKeys) ? 0 : this.metadataKeys.length;
-                const rowCount = this.isEmpty(data) ? (metaKeyCount + 50) : (metaKeyCount + data.length);
-                this.height = rowCount * 12;
-
-                const heatmapSvgHeight = this.height + this.margin.top + this.margin.bottom;
-                const metaSvgHeight = this.isEmpty(this.metadataKeys) ? 0 :
-                                    ((this.metaLegendHeight + this.metaLegendMargin.top + this.metaLegendMargin.bottom))
-                                            * this.metadataKeys.length;
-
-                this.svgHeight = heatmapSvgHeight > metaSvgHeight ? heatmapSvgHeight : metaSvgHeight;
-
-                console.log('     ' + funcName + ': heatmapSvgHeight = ' + heatmapSvgHeight + '; metaSvgHeight = ' + metaSvgHeight
-                            + '; this.svgHeight = ' + this.svgHeight);
-
-                this.isLoaded = true;
-
-                return data;
-            }).catch(error => {
-                // Handle any errors that occur while loading the CSV file
-                console.error('!!! Error loading CSV file:', error);
-                return [];
-            });
-
-        // console.log(csvDataArray);
-
-        console.log('         ' + funcName + ': Loaded CSV file ' + this.csvFile
-            + '; csvDataArray.length = ' + csvDataArray.length
-            + '; this.svgHeight = ' + this.svgHeight
-            + '; this.isLoaded = ' + this.isLoaded
-            + '; this.metaValueObj = ' + JSON.stringify(this.metaValueObj)
-            + '; this.metaColorObj = ' + JSON.stringify(this.metaColorObj));
-
-        this.getHeatmapData(csvDataArray);
-        this.adjustMetaHeatmap();
-
-        this.drawHeatmap(this.heatmapData);
-        this.drawGradientLegend();
-        this.drawMetaLegend();
-        console.log('<<<<<<<<<<<< ' + funcName);
+        await this.initialize();
     },
 
     methods: {
+
+        async setInitialValues() {
+            this.xValues = [];
+            this.yValues = [];
+            this.csvDataArray = [];
+            this.heatmapData = [];
+            // Metadata properties
+            this.metadataKeys = [];
+            this.metadataSamples = [];
+            this.metaValueObj = {};
+            this.metaColorObj = {};           // {"patient":["black";"#964B00"];"therapy":["yellow";"#00FF00"]}
+            this.metaHeatmapData = [];
+            // Vertical metadata legend
+            this.metaLegendWidth = 40;
+            this.metaLegendSvgHeight = 100;
+            this.metaLegendHeight = 100;
+            this.metaLegendMargin = { top: 40, right: 30, bottom: 30, left: 10 };
+            this.metaLegendData = {};
+        },
+
+        async initialize() {
+
+            await this.setInitialValues();
+
+            const funcName = 'mounted()';
+
+            console.log('>>>>>> ' + funcName + ': Loading CSV file ' + this.csvFile);
+
+            await this.getMetadataColors();
+            await this.getMetadataHeatmapValues();
+
+            let csvDataArray = await d3.csv(this.csvFile)
+                .then(data => {
+
+                    if(this.numberOfRowsToShow && this.numberOfRowsToShow < data.length) {
+                        if(this.showRowsFrom.toLowerCase() !== 'top') {
+                            const halfN = Math.floor(this.numberOfRowsToShow / 2);
+
+                            // Get the first N/2 elements
+                            const firstHalf = data.slice(0, halfN);
+
+                            // Get the last N/2 elements
+                            const lastHalf = data.slice(-halfN);
+
+                            // Combine both into a new array
+                            data = [...firstHalf, ...lastHalf];
+                        } else {
+                            data = data.slice(0, this.numberOfRowsToShow);
+                        }
+                    }
+
+                    console.log(data);
+
+                    // console.log('Loading CSV file ' + this.csvFile + '; Data = ' + data);
+
+                    const metaKeyCount = this.isEmpty(this.metadataKeys) ? 0 : this.metadataKeys.length;
+                    const rowCount = this.isEmpty(data) ? (metaKeyCount + 50) : (metaKeyCount + data.length);
+                    this.height = rowCount * 12;
+
+                    const heatmapSvgHeight = this.height + this.margin.top + this.margin.bottom;
+                    const metaSvgHeight = this.isEmpty(this.metadataKeys) ? 0 :
+                                        ((this.metaLegendHeight + this.metaLegendMargin.top + this.metaLegendMargin.bottom))
+                                                * this.metadataKeys.length;
+
+                    this.svgHeight = heatmapSvgHeight > metaSvgHeight ? heatmapSvgHeight : metaSvgHeight;
+
+                    console.log('     ' + funcName + ': heatmapSvgHeight = ' + heatmapSvgHeight + '; metaSvgHeight = ' + metaSvgHeight
+                                + '; this.svgHeight = ' + this.svgHeight);
+
+
+                    return data;
+                }).catch(error => {
+                    // Handle any errors that occur while loading the CSV file
+                    console.error('!!! Error loading CSV file:', error);
+                    return [];
+                });
+
+            // console.log(csvDataArray);
+
+            console.log('         ' + funcName + ': Loaded CSV file ' + this.csvFile
+                + '; csvDataArray.length = ' + csvDataArray.length
+                + '; this.svgHeight = ' + this.svgHeight
+                + '; this.isLoaded = ' + this.isLoaded
+                + '; this.metaValueObj = ' + JSON.stringify(this.metaValueObj)
+                + '; this.metaColorObj = ' + JSON.stringify(this.metaColorObj));
+
+            await this.getHeatmapData(csvDataArray);
+
+            this.width = this.xValues.length*50
+            this.svgWidth = this.width + this.margin.left + this.margin.right;
+
+            this.isLoaded = true;
+
+            await this.adjustMetaHeatmap();
+
+            await this.drawHeatmap(this.heatmapData);
+            await this.drawGradientLegend();
+            await this.drawMetaLegend();
+            console.log('<<<<<<<<<<<< ' + funcName);
+        },
 
         /**
          * Parse the prop metadataPalette to create the metadata color and mapped value array:
@@ -128,9 +191,13 @@ export default {
          * this.metaValueObj = { "patient": ["patient_1101","patient_1102"], "therapy": ["adriamycin","none"] }
          * this.metaColorObj = { "patient": ["black","#964B00"], "therapy" ["yellow","#00FF00"] }
          */
-        getMetadataColors() {
+        async getMetadataColors() {
 
             const funcName = 'getMetadataColors()';
+
+            this.metaValueObj = {};
+            this.metaColorObj = {};
+            this.metaLegendData = {};
 
             if (!this.isEmpty(this.metadataPalette)) {
                 this.metadataKeys = Object.keys(this.metadataPalette);
@@ -191,10 +258,12 @@ export default {
          *      }
          *
          */
-        getMetadataHeatmapValues() {
+        async getMetadataHeatmapValues() {
 
             const funcName = 'getMetadataHeatmapValues()';
 
+            this.metaHeatmapData = [];
+            this.metadataSamples = [];
             let metaYValues = [];
 
             if (!this.isEmpty(this.metadataValues)) {
@@ -255,7 +324,7 @@ export default {
          *
          * @param csvDataArray
          */
-        getHeatmapData(csvDataArray) {
+        async getHeatmapData(csvDataArray) {
 
             const funcName = 'getHeatmapData()';
 
@@ -271,9 +340,16 @@ export default {
                      * xValues is the array of all samples (the CSV file header except the 1st column)
                      * if input prop visibleSamples is empty. Otherwise is visibleSamples
                      */
-                    this.xValues = this.isEmpty(this.visibleSamples) ? csvHeaderArray.slice(1) : this.visibleSamples.slice();
+                    this.xValues = this.isEmpty(this.visibleSamples) ? csvHeaderArray.slice(1) : this.visibleSamples;
+                    if(this.samplesOrder.length) {
+                        this.xValues = this.samplesOrder.filter(sample => this.xValues.includes(sample));
+                    }
+
+                    //limit to 10 samples max
+                    this.xValues = this.xValues.length > 10 ? this.xValues.slice(10) : this.xValues;
+
                     this.numSample = this.xValues.length;
-                    console.log('------ ' + funcName + ': this.xValues = ' + String(this.xValues));
+                    console.log('|||||||||||||||\\\\\\\\\\\\\\\\\\------ ' + funcName + ': this.xValues = ' + String(this.xValues));
                 }
 
                 let yLabel = '';
@@ -332,9 +408,13 @@ export default {
         *
         * @param inData
         */
-        drawHeatmap(inData) {
+        async drawHeatmap(inData) {
 
             const funcName = 'drawHeatmap()';
+
+            if (!d3.select(this.$refs.heatmapRef).select("svg").empty()) {
+                d3.select(this.$refs.heatmapRef).select("svg").remove();
+            }
 
             // Append the svg object to the body of the page
             const svg = d3.select(this.$refs.heatmapRef)
@@ -514,7 +594,7 @@ export default {
         /**
          * Draw a vertical gradient legend
          */
-        drawGradientLegend() {
+        async drawGradientLegend() {
 
             const funcName = 'drawGradientLegend()';
 
@@ -585,7 +665,7 @@ export default {
         /**
          * Draw the vertical legend for each metadata key
          */
-        drawMetaLegend() {
+        async drawMetaLegend() {
 
             const funcName = 'drawMetaLegend()';
 
@@ -690,7 +770,7 @@ export default {
          *          y = heatmap yValue (geneName from CSV file),
          *          value = 'NA'
          */
-        adjustMetaHeatmap() {
+        async adjustMetaHeatmap() {
 
             const funcName = 'adjustMetaHeatmap()';
 
@@ -714,20 +794,20 @@ export default {
                     })
                 } else {
                     // Add heatmap cell with value = 'NA' if the metadata smaple count < visible heatmap sampe count
-                    this.metadataSamples.forEach(sample => {
-                        if (!this.isEmpty(sample) && !this.xValues.includes(sample)) {
-                            this.xValues.push(sample);
-                            if (!this.isEmpty(this.yValues)) {
-                                this.yValues.forEach(yValue => {
-                                    if (!this.isEmpty(yValue) && !this.isEmpty(this.metadataKeys)
-                                                            && !this.metadataKeys.includes(yValue)) {
-                                        // console.log('@@@@@@ ' + funcName + ': sample = ' + sample + '; yValue = ' + yValue);
-                                        this.heatmapData.push({x: sample, y: yValue, value: 'NA'});
-                                    }
-                                })
-                            }
-                        }
-                    })
+                    // this.metadataSamples.forEach(sample => {
+                    //     if (!this.isEmpty(sample) && !this.xValues.includes(sample)) {
+                    //         this.xValues.push(sample);
+                    //         if (!this.isEmpty(this.yValues)) {
+                    //             this.yValues.forEach(yValue => {
+                    //                 if (!this.isEmpty(yValue) && !this.isEmpty(this.metadataKeys)
+                    //                                         && !this.metadataKeys.includes(yValue)) {
+                    //                     // console.log('@@@@@@ ' + funcName + ': sample = ' + sample + '; yValue = ' + yValue);
+                    //                     this.heatmapData.push({x: sample, y: yValue, value: 'NA'});
+                    //                 }
+                    //             })
+                    //         }
+                    //     }
+                    // })
                 }
                 console.log('%%%%%%%%%%%% ' + funcName + ': this.heatmapData = ' + JSON.stringify(this.heatmapData));
             }

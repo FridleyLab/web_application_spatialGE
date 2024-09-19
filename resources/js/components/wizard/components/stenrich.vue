@@ -131,11 +131,38 @@
                             <show-plot :src="stenrich.base_url + 'stenrich_heatmap'" :show-image="false" :side-by-side="false"></show-plot>
 
 
+                            <div>
+                                Sort samples by:
+                                <select v-model="metadataSortedBy">
+                                    <option v-for="meta in metadataNames" :value="meta">{{meta}}</option>
+                                </select>
+                            </div>
+                            <div class="my-4">
+                                Number of rows to show (half from top/half from bottom): <span class="text-primary text-lg text-bold">{{ numberOfRowsToShow }}</span>
+                                <input type="range" min="0" max="200" step="10" class="w-100" v-model="numberOfRowsToShow">
+                            </div>
+                            <div>
+                                <heatmap
+                                    :color-palette="['blue', 'white', 'red']"
+                                    :csv-file="stenrich.base_url + stenrich.heatmap"
+                                    heatmap-title="STenrich FDR-adjusted p-values"
+                                    csv-header-gene-name="gene_set"
+                                    :visible-samples="[/*'sample_093d', 'sample_396c'*/]"
+                                    :samples-order="metadataSorted[metadataSortedBy]"
+                                    :metadata-palette="metadataPalette"
+                                    :metadata-values="metadataValues"
+                                    :number-of-rows-to-show="parseInt(numberOfRowsToShow)"
+                                    show-rows-from="top"
+                                >
+                                </heatmap>
+                            </div>
+
+
                             <!-- <div class="mt-6">
                                 <heatmap
                                     :color-palette="['blue', 'white', 'red']"
                                     :csv-file="stenrich.base_url + stenrich.heatmap"
-                                    heatmap-title="STgradient FDR-adjusted p-values"
+                                    heatmap-title="STenrich FDR-adjusted p-values"
                                     csv-header-gene-name="gene_set"
                                     :visible-samples="[]"
                                     :metadata-palette="metadataPalette"
@@ -240,8 +267,13 @@ import 'vue3-easy-data-table/dist/style.css';
                     num_sds: 1,
                 },
 
+                metadataNames: [],
+                metadataSorted: {},
                 metadataPalette: {},
                 metadataValues: {},
+                metadataSortedBy: '',
+
+                numberOfRowsToShow: 30,
 
                 loaded: false
 
@@ -260,16 +292,16 @@ import 'vue3-easy-data-table/dist/style.css';
 
         methods: {
 
-            getColorPalette(values) {
-                let colors = ['#E8ECFB', '#E0DEF2', '#D8D0EA', '#D0C0E0', '#C7AFD5', '#BD9ECB', '#B48EC1', '#AB7EB8', '#A26FAE', '#9A60A6', '#8F539C', '#804D99', '#6D4D9C', '#6355A5', '#5B5FAF', '#5469B9', '#4F75C2', '#4D80C5', '#4D8BC4', '#4D93BE', '#5099B7', '#549FB1', '#58A3AA', '#5CA7A3', '#61AB9B', '#67B092', '#70B486', '#7AB779', '#88BB6B', '#99BD5D', '#AABD51', '#BBBC49', '#C8B844', '#D3B23F', '#DBAB3C', '#E1A23A', '#E49838', '#E68D35', '#E68033', '#E57330', '#E4642D', '#E05229', '#DD3D26', '#DA2322', '#C4221F', '#AD211D', '#95211B', '#7E1F18', '#671C15', '#521A13'];
+            getColorPalette(values, ini, total) {
+                let colors = ['#A26FAE', '#9A60A6', '#8F539C', '#804D99', '#6D4D9C', '#6355A5', '#5B5FAF', '#5469B9', '#4F75C2', '#4D80C5', '#4D8BC4', '#4D93BE', '#5099B7', '#549FB1', '#58A3AA', '#5CA7A3', '#61AB9B', '#67B092', '#70B486', '#7AB779', '#88BB6B', '#99BD5D', '#AABD51', '#BBBC49', '#C8B844', '#D3B23F', '#DBAB3C', '#E1A23A', '#E49838', '#E68D35', '#E68033', '#E57330', '#E4642D', '#E05229', '#DD3D26', '#DA2322', '#C4221F', '#AD211D', '#95211B', '#7E1F18', '#671C15', '#521A13'];
                 let step = 1;
-                if(values.length <= colors.length/2) {
-                    step = Math.trunc(colors.length / values.length);
+                if(total <= colors.length/2) {
+                    step = Math.trunc(colors.length / total);
                 }
                 let palette = [];
                 for(let i = 0; i < values.length; i++) {
                     let element = {};
-                    element[values[i]] = colors[i*step];
+                    element[values[i]] = colors[(ini+i)*step];
                     palette.push(element);
                 }
                 return palette;
@@ -278,7 +310,12 @@ import 'vue3-easy-data-table/dist/style.css';
             processMetadata() {
                 if(this.project.project_parameters && this.project.project_parameters.metadata && this.project.project_parameters.metadata.length) {
                     let metadata = JSON.parse(this.project.project_parameters.metadata)
+                    let totalValues = 0;
                     metadata.forEach( meta => {
+
+                        //Create a list of metadata names
+                        this.metadataNames.push(meta.name);
+
                         this.metadataValues[meta.name] = [];
                         let values = [];
                         for(let val in meta.values) {
@@ -286,14 +323,48 @@ import 'vue3-easy-data-table/dist/style.css';
                             let element = {};
                             element[val] = meta.values[val];
                             this.metadataValues[meta.name].push(element);
-
                         };
+
+                        //Assign a color to each metadata value
                         values = [...new Set(values)];
-                        // console.log(this.getColorPalette(values));
-                        this.metadataPalette[meta.name] = this.getColorPalette(values);
+                        this.metadataPalette[meta.name] = values;
+                        totalValues += values.length;
+
+                        //Create a list of metadata names with their samplenames sorted
+                        const sortedValues = values.sort();
+                        this.metadataSorted[meta.name] = [];
+                        sortedValues.forEach(metadataName => {
+                            this.metadataValues[meta.name].forEach((val, key) => {
+                                const sampleName = Object.keys(val)[0];
+                                const value = val[sampleName];
+                                if(value === metadataName) this.metadataSorted[meta.name].push(sampleName);
+                            });
+                        });
+
                     });
-                    // console.log(JSON.stringify(this.metadataPalette));
-                    // console.log(JSON.stringify(this.metadataValues));
+
+                    let iValues = 0;
+                    console.log('=========================');
+                    console.log('=========================');
+                    console.log('=========================');
+                    console.log('=========================');
+                    console.log(totalValues);
+                    metadata.forEach( meta => {
+                        let tmpValues = this.metadataPalette[meta.name].length;
+                        console.log(iValues);
+                        this.metadataPalette[meta.name] = this.getColorPalette(this.metadataPalette[meta.name], iValues, totalValues);
+                        console.log(this.metadataPalette[meta.name]);
+                        iValues += tmpValues;
+                    });
+
+
+                    this.metadataSortedBy = this.metadataNames.length ? this.metadataNames[0] : '';
+                    console.log(JSON.stringify(this.metadataNames));
+                    console.log(JSON.stringify(this.metadataValues));
+                    console.log(JSON.stringify(this.metadataSorted));
+
+
+
                 }
             },
 
