@@ -895,11 +895,18 @@ lapply(names(tissues), function(i){
                 Storage::delete($file);
         }
 
+        $this->current_step = 2;
+        $this->save();
+
         //Delete previously generated parameters, if any
         DB::delete("delete from project_parameters where tag not in ('import','') and not(parameter like 'job.%') and project_id=" . $this->id);
         //DB::delete("delete from project_parameters where parameter<>'metadata' and not(parameter like 'job.%') and project_id=" . $this->id);
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+        if(strpos($output, 'NO_DATA')) {
+            return ['output' => 'No samples left in stlist'];
+        }
 
         $_process_files = [];
 
@@ -1019,6 +1026,13 @@ library('spatialGE')
 
 # Apply defined filter to the initial STList
 filtered_stlist = filter_data(initial_stlist, $str_params)
+
+# Close R session if no samples remain in the STlist (for example when filter is too stringent)
+if(length(dim(filtered_stlist)) < 1){
+  warning('spatialGE: NO_DATA No samples left after filtering.')
+  quit()
+}
+
 " .
             $this->_saveStList('filtered_stlist')
             .
@@ -1221,6 +1235,9 @@ $plots
             if (stripos($file, '.rdata') && !stripos($file, 'initial_stlist.rdata') && !stripos($file, 'filtered_stlist.rdata'))
                 Storage::delete($file);
         }
+
+        $this->current_step = 2;
+        $this->save();
 
 
         if (array_key_exists('executeIn', $parameters) && $parameters['executeIn'] === 'HPC') {
@@ -3189,6 +3206,7 @@ lapply(names(ps), function(i){
 
         $params = [
             '_stlist' => 'normalized_stlist',
+            'score_type' => $parameters['score_type'],
             'permutations' => $parameters['permutations'],
             'num_sds' => $parameters['num_sds'],
             'min_spots' => $parameters['min_spots'],
