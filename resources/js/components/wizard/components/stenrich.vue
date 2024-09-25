@@ -27,14 +27,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="text-bg-light">
-                        <div>Coming soon... <show-modal tag="stenrich_select_measure"></show-modal></div>
+                    <div class="mt-2">
                         <label class="text-lg">
-                            <input type="checkbox" v-model="params.average" disabled> Average
+                            <input name="avg_gsea" type="radio" value="gsva" v-model="params.score_type"> GSEA score
                         </label>
-                        <label class="ms-4 text-lg">
-                            <input type="checkbox" v-model="params.gsea" disabled> GSEA score
+                        <label class="ms-3 me-2 text-lg">
+                            <input name="avg_gsea" type="radio" value="avg" v-model="params.score_type"> Average
                         </label>
+                        <show-modal tag="stenrich_select_measure"></show-modal>
                     </div>
                 </div>
             </div>
@@ -242,10 +242,8 @@ import 'vue3-easy-data-table/dist/style.css';
                 textOutput: '',
 
                 params: {
-
                     gene_sets: '',
-                    average: false,
-                    gsea: false,
+                    score_type: 'gsva',
                     permutations: 100,
                     seed: 12345,
                     min_spots: 5,
@@ -273,7 +271,6 @@ import 'vue3-easy-data-table/dist/style.css';
         },
 
         watch: {
-
         },
 
         methods: {
@@ -330,11 +327,6 @@ import 'vue3-easy-data-table/dist/style.css';
                     });
 
                     let iValues = 0;
-                    console.log('=========================');
-                    console.log('=========================');
-                    console.log('=========================');
-                    console.log('=========================');
-                    console.log(totalValues);
                     metadata.forEach( meta => {
                         let tmpValues = this.metadataPalette[meta.name].length;
                         console.log(iValues);
@@ -343,14 +335,7 @@ import 'vue3-easy-data-table/dist/style.css';
                         iValues += tmpValues;
                     });
 
-
                     this.metadataSortedBy = this.metadataNames.length ? this.metadataNames[0] : '';
-                    console.log(JSON.stringify(this.metadataNames));
-                    console.log(JSON.stringify(this.metadataValues));
-                    console.log(JSON.stringify(this.metadataSorted));
-
-
-
                 }
             },
 

@@ -6,6 +6,8 @@
 
 
 # User options
+samples=NULL
+score_type='#{score_type}#'
 permutations = #{permutations}#
 num_sds = #{num_sds}#
 min_spots = #{min_spots}#
@@ -44,7 +46,9 @@ normalized_stlist = #{_stlist}#
 
 # Run STenrich
 sp_enrichment = STenrich(normalized_stlist,
+                         samples=samples,
                          gene_sets=pws,
+                         score_type=score_type,
                          reps=permutations,
                          num_sds=num_sds,
                          min_units=min_spots,
@@ -64,7 +68,7 @@ lapply(names(sp_enrichment), function(i){
 # Make dataframe with all combined results
 sp_enrichment = dplyr::bind_rows(sp_enrichment)
 
-# Create heatmap of p-values
+# Create heatmap matrix of p-values
 hm_mtx = sp_enrichment %>%
   dplyr::select(c('sample_name', 'gene_set', 'adj_p_value')) %>%
   dplyr::arrange(sample_name) %>%
