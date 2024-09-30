@@ -62,7 +62,7 @@ openxlsx::write.xlsx(sp_enrichment, file='stenrich_results.xlsx')
 
 # Each sample as a CSV
 lapply(names(sp_enrichment), function(i){
-  write.csv(sp_enrichment[[i]], paste0('stenrich_', i, '.csv'), row.names=T, quote=F)
+  write.csv(sp_enrichment[[i]], paste0('stenrich_', i, '.csv'), row.names=F, quote=F)
 })
 
 # Make dataframe with all combined results

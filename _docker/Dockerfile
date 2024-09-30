@@ -39,7 +39,7 @@ RUN Rscript -e "install.packages('rgeos')"
 RUN Rscript -e "install.packages('hdf5r')"
 RUN Rscript -e "install.packages('remotes')"
 
-#Install support libraries ro work with Excel files and images
+#Install support libraries to work with Excel files and images
 RUN Rscript -e "install.packages('openxlsx')"
 RUN Rscript -e "install.packages('svglite')"
 RUN Rscript -e "install.packages('rdist')"
@@ -61,8 +61,12 @@ RUN Rscript -e "remotes::install_github('Nanostring-Biostats/InSituType')"
 
 RUN Rscript -e "install.packages('uwot')"
 
+RUN Rscript -e "install.packages('SeuratObject')"
+
+RUN Rscript -e "BiocManager::install('GSVA', update = TRUE, ask = FALSE)"
+
 #Install spatialGE library
-RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev')   "
+RUN Rscript -e "remotes::install_github('FridleyLab/spatialGE@oospina_dev') "
 
 
 
