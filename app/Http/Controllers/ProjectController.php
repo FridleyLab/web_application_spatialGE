@@ -670,7 +670,19 @@ class ProjectController extends Controller
     }
 
     public function spatial_gene_set_enrichment_stenrich(Project $project) {
-        $jobId = $project->createJob('Spatial gene set enrichment', 'STEnrich', request()->all());
+        $gene_set = '';
+        if(!is_null(request('gene_sets')) && strlen(request('gene_sets'))) {
+            $gene_set = request('gene_sets') . '.gmt';
+            $gene_sets_file = 'common/stenrich/' . $gene_set;
+            Storage::copy($gene_sets_file, $project->workingDir() . $gene_set);
+        } else if( request()->hasFile('user_gene_sets')) {
+            $gene_set = 'STenrich_user_gene_set.gmt';
+            $file = request()->file('user_gene_sets');
+            $file->move(Storage::path($project->workingDir()), $gene_set);
+        }
+        $parameters = request()->except('user_gene_sets');
+        $parameters['gene_sets'] = $gene_set;
+        $jobId = $project->createJob('Spatial gene set enrichment', 'STEnrich', $parameters);
         return $project->getJobPositionInQueue($jobId);
     }
 

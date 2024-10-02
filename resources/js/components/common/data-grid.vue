@@ -233,7 +233,7 @@ export default {
                 'avg_lm_coef', 'avg_lm_pval', 'avg_spearman_r', 'avg_spearman_r_pval', 'avg_spearman_r_pval_adj',
                 'sscore', 'q_val', 'p_val', 'in_group_fraction', 'out_group_fraction', 'in_out_group_ratio', 'in_group_mean_exp',
                 'out_group_mean_exp', 'fold_change', 'pvals_adj',
-
+                'prop_size_test',
                 'spotscells', 'genes', 'min_counts_per_spotcell', 'mean_counts_per_spotcell', 'max_counts_per_spotcell', 'min_genes_per_spotcell', 'mean_genes_per_spotcell', 'max_genes_per_spotcell'
             ].includes(column);
         }

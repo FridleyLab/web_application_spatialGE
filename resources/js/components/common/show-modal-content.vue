@@ -112,7 +112,7 @@ export default {
 
                 //STenrich
                 "stenrich_select_gene_set": {"title": "Select a gene set database", "text": "Select a gene set database to test for spatial enrichment. Future implementations will allow input of custom gene sets."},
-                "stenrich_select_measure": {"title": "Measure of gene set expression", "text": "Currently disabled. Select the measure of gene set expression. Either the average gene set expression or GSEA score. The calculation of GSEA scores is currently not supported."},
+                "stenrich_select_measure": {"title": "Measure of gene set expression", "text": "Select the measure of gene set expression. Either the average gene set expression or GSEA score."},
                 "stenrich_permutations": {"title": "Number of permutations", "text": "The number of permutations to estimate the null distribution (no-spatial pattern). The more permutations, the longer STenrich takes to complete, but p-values will be more accurate."},
                 "stenrich_seed_number": {"title": "Seed number", "text": "A seed number to replicate results. It is advisable to run STenrich with different seed values to check for consistency. Different seed values could yield slightly different p-values."},
                 "stenrich_minimum_spots": {"title": "Minimum number of spots", "text": "The minimum number of high expression ROIs/spots/cells required for a gene set to be tested. If a sample has less than this number of high expression ROIs/spots/cells, the gene set is not tested in that sample."},

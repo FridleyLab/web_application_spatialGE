@@ -3156,6 +3156,7 @@ lapply(names(ps), function(i){
             'gene_set' => 'Gene set',
             'size_test' => 'Genes in sample',
             'size_gene_set' => 'Genes in set',
+            'prop_size_test' => 'Proportion of genes in sample',
             'p_value' => 'p-value',
             'adj_p_value' => 'Adjusted p-value'
         ];
@@ -3177,7 +3178,7 @@ lapply(names(ps), function(i){
             if (Storage::fileExists($workingDir . $file)) {
 
                 if (explode('.', $file)[1] === 'csv' && !strpos($file, 'heatmap'))
-                    $this->csv2json($workingDir . $file, 2, $column_names);
+                    $this->csv2json($workingDir . $file, 1, $column_names);
 
                 $file_public = $workingDirPublic . $file;
                 $file_to_move = $workingDir . $file;
@@ -3201,8 +3202,16 @@ lapply(names(ps), function(i){
     private function getSTEnrichScript($parameters)
     {
 
-        $gene_sets_file = 'common/stenrich/' . $parameters['gene_sets'] . '.gmt';
-        Storage::copy($gene_sets_file, $this->workingDir() . $parameters['gene_sets'] . '.gmt');
+        // $gene_set = '';
+        // if(!is_null($parameters['gene_sets']) && strlen($parameters['gene_sets'])) {
+        //     $gene_set = $parameters['gene_sets'] . '.gmt';
+        //     $gene_sets_file = 'common/stenrich/' . $gene_set;
+        //     Storage::copy($gene_sets_file, $this->workingDir() . $gene_set);
+        // } else if( request()->hasFile('user_gene_sets') /*!is_null($parameters['user_gene_sets'])*/) {
+        //     $gene_set = 'STenrich_user_gene_set.gmt';
+        //     $file = request()->file('user_gene_sets');
+        //     $file->move(Storage::path($this->workingDir() . $gene_set));
+        // }
 
         $params = [
             '_stlist' => 'normalized_stlist',
@@ -3212,7 +3221,7 @@ lapply(names(ps), function(i){
             'min_spots' => $parameters['min_spots'],
             'min_genes' => $parameters['min_genes'],
             'seed' => $parameters['seed'],
-            'gene_sets_file' => $parameters['gene_sets'] . '.gmt'
+            'gene_sets_file' => $parameters['gene_sets']
         ];
 
 

@@ -25,6 +25,7 @@
                                     <Multiselect :options="gene_sets_options" v-model="params.gene_sets"></Multiselect>
                                 </span>
                             </div>
+                            <div><input type="file" @change="handleFileUpload" /></div>
                         </div>
                     </div>
                     <div class="mt-2">
@@ -83,7 +84,7 @@
         </div>
 
         <div class="p-3 text-center mt-4">
-            <send-job-button label="Run STenrich" :disabled="processing || !this.params.gene_sets.length || !(this.params.permutations >= 100)" :project-id="project.id" job-name="STEnrich" @started="STEnrich" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button label="Run STenrich" :disabled="processing || (!params.gene_sets.length && params.user_gene_sets === null) || !(params.permutations >= 100)" :project-id="project.id" job-name="STEnrich" @started="STEnrich" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 
@@ -95,10 +96,11 @@
                 <div class="fs-5">Explanation of results:</div>
                 <ul>
                     <li><strong>Gene set:</strong> The name of the gene set/pathway tested</li>
-                    <li><strong>Size test:</strong> The number of genes in the sample that belong to a given gene set/pathway. If this value falls below the set value in “Minimum number of genes”, the gene set was not tested</li>
-                    <li><strong>Size gene set:</strong> The total number of genes belonging to a gene set</li>
+                    <li><strong>Genes in sample:</strong> The number of genes in the sample that belong to a given gene set/pathway. If this value falls below the set value in “Minimum number of genes”, the gene set was not tested</li>
+                    <li><strong>Genes in set:</strong> The total number of genes belonging to a gene set</li>
+                    <li><strong>Proportion of genes in sample:</strong> Proportion of genes expressed in the sample that are included in the gene set.</li>
                     <li><strong>p-value:</strong> The nominal p-value resulting from the permutation procedure</li>
-                    <li><strong>Adj. p-value:</strong> The FDR-adjusted (a.k.a Benjamini-Hochberg) p-values. These values are the recommended values to decide if gene set presents spatial patterns</li>
+                    <li><strong>Adjusted p-value:</strong> The FDR-adjusted (a.k.a Benjamini-Hochberg) p-values. These values are the recommended values to decide if gene set presents spatial patterns</li>
                 </ul>
             </div>
 
@@ -243,6 +245,7 @@ import 'vue3-easy-data-table/dist/style.css';
 
                 params: {
                     gene_sets: '',
+                    user_gene_sets: null,
                     score_type: 'gsva',
                     permutations: 100,
                     seed: 12345,
@@ -274,6 +277,11 @@ import 'vue3-easy-data-table/dist/style.css';
         },
 
         methods: {
+
+            handleFileUpload(event) {
+                this.params.user_gene_sets = event.target.files[0];
+                console.log(this.params.user_gene_sets);
+            },
 
             getColorPalette(values, ini, total) {
                 let colors = ['#A26FAE', '#9A60A6', '#8F539C', '#804D99', '#6D4D9C', '#6355A5', '#5B5FAF', '#5469B9', '#4F75C2', '#4D80C5', '#4D8BC4', '#4D93BE', '#5099B7', '#549FB1', '#58A3AA', '#5CA7A3', '#61AB9B', '#67B092', '#70B486', '#7AB779', '#88BB6B', '#99BD5D', '#AABD51', '#BBBC49', '#C8B844', '#D3B23F', '#DBAB3C', '#E1A23A', '#E49838', '#E68D35', '#E68033', '#E57330', '#E4642D', '#E05229', '#DD3D26', '#DA2322', '#C4221F', '#AD211D', '#95211B', '#7E1F18', '#671C15', '#521A13'];
@@ -347,7 +355,25 @@ import 'vue3-easy-data-table/dist/style.css';
 
                 this.processing = true;
 
-                axios.post(this.stenrichUrl, this.params)
+                const formData = new FormData();
+
+                for(let param in this.params) {
+                    if(this.params[param] !== null) {
+                        formData.append(param, this.params[param]);
+                    }
+                }
+
+                // Append user provided gene sets if present
+                // if (this.params.user_gene_sets) {
+                //     formData.append('user_gene_sets', this.params.user_gene_sets);
+                // }
+
+                // axios.post(this.stenrichUrl, this.params)
+                axios.post(this.stenrichUrl, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
                     .then((response) => {
                     })
                     .catch((error) => {
