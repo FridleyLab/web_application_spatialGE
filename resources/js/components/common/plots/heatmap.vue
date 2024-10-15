@@ -647,7 +647,7 @@ export default {
                 .attr("dominant-baseline", "middle")
                 .attr("font-size", "12px")
                 .attr("font-family", "Arial, sans-serif")
-                .text("value");
+                .text("FDR");
 
             const legendScale = d3
                 .scaleLinear()

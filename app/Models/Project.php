@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\spatialContainer;
 use App\Jobs\RunScript;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,7 +32,7 @@ class Project extends Model
 
     protected $appends = ['url', 'assets_url', 'project_parameters', 'platform_name', 'created_on'];
 
-    protected $dates = ['created_at', 'updated_at'];
+    protected $dates = ['created_at', 'updated_at', 'last_accessed_at'];
 
     private ?spatialContainer $_container = null;
 
@@ -50,6 +51,11 @@ class Project extends Model
     public function parameters(): HasMany
     {
         return $this->hasMany(ProjectParameter::class);
+    }
+
+    public function updateLastAccess() {
+        $this->last_accessed_at = Carbon::now();
+        $this->save();
     }
 
     public function isDemoProject() {
@@ -3656,7 +3662,7 @@ lapply(names(grad_res), function(i){
 
         $_scatterpie_plots = $this->STdeconvolveMovePlotsToPublic();
         $scatterpie_plots = $_scatterpie_plots['scatterpie_plots'];
-        $_process_files = array_merge($_process_files, $_scatterpie_plots['scatterpie_plots_names']);
+        $_process_files = array_merge($_process_files, $_scatterpie_plots['scatterpie_plots_names'], $_scatterpie_plots['_proportions_files']);
 
         ProjectParameter::updateOrCreate(['parameter' => 'STdeconvolve2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'logfold_plots' => $topic_annotations, 'scatterpie_plots' => $scatterpie_plots, 'gsea_results' => $gsea_results])]);
         ProjectProcessFiles::updateOrCreate(['process' => 'STdeconvolve2', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
@@ -3680,6 +3686,22 @@ lapply(names(grad_res), function(i){
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
                     }
+                }
+            }
+        }
+
+        $_proportions_files = [];
+        $workingDir = $this->workingDir();
+        $file = $workingDir . 'stdeconvolve2_proportions_files.csv';
+        if (Storage::fileExists($file)) {
+            $data = explode(',', trim(Storage::read($file)));
+            foreach ($data as $fileName) {
+                $file = $workingDir . $fileName;
+                $file_public = $this->workingDirPublic() . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    $_proportions_files[] = $fileName;
                 }
             }
         }
@@ -3711,7 +3733,7 @@ lapply(names(grad_res), function(i){
             }
         }
 
-        return compact('scatterpie_plots', 'scatterpie_plots_names');
+        return compact('scatterpie_plots', 'scatterpie_plots_names', '_proportions_files');
     }
 
     private function getSTdeconvolve2Script($parameters)
@@ -3800,7 +3822,9 @@ lapply(names(grad_res), function(i){
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
         $file = $workingDir . 'insitutype_results.RData';
+
         $files = ['flightpath' => 'insitutype_flightpath_data.csv', 'flightpath_labels' => 'insitutype_flightpath_cloud_labels.csv', 'bar' => 'insitutype_cell_types_barplot_data.csv', 'umap' => 'insitutype_umap_data.csv'];
+        $_process_files = [];
         if (Storage::fileExists($file)) {
 
             foreach($files as $key => $dataFile) {
@@ -3809,11 +3833,14 @@ lapply(names(grad_res), function(i){
                 if (Storage::fileExists($_file)) {
                     Storage::delete($file_public);
                     Storage::move($_file, $file_public);
-                    $files[$key] = $this->workingDirPublicURL() . $dataFile;
+                    // $files[$key] = $this->workingDirPublicURL() . $dataFile;
+                    $files[$key] = $file_public;
+                    $_process_files[] = $dataFile;
                 }
             }
 
             ProjectParameter::updateOrCreate(['parameter' => 'InSituType', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'plot_data' => $files])]);
+            ProjectProcessFiles::updateOrCreate(['process' => 'InSituType', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 
         $this->current_step = 8;
@@ -3858,6 +3885,7 @@ lapply(names(grad_res), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
         $file = $workingDir . 'insitutype_results.RData';
         if (Storage::fileExists($file)) {
 
@@ -3880,7 +3908,8 @@ lapply(names(grad_res), function(i){
                 }
 
                 if (Storage::fileExists($file_public)) {
-                    $plot_data[$sample] = $this->workingDirPublicURL() . $fileName;
+                    $plot_data[$sample] = $file_public; // $this->workingDirPublicURL() . $fileName;
+                    $_process_files[] = $fileName;
                 }
 
             }
@@ -3925,6 +3954,7 @@ lapply(names(grad_res), function(i){
 
 
             ProjectParameter::updateOrCreate(['parameter' => 'InSituType2', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_path' => $this->workingDirPublicURL(), 'plot_data' => $plot_data, 'parameters' => $parameters])]);
+            ProjectProcessFiles::updateOrCreate(['process' => 'InSituType2', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 
         return ['output' => $output, 'script' => $scriptContents];

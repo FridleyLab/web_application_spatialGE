@@ -47,6 +47,11 @@
                         <p>Any sample data you upload to spatialGE can only be accessed using your credentials. <strong>Please, do not upload any PHI</strong>.</p>
 
 
+                        <p><b>How long is my data stored in spatialGE?</b></p>
+
+                        <p>spatialGE stores data at the project level. Multiple projects can be created and kept within the user’s account. There is a 1-year inactive account policy in place. When a project is not used or accessed for a period of one year, the project is deleted (including all data and files), but users will be notified via email 3 months and 1 month before.</p>
+
+
                         <p><b>Is it normal for some methods in spatialGE to take long time to complete?</b></p>
 
                         <p>Some methods implemented in spatialGE are memory and computing intensive (e.g., spatial

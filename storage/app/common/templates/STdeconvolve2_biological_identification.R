@@ -37,8 +37,8 @@ all_ldas = readRDS('./stdeconvolve_lda_models.RDS')
 ps = list()
 sctr_p = list()
 topic_props = list()
-#sample_col_pal = list()
 possible_celltypes = c()
+proportions_files = list()
 for(i in suggested_k[['sample_name']]){
   opt_k = suggested_k[['suggested_k']][ suggested_k[['sample_name']] == i ]
 
@@ -148,9 +148,15 @@ for(i in suggested_k[['sample_name']]){
   # Save per-spot topic proportions in case user decides to change plots
   topic_props[[i]] = decon_prop_sctr
 
+  # Write deconvolution proportions matrix to file
+  file_name = paste0('stdeconvolve2_topic_proportions_per_spot_', i, '.csv')
+  write.csv(decon_prop_sctr, file_name, row.names=F, quote=T)
+  proportions_files = c(proportions_files, list(file_name))
+
   rm(decon_expr, decon_prop, cols_prop, #col_pal_tmp,
      decon_prop_sctr, celltype_annotations, topic_ann) # Clean env
 }
+write.table(proportions_files, 'stdeconvolve2_proportions_files.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 # Create base color palette
 khroma_cols = khroma::info()
@@ -204,22 +210,12 @@ for(i in names(sctr_p)){
     saveplot(plotname, sctr_p[[i]])
     plotnames = c(plotnames, list(plotname))
 }
-
-# Scatterpie AND tissue images
-#for(sample in list($samples_with_tissue)) {
-#for(i in list(samples_with_tissue)) {
-#  if(grepl(i, names(sctr_p), fixed=TRUE)) {
-#    tp = cowplot::ggdraw() + cowplot::draw_image(paste0(i,'/spatial/', i, '.png'))
-#    ptp = ggpubr::ggarrange(sctr_p[[i]], tp, ncol=2)
-    #{$this->getExportFilesCommands("paste0(p, '-sbs')", 'ptp', 1400, 600)}
-#  }
-#}
-
 write.table(plotnames, 'stdeconvolve2_scatterpie_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 # Save logFC plots in case changes to title are required
 saveRDS(ps, './topic_logfc_all_plots.RDS')
 
+# Save sample color palettes
 saveRDS(sample_col_pal, './color_palette_stdeconvolve.RDS')
 
 # Save per-spot topic proportions in case user decides to change plots
@@ -227,3 +223,4 @@ saveRDS(topic_props, './topic_proportions_all_samples.RDS')
 
 end_t = difftime(Sys.time(), start_t, units='min')
 cat(paste0('STdeconvolve [part 2] finished. ', round(as.vector(end_t), 2), ' min\n'))
+

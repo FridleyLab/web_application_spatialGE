@@ -21,7 +21,6 @@ library('ggtext')
 # USE NORMALIZED
 load(file='normalized_stlist.RData')
 stlist = normalized_stlist
-#stlist = filter_data(stlist, rm_tissue=c(#{sample_list}#))
 
 # Process each sample
 suggested_k = tibble::tibble() # To store suggested k values
@@ -42,7 +41,6 @@ for(i in names(stlist@counts)){
 
   # Extract counts from STlist
   cd = t(as.matrix(stlist@counts[[i]]))
-  #pos = stlist@spatial_meta[[i]] %>% select(y=ypos, x=xpos)
 
   # Process counts
   corpus = preprocess(dat=cd, ODgenes=use_var_genes, nTopOD=use_var_genes_n, verbose=F, plot=F)
@@ -54,10 +52,6 @@ for(i in names(stlist@counts)){
   ldas = fitLDA(corpus[['corpus']], Ks=c(min_k:max_k), ncores=cores, seed=12345, plot=F, verbose=F)
   log_end_t = difftime(Sys.time(), log_start_t, units='min')
   cat(paste0('Finished fitting LDA model to ', i, '... ', round(as.vector(log_end_t), 2), ' min\n'))
-
-  # Save/load model results
-  #saveRDS(ldas, file=paste0('../data/', i, '_lda_model_results.RDS'))
-  #ldas = readRDS(file=paste0('../data/', i, '_lda_model_results.RDS'))
 
   # Plot LDA model selection metrics
   metrics_df = tibble::tibble(k=as.numeric(names(ldas[['models']])),
@@ -79,7 +73,7 @@ for(i in names(stlist@counts)){
     next_rare_val = metrics_df[['rare_types']][next_rare_index]
     next_rare_perp = metrics_df[['perplexity']][next_rare_index]
     diff_perp = next_rare_perp - min_perp_val
-    # Checks that differences in perplexity are lower than half the range of perplexities, on order to pick a 'drop/elbow'
+    # Checks that differences in perplexity are lower than half the range of perplexities, on order to pick a "drop/elbow"
     while(next_rare_val > 0 & diff_perp < range_perp * 0.5 & next_rare_index > 0){
       next_rare_index = next_rare_index - 1
       next_rare_val = metrics_df[['rare_types']][next_rare_index]
@@ -93,18 +87,17 @@ for(i in names(stlist@counts)){
 
   rm(min_perp_index, min_perp_k, min_perp_val, min_perp_rare_val, range_perp) # Clean env
 
-  # Create color palette accroding to model alphas (desirable bwlow 1)
+  # Create color palette according to model alphas (desirable bwlow 1)
   col_alpha = ifelse(metrics_df[['alpha']] > 1, 'orange', 'gray50')
 
   p[[i]] = ggplot(metrics_df) +
     geom_line(aes(x=k, y=rare_types), col='blue') +
     geom_line(aes(x=k, y=scaled_perplexity), col='red') +
-    #    geom_text(aes(x=k, y=-1, label=sprintf('%.2f', alpha)), angle=45, size=4, col=col_alpha) +
     xlab('Number of topics in model') +
     scale_y_continuous('Topics with proportion < 0.05',
                        breaks=seq(-1, max_k),
                        labels=c('Model\nAlpha', 0:max_k),
-                       sec.axis=sec_axis(~., name='Perplexity',
+                       sec.axis=sec_axis(~., name="Perplexity",
                                          breaks=seq(0, max(metrics_df[['k']])),
                                          labels=sprintf(
                                            '%.1f', seq(
@@ -130,7 +123,7 @@ for(i in names(stlist@counts)){
   # Save LDA models
   all_ldas[[i]] = ldas
 
-  rm(metrics_df, col_alpha, log_start_t, log_end_t) # Clean env
+  rm(metrics_df, col_alpha, log_start_t, log_end_t, ldas) # Clean env
 }
 
 write.table(names(p), 'stdeconvolve_plots.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)

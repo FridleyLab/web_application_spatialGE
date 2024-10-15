@@ -19,13 +19,13 @@
                 <div class="w-70 w-md-50 w-lg-40 w-xxl-30">
                     <div class="">
                         <div class="">
-                            <div>Select a gene set database <show-modal tag="stenrich_select_gene_set"></show-modal></div>
+                            <div>Select/upload a gene set database <show-modal tag="stenrich_select_gene_set"></show-modal></div>
                             <div>
                                 <span>
                                     <Multiselect :options="gene_sets_options" v-model="params.gene_sets"></Multiselect>
                                 </span>
                             </div>
-                            <div><input type="file" @change="handleFileUpload" /></div>
+                            <div v-if="params.gene_sets === 'upload'" class="my-3"><input type="file" @change="handleFileUpload" /></div>
                         </div>
                     </div>
                     <div class="mt-2">
@@ -84,7 +84,7 @@
         </div>
 
         <div class="p-3 text-center mt-4">
-            <send-job-button label="Run STenrich" :disabled="processing || (!params.gene_sets.length && params.user_gene_sets === null) || !(params.permutations >= 100)" :project-id="project.id" job-name="STEnrich" @started="STEnrich" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button label="Run STenrich" :disabled="processing || ((!params.gene_sets.length || params.gene_sets === 'upload') && params.user_gene_sets === null) || !(params.permutations >= 100)" :project-id="project.id" job-name="STEnrich" @started="STEnrich" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
         </div>
 
 
@@ -144,7 +144,7 @@
                                 <input type="range" min="0" max="200" step="10" class="w-100" v-model="numberOfRowsToShow">
                             </div>
                             <div>
-                                <heatmap
+                                <heatmap :key="heatmapComponentKey"
                                     :color-palette="['blue', 'white', 'red']"
                                     :csv-file="stenrich.base_url + stenrich.heatmap"
                                     heatmap-title="STenrich FDR-adjusted p-values"
@@ -222,7 +222,10 @@ import 'vue3-easy-data-table/dist/style.css';
         data() {
             return {
 
+                heatmapComponentKey: 0,
+
                 gene_sets_options: [
+                    {'label': '- UPLOAD your own gene database -', 'value': 'upload'},
                     {'label': 'KEGG - human', 'value': 'kegg'},
                     {'label': 'HALLMARK - human', 'value': 'hallmark'},
                     {'label': 'HALLMARK - Mouse', 'value': 'mh.all.v2023.1.Mm.symbols'},
@@ -274,13 +277,18 @@ import 'vue3-easy-data-table/dist/style.css';
         },
 
         watch: {
+            'params.gene_sets'(newValue) {
+                if(this.params.gene_sets !== 'upload') {
+                    this.params.user_gene_sets = null;
+                }
+            },
         },
 
         methods: {
 
             handleFileUpload(event) {
                 this.params.user_gene_sets = event.target.files[0];
-                console.log(this.params.user_gene_sets);
+                // console.log(this.params.user_gene_sets);
             },
 
             getColorPalette(values, ini, total) {
@@ -387,6 +395,7 @@ import 'vue3-easy-data-table/dist/style.css';
                 this.stenrich = ('stenrich' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.stenrich) : {};
                 //this.$enableWizardStep('differential-expression');
                 this.loadResults();
+                this.heatmapComponentKey++;
                 this.processing = false;
             },
 
