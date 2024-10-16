@@ -1830,6 +1830,7 @@ $plots_initial
                     Storage::delete($file_public);
                     Storage::move($file, $file_public);
                     $result['plot_data'][$sample->name] = $this->workingDirPublicURL() . $fileName;
+                    $_process_files[] = $fileName;
                 }
 
             }
@@ -3833,8 +3834,7 @@ lapply(names(grad_res), function(i){
                 if (Storage::fileExists($_file)) {
                     Storage::delete($file_public);
                     Storage::move($_file, $file_public);
-                    // $files[$key] = $this->workingDirPublicURL() . $dataFile;
-                    $files[$key] = $file_public;
+                    $files[$key] = $this->workingDirPublicURL() . $dataFile;
                     $_process_files[] = $dataFile;
                 }
             }
@@ -3908,7 +3908,7 @@ lapply(names(grad_res), function(i){
                 }
 
                 if (Storage::fileExists($file_public)) {
-                    $plot_data[$sample] = $file_public; // $this->workingDirPublicURL() . $fileName;
+                    $plot_data[$sample] = $this->workingDirPublicURL() . $fileName;
                     $_process_files[] = $fileName;
                 }
 

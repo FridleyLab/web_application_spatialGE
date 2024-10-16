@@ -95,6 +95,10 @@
     "SpaGCN_SVG": {
         "annotation_to_test": "Annotation to test"
     },
+    "MILWRM": {
+        "alpha": "Controls the resolution of the clustering",
+        "max_pc": "PCs to use"
+    },
     "STDiffNonSpatial": {
         "samples_array": "List of samples",
         "annotation": "Annotation to test",
@@ -130,5 +134,12 @@
         "q_val": "GSEA q-value threshold",
         "user_radius": "Scatterpie radius",
         "color_pal": "Color palette"
+    },
+    "InSituType": {
+        "cell_profile": "Cell profile signature",
+        "refine_cells": "Refine celltypes"
+    },
+    "InSituType2": {
+        "samples": "List of samples to generate plots"
     }
 }
