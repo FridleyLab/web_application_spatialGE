@@ -1,5 +1,5 @@
 <template>
-    <div class="form-check form-switch">
+    <div class="form-check form-switch" v-if="!plotType === 'pca'">
            <input
                style="cursor: pointer"
                class="form-check-input"
@@ -12,11 +12,11 @@
                {{ showPlot ?  "Hide": `Compute and Render ${title}`}}
            </label>
    </div>
-   <div class="main-container" v-if="showPlot">
+   <div class="main-container" v-if="showPlot || plotType === 'pca'">
        <div class="left-container" ref="plotContainer">
            <PlotViewer
                ref="plotViewer"
-               v-if="processedData && !isViolinPlot"
+               v-if="processedData && (plotType === 'umap' || plotType === 'flight' || plotType === 'gradient' || plotType === 'cluster')"
                :processedData="processedData"
                :expression="expression"
                :title="title"
@@ -33,8 +33,14 @@
            :data="processedData"
            :colorPalette="palette"
            :plotType="plotType"
-           :plotVariable="plotVariable"
            ></ViolinPlot>
+           <PCAPlot
+           v-if="plotType === 'pca' && processedData"
+           :data="processedData"
+           :colorPalette="palette"
+           :plotType="plotType"
+           />
+
        </div>
    </div>
 </template>
@@ -44,6 +50,8 @@ import * as d3 from "d3";
 import { ref, onMounted, watch } from "vue";
 import PlotViewer from "./PlotViewer.vue";
 import ViolinPlot from "./ViolinPlot.vue";
+import PCAPlot from "./PCAPlot.vue";
+
 
 const PlotTypes = Object.freeze({
    GRADIENT: "gradient",
@@ -51,7 +59,8 @@ const PlotTypes = Object.freeze({
    FLIGHT: "flight",
    UMAP: "umap",
    VIOLIN: "violin",
-   BOX: "box"
+   BOX: "box",
+   PCA: "pca"
 });
 
 
@@ -60,7 +69,8 @@ export default {
 
    components: {
        PlotViewer,
-       ViolinPlot
+       ViolinPlot,
+       PCAPlot
    },
 
    props: {
@@ -98,8 +108,6 @@ export default {
        },
        showImage: { type: Boolean, default: true },
        inverted: { type: Boolean, required: true },
-
-       plotVariable: { type: String, default: 'total_genes' },
    },
 
    data() {

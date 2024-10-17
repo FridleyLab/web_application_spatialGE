@@ -1547,6 +1547,24 @@ openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
+        $_process_files = [];
+
+        $pcaPlotFileName = 'pseudobulk_pca_plot_data.csv';
+        $umapPlotFileName = 'pseudobulk_umap_plot_data.csv';
+        $heatmapPlotFileName = 'pseudobulk_heatmap_plot_data.csv';
+        $files = [$pcaPlotFileName, $umapPlotFileName, $heatmapPlotFileName];
+        foreach ($files as $fileName) {
+            $file = $workingDir . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if(Storage::fileExists($file)) {
+                Storage::delete($file_public);
+                Storage::move($file, $file_public);
+                $_process_files[] = $fileName;
+            }
+        }
+
+
+
         $result = [];
 
         //Delete any previously generated plots
@@ -1554,6 +1572,8 @@ openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
 
         //To indicate that the PCA has been calculated
         ProjectParameter::updateOrCreate(['parameter' => 'qc_pca', 'project_id' => $this->id, 'tag' => 'pseudo_bulk_pca'], ['type' => 'number', 'value' => 1]);
+        //PCA plots data
+        ProjectParameter::updateOrCreate(['parameter' => 'qc_pca_plots', 'project_id' => $this->id, 'tag' => 'pseudo_bulk_pca'], ['type' => 'json', 'value' => json_encode(['base_path' => $this->workingDirPublicURL(), 'pca' => $pcaPlotFileName, 'umap' => $umapPlotFileName, 'heatmap' => $heatmapPlotFileName])]);
 
         $result['output'] = $output;
         $result['script'] = $scriptContents;
@@ -1579,14 +1599,40 @@ setwd('/spatialGE')
 # Load the package
 library('svglite')
 library('spatialGE')
+library('magrittr')
 
 # Load normalized STList
 {$this->_loadStList($stlist)}
 
-pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes)
+pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes, calc_umap=T)
 
 #Save stlist to generate PCA Plots
 {$this->_saveStList('pca_stlist')}
+
+# Extract data for PCA (D3)
+pca_df = pca_stlist@misc[['pbulk_pca']] %>%
+  tibble::rownames_to_column('sample_name') #%>%
+  #dplyr::left_join(., pca_stlist@sample_meta %>%
+                     #dplyr::rename(sample_name=1), by='sample_name')
+
+write.csv(pca_df, 'pseudobulk_pca_plot_data.csv', quote=T, row.names=F)
+
+# Extract data for UMAP (D3)
+umap_df = pca_stlist@misc[['pbulk_umap']] %>%
+  tibble::rownames_to_column('sample_name') #%>%
+  #dplyr::left_join(., pca_stlist@sample_meta %>%
+                     #dplyr::rename(sample_name=1), by='sample_name')
+#umap_df = umap_df[, c('UMAP1', 'UMAP2', 'sample_name')] # Implemented for compatibility with the D3 component
+
+write.csv(umap_df, 'pseudobulk_umap_plot_data.csv', quote=T, row.names=F)
+
+# Extract data for heatmap
+hm_df = as.data.frame(t(pca_stlist@misc[['scaled_pbulk_mtx']])) %>%
+  tibble::rownames_to_column('gene_name')
+
+write.csv(hm_df, 'pseudobulk_heatmap_plot_data.csv', quote=T, row.names=F)
+
+
 
 ";
 

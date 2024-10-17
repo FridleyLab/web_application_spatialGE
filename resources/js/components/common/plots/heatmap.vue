@@ -30,6 +30,7 @@ export default {
         numberOfRowsToShow: { type: Number, default: 0 },
         showRowsFrom: { type: String, default: 'top' },
         samplesOrder: { type: Array, default: [] },
+        gradientLabel: { type: String, default: 'FDR' },
     },
 
     data() {
@@ -645,9 +646,9 @@ export default {
                 .attr("y", 7)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
-                .attr("font-size", "12px")
+                .attr("font-size", "10px")
                 .attr("font-family", "Arial, sans-serif")
-                .text("FDR");
+                .text(this.gradientLabel);
 
             const legendScale = d3
                 .scaleLinear()
@@ -820,6 +821,7 @@ export default {
 .heatmap-container {
     width: 80%;
     height: 100%;
+    text-align: center;
 }
 
 .heatmap rect {
