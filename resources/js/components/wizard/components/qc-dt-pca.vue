@@ -289,6 +289,7 @@ import Multiselect from '@vueform/multiselect';
             },
 
             processCompleted() {
+                this.plot_data = 'qc_pca_plots' in this.project.project_parameters ? JSON.parse(this.project.project_parameters.qc_pca_plots) : null;
                 this.generating_pca = false;
             },
 
