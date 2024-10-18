@@ -68,8 +68,7 @@
     },
     "STEnrich": {
         "gene_sets": "Gene set database",
-        "average": "Average gene set expression",
-        "gsea": "GSEA score",
+        "score_type": "GSEA score or Average gene set expression",
         "permutations": "Permutations",
         "seed": "Seed number (permutation)",
         "min_spots": "Minimum number of spots",
