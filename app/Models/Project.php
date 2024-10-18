@@ -1360,6 +1360,7 @@ $plots
         $plots .= $this->getExportFilesCommands('normalized_violin_2', "den_tr\$violin");
 
         $script = "
+options(future.globals.maxSize=(4000*1024^2))
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
