@@ -23,7 +23,7 @@
         </div>
 
         <div class="p-3 text-center">
-            <send-job-button v-if="samples.length > 3" label="Calculate PCA" :disabled="generating_pca || generating_plots" :project-id="project.id" job-name="applyPca" @started="applyPca" @ongoing="generating_pca = true" @completed="processCompleted" :project="project" ></send-job-button>
+            <send-job-button v-if="samples.length > 3" label="Calculate PCA and UMAP" :disabled="generating_pca || generating_plots" :project-id="project.id" job-name="applyPca" @started="applyPca" @ongoing="generating_pca = true" @completed="processCompleted" :project="project" ></send-job-button>
             <div v-else class="text-warning text-xl-center">
                 A minimum of 4 samples are needed to Calculate PCA
             </div>
