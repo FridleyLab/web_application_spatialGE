@@ -60,13 +60,13 @@
         </div>
 
 
-        <div class="mt-4" v-if="!generating_pca && !generating_plots && ('qc_pca_plots' in project.project_parameters)">
+        <div class="mt-4" v-if="!generating_pca && !generating_plots && (('qc_pca_plots' in project.project_parameters) || ('pseudo_bulk_pca' in project.project_parameters))">
             <color-palettes @colors="changeColorPalette"></color-palettes>
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="pcaplot-tab" data-bs-toggle="tab" data-bs-target="#pcaplot" type="button" role="tab" aria-controls="pcaplot" aria-selected="true">PCA</button>
                 </li>
-                <li class="nav-item" role="presentation">
+                <li v-if="'qc_pca_plots' in project.project_parameters" class="nav-item" role="presentation">
                     <button class="nav-link" id="umap-tab" data-bs-toggle="tab" data-bs-target="#umap" type="button" role="tab" aria-controls="umap" aria-selected="true">UMAP</button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -78,9 +78,10 @@
                     <div class="m-4">
                         <p><strong>Pseudo-bulk samples in a principal component analysis (PCA) plot.</strong> This analysis is intended to help users detect samples with unexpected gene expression patterns.</p>
                     </div>
-                    <!-- <show-plot :src="project.project_parameters.pseudo_bulk_pca"></show-plot> -->
 
-                    <plot-holder :key="pcaComponentKey"
+                    <show-plot v-if="'pseudo_bulk_pca' in project.project_parameters" :src="project.project_parameters.pseudo_bulk_pca"></show-plot>
+
+                    <plot-holder v-if="'qc_pca_plots' in project.project_parameters" :key="pcaComponentKey"
                     :csv="plot_data.base_path + plot_data.pca"
                     expression="PCA"
                     title="PCA Plot"
@@ -92,11 +93,10 @@
 
                 </div>
 
-                <div class="tab-pane fade" id="umap" role="tabpanel" aria-labelledby="umap-tab">
+                <div v-if="'qc_pca_plots' in project.project_parameters" class="tab-pane fade" id="umap" role="tabpanel" aria-labelledby="umap-tab">
                     <div class="m-4">
                         <p><strong>Pseudo-bulk samples in a Uniform Manifold Approximation and Projection (UMAP) plot. </strong>This analysis is intended to help users detect samples with unexpected gene expression patterns.</p>
                     </div>
-                    <!-- <show-plot :src="project.project_parameters.pseudo_bulk_pca"></show-plot> -->
 
                     <plot-holder :key="umapComponentKey"
                     :csv="plot_data.base_path + plot_data.umap"
@@ -115,10 +115,11 @@
                     <div class="m-4">
                         <p><strong>Heatmap of expression of top variable genes (rows) across pseudo-bulk samples (columns).</strong> This plot is intended to help users detect samples with unexpected gene expression patterns.</p>
                     </div>
-                    <!-- <show-plot :src="project.project_parameters.pseudo_bulk_heatmap"></show-plot> -->
+
+                    <show-plot v-if="'pseudo_bulk_heatmap' in project.project_parameters" :src="project.project_parameters.pseudo_bulk_heatmap"></show-plot>
 
 
-                    <div v-if="loaded">
+                    <div v-if="loaded && ('qc_pca_plots' in project.project_parameters)">
                         <div>
                             Sort samples by:
                             <select v-model="metadataSortedBy">
