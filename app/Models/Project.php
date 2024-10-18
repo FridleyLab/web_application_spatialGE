@@ -389,26 +389,28 @@ class Project extends Model
 
                     foreach(get_object_vars($dict->$jobName) as $attr => $value) {
 
-                        $CSV .= $task->scheduled_at . ','; //Date
-                        $CSV .= $attr . ','; //'Parameter name'
+                        if(property_exists($values->parameters, $attr)) {
+                            $CSV .= $task->scheduled_at . ','; //Date
+                            $CSV .= $attr . ','; //'Parameter name'
 
-                        $tmp = $values->parameters->$attr;
-                        if(is_array($tmp)) {
-                            $tmp = '[' . implode('; ', $tmp) . ']' ;
-                        }
-                        if(is_object($tmp)) {
-                            $tmp_str = '';
-                            foreach(get_object_vars($tmp) as $key => $val) {
-                                if($tmp_str !== '') { $tmp_str .= ';'; }
-                                $tmp_str .= $key . ': ' . $val;
+                            $tmp = $values->parameters->$attr;
+                            if(is_array($tmp)) {
+                                $tmp = '[' . implode('; ', $tmp) . ']' ;
                             }
-                            $tmp = '[' . $tmp_str . ']';
+                            if(is_object($tmp)) {
+                                $tmp_str = '';
+                                foreach(get_object_vars($tmp) as $key => $val) {
+                                    if($tmp_str !== '') { $tmp_str .= ';'; }
+                                    $tmp_str .= $key . ': ' . $val;
+                                }
+                                $tmp = '[' . $tmp_str . ']';
+                            }
+
+                            $CSV .= $tmp . ','; //Value
+                            $CSV .= $value; //Parameter description
+
+                            $CSV .= "\n";
                         }
-
-                        $CSV .= $tmp . ','; //Value
-                        $CSV .= $value; //Parameter description
-
-                        $CSV .= "\n";
                     }
                 }
                 $CSV .= "\n";
