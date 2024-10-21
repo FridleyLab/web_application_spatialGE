@@ -25,7 +25,10 @@
                                     <Multiselect :options="gene_sets_options" v-model="params.gene_sets"></Multiselect>
                                 </span>
                             </div>
-                            <div v-if="params.gene_sets === 'upload'" class="my-3"><input type="file" @change="handleFileUpload" /></div>
+                            <div v-if="params.gene_sets === 'upload'" class="mt-2 mb-4">
+                                <div class="my-2"><a href="/resources/example_gene_sets_spatialge.gmt" class="text-primary" download>Download example gene database</a></div>
+                                <div><input type="file" @change="handleFileUpload" /></div>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-2">
@@ -41,7 +44,7 @@
             </div>
 
 
-            <div class="row justify-content-center text-center m-5">
+            <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-xxl-95">
                     <div class="row justify-content-center text-center">
                         <div class="">
@@ -53,7 +56,7 @@
                 </div>
             </div>
 
-            <div class="row justify-content-center text-center m-5">
+            <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-xxl-95">
                     <div class="row justify-content-center text-center">
 
@@ -65,7 +68,7 @@
             </div>
 
 
-            <div class="row justify-content-center text-center m-5">
+            <div class="row justify-content-center text-center m-4">
                 <div class="w-100 w-xxl-95">
                     <div class="row justify-content-center text-center">
                         <div class="">
