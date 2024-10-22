@@ -129,14 +129,36 @@
                         <p class="fs-5">If you use spatialGE to generate figures or conduct analysis for your publications, please cite the following papers:</p>
 
                         <ul class="fs-5">
-                            <li>Ospina, O. E., Wilson, C. M., Soupir, A. C., Berglund, A., Smalley, I., Tsai, K. Y., Fridley, B. L. 2022. spatialGE: Quantification and visualization of the tumor microenvironment heterogeneity using spatial transcriptomics. Bioinformatics 38: 2645–2647. <a href="https://doi.org/10.1093/bioinformatics/btac145" target="_blank">https://doi.org/10.1093/bioinformatics/btac145</a></li>
-                            <li>Ospina, O. E., Fridley, B. L. 2023. A spatially-informed framework to differential gene expression analysis for spatial transcriptomics experiments. (In Prep)</li>
+                            <li>
+                                Ospina, O, E., Manjarres-Betancur, R., Gonzalez-Calderon, G., Soupir, A. C., Smalley, I., Tsai, K. Y., Markowitz, J., Vallebuona, E., Berglund, A., Eschrich, S., Yu, X. Fridley, B. L. 2024. spatialGE: A user-friendly web application to democratize spatial transcriptomics analysis. bioRxiv.
+                                <a href="https://www.biorxiv.org/content/10.1101/2024.06.27.601050v1" target="_blank">https://www.biorxiv.org/content/10.1101/2024.06.27.601050v1</a>
+                            </li>
+                            <li>
+                                Ospina, O. E., Soupir, A. C., Manjarres-Betancur, R., Gonzalez-Calderon, G., Yu, X., Fridley, B. L. 2024.  Differential gene expression analysis of spatial transcriptomic experiments using spatial mixed models. Scientific Reports 14: 10967.
+                                <a href="https://doi.org/10.1038/s41598-024-61758-0" target="_blank">https://doi.org/10.1038/s41598-024-61758-0</a>
+                            </li>
+                            <li>
+                                Ospina, O. E., Wilson, C. M., Soupir, A. C., Berglund, A., Smalley, I., Tsai, K. Y., Fridley, B. L. 2022. spatialGE: Quantification and visualization of the tumor microenvironment heterogeneity using spatial transcriptomics. Bioinformatics 38: 2645–2647.
+                                <a href="https://doi.org/10.1093/bioinformatics/btac145" target="_blank">https://doi.org/10.1093/bioinformatics/btac145</a>
+                            </li>
                         </ul>
 
                         <p class="fs-5">Some scientific articles using spatialGE methods:</p>
                         <ul class="fs-5">
-                            <li>Ospina, O., Soupir, A., Fridley, B.L. 2023. A primer on preprocessing, visualization, clustering, and phenotyping of barcode-based spatial transcriptomics data. In: Fridley, B. L., Wang, X. (eds) Statistical Genomics. Methods in Molecular Biology, vol 2629. New York, NY, USA. <a href="https://doi.org/10.1007/978-1-0716-2986-4_7" target="_blank">https://doi.org/10.1007/978-1-0716-2986-4_7</a></li>
-                            <li>Alhaddad, H., Ospina, O. E., Khaled, M., Fridley, B. L., Smalley, I. Spatial multi-omics identifies unique tumor-stroma interactions mediating therapy resistance in leptomeningeal melanoma metastasis. (In Prep)</li>
+                            <li>
+                                Alhaddad, H., Ospina, O. E., Khaled, M. L., Ren, Y., Vallebuona, E., Boozo, M. B., Forsyth, P. A., Pina, Y., Macaulay, R., Law, V., Tsai, K. Y., Cress, W. D., Fridley, B. L., Smalley, I. 2024. Spatial transcriptomics analysis identifies a tumor-promoting function of the meningeal stroma in melanoma leptomeningeal disease. Cell Reports Medicine 5: 101606.
+                                <a href="https://doi.org/10.1016/j.xcrm.2024.101606" target="_blank">https://doi.org/10.1016/j.xcrm.2024.101606</a>
+                            </li>
+
+                            <li>
+                                Soupir, A. C., Hayes, M. T., Peak, T. C., Ospina, O. E., Chakiryan, N. H., Berglund, A., Stewart, P. A., Nguyen, J. V., Moran-Segura, C. M., Francis, N. L., Ramos-Echevarria, P. M., Chahoud, J., Li, R., Tsai, K. Y., Balasi, J. A., Caraballo-Perez, Y., Dhillon, J., Martinez, L. A., Gloria, W. E., Schurman, N., Kim, S., Gregory, M., Mule, J. J., Fridley, B. L., Manley, B. J. 2023. Increased spatial coupling of integrin and collagen IV in the immunoresistant clear cell renal cell carcinoma tumor microenvironment. bioRxiv.
+                                <a href="https://www.biorxiv.org/content/10.1101/2023.11.16.567457v1" target="_blank">https://www.biorxiv.org/content/10.1101/2023.11.16.567457v1</a>
+                            </li>
+
+                            <li>
+                                Ospina, O. E., Soupir, A. C., Fridley, B. L. 2023. A primer on preprocessing, visualization, clustering, and phenotyping of barcode-based spatial transcriptomics data. In: Fridley, B. L., Wang, X. (eds) Statistical Genomics. Methods in Molecular Biology, New York, NY, USA.
+                                <a href="https://doi.org/10.1007/978-1-0716-2986-4_7" target="_blank">https://doi.org/10.1007/978-1-0716-2986-4_7</a>
+                            </li>
                         </ul>
 
 
