@@ -84,6 +84,7 @@
                 </div>
 
                 <div v-if="samples.length && !showAddSample && project.current_step === 1" class="p-3 text-end">
+                    <div class="text-warning text-2xl">Please add all the samples before clicking IMPORT DATA</div>
                     <send-job-button label="Import Data" :project-id="project.id" :project="project" job-name="createStList" @started="nextStep" @ongoing="changingStep = true" @completed="importCompleted" ></send-job-button>
                 </div>
             </div>
@@ -323,9 +324,9 @@ import { getCurrentInstance } from 'vue';
                         //setTimeout(() => location.href = response.data, 1000);
                         //location.href = response.data;
 
-                        let position = await this.$getJobPositionInQueue(this.project.id, 'createStList');
+                        //let position = await this.$getJobPositionInQueue(this.project.id, 'createStList');
 
-                        console.log('Job position =>', position);
+                        //console.log('Job position =>', position);
 
                     })
 
