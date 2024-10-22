@@ -37,6 +37,11 @@
                             NIH grants (T32 CA 233399 and U01 CA 274489). Users are only required to create an account,
                             and to acknowledge its use by citing the research articles that describes the methods in
                             spatialGE:</p>
+
+                        <p class="ms-4 me-10">
+                            Ospina, O, E., Manjarres-Betancur, R., Gonzalez-Calderon, G., Soupir, A. C., Smalley, I., Tsai, K., Markowitz, J., Vallebuona, E., Berglund, A., Eschrich, S., Yu, X. Fridley, B. L. 2024. spatialGE: A user-friendly web application to democratize spatial transcriptomics analysis. bioRxiv. <a href="https://www.biorxiv.org/content/10.1101/2024.06.27.601050v1" target="_blank">https://www.biorxiv.org/content/10.1101/2024.06.27.601050v1</a>
+                        </p>
+
                         <p class="ms-4 me-10">
                             Ospina, O. E., Wilson, C. M., Soupir, A. C., Berglund, A., Smalley, I., Tsai, K. Y., Fridley, B. L. 2022. spatialGE: Quantification and visualization of the tumor microenvironment heterogeneity using spatial transcriptomics. Bioinformatics 38: 2645–2647. <a href="https://doi.org/10.1093/bioinformatics/btac145" target="_blank">https://doi.org/10.1093/bioinformatics/btac145</a>
                         </p>
