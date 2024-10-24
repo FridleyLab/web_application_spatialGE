@@ -61,11 +61,12 @@
         <DxScrolling :mode="scrollingMode" use-native="true" />
 
         <DxColumn v-for="(column, index) in _headers"
-                  :data-field="column.value"
-                  :cell-template="showGeneCard && ['gene', 'genes'].includes(column.value) ? (column.value + '-cell') : ''"
-                  :data-type="is_numeric_column(column.value) ? 'number' : ''"
-                  :alignment="is_numeric_column(column.value) ? 'right' : ''"
-                  :caption="'text' in column ? column.text : column.value"
+                :data-field="column.value"
+                :cell-template="showGeneCard && ['gene', 'genes', 'gene_name'].includes(column.value) ? (column.value + '-cell') : ''"
+                :data-type="is_numeric_column(column.value) ? 'number' : ''"
+                :alignment="is_numeric_column(column.value) ? 'right' : ''"
+                :caption="'text' in column ? column.text : column.value"
+                :visible="!visibleColumns.length || visibleColumns.includes(column.value)"
         >
         </DxColumn>
 
@@ -74,6 +75,10 @@
         </template>
 
         <template #genes-cell="{ data }">
+            <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data.text" class="text-info" target="_blank">{{ data.text }}</a>
+        </template>
+
+        <template #gene_name-cell="{ data }">
             <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data.text" class="text-info" target="_blank">{{ data.text }}</a>
         </template>
 
@@ -157,6 +162,7 @@ export default {
         pageSize: {type: Number, default: 15},
         selectedKeys: {type: Object, default: []},
         src: {type: String, default: ''},
+        visibleColumns: {type: Array, default: []}
     },
 
     data() {
@@ -194,15 +200,15 @@ export default {
 
             if(this.src.length) {
 
-            axios.get(this.src + '?' + Date.now())
-                .then((response) => {
-                    this._data = response.data.items;
-                    this._headers = response.data.headers;
-                })
-                .catch((error) => {
-                    console.log(error.message);
-                })
-            }
+                axios.get(this.src + '?' + Date.now())
+                    .then((response) => {
+                        this._data = response.data.items;
+                        this._headers = response.data.headers;
+                    })
+                    .catch((error) => {
+                        console.log(error.message);
+                    })
+                }
         },
 
         onCellPrepared(cell) {
@@ -234,7 +240,8 @@ export default {
                 'sscore', 'q_val', 'p_val', 'in_group_fraction', 'out_group_fraction', 'in_out_group_ratio', 'in_group_mean_exp',
                 'out_group_mean_exp', 'fold_change', 'pvals_adj',
                 'prop_size_test',
-                'spotscells', 'genes', 'min_counts_per_spotcell', 'mean_counts_per_spotcell', 'max_counts_per_spotcell', 'min_genes_per_spotcell', 'mean_genes_per_spotcell', 'max_genes_per_spotcell'
+                'spotscells', 'genes', 'min_counts_per_spotcell', 'mean_counts_per_spotcell', 'max_counts_per_spotcell', 'min_genes_per_spotcell', 'mean_genes_per_spotcell', 'max_genes_per_spotcell',
+                'combined_pvalue', 'adjusted_pvalue'
             ].includes(column);
         }
     },

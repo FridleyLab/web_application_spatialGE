@@ -118,6 +118,9 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/spatial-gradients',[ProjectController::class, 'spatial_gradients'])->name('spatial-gradients')->middleware('project');
     Route::post('/projects/{project}/spatial-gradients/stgradients',[ProjectController::class, 'spatial_gradients_stgradients'])->name('spatial-gradients-stgradients')->middleware('project');
 
+    Route::get('/projects/{project}/SPARK-X',[ProjectController::class, 'SPARK_X'])->name('sparkx')->middleware('project');
+    Route::post('/projects/{project}/SPARK-X/SPARK',[ProjectController::class, 'SPARK'])->name('spark')->middleware('project');
+
     Route::get('/projects/{project}/phenotyping',[ProjectController::class, 'phenotyping'])->name('phenotyping')->middleware('project');
     Route::post('/projects/{project}/phenotyping/STdeconvolve', [ProjectController::class, 'STdeconvolve'])->name('STdeconvolve')->middleware('project');
     Route::post('/projects/{project}/phenotyping/STdeconvolve2', [ProjectController::class, 'STdeconvolve2'])->name('STdeconvolve2')->middleware('project');

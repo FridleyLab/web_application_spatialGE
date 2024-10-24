@@ -199,6 +199,7 @@ class ProjectController extends Controller
             $json = json_decode(Storage::get("$_basepath/parameters.json"));
             //Create new parameters in the DB
             foreach($json as $parameter) {
+                $parameter->value = str_replace('{project_public_url}', $project->workingDirPublicURL(), $parameter->value);
                 ProjectParameter::updateOrCreate(['parameter' => $parameter->parameter, 'project_id' => $project->id, 'tag' => $parameter->tag], ['type' => $parameter->type, 'value' => $parameter->value]);
             }
 
@@ -383,7 +384,7 @@ class ProjectController extends Controller
 
     public function getJobPositionInQueue(Project $project) {
         $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
-        return $jobId ? $project->getJobPositionInQueue($jobId) : 0;
+        return $jobId ? $project->getJobPositionInQueue($jobId, request('command')) : 0;
     }
 
     public function cancelJobInQueue(Project $project) {
@@ -730,6 +731,16 @@ class ProjectController extends Controller
 
     public function InSituTypeRename(Project $project) {
         $jobId = $project->createJob('Phenotyping - InSituType (Rename)', 'InSituTypeRename', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
+    public function SPARK_X(Project $project) {
+        $samples = $project->samples;
+        return view('wizard.sparkx')->with(compact('project', 'samples'));
+    }
+
+    public function SPARK(Project $project) {
+        $jobId = $project->createJob('SPARK', 'SPARK', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 

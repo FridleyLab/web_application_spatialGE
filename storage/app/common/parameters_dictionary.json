@@ -140,5 +140,9 @@
     },
     "InSituType2": {
         "samples": "List of samples to generate plots"
+    },
+    "SPARK": {
+        "samples": "List of samples",
+        "thr": "thr"
     }
 }

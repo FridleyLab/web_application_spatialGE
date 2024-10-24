@@ -2,7 +2,9 @@
     <div class="table-responsive mt-3">
 
 
-        <data-grid :headers="main_data.headers" :data="main_data.rows" :show-gene-card="false" :allow-selection="allowSelection" key-attribute="sample_name" :page-size="10" :selected-keys="selectedKeys" @selected="selectedKeysChanged"></data-grid>
+        <data-grid :scrolling-toggle="false" :headers="main_data.headers" :data="main_data.rows" :show-gene-card="false" :allow-selection="allowSelection" key-attribute="sample_name" :page-size="10" :selected-keys="selectedKeys" @selected="selectedKeysChanged"></data-grid>
+
+        <div v-if="downloadButton && url.length" class="float-end"><a class="text-info" :href="url" download>Download summary</a></div>
 
 
         <!-- <table class="table table-striped">
@@ -41,6 +43,7 @@
             url: {type: String, default: ''},
             selectedKeys: {type: Object, default: []},
             allowSelection: {type: Boolean, default: true},
+            downloadButton: {type: Boolean, default: false},
         },
 
         data() {

@@ -67,6 +67,8 @@ import stdeconvolve from "./components/wizard/components/phenotyping-stdeconvolv
 import stdeconvolve_suggested_ks from "./components/wizard/components/phenotyping-stdeconvolve-suggested-ks.vue";
 import insitutype from "./components/wizard/components/phenotyping-insitutype.vue";
 
+import sparkx from "./components/wizard/sparkx.vue";
+import spark from "./components/wizard/components/spark.vue";
 
 //Client-side Plots
 import PlotsComponent from "./components/common/plots/PlotsComponent.vue";
@@ -169,6 +171,8 @@ app.component('stdeconvolve', stdeconvolve);
 app.component('insitutype', insitutype);
 app.component('stdeconvolve-suggested-ks', stdeconvolve_suggested_ks);
 
+app.component('sparkx', sparkx);
+app.component('spark', spark);
 
 app.component('plots-component', PlotsComponent);
 app.component('plot-holder', PlotHolder);

@@ -179,7 +179,7 @@
 
                                 <div v-for="(sample, index) in stenrich.samples" class="tab-pane fade min-vh-50" :class="index === 0 ? 'show active' : ''" :id="sample" role="tabpanel" :aria-labelledby="sample + '-tab'">
                                     <div class="m-4">
-                                        <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items"></data-grid>
+                                        <data-grid v-if="(sample in results) && results[sample].loaded" :headers="results[sample].data.headers/*.map(a => a.value)*/" :data="results[sample].data.items" :allow-selection="false"></data-grid>
                                     </div>
                                 </div>
 
@@ -348,9 +348,9 @@ import 'vue3-easy-data-table/dist/style.css';
                     let iValues = 0;
                     metadata.forEach( meta => {
                         let tmpValues = this.metadataPalette[meta.name].length;
-                        console.log(iValues);
+                        // console.log(iValues);
                         this.metadataPalette[meta.name] = this.getColorPalette(this.metadataPalette[meta.name], iValues, totalValues);
-                        console.log(this.metadataPalette[meta.name]);
+                        // console.log(this.metadataPalette[meta.name]);
                         iValues += tmpValues;
                     });
 

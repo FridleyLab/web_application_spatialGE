@@ -1,53 +1,56 @@
 <template>
-        <input v-if="startButtonVisible && !processing" type="button" class="btn btn-lg mt-2 mb-0" :class="((processing || disabled || otherJobsInQueue) ? 'disabled' : '') + (!secondary ? ' bg-gradient-info' : ' btn-sm btn-outline-info')" @click="sendStartSignal" :value="label" />
-        <div v-if="otherJobsInQueue && startButtonVisible" class="mt-2 text-warning text-xxs">Running other process <show-modal tag="running_other_process"></show-modal></div>
-        <div v-if="processing" :class="processing ? 'popup-center' : ''" class="border border-1 rounded rounded-2 bg-gray-400 p-4">
-            <div class="text-info text-bold">
-                <div class="text-center">
-                    Process sent to server
+    <input v-if="startButtonVisible && !processing" type="button" class="btn btn-lg mt-2 mb-0" :class="((processing || disabled || otherJobsInQueue) ? 'disabled' : '') + (!secondary ? ' bg-gradient-info' : ' btn-sm btn-outline-info')" @click="sendStartSignal" :value="label" />
+    <div v-if="otherJobsInQueue && startButtonVisible" class="mt-2 text-warning text-xxs">Running other process <show-modal tag="running_other_process"></show-modal></div>
+    <div v-if="processing" :class="processing ? 'popup-center' : ''" class="border border-1 rounded rounded-2 bg-gray-400 p-4">
+        <div class="text-info text-bold">
+            <div class="text-center">
+                Process sent to server
+            </div>
+            <div class="py-2 justify-content-center align-items-center text-center">
+                <span class="text-lg me-2">Send email when completed?</span>
+                <div>
+                    <label class="me-3">
+                        <input type="radio" :value="0" v-model="sendEmail" @click="setEmailNofitication"> No
+                    </label>
+                    <label>
+                        <input type="radio" :value="1" v-model="sendEmail" @click="setEmailNofitication"> Yes
+                    </label>
                 </div>
-                <div class="py-2 justify-content-center align-items-center text-center">
-                    <span class="text-lg me-2">Send email when completed?</span>
-                    <div>
-                        <label class="me-3">
-                            <input type="radio" :value="0" v-model="sendEmail" @click="setEmailNofitication"> No
-                        </label>
-                        <label>
-                            <input type="radio" :value="1" v-model="sendEmail" @click="setEmailNofitication"> Yes
-                        </label>
-                    </div>
-                </div>
-                <div v-if="queuePosition>0" class="text-center">
-                    <span v-if="queuePosition > 1">Queue position: </span><span class="text-warning text-lg">{{ queuePosition > 2 ? queuePosition : queuePosition === 2 ? 'next in queue' : '' }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span>
-                </div>
-                <div class="my-3 text-center">
-                    <img src="/images/loading-circular.gif" class="" style="width:100px" />
-                </div>
+            </div>
+            <div v-if="queuePosition>0" class="text-center">
+                <span v-if="queuePosition > 1">Queue position: </span><span class="text-warning text-lg">{{ queuePosition > 2 ? queuePosition : queuePosition === 2 ? 'next in queue' : '' }}</span> <span v-if="queuePosition === 1" class="text-success text-lg">Processing...</span>
+            </div>
+            <div v-if="errorRunningJob" class="my-3">
+                <span class="text-danger">Error while running process</span>
+            </div>
+            <div v-if="queuePosition === 1" class="my-3 text-center">
+                <img src="/images/loading-circular.gif" class="" style="width:100px" />
+            </div>
 
-                <div class="mt-3 text-center" v-if="queuePosition >= 1">
-                    <div v-if="!cancellingJob" class="">
-                        <button class="btn btn-sm btn-danger mb-1" @click="cancellingJob = true">Cancel process</button>
+            <div class="mt-3 text-center" v-if="queuePosition >= 1">
+                <div v-if="!cancellingJob" class="">
+                    <button class="btn btn-sm btn-danger mb-1" @click="cancellingJob = true">Cancel process</button>
 <!--                        <div class="text-info text-xxs">Only if not started yet</div>-->
-                    </div>
-                    <div v-if="cancellingJob" class="">
-                        <div class="text-danger">Are you sure?</div>
-                        <div>
-                            <button type="button" class="btn btn-sm btn-danger" @click="cancelJobInQueue">Yes</button>
-                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" @click="cancellingJob = false">No</button>
-                        </div>
+                </div>
+                <div v-if="cancellingJob" class="">
+                    <div class="text-danger">Are you sure?</div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-danger" @click="cancelJobInQueue">Yes</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary ms-2" @click="cancellingJob = false">No</button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div v-if="startButtonVisible && !processing && jobParameters && downloadLog" class="mt-4">
-            <div>
-                <a role="button" class="text-info text-sm" @click="downloadJobParameters">Download parameter log</a>
-            </div>
-            <div v-if="project.project_parameters.downloadable.includes(jobName)">
-                <a role="button" class="text-info text-sm" :href="'/projects/' + projectId + '/download-files/' + jobName + '.zip'">Download zipped results</a>
-            </div>
+    <div v-if="startButtonVisible && !processing && jobParameters && downloadLog" class="mt-4">
+        <div>
+            <a role="button" class="text-info text-sm" @click="downloadJobParameters">Download parameter log</a>
         </div>
+        <div v-if="project.project_parameters.downloadable.includes(jobName)">
+            <a role="button" class="text-info text-sm" :href="'/projects/' + projectId + '/download-files/' + jobName + '.zip'">Download zipped results</a>
+        </div>
+    </div>
 
 </template>
 
@@ -87,6 +90,8 @@ export default {
             otherJobsInQueue: 0,
 
             jobParameters: 0,
+
+            errorRunningJob: 0,
         }
     },
 
@@ -163,7 +168,13 @@ export default {
             this.checkQueueIntervalId = 0;
             //Create the interval to check queue position
             this.checkQueueIntervalId = setInterval(async () => {
-                this.queuePosition =  await this.$getJobPositionInQueue(this.projectId, this.jobName);
+
+                let response =  await this.$getJobPositionInQueue(this.projectId, this.jobName);
+
+                if(this.jobName === 'STEnrich') console.log(response);
+
+                this.queuePosition =  response.position;
+                this.errorRunningJob = response.error;
                 if(!this.queuePosition) {
                     this.startButtonVisible = true;
                     clearInterval(this.checkQueueIntervalId);

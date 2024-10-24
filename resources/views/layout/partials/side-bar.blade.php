@@ -143,6 +143,15 @@
                             </a>
                         </li>
 
+                        <li class="nav-item ps-2">
+                            <a id="sparkx-a" class="nav-link text-white @if(url()->current() === route('sparkx', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 3) disabled @endif" style="@if(getActiveProject()->current_step < 3) background-color: transparent !important @endif" href="{{ route('sparkx', ['project' => session('project_id')]) }}">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <i id="sparkx-i" class="material-icons opacity-10 @if(getActiveProject()->current_step < 3) text-secondary @endif"></i>
+                                </div>
+                                <span id="sparkx-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 3) text-secondary @endif text-bold">SPARK-X</span>
+                            </a>
+                        </li>
+
                     @endif
                 </div>
 

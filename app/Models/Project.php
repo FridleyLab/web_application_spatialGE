@@ -4087,6 +4087,89 @@ lapply(names(grad_res), function(i){
     }
 
 
+
+
+
+    public function SPARK($parameters)
+    {
+        $workingDir = $this->workingDir();
+        $workingDirPublic = $this->workingDirPublic();
+
+        $scriptName = 'SPARKX.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getSPARKXScript($parameters);
+        Storage::put($script, $scriptContents);
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+        $_process_files = [];
+
+        $column_names = [
+            'gene_name' => 'Gene',
+            'combined_pvalue' => 'Combined p-value',
+            'adjusted_pvalue' => 'Adjusted p-value'
+        ];
+
+        $samples = (!is_null($parameters['samples']) && is_array($parameters['samples'])) ? $parameters['samples'] : $this->samples()->pluck('samples.name')->toArray();
+
+        $files = [];
+        $json_files = [];
+        foreach ($samples as $sample) {
+            $file_name = "sparkx_" . $sample . "_sparkx_spatially_var_genes";
+            $files[] = $file_name . '.csv';
+            $files[] = $file_name . '.json';
+            $json_files[$sample] = $file_name . '.json';
+        }
+        foreach ($files as $file) {
+            if (Storage::fileExists($workingDir . $file)) {
+
+                if (explode('.', $file)[1] === 'csv')
+                    $this->csv2json($workingDir . $file, 0, $column_names);
+
+                $file_public = $workingDirPublic . $file;
+                $file_to_move = $workingDir . $file;
+                Storage::delete($file_public);
+                Storage::move($file_to_move, $file_public);
+
+                if (explode('.', $file)[1] !== 'json') {
+                    $_process_files[] = $file;
+                }
+
+            }
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'spark', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'samples' => $samples, 'json_files' => $json_files])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'SPARK', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+
+    private function getSPARKXScript($parameters)
+    {
+
+        $params = [
+            'samples' => (!is_null($parameters['samples']) && is_array($parameters['samples'])) ? "c('" . join("', '",$parameters['samples']) . "')" : 'NULL',
+            'thr' => $parameters['thr']
+        ];
+
+
+
+        $script = Storage::get("/common/templates/SPARKX.R");
+
+        foreach ($params as $param => $value) {
+            $script = $this->replaceRscriptParameter($param, $value, $script);
+        }
+
+        return $script;
+    }
+
+
+
+
+
     private function getDefaultSamplesToProcess() {
         $workingDir = $this->workingDir();
         $samples_fovs = Storage::get($workingDir . "slide_x_fov_table.csv");
@@ -4361,19 +4444,28 @@ lapply(names(grad_res), function(i){
         Storage::put(join('.', $_parts) . '.json', $contents);
     }
 
-    public function getJobPositionInQueue($jobId): int
+    public function getJobPositionInQueue($jobId, $process = ''): array
     {
+        $position = 0;
+        $error = 0;
 
         try {
-
             $job = Job::findOrFail($jobId);
-
-            if ($job->isRunning()) return 1; //Job running, return 1 to indicate that it is first in line and being run
-
-            return $job->currentPosition();
-        } catch (\Exception $e) {
-            return 0;
+            $position = $job->isRunning() ? 1 : $job->currentPosition(); //Job running, return 1 to indicate that it is first in line and being run
+        } catch (Exception $e) {
+            $position = 0;
         }
+
+        try {
+            $task = $this->getLatestTask($process);
+
+            $error = ($task && $task->attempts > 1 && $task->completed === 0 && is_null($task->cancelled_at)) ? 1 : 0;
+
+        } catch(Exception $e) {
+            $error = 0;
+        }
+
+        return ['position' => $position, 'error' => $error];
     }
 
     public function cancelJobInQueue($jobId, $task): int
