@@ -302,13 +302,13 @@
 
                     <div class="tab-pane fade show active" id="filtered-summary" role="tabpanel" aria-labelledby="filtered-summary-tab">
                         <div class="text-center m-4">
-                            <project-summary-table :data="project.project_parameters.filtered_stlist_summary" :reference="project.project_parameters.initial_stlist_summary"></project-summary-table>
+                            <project-summary-table :data="project.project_parameters.filtered_stlist_summary" :reference="project.project_parameters.initial_stlist_summary" :selected-keys="params.samples" @selected="(keys) => params.samples = keys"></project-summary-table>
                         </div>
                     </div>
 
                     <div class="tab-pane fade" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
                         <show-plot :src="project.project_parameters.filter_violin"></show-plot>
-                        <!-- <plot-holder v-if="'violin_box_plot_data' in project.project_parameters"
+                        <plot-holder v-if="'violin_box_plot_data' in project.project_parameters"
                             :csv="project.project_parameters.violin_box_plot_data + '.csv'"
                             expression="Violin"
                             title="Violin Plot"
@@ -316,12 +316,12 @@
                             :plot-variable="filter_variable"
                             :palette="{'sample_093d': '#1fa371', 'sample_396a': '#a5570e', 'sample_396c': '#590cc7', 'sample_397d': '#a30354'}"
                             :inverted="false"
-                        ></plot-holder> -->
+                        ></plot-holder>
                     </div>
 
                     <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
                         <show-plot :src="project.project_parameters.filter_boxplot"></show-plot>
-                        <!-- <plot-holder v-if="'violin_box_plot_data' in project.project_parameters"
+                        <plot-holder v-if="'violin_box_plot_data' in project.project_parameters"
                             :csv="project.project_parameters.violin_box_plot_data + '.csv'"
                             expression="Box"
                             title="Box Plot"
@@ -329,7 +329,7 @@
                             :plot-variable="filter_variable"
                             :palette="{'sample_093d': '#1fa371', 'sample_396a': '#a5570e', 'sample_396c': '#590cc7', 'sample_397d': '#a30354'}"
                             :inverted="false"
-                        ></plot-holder> -->
+                        ></plot-holder>
                     </div>
 
                 </div>
