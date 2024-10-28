@@ -61,7 +61,7 @@
 
 
         <div class="mt-4" v-if="!generating_pca && !generating_plots && (('qc_pca_plots' in project.project_parameters) || ('pseudo_bulk_pca' in project.project_parameters))">
-            <color-palettes @colors="changeColorPalette"></color-palettes>
+            <color-palettes @colors="changeColorPalette" legend="Color palette (for PCA and UMAP)"></color-palettes>
             <ul class="nav nav-tabs" id="filterDiagrams" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="pcaplot-tab" data-bs-toggle="tab" data-bs-target="#pcaplot" type="button" role="tab" aria-controls="pcaplot" aria-selected="true">PCA</button>

@@ -1600,7 +1600,7 @@ openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
         $script = "
 setwd('/spatialGE')
 # Load the package
-library('svglite')
+#library('svglite')
 library('spatialGE')
 library('magrittr')
 
@@ -1614,23 +1614,19 @@ pca_stlist = pseudobulk_samples($stlist, max_var_genes=$n_genes, calc_umap=T)
 
 # Extract data for PCA (D3)
 pca_df = pca_stlist@misc[['pbulk_pca']] %>%
-  tibble::rownames_to_column('sample_name') #%>%
-  #dplyr::left_join(., pca_stlist@sample_meta %>%
-                     #dplyr::rename(sample_name=1), by='sample_name')
+  tibble::rownames_to_column('sample_name')
 
 write.csv(pca_df, 'pseudobulk_pca_plot_data.csv', quote=T, row.names=F)
 
 # Extract data for UMAP (D3)
 umap_df = pca_stlist@misc[['pbulk_umap']] %>%
-  tibble::rownames_to_column('sample_name') #%>%
-  #dplyr::left_join(., pca_stlist@sample_meta %>%
-                     #dplyr::rename(sample_name=1), by='sample_name')
-#umap_df = umap_df[, c('UMAP1', 'UMAP2', 'sample_name')] # Implemented for compatibility with the D3 component
+  tibble::rownames_to_column('sample_name')
 
 write.csv(umap_df, 'pseudobulk_umap_plot_data.csv', quote=T, row.names=F)
 
-# Extract data for heatmap
-hm_df = as.data.frame(t(pca_stlist@misc[['scaled_pbulk_mtx']])) %>%
+# Extract data for heatmap and order using variance coefficient
+hm_df = as.data.frame(t(pca_stlist@misc[['scaled_pbulk_mtx']]))
+hm_df = hm_df[order(apply(hm_df, 1, function(i){sd(i)/mean(i)}), decreasing=T), ] %>%
   tibble::rownames_to_column('gene_name')
 
 write.csv(hm_df, 'pseudobulk_heatmap_plot_data.csv', quote=T, row.names=F)
