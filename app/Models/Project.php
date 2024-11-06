@@ -1905,7 +1905,7 @@ $plots_initial
         foreach ($genes as $gene) {
             $_samples = $this->samples()->whereIn('name', $samples_array)->get();
             foreach ($_samples as $sample) {
-                $export_files .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name, "qp\$" . $gene . "_" . $sample->name);
+                $export_files .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name, "qp[['" . $gene . "_" . $sample->name . "']]");
                 if ($sample->has_image) {
                     $export_files_side_by_side .= "tp = cowplot::ggdraw() + cowplot::draw_image('{$sample->image_file_path(true)}')" . PHP_EOL;
                     $export_files_side_by_side .= "qptp = ggpubr::ggarrange(qp[['{$gene}_$sample->name']], tp, ncol=2)" . PHP_EOL;
