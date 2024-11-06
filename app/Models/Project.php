@@ -1908,7 +1908,7 @@ $plots_initial
                 $export_files .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name, "qp\$" . $gene . "_" . $sample->name);
                 if ($sample->has_image) {
                     $export_files_side_by_side .= "tp = cowplot::ggdraw() + cowplot::draw_image('{$sample->image_file_path(true)}')" . PHP_EOL;
-                    $export_files_side_by_side .= "qptp = ggpubr::ggarrange(qp\${$gene}_$sample->name, tp, ncol=2)" . PHP_EOL;
+                    $export_files_side_by_side .= "qptp = ggpubr::ggarrange(qp[['{$gene}_$sample->name']], tp, ncol=2)" . PHP_EOL;
                     $export_files_side_by_side .= $this->getExportFilesCommands("stplot-quilt-$gene-" . $sample->name . '-sbs', 'qptp', 1400, 600) . PHP_EOL;
                 }
             }
