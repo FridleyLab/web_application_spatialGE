@@ -54,7 +54,8 @@
             sthetUrl: String,
             sthetPlotUrl: String,
 
-            isLocal: Boolean,
+            sparkUrl: String,
+            isLocal: Number,
         },
 
     }

@@ -9,6 +9,7 @@
         sthet-plot-url="{{ route('sthet-spatial-het-plot', ['project' => $project->id]) }}"
         :color-palettes="{{ json_encode($color_palettes) }}"
 
+        spark-url="{{ route('spark', ['project' => $project->id]) }}"
         :is-local="{{ app()->isLocal() }}"
     >
     </sthet-spatial-het>
