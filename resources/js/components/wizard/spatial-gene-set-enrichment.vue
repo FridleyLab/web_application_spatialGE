@@ -45,7 +45,7 @@
         },
 
         mounted() {
-            console.log(this.project);
+            // console.log(this.project);
         }
 
     }

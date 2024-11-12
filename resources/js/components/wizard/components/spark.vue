@@ -3,7 +3,7 @@
     <form>
 
         <div class="my-3 text-bold">
-            SPARK
+            SPARK-X
         </div>
         <div>
             A non-parametric method for detection of spatially variable genes using spatial kernel modeling.

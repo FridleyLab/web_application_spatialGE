@@ -8,6 +8,8 @@
         sthet-url="{{ route('sthet-spatial-het-calculate', ['project' => $project->id]) }}"
         sthet-plot-url="{{ route('sthet-spatial-het-plot', ['project' => $project->id]) }}"
         :color-palettes="{{ json_encode($color_palettes) }}"
+
+        :is-local="{{ app()->isLocal() }}"
     >
     </sthet-spatial-het>
 @endsection
