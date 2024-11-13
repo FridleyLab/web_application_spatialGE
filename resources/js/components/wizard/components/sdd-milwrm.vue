@@ -217,7 +217,19 @@
                     labelsBySample[sampleName] = [...new Set(labels)];
                 }
                 // Get unique values using a Set
-                const uniqueValues = [...new Set(allLabels)];
+                let uniqueValues = [...new Set(allLabels)];
+
+                // Check if all elements are numeric using a regular expression
+                const allNumeric = uniqueValues.every(item => /^\d+$/.test(item.trim()));
+                // Sort by numeric value if all elements are numeric
+                if (allNumeric) {
+                    uniqueValues = uniqueValues.sort((a, b) => parseFloat(a) - parseFloat(b));
+                } else {
+                // Otherwise, sort as strings
+                    uniqueValues = uniqueValues.sort();
+                }
+
+                console.log(uniqueValues);
 
                 let step = 1;
                 if(uniqueValues.length <= colors.length/2) {
@@ -227,6 +239,7 @@
                 let colorPalette = {};
                 for(let i = 0; i < uniqueValues.length; i++) {
                     colorPalette[uniqueValues[i]] = {label: uniqueValues[i], color: colors[i*step]};
+                    // console.log('cluster', uniqueValues[i], 'index', i*step);
                 }
 
                 for(let sampleName in this.plot_data) {
