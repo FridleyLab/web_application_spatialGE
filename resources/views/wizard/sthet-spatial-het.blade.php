@@ -10,7 +10,7 @@
         :color-palettes="{{ json_encode($color_palettes) }}"
 
         spark-url="{{ route('spark', ['project' => $project->id]) }}"
-        :is-local="{{ app()->isLocal() }}"
+        :is-local="{{ app()->isLocal() ? 1 : 0 }}"
     >
     </sthet-spatial-het>
 @endsection
