@@ -26,7 +26,8 @@
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="stplot-quilt" role="tabpanel" aria-labelledby="stplot-quilt-tab">
-                                <sthet-plot :project="project" :samples="samples" :sthet-plot-url="sthetPlotUrl" :sthet-url="sthetUrl" :color-palettes="colorPalettes"></sthet-plot>
+                                <!-- <sthet-plot :project="project" :samples="samples" :sthet-plot-url="sthetPlotUrl" :sthet-url="sthetUrl" :color-palettes="colorPalettes"></sthet-plot> -->
+                                Coming soon...
                             </div>
                             <div class="tab-pane fade show min-vh-50" id="sparkx" role="tabpanel" aria-labelledby="sparkx-tab">
                                 <!-- <spark v-if="isLocal" :project="project" :samples="samples" :spark-url="sparkUrl"></spark> -->
