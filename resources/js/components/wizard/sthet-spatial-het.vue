@@ -30,7 +30,7 @@
                             </div>
                             <div class="tab-pane fade show min-vh-50" id="spark-x" role="tabpanel" aria-labelledby="spark-x-tab">
                                 <spark v-if="isLocal" :project="project" :samples="samples" :spark-url="sparkUrl"></spark>
-                                <div v-else class="p-4">
+                                <div v-if="!isLocal" class="p-4">
                                     Coming soon...
                                 </div>
                             </div>
@@ -53,7 +53,6 @@
             colorPalettes: Object,
             sthetUrl: String,
             sthetPlotUrl: String,
-
             sparkUrl: String,
             isLocal: Number,
         },
