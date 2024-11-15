@@ -2015,7 +2015,7 @@ $export_files
         $export_files = '';
         foreach ($genes as $gene)
             foreach (/*$this->samples*/ $samples as $sample)
-                $export_files .= $this->getExportFilesCommands("stplot-expression-surface-$gene-" . $sample->name, "krp\$" . $gene . "_" . $sample->name);
+                $export_files .= $this->getExportFilesCommands("stplot-expression-surface-$gene-" . $sample->name, "krp[[" . $gene . "_" . $sample->name . "]]");
 
         $script = "
 
