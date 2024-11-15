@@ -29,8 +29,8 @@
                                 <sthet-plot :project="project" :samples="samples" :sthet-plot-url="sthetPlotUrl" :sthet-url="sthetUrl" :color-palettes="colorPalettes"></sthet-plot>
                             </div>
                             <div class="tab-pane fade show min-vh-50" id="spark-x" role="tabpanel" aria-labelledby="spark-x-tab">
-                                <spark v-if="isLocal" :project="project" :samples="samples" :spark-url="sparkUrl"></spark>
-                                <div v-if="!isLocal" class="p-4">
+                                <!-- <spark v-if="isLocal" :project="project" :samples="samples" :spark-url="sparkUrl"></spark> -->
+                                <div class="p-4">
                                     Coming soon...
                                 </div>
                             </div>
