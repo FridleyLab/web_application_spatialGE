@@ -21,14 +21,14 @@
                                 <button class="nav-link active" id="stplot-quilt-tab" data-bs-toggle="tab" data-bs-target="#stplot-quilt" type="button" role="tab" aria-controls="stplot-quilt" aria-selected="true">Spatial heterogeneity</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="spark-x-tab" data-bs-toggle="tab" data-bs-target="#spark-x" type="button" role="tab" aria-controls="spark-x" aria-selected="true">SPARK-X</button>
+                                <button class="nav-link" id="sparkx-tab" data-bs-toggle="tab" data-bs-target="#sparkx" type="button" role="tab" aria-controls="sparkx" aria-selected="true">SPARK-X</button>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active min-vh-50" id="stplot-quilt" role="tabpanel" aria-labelledby="stplot-quilt-tab">
                                 <sthet-plot :project="project" :samples="samples" :sthet-plot-url="sthetPlotUrl" :sthet-url="sthetUrl" :color-palettes="colorPalettes"></sthet-plot>
                             </div>
-                            <div class="tab-pane fade show min-vh-50" id="spark-x" role="tabpanel" aria-labelledby="spark-x-tab">
+                            <div class="tab-pane fade show min-vh-50" id="sparkx" role="tabpanel" aria-labelledby="sparkx-tab">
                                 <!-- <spark v-if="isLocal" :project="project" :samples="samples" :spark-url="sparkUrl"></spark> -->
                                 <div class="p-4">
                                     Coming soon...
