@@ -143,12 +143,12 @@
                                 </div>
                             </div>
 
-                            <div class="row justify-content-center text-center m-4">
+                            <!-- <div class="row justify-content-center text-center m-4">
                                 <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                                     <div>Color palette <show-modal tag="sdd_spagcn_color_palette"></show-modal></div>
                                     <div><Multiselect :options="colorPalettes" v-model="params2.color_pal"></Multiselect></div>
                                 </div>
-                            </div>
+                            </div> -->
 
                         </div>
 
@@ -163,6 +163,8 @@
                             <div class="text-warning">Please click the "RENAME TOPICS" button only after completing all annotation changes in all samples</div>
                             <send-job-button label="Rename Topics" :disabled="processing2 || processing3" :project-id="project.id" job-name="STdeconvolve3" @started="runSTdeconvolve3" @ongoing="processing3 = true" @completed="processCompleted3" :project="project" :download-log="false"></send-job-button>
                         </div>
+
+                        <color-palettes v-if="'STdeconvolve2' in this.project.project_parameters" @colors="changeColorPalette"></color-palettes>
 
                         <!-- Create tabs for each sample -->
                         <div v-if="!processing2 && !processing3 && ('STdeconvolve2' in project.project_parameters)">
@@ -190,7 +192,17 @@
                                             <div class="tab-pane fade show active min-vh-50" :id="'stdec2_scatterpie_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_scatterpie_tab_' + sample.name">
                                                 <div v-for="image in STdeconvolve2.scatterpie_plots">
                                                     <!-- <show-plot v-if="image.includes(sample.name)" :src="image" :sample="sample"></show-plot> -->
-                                                    <show-plot v-if="image.includes(sample.name)" :src="image" :show-image="Boolean(sample)" :sample="sample" :side-by-side="false"></show-plot>
+                                                    <plots-component v-if="loaded && image.includes(sample.name)"
+                                                            :base="sample.image_file_url"
+                                                            :csv="scatterpieData[sample.name]['csv']"
+                                                            :title="sample.name"
+                                                            plot-type="scatterpie"
+                                                            :color-palette="scatterpieData[sample.name]['palette']"
+                                                            :legend-min="0"
+                                                            :legend-max="10"
+                                                            :p-key="sample.name + '_stdeconvolve_plot'"
+                                                    ></plots-component>
+                                                    <!-- <show-plot v-if="image.includes(sample.name)" :src="image" :show-image="Boolean(sample)" :sample="sample" :side-by-side="false"></show-plot> -->
                                                 </div>
                                             </div>
                                             <div class="tab-pane fade min-vh-50" :id="'stdec2_topics_' + sample.name" role="tabpanel" :aria-labelledby="'stdec2_topics_tab_' + sample.name">
@@ -203,6 +215,7 @@
                                                             <div v-if="topic.current_annotation.trim() !== topic.new_annotation" class="mx-2 text-warning">Modified. Original topic name was '{{ topic.annotation }}'</div>
                                                         </div>
                                                         <show-plot :src="topic.plot" :sample="sample" css-classes="mt-0"></show-plot>
+
                                                         <data-grid v-if="'gsea_results' in STdeconvolve2"
                                                             :scrolling-toggle="false"
                                                             :show-filter-row="false"
@@ -312,6 +325,10 @@ import Multiselect from '@vueform/multiselect';
                 showSuggestedKs: false,
 
                 topicNamesChanged: false,
+
+                scatterpieData: {},
+                colorPalette: [],
+                loaded: false,
             }
         },
 
@@ -325,13 +342,118 @@ import Multiselect from '@vueform/multiselect';
             },
         },
 
-        mounted() {
-            this.diplicateTopicNames();
+        async mounted() {
+            await this.diplicateTopicNames();
 
-            console.log(this.STdeconvolve2);
+            await this.loadResults();
+
+            // console.log(this.STdeconvolve2);
         },
 
         methods: {
+
+            async loadResults() {
+
+                if(!('STdeconvolve2' in this.project.project_parameters)) {
+                    this.loaded = true;
+                    return;
+                }
+
+                this.loaded = false;
+
+                this.scatterpieData = {};
+
+                const data = this.STdeconvolve2['logfold_plots'];
+                const samples = Object.keys(data);
+
+                for(let i = 0; i < samples.length; i++) {
+                    const sample = samples[i];
+                    const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+                    let data = await axios.get(`/storage/users/${this.project.user_id}/${this.project.id}/stdeconvolve2_topic_proportions_per_spot_${sample}.csv` + '?cachebuster=' + timestamp);
+                    this.scatterpieData[sample] = {};
+                    this.scatterpieData[sample]['csv'] = data.data;
+                }
+
+                await this.getColorPalette();
+
+                console.log(this.scatterpieData);
+
+                this.loaded = true;
+            },
+
+            changeColorPalette(colors) {
+
+                this.colorPalette = colors;
+
+                if(!this.loaded) return;
+
+                this.getColorPalette();
+
+            },
+
+            async getColorPalette() {
+
+                const data = this.STdeconvolve2['logfold_plots'];
+                const samples = Object.keys(data);
+
+                let topicNames = [];
+                let unknown = false;
+                samples.forEach(sample => {
+                    const topics = Object.keys(data[sample]);
+                    topics.forEach(topic => {
+                        if(data[sample][topic]['current_annotation'] !== 'unknown') {
+                            topicNames.push(data[sample][topic]['current_annotation'])
+                        } else {
+                            unknown = true;
+                        }
+                    });
+                });
+
+                topicNames = [...new Set(topicNames)];
+                console.log('topicNames', topicNames);
+
+                const colors = this.colorPalette.length ? this.colorPalette : ['#E8ECFB', '#E0DEF2', '#D8D0EA', '#D0C0E0', '#C7AFD5', '#BD9ECB', '#B48EC1', '#AB7EB8', '#A26FAE', '#9A60A6', '#8F539C', '#804D99', '#6D4D9C', '#6355A5', '#5B5FAF', '#5469B9', '#4F75C2', '#4D80C5', '#4D8BC4', '#4D93BE', '#5099B7', '#549FB1', '#58A3AA', '#5CA7A3', '#61AB9B', '#67B092', '#70B486', '#7AB779', '#88BB6B', '#99BD5D', '#AABD51', '#BBBC49', '#C8B844', '#D3B23F', '#DBAB3C', '#E1A23A', '#E49838', '#E68D35', '#E68033', '#E57330', '#E4642D', '#E05229', '#DD3D26', '#DA2322', '#C4221F', '#AD211D', '#95211B', '#7E1F18', '#671C15', '#521A13'];
+                let step = 1;
+                if(topicNames.length <= colors.length/2) {
+                    step = Math.trunc(colors.length / (topicNames.length -1));
+                }
+
+                let colorPalette = {};
+                for(let i = 0; i < topicNames.length; i++) {
+                    colorPalette[topicNames[i]] = colors[i*step < colors.length ? i*step : i*step - 1];
+                }
+
+                console.log(colorPalette);
+
+                let samplesPalettes = {};
+                samples.forEach(sample => {
+                    samplesPalettes[sample] = {};
+                    const topics = Object.keys(data[sample]);
+                    topics.forEach(topic => {
+
+                        const annotation = data[sample][topic]['current_annotation'];
+
+                        const topicLabel = `${topic} (${annotation})`;
+
+                        const color = (annotation !== 'unknown') ? colorPalette[annotation] : '#AAAAAA'; //gray for unknown topics
+
+                        samplesPalettes[sample][topicLabel] = {label: topicLabel, color: color};
+
+                    });
+
+                    this.scatterpieData[sample]['palette'] = samplesPalettes[sample];
+                });
+
+
+                console.log(samplesPalettes);
+
+                console.log('PROJECT', this.project);
+
+
+
+
+
+            },
 
             runSTdeconvolve() {
                 this.processing = true;
@@ -369,10 +491,10 @@ import Multiselect from '@vueform/multiselect';
                     })
             },
 
-            processCompleted2() {
+            async processCompleted2() {
                 //console.log(this.project.project_parameters);
                 this.STdeconvolve2 = ('STdeconvolve2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve2) : {};
-                this.diplicateTopicNames();
+                await this.diplicateTopicNames();
                 this.processing2 = false;
             },
 
@@ -392,10 +514,10 @@ import Multiselect from '@vueform/multiselect';
                     })
             },
 
-            processCompleted3() {
+            async processCompleted3() {
                 //console.log(this.project.project_parameters);
                 this.STdeconvolve2 = ('STdeconvolve2' in this.project.project_parameters) ? JSON.parse(this.project.project_parameters.STdeconvolve2) : {};
-                this.diplicateTopicNames();
+                await this.diplicateTopicNames();
                 this.processing3 = false;
             },
 
@@ -405,7 +527,7 @@ import Multiselect from '@vueform/multiselect';
                 return typeof obj === 'object' ? obj["new_annotation"] : '';
             },
 
-            diplicateTopicNames() {
+            async diplicateTopicNames() {
                 if('logfold_plots' in this.STdeconvolve2) {
                     Object.entries(this.STdeconvolve2['logfold_plots']).forEach(([keySample, sample]) => {
                         Object.entries(sample).forEach(([keyTopic, topic]) => {
@@ -424,6 +546,8 @@ import Multiselect from '@vueform/multiselect';
                         });
                     });
                 }
+
+                this.getColorPalette();
             },
 
         },

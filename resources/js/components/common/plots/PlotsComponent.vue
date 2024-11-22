@@ -28,7 +28,10 @@
 
             <div
                 class="toggle-cluster-points-plot-viewer form-check form-switch"
-                v-if="plotType === 'cluster' && showControls"
+                v-if="
+                    plotType === 'cluster' ||
+                    (plotType === 'scatterpie' && showControls)
+                "
             >
                 <input
                     style="cursor: pointer"
@@ -46,6 +49,45 @@
                     }}
                 </label>
             </div>
+            <div
+                class="toggle-legends-plot-viewer form-check form-switch"
+                v-if="
+                    plotType === 'cluster' ||
+                    (plotType === 'scatterpie' && showControls)
+                "
+            >
+                <input
+                    style="cursor: pointer"
+                    class="form-check-input"
+                    type="checkbox"
+                    :id="pKey + 'toggleShowAllClusters'"
+                    @change="toggleShowLegends"
+                    :checked="showLegends"
+                />
+                <label class="form-check-label" :for="pKey + 'toggleClusters'">
+                    Enable Legend
+                </label>
+            </div>
+
+            <div
+                class="toggle-background-legends-plot-viewer form-check form-switch"
+                v-if="
+                    plotType === 'cluster' ||
+                    (plotType === 'scatterpie' && showControls)
+                "
+            >
+                <input
+                    style="cursor: pointer"
+                    class="form-check-input"
+                    type="checkbox"
+                    :id="pKey + 'toggleShowAllClusters'"
+                    @change="toggleShowLegendBackground"
+                    :checked="showBackground"
+                />
+                <label class="form-check-label" :for="pKey + 'toggleClusters'">
+                    Enable Background
+                </label>
+            </div>
 
             <div
                 class="controls-left-container-plot-viewer"
@@ -53,7 +95,6 @@
             >
                 <div class="mb-1">
                     <label :for="pKey + 'pointSizeSlider'">Point size</label>
-                    <br />
                     <input
                         type="range"
                         :id="pKey + 'pointSizeSlider'"
@@ -62,14 +103,13 @@
                         step="0.1"
                         v-model="pointSize"
                         @input="updatePointSize"
-
+                        class="form-range"
                     />
                 </div>
                 <div class="mb-1" v-if="plotType === 'gradient'">
                     <label :for="pKey + 'expressionThresholdSlider'"
                         >Expression Threshold: {{ expressionThreshold }}</label
                     >
-                    <br />
                     <input
                         type="range"
                         :id="pKey + 'expressionThresholdSlider'"
@@ -78,7 +118,7 @@
                         :max="maxValue"
                         v-model="expressionThreshold"
                         @input="handleThresholdChange"
-
+                        class="form-range"
                     />
                 </div>
             </div>
@@ -124,7 +164,6 @@
                         class="image-base-plot-viewer"
                         :href="base"
                         @load="onBaseImageLoad"
-                        @error="onBaseImageLoadError"
                         x="100"
                         y="100"
                         :width="baseImageWidth"
@@ -189,6 +228,7 @@
                     :id="pKey + 'zoomInButton'"
                     :class="{ disabled: !isSynced && base }"
                     @click.prevent="zoomIn"
+                    v-if="isSynced || !base"
                     title="Zoom In"
                 >
                     <i class="fas fa-search-plus"></i>
@@ -198,6 +238,7 @@
                     :id="pKey + 'zoomOutButton'"
                     :class="{ disabled: !isSynced && base }"
                     @click.prevent="zoomOut"
+                    v-if="isSynced || !base"
                     title="Zoom Out"
                 >
                     <i class="fas fa-search-minus"></i>
@@ -207,6 +248,7 @@
                     :id="pKey + 'resetZoomButton'"
                     :class="{ disabled: !isSynced && base }"
                     @click.prevent="resetZoom"
+                    v-if="isSynced"
                     title="Reset Zoom"
                 >
                     <i class="fas fa-sync-alt"></i>
@@ -217,7 +259,7 @@
                     :class="{ disabled: isSynced }"
                     @click.prevent="increaseSize"
                     title="Increase Overlay Size"
-                    v-if="base"
+                    v-if="!isSynced && base"
                 >
                     <i class="fas fa-expand"></i>
                 </button>
@@ -227,7 +269,7 @@
                     :class="{ disabled: isSynced }"
                     @click.prevent="decreaseSize"
                     title="Decrease Overlay Size"
-                    v-if="base"
+                    v-if="!isSynced && base"
                 >
                     <i class="fas fa-compress"></i>
                 </button>
@@ -237,7 +279,7 @@
                     :class="{ disabled: isSynced }"
                     @click.prevent="moveOverlay('up')"
                     title="Move Up"
-                    v-if="base"
+                    v-if="!isSynced && base"
                 >
                     <i class="fas fa-arrow-up"></i>
                 </button>
@@ -247,7 +289,7 @@
                     :class="{ disabled: isSynced }"
                     @click.prevent="moveOverlay('down')"
                     title="Move Down"
-                    v-if="base"
+                    v-if="!isSynced && base"
                 >
                     <i class="fas fa-arrow-down"></i>
                 </button>
@@ -257,7 +299,7 @@
                     :class="{ disabled: isSynced }"
                     @click.prevent="moveOverlay('left')"
                     title="Move Left"
-                    v-if="base"
+                    v-if="!isSynced && base"
                 >
                     <i class="fas fa-arrow-left"></i>
                 </button>
@@ -267,7 +309,7 @@
                     :class="{ disabled: isSynced }"
                     @click.prevent="moveOverlay('right')"
                     title="Move Right"
-                    v-if="base"
+                    v-if="!isSynced && base"
                 >
                     <i class="fas fa-arrow-right"></i>
                 </button>
@@ -278,7 +320,7 @@
                     :class="{ disabled: isSynced }"
                     @click.prevent="increaseWidth"
                     title="Increase Width"
-                    v-if="base"
+                    v-if="!isSynced && base"
                 >
                     <i class="fas fa-arrows-alt-h"></i>
                 </button>
@@ -288,7 +330,7 @@
                     :class="{ disabled: isSynced }"
                     @click.prevent="decreaseWidth"
                     title="Decrease Width"
-                    v-if="base"
+                    v-if="!isSynced && base"
                 >
                     <i class="fas fa-compress-arrows-alt"></i>
                 </button>
@@ -311,6 +353,7 @@
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                         :class="{ disabled: !isSynced && this.base }"
+                        v-if="isSynced || !this.base"
                     >
                         <i class="fa-solid fa-bars"></i>
                     </button>
@@ -363,6 +406,7 @@ import * as d3 from "d3";
 const PlotTypes = Object.freeze({
     GRADIENT: "gradient",
     CLUSTER: "cluster",
+    SCATTERPIE: "scatterpie",
 });
 
 export default {
@@ -436,6 +480,8 @@ export default {
             clickTimeout: null,
             isDoubleClick: false,
             showAllClusters: true,
+            showBackground: false,
+            showLegends: true,
         };
     },
 
@@ -447,18 +493,30 @@ export default {
 
     watch: {
         pointSize() {
-            this.updatePoints(
-                d3.select("#" + this.pKey + "overlay").select("g"),
-                this.xScale,
-                this.yScale,
-                this.colorScale
-            );
-            this.updatePoints(
-                d3.select("#" + this.pKey + "overlayLeft").select("g"),
-                this.xScale,
-                this.yScale,
-                this.colorScale
-            );
+            if (this.plotType === PlotTypes.SCATTERPIE) {
+                const g = d3.select("#" + this.pKey + "overlay").select("g");
+                g.selectAll("*").remove();
+                this.createScatterPie(g);
+
+                const gLeft = d3
+                    .select("#" + this.pKey + "overlayLeft")
+                    .select("g");
+                gLeft.selectAll("*").remove();
+                this.createScatterPie(gLeft);
+            } else {
+                this.updatePoints(
+                    d3.select("#" + this.pKey + "overlay").select("g"),
+                    this.xScale,
+                    this.yScale,
+                    this.colorScale
+                );
+                this.updatePoints(
+                    d3.select("#" + this.pKey + "overlayLeft").select("g"),
+                    this.xScale,
+                    this.yScale,
+                    this.colorScale
+                );
+            }
         },
 
         expressionThreshold() {
@@ -478,16 +536,8 @@ export default {
         },
 
         colorPalette() {
-
-            if (this.plotType === PlotTypes.GRADIENT) {
-                this.createGradientLegend();
-            } else if (this.plotType === PlotTypes.CLUSTER) {
-                this.createClusterLegend();
-            }
-
             this.initializeActiveColors();
             if (this.isGrouped) this.groupColorPalette();
-
             this.drawPoints("#" + this.pKey + "overlay");
             this.drawPoints("#" + this.pKey + "overlayLeft");
         },
@@ -516,15 +566,6 @@ export default {
             );
 
             observer.observe(this.$el);
-        },
-
-
-        /**
-         * Handles errors while loading the base image.
-         */
-        onBaseImageLoadError() {
-            console.log('ERROR loading image');
-            //this.base = '';
         },
 
         /**
@@ -586,8 +627,12 @@ export default {
          * @returns {Promise<void>} A promise that resolves when the component is fully initialized.
          */
         async initializeComponent() {
-            if (this.plotType === PlotTypes.CLUSTER)
+            if (
+                this.plotType === PlotTypes.CLUSTER ||
+                this.plotType === PlotTypes.SCATTERPIE
+            )
                 this.initializeActiveColors();
+
             if (this.isGrouped) this.groupColorPalette();
 
             const leftContainer = this.$refs.leftContainer;
@@ -665,13 +710,31 @@ export default {
         async loadCSVData() {
             // const data = await d3.csv(this.csv);
             const data = await d3.csvParse(this.csv);
-            this.processedData = data.map((d) => ({
-                xpos: +d.xpos,
-                ypos: +d.ypos,
-                value: isNaN(Object.values(data[0])[2])
-                    ? Object.values(d)[2]
-                    : +Object.values(d)[2],
-            }));
+
+            if (this.plotType === PlotTypes.SCATTERPIE) {
+                this.processedData = data.map((d) => {
+                    const processedItem = {
+                        xpos: +d.xpos,
+                        ypos: +d.ypos,
+                    };
+
+                    Object.keys(d).forEach((key) => {
+                        if (key.startsWith("Topic_")) {
+                            processedItem[key] = +d[key];
+                        }
+                    });
+
+                    return processedItem;
+                });
+            } else {
+                this.processedData = data.map((d) => ({
+                    xpos: +d.xpos,
+                    ypos: +d.ypos,
+                    value: isNaN(Object.values(data[0])[2])
+                        ? Object.values(d)[2]
+                        : +Object.values(d)[2],
+                }));
+            }
 
             this.filteredData = [...this.processedData];
 
@@ -828,13 +891,66 @@ export default {
 
             const g = svg.append("g");
 
-            this.updatePoints(g, this.xScale, this.yScale, this.colorScale);
+            if (this.plotType !== PlotTypes.SCATTERPIE) {
+                this.updatePoints(g, this.xScale, this.yScale, this.colorScale);
+            } else {
+                this.createScatterPie(g);
+            }
 
             if (this.plotType === PlotTypes.GRADIENT) {
                 this.createGradientLegend();
-            } else if (this.plotType === PlotTypes.CLUSTER) {
+            } else if (
+                this.plotType === PlotTypes.CLUSTER ||
+                this.plotType === PlotTypes.SCATTERPIE
+            ) {
                 this.createClusterLegend();
             }
+        },
+
+        createScatterPie(g) {
+            this.processedData.forEach((dataPoint) => {
+                const x = this.xScale(dataPoint.xpos);
+                const y = this.yScale(dataPoint.ypos);
+
+                const pieData = Object.keys(dataPoint)
+                    .filter((key) => key.startsWith("Topic_"))
+                    .map((key) => ({
+                        topic: key,
+                        value: dataPoint[key],
+                        color: this.colorPalette[key]?.color || "#ccc",
+                    }));
+
+                const pie = d3
+                    .pie()
+                    .value((d) => d.value)
+                    .sort(null);
+
+                const arc = d3.arc().outerRadius(this.pointSize).innerRadius(0);
+
+                const pieGroup = g
+                    .append("g")
+                    .attr("transform", `translate(${x}, ${y})`);
+
+                pieGroup
+                    .selectAll("path")
+                    .data(pie(pieData))
+                    .enter()
+                    .append("path")
+                    .attr("d", arc)
+                    .attr("fill", (d) => d.data.color)
+                    .attr(
+                        "class",
+                        (d) =>
+                            `pie-section-${d.data.topic.replace(/\s+/g, "-")}`
+                    )
+                    .attr("fill-opacity", (d) =>
+                        this.activeColors[d.data.color] ? 1 : 0
+                    )
+                    .attr("data-topic", (d) => d.data.topic)
+                    .attr("stroke", "#8E8E8E")
+                    .attr("stroke-width", "0.05px")
+                    .attr("stroke-opacity", 1);
+            });
         },
 
         /**
@@ -904,7 +1020,7 @@ export default {
          *
          * @param {String} color - The color of the cluster
          */
-         handleClick(color) {
+        handleClick(color) {
             if (!this.isDoubleClick) {
                 this.handleLegendClick(color);
             }
@@ -932,34 +1048,36 @@ export default {
         handleLegendClick(color) {
             const isActive = this.activeColors[color];
             this.activeColors[color] = !isActive;
+            const targetLabel = Object.values(this.colorPalette).find(
+                (colorObject) => colorObject.color === color
+            )?.label;
 
-            if (this.isGrouped) {
-                const targetLabel = Object.values(this.colorPalette).find(
-                    (colorObject) => colorObject.color === color
-                )?.label;
+            if (this.plotType !== PlotTypes.SCATTERPIE) {
+                if (this.isGrouped && !this.plotType === PlotTypes.SCATTERPIE) {
+                    Object.values(this.colorPalette).forEach((colorObject) => {
+                        if (colorObject.label === targetLabel) {
+                            this.activeColors[colorObject.color] = !isActive;
+                        }
+                    });
 
-                Object.values(this.colorPalette).forEach((colorObject) => {
-                    if (colorObject.label === targetLabel) {
-                        this.activeColors[colorObject.color] = !isActive;
-                    }
-                });
+                    const activeKeys = new Set(
+                        Object.values(this.groupedPalette)
+                            .filter(
+                                (colorObject) =>
+                                    this.activeColors[colorObject.color]
+                            )
+                            .flatMap((colorObject) => colorObject.groupedKeys)
+                    );
 
-                const activeKeys = new Set(
-                    Object.values(this.groupedPalette)
-                        .filter(
-                            (colorObject) =>
-                                this.activeColors[colorObject.color]
-                        )
-                        .flatMap((colorObject) => colorObject.groupedKeys)
-                );
-
-                this.filteredData = this.processedData.filter((d) =>
-                    activeKeys.has(`${d.value}`)
-                );
-            } else {
-                this.filteredData = this.processedData.filter(
-                    (d) => this.activeColors[this.colorPalette[d.value].color]
-                );
+                    this.filteredData = this.processedData.filter((d) =>
+                        activeKeys.has(`${d.value}`)
+                    );
+                } else {
+                    this.filteredData = this.processedData.filter(
+                        (d) =>
+                            this.activeColors[this.colorPalette[d.value].color]
+                    );
+                }
             }
 
             this.updatePointsAndRecreateClusterLegend();
@@ -978,9 +1096,11 @@ export default {
                 this.activeColors[color] = color === selectedColor;
             });
 
-            this.filteredData = this.processedData.filter(
-                (d) => this.activeColors[this.colorPalette[d.value].color]
-            );
+            if (this.plotType !== PlotTypes.SCATTERPIE) {
+                this.filteredData = this.processedData.filter(
+                    (d) => this.activeColors[this.colorPalette[d.value].color]
+                );
+            }
 
             this.updatePointsAndRecreateClusterLegend();
         },
@@ -1002,26 +1122,52 @@ export default {
                 });
             }
 
-            this.filteredData = this.processedData.filter(
-                (d) => this.activeColors[this.colorPalette[d.value].color]
-            );
+            if (this.plotType !== PlotTypes.SCATTERPIE) {
+                this.filteredData = this.processedData.filter(
+                    (d) => this.activeColors[this.colorPalette[d.value].color]
+                );
+            }
 
             this.updatePointsAndRecreateClusterLegend();
         },
 
+        toggleShowLegendBackground() {
+            this.showBackground = !this.showBackground;
+
+            this.createClusterLegend();
+        },
+
+        toggleShowLegends() {
+            this.showLegends = !this.showLegends;
+
+            this.createClusterLegend();
+        },
+
         updatePointsAndRecreateClusterLegend() {
-            this.updatePoints(
-                d3.select("#" + this.pKey + "overlay").select("g"),
-                this.xScale,
-                this.yScale,
-                this.colorScale
-            );
-            this.updatePoints(
-                d3.select("#" + this.pKey + "overlayLeft").select("g"),
-                this.xScale,
-                this.yScale,
-                this.colorScale
-            );
+            if (this.plotType === PlotTypes.SCATTERPIE) {
+                const g = d3.select("#" + this.pKey + "overlay").select("g");
+                g.selectAll("*").remove();
+                this.createScatterPie(g);
+
+                const gLeft = d3
+                    .select("#" + this.pKey + "overlayLeft")
+                    .select("g");
+                gLeft.selectAll("*").remove();
+                this.createScatterPie(gLeft);
+            } else {
+                this.updatePoints(
+                    d3.select("#" + this.pKey + "overlay").select("g"),
+                    this.xScale,
+                    this.yScale,
+                    this.colorScale
+                );
+                this.updatePoints(
+                    d3.select("#" + this.pKey + "overlayLeft").select("g"),
+                    this.xScale,
+                    this.yScale,
+                    this.colorScale
+                );
+            }
 
             this.createClusterLegend();
         },
@@ -1036,7 +1182,7 @@ export default {
             );
 
             if (!legendContainer.select("svg").empty()) {
-                legendContainer.select("svg").remove();
+                return;
             }
 
             const legendWidth = 40;
@@ -1127,12 +1273,31 @@ export default {
                 legendContainer.select("svg").remove();
             }
 
-            const legendWidth = 150;
-            const legendHeight = 600;
+            if (!this.showLegends) {
+                return;
+            }
 
-            const legendItems = this.isGrouped
+            const legendWidth = 150;
+            const legendHeight = 400;
+
+            let legendItems = this.isGrouped
                 ? Object.entries(this.groupedPalette)
                 : Object.entries(this.colorPalette);
+
+            legendContainer
+                .style("max-height", "400px")
+                .style("overflow-y", "auto")
+                .style("overflow-x", "auto");
+
+            if (this.showBackground) {
+                legendContainer
+                    .style("background-color", "white")
+                    .style("border-radius", "5px");
+            } else {
+                legendContainer
+                    .style("background-color", null)
+                    .style("border-radius", null);
+            }
 
             const legendSvg = legendContainer
                 .append("svg")
@@ -1141,8 +1306,41 @@ export default {
 
             legendSvg.selectAll("*").remove();
 
+            let marginBottom = 0;
+
+            if (this.plotType === PlotTypes.SCATTERPIE) {
+                legendItems = legendItems.map(([key, colorObject]) => {
+                    const topicMatch = colorObject.label.match(/Topic_(\d+)/);
+                    const number = topicMatch ? topicMatch[1] : "";
+                    const labelMatch = colorObject.label.match(/\(([^)]+)\)/);
+                    const labelInsideParentheses = labelMatch
+                        ? labelMatch[1]
+                        : colorObject.label;
+
+                    return [
+                        key,
+                        {
+                            ...colorObject,
+                            label: `${number} (${labelInsideParentheses})`,
+                        },
+                    ];
+                });
+
+                legendSvg
+                    .append("text")
+                    .attr("x", 10)
+                    .attr("y", 15)
+                    .attr("font-size", "14px")
+                    .attr("font-family", "Arial, sans-serif")
+                    .style("font-weight", "bold")
+                    .style("fill", "black")
+                    .text("Topics");
+
+                marginBottom = 15;
+            }
+
             legendItems.forEach(([key, colorObject], index) => {
-                const yPosition = index * 30 + 20;
+                const yPosition = index * 30 + 20 + marginBottom;
                 const isActive = this.activeColors[colorObject.color];
 
                 legendSvg
@@ -1164,12 +1362,27 @@ export default {
                         this.handleDoubleClick(colorObject.color);
                     });
 
+                const tooltip = d3
+                    .select("body")
+                    .append("div")
+                    .style("position", "absolute")
+                    .style("background-color", "white")
+                    .style("border", "1px solid grey")
+                    .style("border-radius", "5px")
+                    .style("padding", "5px")
+                    .style("font-size", "12px")
+                    .style("font-family", "Arial, sans-serif")
+                    .style("visibility", "hidden")
+                    .style("pointer-events", "none")
+                    .style("z-index", "9999");
+
                 legendSvg
                     .append("text")
                     .attr("x", 40)
                     .attr("y", yPosition)
+                    .attr("width", 90)
                     .attr("dy", "0.35em")
-                    .attr("font-size", "12px")
+                    .attr("font-size", "10px")
                     .attr("font-family", "Arial, sans-serif")
                     .style("fill", isActive ? "black" : "grey")
                     .text(`${colorObject.label}`)
@@ -1180,11 +1393,32 @@ export default {
                         this.clickTimeout = setTimeout(() => {
                             this.handleClick(colorObject.color);
                         }, 200);
+
+                        tooltip.style("visibility", "hidden");
                     })
                     .on("dblclick", () => {
                         if (this.clickTimeout) clearTimeout(this.clickTimeout);
                         this.handleDoubleClick(colorObject.color);
+
+                        tooltip.style("visibility", "hidden");
+                    })
+                    .on("mouseover", (event) => {
+                        tooltip
+                            .style("visibility", "visible")
+                            .text(`${colorObject.label}`);
+                    })
+                    .on("mousemove", (event) => {
+                        tooltip
+                            .style("top", `${event.pageY + 10}px`)
+                            .style("left", `${event.pageX + 10}px`);
+                    })
+                    .on("mouseout", () => {
+                        tooltip.style("visibility", "hidden");
                     });
+
+                d3.select("body").on("click", () => {
+                    tooltip.style("visibility", "hidden");
+                });
             });
         },
 
@@ -1412,6 +1646,7 @@ export default {
             if (!this.isSynced) {
                 this.drawOffsetWidth += 5;
                 this.drawPoints(`#${this.pKey}overlay`);
+                this.drawPoints(`#${this.pKey}overlayLeft`);
             }
         },
 
@@ -1422,6 +1657,7 @@ export default {
             if (!this.isSynced) {
                 this.drawOffsetWidth = Math.max(this.drawOffsetWidth - 5, 0);
                 this.drawPoints(`#${this.pKey}overlay`);
+                this.drawPoints(`#${this.pKey}overlayLeft`);
             }
         },
 
@@ -1535,12 +1771,6 @@ export default {
                     .attr("transform")
             );
 
-            console.log("exported Positions", {
-                overlayPosition: overlayTransform,
-                basePosition: baseTransform,
-                pointScale: this.pointScale,
-                currentTransform: this.currentTransform.toString(),
-            });
             return {
                 overlayPosition: overlayTransform,
                 basePosition: baseTransform,
@@ -1635,7 +1865,7 @@ export default {
                     Math.max(this.baseImageHeight, this.containerHeight)
                 );
 
-                leftSvg.setAttribute("x", 50);
+                leftSvg.setAttribute("x", 100);
                 leftSvg.setAttribute("y", 0);
 
                 rightSvg.setAttribute("x", this.containerWidth - 100);
@@ -1645,6 +1875,8 @@ export default {
                 combinedSvg.appendChild(rightSvg);
 
                 svgToExport = combinedSvg;
+
+                this.embedImagesAsDataURI(svgToExport);
             }
 
             const svgClone = this.convertToSVG(svgToExport);
@@ -1658,6 +1890,24 @@ export default {
             }
 
             this.showControls = true;
+        },
+
+        async embedImagesAsDataURI(svgElement) {
+            const images = svgElement.querySelectorAll("image");
+            for (const image of images) {
+                const url =
+                    image.getAttribute("href") ||
+                    image.getAttribute("xlink:href");
+                if (url) {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        image.setAttribute("href", reader.result);
+                    };
+                    reader.readAsDataURL(blob);
+                }
+            }
         },
 
         /**
@@ -1715,8 +1965,485 @@ export default {
             };
         },
 
-        // TODO
-        exportAsPDF(svgElement) {},
+        // Backup 1
+        // async exportAsPDF(svgElement) {
+        //     try {
+        //         const clonedSvg = this.convertToSVG(svgElement);
+        //         const svgData = new XMLSerializer().serializeToString(
+        //             clonedSvg
+        //         );
+
+        //         const styles = [...document.styleSheets]
+        //             .map((sheet) => {
+        //                 try {
+        //                     return [...sheet.cssRules]
+        //                         .map((rule) => rule.cssText)
+        //                         .join("");
+        //                 } catch (e) {
+        //                     return "";
+        //                 }
+        //             })
+        //             .join("");
+
+        //         const printWindow = window.open("", "_blank");
+        //         if (!printWindow) {
+        //             throw new Error("Error opening the print window.");
+        //         }
+
+        //         let printStyles = `
+        //             body, html {
+        //                 margin: 0;
+        //                 padding: 0;
+        //                 width: 100%;
+        //                 height: 100%;
+        //                 display: flex;
+        //                 justify-content: center;
+        //                 align-items: center;
+        //             }
+        //             @media print {
+        //                 body, html {
+        //                     overflow: hidden;
+        //                     page-break-before: always;
+        //                     page-break-inside: avoid;
+        //                     page-break-after: always;
+        //                 }
+        //             }`;
+
+        //         const isSafari = /^((?!chrome|android).)*safari/i.test(
+        //             navigator.userAgent
+        //         );
+        //         const isLandscape = this.selectedGraphic === "both";
+
+        //         if (isLandscape) {
+        //             const svgWidth =
+        //                 clonedSvg.getAttribute("width") || "16.54in";
+        //             const svgHeight = clonedSvg.getAttribute("height") || "8in";
+
+        //             printStyles += `
+        //                 .print-container {
+        //                     width: ${svgWidth};
+        //                     height: ${svgHeight};
+        //                     display: flex;
+        //                     justify-content: center;
+        //                     align-items: center;
+        //                     overflow: hidden;
+        //                 }
+        //                `;
+
+        //             if (!isSafari) {
+        //                 printStyles += `@page {
+        //                 size: ${svgWidth} ${svgHeight};
+        //                 margin: 0;
+        //             }`;
+        //             }
+        //         } else {
+        //             const pageOrientation = isLandscape
+        //                 ? "landscape"
+        //                 : "portrait";
+        //             printStyles += `@page {
+        //                 size: ${pageOrientation};
+        //                 margin: 0;
+        //             }`;
+        //         }
+
+        //         printWindow.document.write(`
+        //             <html>
+        //                 <head>
+        //                     <title>${this.title}-${Date.now()}</title>
+        //                     <style>
+        //                         ${styles}
+        //                         ${printStyles}
+        //                     </style>
+        //                 </head>
+        //                 <body onload="window.print(); window.close();">
+        //                     <div class="print-container">
+        //                         ${svgData}
+        //                     </div>
+        //                 </body>
+        //             </html>
+        //         `);
+
+        //         await this.waitForImagesToLoad(printWindow.document);
+        //         printWindow.document.close();
+        //     } catch (error) {
+        //         console.error(
+        //             "There was an error while generating the PDF File:",
+        //             error
+        //         );
+        //     }
+        // },
+
+        // Backup 2
+        // async exportAsPDF(svgElement) {
+        //     try {
+        //         const clonedSvg = this.convertToSVG(svgElement);
+        //         const svgData = new XMLSerializer().serializeToString(
+        //             clonedSvg
+        //         );
+
+        //         const styles = [...document.styleSheets]
+        //             .map((sheet) => {
+        //                 try {
+        //                     return [...sheet.cssRules]
+        //                         .map((rule) => rule.cssText)
+        //                         .join("");
+        //                 } catch (e) {
+        //                     return "";
+        //                 }
+        //             })
+        //             .join("");
+
+        //         const printWindow = window.open("", "_blank");
+        //         if (!printWindow) {
+        //             throw new Error("Error opening the print window.");
+        //         }
+
+        //         let printStyles = `
+        //     body, html {
+        //         margin: 0;
+        //         padding: 0;
+        //         width: 100%;
+        //         height: 100%;
+        //         display: flex;
+        //         justify-content: center;
+        //         align-items: center;
+        //     }
+        //     @media print {
+        //         body, html {
+        //             overflow: hidden;
+        //             page-break-before: always;
+        //             page-break-inside: avoid;
+        //             page-break-after: always;
+        //         }
+        //     }`;
+
+        //         const isSafari = /^((?!chrome|android).)*safari/i.test(
+        //             navigator.userAgent
+        //         );
+        //         const isLandscape = this.selectedGraphic === "both";
+
+        //         if (isLandscape) {
+        //             const svgWidth =
+        //                 clonedSvg.getAttribute("width") || "16.54in";
+        //             const svgHeight = clonedSvg.getAttribute("height") || "8in";
+
+        //             printStyles += `
+        //         .print-container {
+        //             width: ${svgWidth};
+        //             height: ${svgHeight};
+        //             display: flex;
+        //             justify-content: center;
+        //             align-items: center;
+        //             overflow: hidden;
+        //         }`;
+
+        //             if (!isSafari) {
+        //                 printStyles += `@page {
+        //             size: ${svgWidth} ${svgHeight};
+        //             margin: 0;
+        //         }`;
+        //             }
+        //         } else {
+        //             const pageOrientation = isLandscape
+        //                 ? "landscape"
+        //                 : "portrait";
+        //             printStyles += `@page {
+        //         size: ${pageOrientation};
+        //         margin: 0;
+        //     }`;
+        //         }
+
+        //         printWindow.document.write(`
+        //     <html>
+        //         <head>
+        //             <title>${this.title}-${Date.now()}</title>
+        //             <style>
+        //                 ${styles}
+        //                 ${printStyles}
+        //             </style>
+        //         </head>
+        //         <body>
+        //             <div class="print-container">
+        //                 ${svgData}
+        //             </div>
+        //             <p style="text-align:center;">
+        //                 Please adjust the orientation and size if necessary to ensure the image prints correctly.
+        //             </p>
+        //             <button id="printButton" style="display:none; position: absolute; bottom: 20px; right: 20px;">
+        //                 Print
+        //             </button>
+        //         </body>
+        //     </html>
+        // `);
+
+        //         await this.waitForImagesToLoad(printWindow.document);
+
+        //         // Show the print button only after the image has loaded
+        //         const printButton =
+        //             printWindow.document.getElementById("printButton");
+        //         printButton.style.display = "block";
+
+        //         // Add the print functionality to the button
+        //         printButton.addEventListener("click", () => {
+        //             printWindow.print();
+        //         });
+
+        //         printWindow.document.close();
+        //     } catch (error) {
+        //         console.error(
+        //             "There was an error while generating the PDF File:",
+        //             error
+        //         );
+        //     }
+        // },
+
+        // Backup 3
+        async exportAsPDF(svgElement) {
+            try {
+                const clonedSvg = this.convertToSVG(svgElement);
+                const svgData = new XMLSerializer().serializeToString(
+                    clonedSvg
+                );
+
+                const styles = [...document.styleSheets]
+                    .map((sheet) => {
+                        try {
+                            return [...sheet.cssRules]
+                                .map((rule) => rule.cssText)
+                                .join("");
+                        } catch (e) {
+                            return "";
+                        }
+                    })
+                    .join("");
+
+                const printWindow = window.open("", "_blank");
+                if (!printWindow) {
+                    throw new Error("Error opening the print window.");
+                }
+
+                let printStyles = `
+                    body, html {
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                        height: 100%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .print-message, .button-container, .loading-message, .safari-print-instruction {
+                        position: fixed;
+                        left: 50%;
+                        transform: translateX(-50%);
+                    }
+                    .loading-message {
+                        top: 50px;
+                        font-size: 16px;
+                        color: #555;
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                    }
+                    .print-message {
+                        top: 20px;
+                        font-size: 14px;
+                        color: #555;
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                    }
+                    .button-container {
+                        top: 50px;
+                        display: none;
+                        gap: 10px;
+                    }
+                    .button-container button {
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        color: #fff;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        transition: background-color 0.3s;
+                    }
+                    #printButton {
+                        background-color: #007bff;
+                    }
+                    #printButton:hover {
+                        background-color: #0056b3;
+                    }
+                    #closeButton {
+                        background-color: #6c757d;
+                    }
+                    #closeButton:hover {
+                        background-color: #5a6268;
+                    }
+                    .safari-print-instruction {
+                        display: none;
+                        top: 40px;
+                        font-size: 14px;
+                        color: #333;
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                    }
+                    @media print {
+                        body, html {
+                            overflow: hidden;
+                            page-break-before: always;
+                            page-break-inside: avoid;
+                            page-break-after: always;
+                        }
+                        .print-message, .button-container, .loading-message, .safari-print-instruction {
+                            display: none;
+                        }
+                    }`;
+
+                const isSafari = /^((?!chrome|android).)*safari/i.test(
+                    navigator.userAgent
+                );
+                const isLandscape = this.selectedGraphic === "both";
+
+                if (isLandscape) {
+                    const svgWidth =
+                        clonedSvg.getAttribute("width") || "16.54in";
+                    const svgHeight = clonedSvg.getAttribute("height") || "8in";
+
+                    printStyles += `
+                        .print-container {
+                            width: ${svgWidth};
+                            height: ${svgHeight};
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            overflow: hidden;
+                            position: relative;
+                        }`;
+
+                    if (!isSafari) {
+                        printStyles += `@page {
+                            size: ${svgWidth} ${svgHeight};
+                            margin: 0;
+                        }`;
+                    }
+                } else {
+                    const pageOrientation = isLandscape
+                        ? "landscape"
+                        : "portrait";
+                    printStyles += `@page {
+                        size: ${pageOrientation};
+                        margin: 0;
+                    }`;
+                }
+
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>${this.title}-${Date.now()}</title>
+                            <style>
+                                ${styles}
+                                ${printStyles}
+                            </style>
+                        </head>
+                        <body>
+                            <div class="print-container">
+                                ${svgData}
+                                <p class="loading-message">Loading...</p>
+                                <p class="print-message">
+                                    Please adjust the orientation and size if necessary to ensure the image prints correctly.
+                                </p>
+                                <div class="button-container" style="display: none;">
+                                    <button id="printButton">Print</button>
+                                    <button id="closeButton">Close</button>
+                                </div>
+                                <p class="safari-print-instruction" style="display: ${
+                                    isSafari ? "block" : "none"
+                                };">
+                                    For Safari, please use Cmd + P to print.
+                                </p>
+                            </div>
+                        </body>
+                    </html>
+                `);
+
+                await this.waitForImagesToLoad(printWindow.document);
+
+                const loadingMessage =
+                    printWindow.document.querySelector(".loading-message");
+                loadingMessage.style.display = "none";
+
+                const buttonContainer =
+                    printWindow.document.querySelector(".button-container");
+                const safariInstruction = printWindow.document.querySelector(
+                    ".safari-print-instruction"
+                );
+
+                if (isSafari) {
+                    safariInstruction.style.display = "block";
+                    buttonContainer.style.display = "none";
+                } else {
+                    buttonContainer.style.display = "flex";
+                }
+
+                if (!isSafari) {
+                    const printButton =
+                        printWindow.document.getElementById("printButton");
+                    printButton.addEventListener("click", () => {
+                        buttonContainer.style.display = "none";
+                        printWindow.print();
+                    });
+                }
+
+                const closeButton =
+                    printWindow.document.getElementById("closeButton");
+                closeButton.addEventListener("click", () => {
+                    printWindow.close();
+                });
+
+                if (!isSafari) {
+                    printWindow.onafterprint = () => {
+                        buttonContainer.style.display = "flex";
+                    };
+                }
+            } catch (error) {
+                console.error(
+                    "There was an error while generating the PDF File:",
+                    error
+                );
+            }
+        },
+
+        waitForImagesToLoad(doc) {
+            const images = Array.from(doc.querySelectorAll("image"));
+
+            return Promise.all(
+                images.map((img) => {
+                    return new Promise((resolve) => {
+                        const href =
+                            img.getAttributeNS(
+                                "http://www.w3.org/1999/xlink",
+                                "href"
+                            ) || img.getAttribute("href");
+
+                        if (!href) {
+                            resolve();
+                            return;
+                        }
+
+                        const testImg = new Image();
+                        testImg.src = href;
+
+                        testImg.onload = () => {
+                            resolve();
+                        };
+
+                        testImg.onerror = () => {
+                            console.warn("Error loading image:", href);
+                            resolve();
+                        };
+                    });
+                })
+            );
+        },
 
         /**
          * Converts the provided SVG element as an SVG file.
@@ -1742,53 +2469,47 @@ export default {
                 if (imageBaseElement) {
                     const img = new Image();
                     img.src = this.base;
-                    const canvas = document.createElement("canvas");
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0);
-                    const base64String = canvas.toDataURL("image/png");
-                    imageBaseElement.setAttribute("href", base64String);
+
+                    img.onload = () => {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0);
+                        const base64String = canvas.toDataURL("image/png");
+                        imageBaseElement.setAttribute("href", base64String);
+                    };
+
                     imageBaseElement.style.height = "80%";
                 }
             }
 
-            if (
-                this.selectedGraphic === "left" ||
-                this.selectedGraphic === "both"
-            ) {
-                const legendContainer = document.querySelector(
-                    `#${this.pKey}legend-container-plot-viewer svg`
+            const legendContainer = document.querySelector(
+                `#${this.pKey}legend-container-plot-viewer svg`
+            );
+
+            if (legendContainer) {
+                const legendClone = legendContainer.cloneNode(true);
+                svgClone.appendChild(legendClone);
+            }
+
+            const leftTitle = document.querySelector(
+                ".title-container-plot-viewer label"
+            );
+
+            if (leftTitle) {
+                const titleClone = document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "text"
                 );
-
-                svgClone.firstChild.setAttribute(
-                    "transform",
-                    "translate(-30,-30) scale(0.9)"
-                );
-
-                if (legendContainer) {
-                    const legendClone = legendContainer.cloneNode(true);
-                    svgClone.appendChild(legendClone);
-                }
-
-                const leftTitle = document.querySelector(
-                    ".title-container-plot-viewer label"
-                );
-
-                if (leftTitle) {
-                    const titleClone = document.createElementNS(
-                        "http://www.w3.org/2000/svg",
-                        "text"
-                    );
-                    titleClone.setAttribute("x", "100");
-                    titleClone.setAttribute("y", "20");
-                    titleClone.setAttribute("font-size", "16");
-                    titleClone.setAttribute("font-family", "Arial, sans-serif");
-                    titleClone.setAttribute("font-weight", "bold");
-                    titleClone.setAttribute("dy", "1em");
-                    titleClone.textContent = leftTitle.textContent;
-                    svgClone.appendChild(titleClone);
-                }
+                titleClone.setAttribute("x", "100");
+                titleClone.setAttribute("y", "20");
+                titleClone.setAttribute("font-size", "16");
+                titleClone.setAttribute("font-family", "Arial, sans-serif");
+                titleClone.setAttribute("font-weight", "bold");
+                titleClone.setAttribute("dy", "1em");
+                titleClone.textContent = leftTitle.textContent;
+                svgClone.appendChild(titleClone);
             }
 
             return svgClone;
@@ -1821,7 +2542,7 @@ export default {
 };
 </script>
 
-<style scoped src="bootstrap/dist/css/bootstrap.css"></style>
+<!-- <style scoped src="bootstrap/dist/css/bootstrap.css"></style> -->
 
 <style scoped>
 .main-container-plot-viewer {
@@ -1893,6 +2614,22 @@ svg {
     border-radius: 8px;
 }
 
+.toggle-legends-plot-viewer {
+    z-index: 1;
+    position: absolute;
+    bottom: 125px;
+    left: 10px;
+    z-index: 1050;
+    align-items: center;
+}
+.toggle-background-legends-plot-viewer {
+    z-index: 1;
+    position: absolute;
+    bottom: 103px;
+    left: 10px;
+    z-index: 1050;
+    align-items: center;
+}
 .toggle-cluster-points-plot-viewer {
     z-index: 1;
     position: absolute;
