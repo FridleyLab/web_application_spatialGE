@@ -85,7 +85,7 @@
 
                 <div v-if="!processing && !processing2 && annotations_renamed" class="row mt-3">
                     <div class="p-3 text-end">
-                        <send-job-button label="Complete renaming" :disabled="processing || renaming" :project-id="project.id" job-name="InSituTypeRename" @started="runInSituTypeRename" @completed="runInSituTypeRenameCompleted" :project="project" ></send-job-button>
+                        <send-job-button label="Complete renaming" :disabled="processing || renaming" :project-id="project.id" job-name="InSituTypeRename" @started="runInSituTypeRename" @completed="runInSituTypeRenameCompleted" :project="project"></send-job-button>
                     </div>
                 </div>
 
@@ -172,7 +172,7 @@
                                 <div class="tab-pane fade show active mt-4" id="inSituType-UMAP-plot" role="tabpanel" aria-labelledby="inSituType-UMAP-plot-tab">
 
                                     <div>
-                                        <plot-holder
+                                        <plot-holder v-if="'plot_data' in inSituType && 'umap' in inSituType.plot_data"
                                             :csv="inSituType.plot_data.umap"
                                             expression="Umap"
                                             title="UMAP Plot"
@@ -188,7 +188,7 @@
                                 <div class="tab-pane fade mt-4" id="inSituType-Flight-plot" role="tabpanel" aria-labelledby="inSituType-Flight-plot-tab">
 
                                     <div width="800" height="800">
-                                        <plot-holder
+                                        <plot-holder v-if="'plot_data' in inSituType && 'flightpath' in inSituType.plot_data"
                                             :csv="inSituType.plot_data.flightpath"
                                             expression="Flight"
                                             title="Flight Path"
