@@ -78,7 +78,7 @@
 
                 </div>
 
-                <div v-if="'InSituType' in this.project.project_parameters" class="text-center mt-3">
+                <div v-if="'InSituType' in this.project.project_parameters && 'plot_data' in inSituType && 'umap' in inSituType.plot_data" class="text-center mt-3">
                     <send-job-button label="Generate Plots" :disabled="processing || processing2 || renaming || !visibleSamples.length" :project-id="project.id" job-name="InSituType2" @started="runInSituType2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
                 </div>
 
@@ -90,10 +90,10 @@
                 </div>
 
 
-                <color-palettes @colors="changeColorPalette"></color-palettes>
+                <color-palettes v-if="'InSituType' in this.project.project_parameters && 'plot_data' in inSituType && 'umap' in inSituType.plot_data" @colors="changeColorPalette"></color-palettes>
 
 
-                <div class="mt-4" v-if="('InSituType2' in this.project.project_parameters) && !processing && !processing2 && !renaming && annotations !== null">
+                <div class="mt-4" v-if="'InSituType' in this.project.project_parameters && 'plot_data' in inSituType && 'umap' in inSituType.plot_data && ('InSituType2' in this.project.project_parameters) && !processing && !processing2 && !renaming && annotations !== null">
 
                     <ul class="nav nav-tabs" id="inSituTypePlots" role="tablist">
                         <li class="nav-item" role="presentation">
