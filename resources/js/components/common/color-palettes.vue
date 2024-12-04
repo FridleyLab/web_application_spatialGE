@@ -1,7 +1,7 @@
 <template>
     <div class="row justify-content-center text-center m-4">
         <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
-            <div>Color palette</div>
+            <div>{{ legend }}</div>
             <div><Multiselect :options="colorPalettes" v-model="selected" @change="paletteSelected"></Multiselect></div>
         </div>
     </div>
@@ -20,7 +20,8 @@ export default {
 
     props: {
         paletteType: {type: String, default: 'ALL'}, // or GRADIENT
-        defaultPalette: {type: String, default: 'discreterainbow'}
+        defaultPalette: {type: String, default: 'discreterainbow'},
+        legend: {type: String, default: 'Color palette'},
     },
 
     data() {
