@@ -1,5 +1,5 @@
 <template>
-    <div class="form-check form-switch" v-if="!plotType === 'pca'">
+    <div class="form-check form-switch" v-if="!(plotType === 'pca')">
            <input
                style="cursor: pointer"
                class="form-check-input"
