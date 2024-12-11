@@ -17,7 +17,13 @@
         </div>
 
         <svg ref="pcaSvg"></svg>
-        <svg ref="legendRef" class="legend-svg"></svg>
+
+        <div class="legend-svg">
+            <svg ref="legendRef" ></svg>
+
+        </div>
+
+
 
     </div>
   </template>
@@ -191,9 +197,10 @@
         },
         createClusterLegend() {
             const legendWidth =  150
-            const legendHeight =  200
 
             const legendItems = Object.entries(this.colorPalette);
+
+            const legendHeight =  legendItems.length * 35
 
             const legendSvg = d3
                 .select(this.$refs.legendRef)
@@ -224,6 +231,7 @@
                     .style("fill", "black")
                     .text(`${key}`);
             });
+            legendSvg.attr('overflow-y', 'scroll')
         },
     }
   };
@@ -253,9 +261,11 @@
     }
     .legend-svg {
         width: 20%;
+        height: 35%;
         position: absolute;
         left: 10px;
         top:5px;
-        overflow: auto;
+        overflow: auto; /* Enables vertical scrolling */
+        border: 0.5px solid #ccc;
     }
   </style>

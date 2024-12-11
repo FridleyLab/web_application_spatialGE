@@ -233,13 +233,14 @@
 
                 let step = 1;
                 if(uniqueValues.length <= colors.length/2) {
-                    step = Math.trunc(colors.length / uniqueValues.length);
+                    step = Math.trunc(colors.length / (uniqueValues.length -1));
+                    console.log(colors.length, uniqueValues.length, step);
                 }
 
                 let colorPalette = {};
                 for(let i = 0; i < uniqueValues.length; i++) {
-                    colorPalette[uniqueValues[i]] = {label: uniqueValues[i], color: colors[i*step]};
-                    // console.log('cluster', uniqueValues[i], 'index', i*step);
+                    colorPalette[uniqueValues[i]] = {label: uniqueValues[i], color: colors[i*step < colors.length ? i*step : i*step - 1]};
+                    console.log('cluster', uniqueValues[i], 'index', i*step);
                 }
 
                 for(let sampleName in this.plot_data) {

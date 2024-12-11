@@ -280,7 +280,7 @@ export default {
                 /*
                     For each event add an event listener that prevents the default action
                     (opening the file in the browser) and stop the propagation of the event (so
-                    no other elements open the file in the browser)
+                    no other elements open the fiinle in the browser)
                 */
                 document.getElementById('drop-form_' + this.code).addEventListener(evt, function(e){
                     e.preventDefault();

@@ -159,7 +159,7 @@ export default {
                 // Create a histogram for the total_counts values
                 const histogram = d3.histogram()
                 .domain([0, max]) // Use the max point of the sample data to scale the domain
-                .thresholds(yScale.ticks(20)) // Adjust the number of bins
+                .thresholds(yScale.ticks(50)) // Adjust the number of bins
                 (totalCounts);
 
                 // Creates symmetry from left/right side

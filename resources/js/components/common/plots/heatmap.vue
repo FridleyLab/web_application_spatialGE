@@ -111,7 +111,7 @@ export default {
 
             const funcName = 'mounted()';
 
-            console.log('>>>>>> ' + funcName + ': Loading CSV file ' + this.csvFile);
+            // console.log('>>>>>> ' + funcName + ': Loading CSV file ' + this.csvFile);
 
             await this.getMetadataColors();
             await this.getMetadataHeatmapValues();
@@ -136,7 +136,7 @@ export default {
                         }
                     }
 
-                    console.log(data);
+                    // console.log(data);
 
                     // console.log('Loading CSV file ' + this.csvFile + '; Data = ' + data);
 
@@ -151,8 +151,8 @@ export default {
 
                     this.svgHeight = heatmapSvgHeight > metaSvgHeight ? heatmapSvgHeight : metaSvgHeight;
 
-                    console.log('     ' + funcName + ': heatmapSvgHeight = ' + heatmapSvgHeight + '; metaSvgHeight = ' + metaSvgHeight
-                                + '; this.svgHeight = ' + this.svgHeight);
+                    // console.log('     ' + funcName + ': heatmapSvgHeight = ' + heatmapSvgHeight + '; metaSvgHeight = ' + metaSvgHeight
+                    //             + '; this.svgHeight = ' + this.svgHeight);
 
 
                     return data;
@@ -164,12 +164,12 @@ export default {
 
             // console.log(csvDataArray);
 
-            console.log('         ' + funcName + ': Loaded CSV file ' + this.csvFile
-                + '; csvDataArray.length = ' + csvDataArray.length
-                + '; this.svgHeight = ' + this.svgHeight
-                + '; this.isLoaded = ' + this.isLoaded
-                + '; this.metaValueObj = ' + JSON.stringify(this.metaValueObj)
-                + '; this.metaColorObj = ' + JSON.stringify(this.metaColorObj));
+            // console.log('         ' + funcName + ': Loaded CSV file ' + this.csvFile
+            //     + '; csvDataArray.length = ' + csvDataArray.length
+            //     + '; this.svgHeight = ' + this.svgHeight
+            //     + '; this.isLoaded = ' + this.isLoaded
+            //     + '; this.metaValueObj = ' + JSON.stringify(this.metaValueObj)
+            //     + '; this.metaColorObj = ' + JSON.stringify(this.metaColorObj));
 
             await this.getHeatmapData(csvDataArray);
 
@@ -183,7 +183,7 @@ export default {
             await this.drawHeatmap(this.heatmapData);
             await this.drawGradientLegend();
             await this.drawMetaLegend();
-            console.log('<<<<<<<<<<<< ' + funcName);
+            // console.log('<<<<<<<<<<<< ' + funcName);
         },
 
         /**
@@ -204,7 +204,7 @@ export default {
                 this.metadataKeys = Object.keys(this.metadataPalette);
 
                 Object.entries(this.metadataPalette).forEach(([key, value]) => {
-                    console.log('.... ' + funcName + ': key = ' + key + '; value = ' + JSON.stringify(value));
+                    // console.log('.... ' + funcName + ': key = ' + key + '; value = ' + JSON.stringify(value));
 
                     if (!this.isEmpty(value)) {
                         let valueArray = [];
@@ -302,8 +302,8 @@ export default {
 
             this.yValues = [...metaYValues.reverse()];
 
-            console.log(':::::::::: ' + funcName + ': this.metadataSamples = ' + JSON.stringify(this.metadataSamples)
-                    + '; this.metaHeatmapData = ' + JSON.stringify(this.metaHeatmapData));
+            // console.log(':::::::::: ' + funcName + ': this.metadataSamples = ' + JSON.stringify(this.metadataSamples)
+            //         + '; this.metaHeatmapData = ' + JSON.stringify(this.metaHeatmapData));
         },
 
         /**
@@ -350,7 +350,7 @@ export default {
                     this.xValues = this.xValues.length > 10 ? this.xValues.slice(0,10) : this.xValues;
 
                     this.numSample = this.xValues.length;
-                    console.log('|||||||||||||||\\\\\\\\\\\\\\\\\\------ ' + funcName + ': this.xValues = ' + String(this.xValues));
+                    // console.log('|||||||||||||||\\\\\\\\\\\\\\\\\\------ ' + funcName + ': this.xValues = ' + String(this.xValues));
                 }
 
                 let yLabel = '';
@@ -398,10 +398,10 @@ export default {
                 this.numGene = this.yValues.length;
             });
 
-            console.log('-------- ' + funcName + ': this.numSample = ' + this.numSample + '; this.numGene = '
-                + this.numGene + '; this.legendMin = ' + this.legendMin + '; this.legendMax = ' + this.legendMax);
+            // console.log('-------- ' + funcName + ': this.numSample = ' + this.numSample + '; this.numGene = '
+            //     + this.numGene + '; this.legendMin = ' + this.legendMin + '; this.legendMax = ' + this.legendMax);
 
-            console.log(this.heatmapData);
+            // console.log(this.heatmapData);
         },
 
         /*
@@ -535,7 +535,7 @@ export default {
             } else if (this.numSample >= 4 && this.numSample < 14) {
                 widthExpand = (14 - this.numSample) * 0.42;
             }
-            console.log('|||| ' + funcName + ': this.numSample = ' + this.numSample + '; widthExpand = ' + widthExpand);
+            // console.log('|||| ' + funcName + ': this.numSample = ' + this.numSample + '; widthExpand = ' + widthExpand);
 
             // Get the bottom heatmap yValue to add a vertical padding below the heatmap cells.
             // This will show a gap between the heatmap cells and metadata cells
@@ -605,8 +605,8 @@ export default {
                 .attr("height", this.legendHeight + 50);
 
             legendSvg.selectAll("*").remove();
-            console.log('==== ' + funcName + ': drawGradientLegend(): this.colorPalette = '
-                        + JSON.stringify(this.colorPalette));
+            // console.log('==== ' + funcName + ': drawGradientLegend(): this.colorPalette = '
+            //             + JSON.stringify(this.colorPalette));
 
             const gradient = legendSvg
                 .append("defs")
@@ -670,7 +670,7 @@ export default {
 
             const funcName = 'drawMetaLegend()';
 
-            console.log('???? ' + funcName + ': this.metaLegendData = ' + JSON.stringify(this.metaLegendData));
+            // console.log('???? ' + funcName + ': this.metaLegendData = ' + JSON.stringify(this.metaLegendData));
 
             const metaLegendSvg = d3.select(this.$refs.metaLegendRef);
             metaLegendSvg.selectAll("*").remove();          // Reset the metadata legend
@@ -775,8 +775,8 @@ export default {
 
             const funcName = 'adjustMetaHeatmap()';
 
-            console.log('%%%% ' + funcName + ': this.metadataSamples = ' + JSON.stringify(this.metadataSamples)
-                        + '; this.xValues = ' + JSON.stringify(this.xValues));
+            // console.log('%%%% ' + funcName + ': this.metadataSamples = ' + JSON.stringify(this.metadataSamples)
+            //             + '; this.xValues = ' + JSON.stringify(this.xValues));
 
             if (!this.isEmpty(this.metadataSamples) && !this.isEmpty(this.xValues)
                                 && this.metadataSamples.length != this.xValues.length) {

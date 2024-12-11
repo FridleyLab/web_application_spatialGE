@@ -84,11 +84,12 @@ export default {
         userFirstName: {type: String, default: ''},
         userLastName: {type: String, default: ''},
         userEmail: {type: String, default: ''},
+        userSubject: {type: String, default: ''},
     },
 
     data() {
         return {
-            subject: '',
+            subject: this.userSubject,
             description: '',
             email: this.userEmail,
             first_name: this.userFirstName,
