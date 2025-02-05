@@ -10,7 +10,7 @@
                         <div class="text-end pt-1">
                             <h6 class="mb-0 text-capitalize">Spatially variable genes</h6>
                             <div>
-                                <show-vignette url="/documentation/vignettes/spatial_heterogeneity.pdf"></show-vignette>
+                                <show-vignette url="/documentation/vignettes/spatially_variable_genes.pdf"></show-vignette>
                             </div>
                         </div>
                     </div>

@@ -130,8 +130,8 @@
 
                         <ul class="fs-5">
                             <li>
-                                Ospina, O, E., Manjarres-Betancur, R., Gonzalez-Calderon, G., Soupir, A. C., Smalley, I., Tsai, K. Y., Markowitz, J., Vallebuona, E., Berglund, A., Eschrich, S., Yu, X. Fridley, B. L. 2024. spatialGE: A user-friendly web application to democratize spatial transcriptomics analysis. bioRxiv.
-                                <a href="https://www.biorxiv.org/content/10.1101/2024.06.27.601050v1" target="_blank">https://www.biorxiv.org/content/10.1101/2024.06.27.601050v1</a>
+                                Ospina, O, E., Manjarres-Betancur, R., Gonzalez-Calderon, G., Soupir, A. C., Smalley, I., Tsai, K. Y., Markowitz, J., Khaled, M. L., Vallebuona, E., Berglund, A., Eschrich, S., Yu, X. Fridley, B. L. 2024. spatialGE: A user-friendly web application to democratize spatial transcriptomics analysis. Cancer Research.
+                                <a href="https://doi.org/10.1158/0008-5472.CAN-24-2346" target="_blank">https://doi.org/10.1158/0008-5472.CAN-24-2346</a>
                             </li>
                             <li>
                                 Ospina, O. E., Soupir, A. C., Manjarres-Betancur, R., Gonzalez-Calderon, G., Yu, X., Fridley, B. L. 2024.  Differential gene expression analysis of spatial transcriptomic experiments using spatial mixed models. Scientific Reports 14: 10967.

@@ -272,7 +272,7 @@
                 </div>
                 <div class="col">
                     <div>Variable</div>
-                    <div><Multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" v-model="filter_variable"></Multiselect></div>
+                    <div><Multiselect :options="JSON.parse(project.project_parameters.filter_meta_options)" v-model="filter_variable" @change="plotsKey++"></Multiselect></div>
                 </div>
             </div>
             <div class="row mt-3">
@@ -307,8 +307,8 @@
                     </div>
 
                     <div class="tab-pane fade" id="violinplot" role="tabpanel" aria-labelledby="violinplot-tab">
-                        <show-plot :src="project.project_parameters.filter_violin"></show-plot>
                         <plot-holder v-if="'violin_box_plot_data' in project.project_parameters"
+                            :key="'violin_' + plotsKey"
                             :csv="project.project_parameters.violin_box_plot_data + '.csv'"
                             expression="Violin"
                             title="Violin Plot"
@@ -317,11 +317,12 @@
                             :palette="{'sample_093d': '#1fa371', 'sample_396a': '#a5570e', 'sample_396c': '#590cc7', 'sample_397d': '#a30354'}"
                             :inverted="false"
                         ></plot-holder>
+                        <show-plot :src="project.project_parameters.filter_violin"></show-plot>
                     </div>
 
                     <div class="tab-pane fade" id="boxplot" role="tabpanel" aria-labelledby="boxplot-tab">
-                        <show-plot :src="project.project_parameters.filter_boxplot"></show-plot>
                         <plot-holder v-if="'violin_box_plot_data' in project.project_parameters"
+                            :key="'boxplot_' + plotsKey"
                             :csv="project.project_parameters.violin_box_plot_data + '.csv'"
                             expression="Box"
                             title="Box Plot"
@@ -330,6 +331,7 @@
                             :palette="{'sample_093d': '#1fa371', 'sample_396a': '#a5570e', 'sample_396c': '#590cc7', 'sample_397d': '#a30354'}"
                             :inverted="false"
                         ></plot-holder>
+                        <show-plot :src="project.project_parameters.filter_boxplot"></show-plot>
                     </div>
 
                 </div>
@@ -414,6 +416,8 @@
                 reloadPage: false,
 
                 loaded: false,
+
+                plotsKey: 1,
 
             }
         },

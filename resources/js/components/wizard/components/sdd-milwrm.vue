@@ -42,7 +42,7 @@
                         </div>
                     </div> -->
 
-                    <color-palettes @colors="changeColorPalette"></color-palettes>
+
 
                 </div>
 
@@ -52,6 +52,8 @@
 
 
                 <div v-if="loaded && !processing && ('milwrm' in project.project_parameters)">
+
+                    <color-palettes @colors="changeColorPalette"></color-palettes>
 
                     <ul class="nav nav-tabs" id="MILWRM_myTab" role="tablist">
                         <template v-for="(sample, index) in samples">

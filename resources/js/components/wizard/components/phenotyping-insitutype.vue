@@ -40,7 +40,7 @@
                     <div class="row justify-content-center text-center mt-4">
                         <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
                             <label class="me-3 text-lg">
-                                <input type="checkbox" v-model="params.refine_cells"> Refine celltypes <show-modal tag="sthet_plot_methods"></show-modal>
+                                <input type="checkbox" v-model="params.refine_cells"> Refine cell types <show-modal tag="sthet_plot_methods"></show-modal>
                             </label>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
 
 
                 <div v-if="'InSituType' in this.project.project_parameters" class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2 || renaming) ? 'disabled-clicks' : ''">
-                    <div class="row justify-content-center text-center m-4">
+                    <!-- <div class="row justify-content-center text-center m-4">
                         <div class="w-100">
                             <div class="me-3">
                                 <label class="text-lg">
@@ -63,7 +63,7 @@
                             </div>
                             <input type="range" :min="1" :max="8" step="1" class="w-100" v-model="params2.ptsize">
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- <div class="row justify-content-center text-center m-4">
                         <div class="w-100 w-md-80 w-lg-70 w-xxl-55">
@@ -122,6 +122,9 @@
 
                                     <template v-for="(plotData, annotation) in plot_data[sampleName]">
                                         <div class="my-4" style="width: 100%; height: 700px">
+                                            <!-- {{ sampleName }} - {{ annotation }}
+                                            <br />
+                                            {{ plot_data[sampleName][annotation]['palette'] }} -->
                                             <plots-component
                                                 :base="getSampleByName(sampleName).image_file_url"
                                                 :csv="plotData.data"
@@ -134,6 +137,13 @@
                                                 :is-grouped="true"
                                                 :p-key="sampleName.replaceAll(' ', '').replaceAll('.','') + '_insitutype_' + annotation.replaceAll(' ', '').replaceAll('.','')"
                                             ></plots-component>
+
+                                            <!-- <barchart
+                                                :cell-type-names="['B.cell','CD4+.T.cell','CD8+.cytotoxic.T.cell', 'MARCOneg.macrophage','MARCOpos.macrophage','activated.dendritic.cell','alveolar.epithelial.cell.type.1','alveolar.epithelial.cell.type.2','blood.vessel.cell','ciliated.cell','dendritic.cell.type.1','dendritic.cell.type.2','fibroblast','lymph.vessel.cell','mast.cell','monocyte','muscle.cell','natural.killer.cell','plasma.cell','plasmacytoid.dendritic.cell','regulatory.T.cell','unknown']"
+                                                :counts="[77,25,48, 242,10,9,268,81,498,13,21,21,301,21,52,25,28,15,209,16,172,0]"
+                                                :colors="['#F0F8FF','#FAEBD7', '#00FFFF','#7FFFD4', '#0000FF', '#5F9EA0', '#A52A2A','#5F9EA0', '#8A2BE2', '#FF7F50', '#D2691E', '#00008B', '#556B2F', '#E9967A', '#2F4F4F', '#B22222', '#FFD700', '#20B2AA', '#CD853F', '#663399', '#008080', '#EE82EE']"
+                                            > </barchart> -->
+
                                         </div>
                                         <stdiff-rename-annotations-clusters :annotation="annotations[sampleName][annotation]" :sample-name="sampleName" :file-path="inSituType2.base_path + sampleName" prefix="insitutype_cell_types_insitutype_plot_spatial_" suffix="_top_deg" :rename-url="inSituTypeRenameUrl" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
                                     </template>
@@ -350,14 +360,42 @@ import Multiselect from '@vueform/multiselect';
                     return;
                 }
 
+                const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+
                 for(let sample in this.inSituType2.plot_data) {
-                    const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
                     let data = await axios.get(this.inSituType2.plot_data[sample] + '?cachebuster=' + timestamp);
                     this.processPlotFile(sample, data.data);
                 }
 
+                // if('plot_data' in this.inSituType && 'bar' in this.inSituType.plot_data) {
+                //     let data = await axios.get(this.inSituType.plot_data.bar + '?cachebuster=' + timestamp);
+                //     console.log(data.data);
+
+                // }
+
+
                 this.loaded = true;
             },
+
+            // processBarPlotData(data) {
+            //     const lines = data.split('\n');
+
+            //     if(lines.length < 2) return;
+
+            //     this.plot_data['bar_plot_names'] = lines[0].replaceAll('"', '').split(',').slice(1);
+
+            //     for(let i = 0; i < this.plot_data['bar_plot_names'].length; i++) {
+
+            //     }
+
+            //     for(let i = 1; i < lines.length; i++) {
+            //         for (let sampleName in this.plot_data) {
+            //             if(lines[i].includes(sampleName)) {
+            //                 this.plot_data[sampleName]['bar_plot_data'] = lines[i].replaceAll('"', '').replaceAll('unknown', 0).split(',').slice(1);
+            //             }
+            //         }
+            //     }
+            // },
 
             changeColorPalette(colors) {
 

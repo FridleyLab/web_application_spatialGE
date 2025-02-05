@@ -530,7 +530,9 @@ class Project extends Model
             'Execution halted',
             'Cannot allocate memory',
             'Error in',
-            'Killed'
+            'Killed',
+            'Unable to find image',
+            'Error response from daemon'
         ];
         $error_found = false;
         foreach ($error_strings_to_look_for as $item) {
