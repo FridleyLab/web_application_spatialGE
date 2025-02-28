@@ -15,7 +15,7 @@ while [ $count -lt 5 ]; do
     echo "$docker_stats_output" | while IFS= read -r line; do
 
         #if there are containers running
-        if [ -n "$line" ]; then
+        if [ -n "$line" ] && [[ "$line" =~ spatialGE ]]; then
 
             #parse the data to get container's memory and cpu usage
             container=$(echo "$line" | jq -r '.container')
