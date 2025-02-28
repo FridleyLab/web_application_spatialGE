@@ -167,67 +167,27 @@ class HomeController extends Controller
         try {
 
 
-            $data = DB::table('tasks')
-                ->join('users', 'tasks.user_id', '=', 'users.id')
-                ->leftJoin('task_stats', 'tasks.task', '=', 'task_stats.task')
-                ->select('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.completed','tasks.attempts','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at','tasks.cancelled_at', DB::raw('max(task_stats.memory) as max_ram'))
-                ->groupBy('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.completed','tasks.attempts','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.cancelled_at')
-                ->orderBy('tasks.id', 'desc')
-                ->limit(30)
-                ->get();
+            // $data = DB::table('tasks')
+            //     ->join('users', 'tasks.user_id', '=', 'users.id')
+            //     ->leftJoin('task_stats', 'tasks.task', '=', 'task_stats.task')
+            //     ->select('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.completed','tasks.attempts','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.finished_at','tasks.cancelled_at', DB::raw('max(task_stats.memory) as max_ram'))
+            //     ->groupBy('users.email','tasks.id','tasks.task','tasks.user_id','tasks.project_id','tasks.samples','tasks.process','tasks.completed','tasks.attempts','tasks.output','tasks.scheduled_at','tasks.started_at','tasks.cancelled_at')
+            //     ->orderBy('tasks.id', 'desc')
+            //     ->limit(30)
+            //     ->get();
 
-
-            $projectFiles = [];
-            foreach ($data as $key => $row) {
-                $scheduled = Carbon::parse($row->scheduled_at);
-                $started = Carbon::parse($row->started_at);
-                $finished = Carbon::parse($row->finished_at);
-
-                $row->process_time = null;
-                $row->wait_time = null;
-                $row->total_time = null;
-                if(is_null($row->cancelled_at)) {
-                    $row->process_time = round($started->diffInSeconds($finished) / 60, 1);
-                    $row->wait_time = round($scheduled->diffInSeconds($started) / 60, 1);
-                    $row->total_time = round($scheduled->diffInSeconds($finished) / 60, 1);
-                }
-
-                $row->user = explode('@', $row->email)[0];
-
-                $stats = TaskStat::where('task', $row->task)->orderBy('timestamp')->get();
-                foreach ($stats as $stat) {
-                    $timestamp = Carbon::parse($stat->timestamp);
-                    $stat->time = round($started->diffInSeconds($timestamp)/60, 1);
-                }
-                $row->stats = $stats;
+            $data = DB::select('SELECT t.id, t.task, t.user_id, u.email, t.project_id, t.samples, t.process, t.completed, t.attempts, t.scheduled_at, t.started_at, t.finished_at, t.cancelled_at,
+                ROUND(IF(t.cancelled_at IS NOT NULL, NULL, TIMESTAMPDIFF(SECOND, t.started_at, t.finished_at))/60, 1) AS process_time,
+                ROUND(IF(t.started_at IS NULL, NULL, TIMESTAMPDIFF(SECOND, t.scheduled_at, t.started_at))/60, 1) AS wait_time,
+                ROUND(IF(t.cancelled_at IS NOT NULL, NULL, TIMESTAMPDIFF(SECOND, t.scheduled_at, t.finished_at))/60, 1) AS wait_time,
+                MAX(ts.memory) AS max_ram FROM tasks t INNER JOIN users u ON (t.user_id = u.id)
+                LEFT JOIN task_stats ts ON (t.task = ts.task)
+                GROUP BY t.id, t.task, t.user_id, u.email, t.project_id, t.samples, t.process, t.completed, t.attempts, t.scheduled_at, t.started_at, t.finished_at, t.cancelled_at, process_time, wait_time
+                ORDER BY t.scheduled_at desc');
 
 
 
-                if(!in_array($row->project_id, $projectFiles)) {
-                    $folder = Storage::path('users/' . $row->user_id . '/' . $row->project_id);
-                    $filteredFiles = [];
-                    if(is_dir($folder)) {
-                        $extensions = ['R', 'RData', 'csv', 'RDS'];
 
-                        $files = scandir($folder);
-
-                        foreach ($files as $file) {
-                            $filePath = $folder . '/' . $file;
-                            if (is_file($filePath)) {
-                                $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
-                                if (in_array($fileExtension, $extensions)) {
-                                    $filteredFiles[] = basename($filePath);
-                                }
-                            }
-
-                        }
-                    }
-                    //$row->downloadable = $filteredFiles;
-                    $projectFiles[$row->project_id] = $filteredFiles;
-                }
-
-
-            }
 
             if (empty($data)) {
                 return response('No data available');
@@ -237,49 +197,127 @@ class HomeController extends Controller
             $columns_to_remove = ['output', 'task', 'stats', 'email', 'downloadable'];
             $headers = array_diff($headers, $columns_to_remove);
 
+            // return ['headers' => $headers, 'projectFiles' => $projectFiles, 'data' => $data];
+
             $plot_data = [];
-            $processes = DB::table('tasks')
-                ->select('process')
-                ->distinct()
-                ->where('samples', '>', 0)
-                ->where('completed', 1)
-                ->get();
+            // $processes = DB::table('tasks')
+            //     ->select('process')
+            //     ->distinct()
+            //     ->where('samples', '>', 0)
+            //     ->where('completed', 1)
+            //     ->get();
 
-            $samples = DB::table('tasks')
-                ->select('samples')
-                ->distinct()
-                ->where('samples', '>', 0)
-                ->where('completed', 1)
-                ->orderBy('samples')
-                ->get();
+            // $samples = DB::table('tasks')
+            //     ->select('samples')
+            //     ->distinct()
+            //     ->where('samples', '>', 0)
+            //     ->where('completed', 1)
+            //     ->orderBy('samples')
+            //     ->get();
 
-            foreach ($processes as $process) {
-                $item['process'] = $process->process;
+            // foreach ($processes as $process) {
+            //     $item['process'] = $process->process;
 
-                foreach ($samples as $sample) {
-                    $_data = DB::table('tasks')
-                        ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
-                        ->select(DB::raw('avg(task_stats.memory) as ram'))
-                        ->where('samples', $sample->samples)
-                        ->where('completed', 1)
-                        ->where('process', $process->process)
-                        ->get();
+            //     foreach ($samples as $sample) {
+            //         $_data = DB::table('tasks')
+            //             ->join('task_stats', 'tasks.task', '=', 'task_stats.task')
+            //             ->select(DB::raw('avg(task_stats.memory) as ram'))
+            //             ->where('samples', $sample->samples)
+            //             ->where('completed', 1)
+            //             ->where('process', $process->process)
+            //             ->get();
 
-                    if($_data[0]->ram > 0) {
-                        $item['samples_' . $sample->samples] = round($_data[0]->ram);
-                    }
-                }
+            //         if($_data[0]->ram > 0) {
+            //             $item['samples_' . $sample->samples] = round($_data[0]->ram);
+            //         }
+            //     }
 
-                $plot_data[] = $item;
-            }
+            //     $plot_data[] = $item;
+            // }
 
-
+            $projectFiles = [];
             return view('stats.summary' , compact('headers', 'data', 'plot_data', 'projectFiles'));
         }
         catch(\Exception $e) {
             return response($e->getMessage());
         }
 
+    }
+
+    public function show_statistics_process_info(Task $task) {
+
+        $folder = Storage::path($task->project->workingDir());
+        $filteredFiles = [];
+        if(is_dir($folder)) {
+
+            $extensions = ['R', 'RData', 'csv', 'RDS'];
+
+            $files = scandir($folder);
+
+            foreach ($files as $file) {
+                $filePath = $folder . '/' . $file;
+                if (is_file($filePath)) {
+                    $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
+                    if (in_array($fileExtension, $extensions)) {
+                        $filteredFiles[] = basename($filePath);
+                    }
+                }
+
+            }
+        }
+
+        return ['files' => $filteredFiles, 'output' => $task->output, 'projectId' => $task->project->id];
+
+            // foreach ($data as $key => $row) {
+            //     // $scheduled = Carbon::parse($row->scheduled_at);
+            //     // $started = Carbon::parse($row->started_at);
+            //     // $finished = Carbon::parse($row->finished_at);
+
+            //     // $row->process_time = null;
+            //     // $row->wait_time = null;
+            //     // $row->total_time = null;
+            //     // if(is_null($row->cancelled_at)) {
+            //     //     $row->process_time = round($started->diffInSeconds($finished) / 60, 1);
+            //     //     $row->wait_time = round($scheduled->diffInSeconds($started) / 60, 1);
+            //     //     $row->total_time = round($scheduled->diffInSeconds($finished) / 60, 1);
+            //     // }
+
+            //     $row->user = explode('@', $row->email)[0];
+
+            //     // $stats = TaskStat::where('task', $row->task)->orderBy('timestamp')->get();
+            //     // foreach ($stats as $stat) {
+            //     //     $timestamp = Carbon::parse($stat->timestamp);
+            //     //     $stat->time = round($started->diffInSeconds($timestamp)/60, 1);
+            //     // }
+            //     // $row->stats = $stats;
+
+
+
+            //     if(!in_array($row->project_id, $projectFiles)) {
+            //         $folder = Storage::path('users/' . $row->user_id . '/' . $row->project_id);
+            //         $filteredFiles = [];
+            //         if(is_dir($folder)) {
+            //             $extensions = ['R', 'RData', 'csv', 'RDS'];
+
+            //             $files = scandir($folder);
+
+            //             foreach ($files as $file) {
+            //                 $filePath = $folder . '/' . $file;
+            //                 if (is_file($filePath)) {
+            //                     $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
+            //                     if (in_array($fileExtension, $extensions)) {
+            //                         $filteredFiles[] = basename($filePath);
+            //                     }
+            //                 }
+
+            //             }
+            //         }
+            //         //$row->downloadable = $filteredFiles;
+            //         $projectFiles[$row->project_id] = $filteredFiles;
+            //     }
+
+
+            // }
     }
 
 

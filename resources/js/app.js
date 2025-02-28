@@ -33,6 +33,7 @@ import stDiffRenameAnnotationsClusters from './components/common/stdiff-rename-a
 import ColorPalettes from "./components/common/color-palettes.vue";
 
 import showStats from "./components/common/show-stats.vue";
+import showStatsProcessInfo from "./components/common/show-stats-process-info.vue";
 import showStatsPlot from "./components/common/show-stats-plot.vue";
 import showStatsPlotDetail from "./components/common/show-stats-plot-detail.vue";
 
@@ -138,6 +139,7 @@ app.component('data-grid', dataGrid);
 app.component('stdiff-rename-annotations-clusters', StdiffRenameAnnotationsClusters);
 
 app.component('show-stats', showStats);
+app.component('show-stats-process-info', showStatsProcessInfo);
 app.component('show-stats-plot', showStatsPlot);
 app.component('show-stats-plot-detail', showStatsPlot);
 

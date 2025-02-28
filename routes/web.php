@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('/stats',[HomeController::class, 'download_statistics'])->name('stats');
     Route::get('/show-stats',[HomeController::class, 'show_statistics'])->name('show-stats');
+    Route::get('/show-stats-process-info/{task}',[HomeController::class, 'show_statistics_process_info'])->name('show-stats-process-info');
     Route::get('/admin-download-file/{project}/{filename}',[HomeController::class, 'admin_download_file'])->name('show-stats');
     Route::get('/create-test-users/prefix/{prefix}/n_users/{n_users}/n_samples/{n_samples}',[HomeController::class, 'create_test_users'])->name('create-test-users');
     Route::get('/runNormalizationSim',[HomeController::class, 'runNormalization'])->name('runNormalizationSim');
@@ -120,6 +121,8 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('/projects/{project}/SPARK-X',[ProjectController::class, 'SPARK_X'])->name('sparkx')->middleware('project');
     Route::post('/projects/{project}/SPARK-X/SPARK',[ProjectController::class, 'SPARK'])->name('spark')->middleware('project');
+
+    Route::post('/projects/{project}/getGeneSetsFromGmtFile',[ProjectController::class, 'getGeneSetsFromGmtFile'])->name('getGeneSetsFromGmtFile')->middleware('project');
 
     Route::get('/projects/{project}/phenotyping',[ProjectController::class, 'phenotyping'])->name('phenotyping')->middleware('project');
     Route::post('/projects/{project}/phenotyping/STdeconvolve', [ProjectController::class, 'STdeconvolve'])->name('STdeconvolve')->middleware('project');
