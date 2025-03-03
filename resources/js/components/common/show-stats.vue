@@ -60,7 +60,10 @@
 
                 <DxColumn v-for="(column, index) in headers"
                           :data-field="column"
-                          :cell-template="column === 'project_id' ? 'projectid-cell' : ''">
+                          :cell-template="column === 'project_id' ? 'projectid-cell' : ''"
+                          :data-type="column.includes('_time') ? 'number' : ''"
+                          :alignment="['attempts', 'project_id', 'samples'].includes(column) ? 'center' : ''"
+                          >
                 </DxColumn>
 
                 <template #projectid-cell="{ data }">

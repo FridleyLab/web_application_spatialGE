@@ -176,14 +176,15 @@ class HomeController extends Controller
             //     ->limit(30)
             //     ->get();
 
-            $data = DB::select('SELECT t.id, t.task, t.user_id, u.email, t.project_id, t.samples, t.process, t.completed, t.attempts, t.scheduled_at, t.started_at, t.finished_at, t.cancelled_at,
-                ROUND(IF(t.cancelled_at IS NOT NULL, NULL, TIMESTAMPDIFF(SECOND, t.started_at, t.finished_at))/60, 1) AS process_time,
+            $data = DB::select("SELECT t.id, t.task, u.email, t.project_id, t.samples, t.process, t.completed, t.attempts,
+                DATE_FORMAT(t.scheduled_at, '%m/%d/%y %H:%i:%s') scheduled_at, DATE_FORMAT(t.started_at, '%m/%d/%y %H:%i:%s') started_at, DATE_FORMAT(t.finished_at, '%m/%d/%y %H:%i:%s') finished_at, DATE_FORMAT(t.cancelled_at, '%m/%d/%y %H:%i:%s') cancelled_at,
                 ROUND(IF(t.started_at IS NULL, NULL, TIMESTAMPDIFF(SECOND, t.scheduled_at, t.started_at))/60, 1) AS wait_time,
-                ROUND(IF(t.cancelled_at IS NOT NULL, NULL, TIMESTAMPDIFF(SECOND, t.scheduled_at, t.finished_at))/60, 1) AS wait_time,
+                ROUND(IF(t.finished_at IS NULL, NULL, TIMESTAMPDIFF(SECOND, t.started_at, t.finished_at))/60, 1) AS process_time,
+                ROUND(IF(t.finished_at IS NULL, NULL, TIMESTAMPDIFF(SECOND, t.scheduled_at, t.finished_at))/60, 1) AS total_time,
                 MAX(ts.memory) AS max_ram FROM tasks t INNER JOIN users u ON (t.user_id = u.id)
                 LEFT JOIN task_stats ts ON (t.task = ts.task)
                 GROUP BY t.id, t.task, t.user_id, u.email, t.project_id, t.samples, t.process, t.completed, t.attempts, t.scheduled_at, t.started_at, t.finished_at, t.cancelled_at, process_time, wait_time
-                ORDER BY t.scheduled_at desc');
+                ORDER BY t.scheduled_at desc");
 
 
 
@@ -194,7 +195,7 @@ class HomeController extends Controller
             }
 
             $headers = array_keys((array)$data[0]);
-            $columns_to_remove = ['output', 'task', 'stats', 'email', 'downloadable'];
+            $columns_to_remove = ['output', 'task', 'stats', 'downloadable'];
             $headers = array_diff($headers, $columns_to_remove);
 
             // return ['headers' => $headers, 'projectFiles' => $projectFiles, 'data' => $data];
