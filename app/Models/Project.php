@@ -2980,6 +2980,13 @@ $export_files
             $script = $this->replaceRscriptParameter($param, $value, $script);
         }
 
+
+        $scripts = ['volcano', 'heatmap'];
+        foreach ($scripts as $script_name) {
+            $scriptContents = Storage::get("/common/templates/STdiff_nonSpatial_$script_name.R");
+            $script = $this->replaceRscriptParameter($script_name, $scriptContents, $script);
+        }
+
         $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
 
         return $script;
@@ -4147,11 +4154,24 @@ lapply(names(grad_res), function(i){
 
     private function getSPARKXScript($parameters)
     {
+        info($parameters);
+
+        $genes = 'c()';
+        if($parameters['method'] === 'genes' /*|| ($parameters['method'] === 'gene_sets' && $parameters['selected_gene_sets'] !== null && $parameters['selected_gene_sets'] !== '')*/)
+        {
+            $genes = (!is_null($parameters['genes']) && is_array($parameters['genes'])) ? "c('" . join("','", $parameters['genes']) . "')" : "c('" . join("','", explode(',', $parameters['genes'])) . "')";
+        }
 
         $params = [
-            'samples' => (!is_null($parameters['samples']) && is_array($parameters['samples'])) ? "c('" . join("', '",$parameters['samples']) . "')" : 'NULL',
-            'thr' => $parameters['thr']
+            'samples' => is_array($parameters['samples']) ? "c('" . join("','", $parameters['samples']) . "')" : ( strlen($parameters['samples']) ? "c('" . join("','", explode(',', $parameters['samples'])) . "')" : 'NULL' ), //(!is_null($parameters['samples']) && is_array($parameters['samples'])) ? "c('" . join("', '",$parameters['samples']) . "')" : 'NULL',
+            'genes' => $genes,
+            'thr' => $parameters['thr'],
+            'subset_mean' => $parameters['subset_mean'] === 'true' ? 'T' : 'F',
+            'gene_sets' => ($parameters['gene_sets'] !== null && $parameters['gene_sets'] !== '') ? "'" . $parameters['gene_sets'] . "'" : 'NULL',
         ];
+
+        // info('/*****************/');
+        // info($params);
 
 
 

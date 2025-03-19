@@ -42,6 +42,7 @@
             project: Object,
             samples: Object,
             sparkUrl: String,
+            gmtFileUrl: String,
         },
 
     }

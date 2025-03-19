@@ -62,7 +62,7 @@
 
         <DxColumn v-for="(column, index) in _headers"
                 :data-field="column.value"
-                :cell-template="showGeneCard && ['gene', 'genes', 'gene_name'].includes(column.value) ? (column.value + '-cell') : ''"
+                :cell-template="showGeneCard && ['gene', 'genes', 'gene_name', 'gene_list'].includes(column.value) ? (column.value + '-cell') : ''"
                 :data-type="is_numeric_column(column.value) ? 'number' : ''"
                 :alignment="is_numeric_column(column.value) ? 'right' : ''"
                 :caption="'text' in column ? column.text : column.value"
@@ -80,6 +80,10 @@
 
         <template #gene_name-cell="{ data }">
             <a :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data.text" class="text-info" target="_blank">{{ data.text }}</a>
+        </template>
+
+        <template #gene_list-cell="{ data }">
+            <a v-for="gene in data.text.split(',')" :href="'https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene" class="text-info mx-1" target="_blank">{{ gene }}</a>
         </template>
 
         <template #scrollingModeTemplate>

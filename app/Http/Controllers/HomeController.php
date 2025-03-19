@@ -251,7 +251,7 @@ class HomeController extends Controller
         $filteredFiles = [];
         if(is_dir($folder)) {
 
-            $extensions = ['R', 'RData', 'csv', 'RDS'];
+            $extensions = ['R', 'RData', 'csv', 'RDS', 'xlsx'];
 
             $files = scandir($folder);
 

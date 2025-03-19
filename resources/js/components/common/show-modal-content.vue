@@ -94,6 +94,11 @@ export default {
                 "sthet_plot_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the plots. Names are derived from the R packages Khroma (https://cran.r-project.org/web/packages/khroma/vignettes/tol.html) and RColorBrewer (https://r-graph-gallery.com/38-rcolorbrewers-palettes.html). Qualitative and some of the sequential palettes are recommended (see Khroma and RColorBrewer documentation)."},
                 "sthet_plot_download_stats": {"title": "Download statistics", "text": "Click this button to download a file containing a table with the calculated spatial statistics. Useful for plotting with other software or reporting in scientific articles."},
 
+                //SPARK-X
+                "spark_x_select_genes": {"title": "Select genes", "text": "Manually input individual genes to test for spatially aggregated expression with SPARK-X."},
+                "spark_x_gene_sets": {"title": "Gene sets", "text": "Test for spatially aggregated expression in genes derived from built-in gene sets or upload a gene set (.gmt) file to extract genes for testing."},
+                "spark_x_select_genes_by_expression": {"title": "Select genes by expression", "text": "Test for spatially aggregated expression in genes with the highest average expression or standard deviation."},
+
                 //Spatial Domain Detection
                 "sdd_stclust_spatial_weight": {"title": "Spatial weight", "text": "Select a spatial weight to use in “shrinkage” of gene expression differences among ROIs/spots/cells. Spatial weights larger than 0.1 often result in non-informative clusters."},
                 "sdd_stclust_range_of_ks": {"title": "Range of Ks", "text": "Define domains over a range of K values. STclust will assign ROIs/spots/cells to as many domains as each of the K in the selected range. This option allows for deeper exploration of data as users can select the K value that better explains differences among domains."},

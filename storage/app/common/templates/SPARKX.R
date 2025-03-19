@@ -8,7 +8,19 @@
 
 # User arguments
 samples = #{samples}#
-thr = #{thr}# #### Slider 0 to 1
+
+#THREE RADIO BUTTONS
+
+#SELECT GENES
+genes = #{genes}# ###### Option 1: Textbox with gene names
+
+#GENE SETS
+gene_sets = #{gene_sets}# ## Option 2: File upload similar to the one in Spatial Gene Set Enrichment
+
+#SELECT GENES BY EXPRESSION
+#DEFAULT
+subset_mean = #{subset_mean}# ### Option 3: Check box - Disabled if genes has input DEFAULT true
+thr = #{thr}# ######### Option 3: Slider 0 to 1 default to 0.9 - Disabled if genes has input - STEP 0.05 #REQUIRED
 
 #### SPARK-X ANALYSIS BEGINS
 
@@ -31,17 +43,32 @@ if(is.null(samples)){
 # Extract expression data from STlist
 cts_ls = stlist@counts
 
-# Subset genes by expression in case user requests it
-if(!is.null(thr)){
-  for(i in samples){
-    # expr_thr = as.vector(quantile(stlist@gene_meta[[i]][['gene_mean']], probs=thr))
-    # vargenes_tmp = stlist@gene_meta[[i]][[1]][ stlist@gene_meta[[i]][['gene_mean']] >= expr_thr ]
+# Extract gene sets if requested by user
+if(!is.null(gene_sets)){
+  fp = gene_sets
+  pws_raw = readLines(fp)
+  genes = lapply(pws_raw, function(i){
+    pws_tmp = unlist(strsplit(i, split='\\t'))
+    pws_tmp = pws_tmp[-c(1:2)]
+    return(pws_tmp)
+  })
+  genes = unique(unlist(genes))
+}
 
-    expr_thr = as.vector(quantile(stlist@gene_meta[[i]][['gene_stdevs']], probs=thr))
-    vargenes_tmp = stlist@gene_meta[[i]][[1]][ stlist@gene_meta[[i]][['gene_stdevs']] >= expr_thr ]
-
-    cts_ls[[i]] = cts_ls[[i]][rownames(cts_ls[[i]]) %in% vargenes_tmp, , drop=F]
+# Loop through samples and select genes to test according to user's selection
+for(i in samples){
+  if(!is.null(genes)){ ### OPTION 1
+    vargenes_tmp = genes
+  } else if(!is.null(thr)){ ### OPTION 3
+    if(subset_mean){
+      expr_thr = as.vector(quantile(stlist@gene_meta[[i]][['gene_mean']], probs=thr))
+      vargenes_tmp = stlist@gene_meta[[i]][[1]][ stlist@gene_meta[[i]][['gene_mean']] >= expr_thr ]
+    } else{
+      expr_thr = as.vector(quantile(stlist@gene_meta[[i]][['gene_stdevs']], probs=thr))
+      vargenes_tmp = stlist@gene_meta[[i]][[1]][ stlist@gene_meta[[i]][['gene_stdevs']] >= expr_thr ]
+    }
   }
+  cts_ls[[i]] = cts_ls[[i]][rownames(cts_ls[[i]]) %in% vargenes_tmp, , drop=F]
 }
 
 # Extract coordinates data from STlist
@@ -66,8 +93,7 @@ invisible(gc(full=T))
 # Test genes
 spark_obj = lapply(samples, function(i){
   spk_tmp = CreateSPARKObject(counts=cts_ls[[i]], location=coords_ls[[i]][, c(1:2)], percentage=0.1, min_total_counts=10)
-  spk_tmp@lib_size = as.vector(coords_ls[[i]][[3]])
-  spk_tmp = spark.vc(spk_tmp, covariates=NULL, lib_size=spk_tmp@lib_size, num_core=1, verbose=F)
+  spk_tmp = spark.vc(spk_tmp, covariates=NULL, num_core=1, verbose=F)
   spk_tmp = spark.test(spk_tmp, check_positive=T, verbose=F)
 
   return(spk_tmp)

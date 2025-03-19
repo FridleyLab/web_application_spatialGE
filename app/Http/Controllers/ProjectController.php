@@ -739,8 +739,47 @@ class ProjectController extends Controller
         return view('wizard.sparkx')->with(compact('project', 'samples'));
     }
 
+    public function getGeneSetsFromGmtFile(Project $project) {
+        $tmpFilePath = $project->workingDir();
+        $tmpFileName = 'tmp.gmt';
+        $tmpFile = $project->workingDir() . 'tmp.gmt';
+        info($tmpFile);
+        if(!is_null(request('gene_sets')) && strlen(request('gene_sets')) && request('gene_sets') !== 'upload') {
+            $gene_set = request('gene_sets') . '.gmt';
+            $gene_sets_file = 'common/stenrich/' . $gene_set;
+            info($gene_sets_file);
+            Storage::copy($gene_sets_file, $tmpFile);
+        } else if(request('gene_sets') === 'upload' && request()->hasFile('user_gene_sets')) {
+            $file = request()->file('user_gene_sets');
+            $file->move(Storage::path($tmpFilePath), $tmpFileName);
+        }
+
+        $gene_sets = [];
+        $lines = file(Storage::path($tmpFile), FILE_IGNORE_NEW_LINES);
+        foreach($lines as $line) {
+            $parts = explode("\t", $line);
+            $gene_list = array_slice($parts, 2);
+            sort($gene_list);
+            $gene_sets[] = ['name' => $parts[0], 'gene_list' => $gene_list, 'count' => count($gene_list)];
+        }
+        return $gene_sets;
+    }
+
     public function SPARK(Project $project) {
-        $jobId = $project->createJob('SPARK', 'SPARK', request()->all());
+        $gene_set = '';
+        if(!is_null(request('gene_sets')) && strlen(request('gene_sets')) && request('gene_sets') !== 'upload') {
+            $gene_set = request('gene_sets') . '.gmt';
+            $gene_sets_file = 'common/stenrich/' . $gene_set;
+            Storage::copy($gene_sets_file, $project->workingDir() . $gene_set);
+        } else if(request('gene_sets') === 'upload' && request()->hasFile('user_gene_sets')) {
+            $gene_set = 'STenrich_user_gene_set.gmt';
+            $file = request()->file('user_gene_sets');
+            $file->move(Storage::path($project->workingDir()), $gene_set);
+        }
+        $parameters = request()->except('user_gene_sets');
+        $parameters['gene_sets'] = $gene_set;
+
+        $jobId = $project->createJob('SPARK', 'SPARK', $parameters);
         return $project->getJobPositionInQueue($jobId);
     }
 

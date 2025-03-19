@@ -10,6 +10,8 @@
         :color-palettes="{{ json_encode($color_palettes) }}"
 
         spark-url="{{ route('spark', ['project' => $project->id]) }}"
+        gmt-file-url="{{ route('getGeneSetsFromGmtFile', ['project' => $project->id]) }}"
+
         :is-local="{{ app()->environment('local') ? 1 : 0 }}"
     >
     </sthet-spatial-het>
