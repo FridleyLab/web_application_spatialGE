@@ -163,6 +163,7 @@ class HomeController extends Controller
             return response('Forbidden', '401');
 
         $query = "SELECT u.id, email, first_name, last_name, industry, job, interest, DATE_FORMAT(u.created_at, '%m/%d/%y %H:%i:%s') as registered_on, COUNT(t.id) as number_of_jobs, DATE_FORMAT(max(scheduled_at), '%m/%d/%y %H:%i:%s') as last_job_on FROM users u left join tasks t on (u.id = t.user_id)
+                    where u.email not like '%_test_%@moffitt.org'
                     group by first_name, last_name, email, industry, job, interest, u.created_at
                     order by u.id desc;";
 
