@@ -1,18 +1,19 @@
 <template>
-    <div class="form-check form-switch" v-if="!(plotType === 'pca')">
-           <input
-               style="cursor: pointer"
-               class="form-check-input"
-               type="checkbox"
-               id="toggleControls"
-               @change="toggleShowPlot"
-               :checked="showPlot"
-           />
-           <label class="form-check-label" for="toggleControls">
-               {{ showPlot ?  "Hide": `Compute and Render ${title}`}}
-           </label>
-   </div>
-   <div class="main-container" v-if="showPlot || plotType === 'pca'">
+    <!-- <div class="form-check form-switch" v-if="!plotType === 'pca'"> -->
+       <input
+           style="cursor: pointer"
+           class="form-check-input"
+           type="checkbox"
+           id="toggleControls"
+           :checked="showPlot"
+           @change="toggleShowPlot"
+
+       />
+       <label class="form-check-label" for="toggleControls">
+           {{ showPlot ?  "Hide": `Compute and Render ${title}`}}
+       </label>
+   <!-- </div> -->
+   <div class="main-container" v-if="showPlot">
        <div class="left-container" ref="plotContainer">
            <PlotViewer
                ref="plotViewer"
@@ -33,12 +34,15 @@
            :data="processedData"
            :colorPalette="palette"
            :plotType="plotType"
+           :title="title"
+           :variable="plotVariable"
            ></ViolinPlot>
            <PCAPlot
-           v-if="plotType === 'pca' && processedData"
+           v-if="(plotType === 'pca' || plotType === 'ranker') && processedData"
            :data="processedData"
            :colorPalette="palette"
            :plotType="plotType"
+           :title="title"
            />
 
        </div>
@@ -90,6 +94,10 @@ export default {
            type: String,
            required: true,
        },
+       plotVariable: {
+           type: String,
+           default: 'total_counts',
+       },
        palette: {
            type: Object,
            required: true,
@@ -136,15 +144,20 @@ export default {
    },
 
    async mounted() {
+
        this.isViolinPlot = this.plotType === PlotTypes.VIOLIN || this.plotType === PlotTypes.BOX ? true : false
-       const data = await d3.csv(this.csv); // replace endpoint URI
-    //    const data = await d3.csv(`http://10.201.21.159:8001/download-csv/${this.csv}`); // replace endpoint URI
+       // const data = await d3.csv(`http://10.201.21.159:8001/download-csv/${this.csv}`); // replace endpoint URI
+       const data = await d3.csv(`${this.csv}`); // replace endpoint URI
        this.processedData = data;
        this.sharedState.plotWidth = "800";
        this.sharedState.plotHeight = "800";
 
        if(this.plotType === "flight"){
-           this.labelData = await d3.csvParse(`${this.labelCsv}`) // replace endpoint URI
+        this.labelData = await d3.csvParse(`${this.labelCsv}`) // replace endpoint URI
+       }
+
+       if(data.length < 20000) {
+        this.showPlot = true;
        }
    },
 
@@ -152,6 +165,8 @@ export default {
        toggleShowPlot() {
            this.showPlot = !this.showPlot;
        },
+
+       handleSvgUpdate() {}
    },
 };
 </script>
