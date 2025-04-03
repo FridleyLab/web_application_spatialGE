@@ -33,6 +33,7 @@ import stDiffRenameAnnotationsClusters from './components/common/stdiff-rename-a
 import ColorPalettes from "./components/common/color-palettes.vue";
 
 import showStats from "./components/common/show-stats.vue";
+import showUsers from "./components/common/show-users.vue";
 import showStatsProcessInfo from "./components/common/show-stats-process-info.vue";
 import showStatsPlot from "./components/common/show-stats-plot.vue";
 import showStatsPlotDetail from "./components/common/show-stats-plot-detail.vue";
@@ -75,6 +76,7 @@ import spark from "./components/wizard/components/spark.vue";
 import PlotsComponent from "./components/common/plots/PlotsComponent.vue";
 import PlotHolder from "./components/common/plots/PlotHolder.vue";
 import Heatmap from "./components/common/plots/heatmap.vue";
+import Barchart from "./components/common/plots/barchart.vue";
 // import SideBySidePlot from "./components/common/plots/Editor.vue";
 // import OverlayEditor from "./components/common/plots/OverlayEditor.vue";
 // import PlotViewer from "./components/common/plots/PlotViewer.vue";
@@ -139,6 +141,7 @@ app.component('data-grid', dataGrid);
 app.component('stdiff-rename-annotations-clusters', StdiffRenameAnnotationsClusters);
 
 app.component('show-stats', showStats);
+app.component('show-users', showUsers);
 app.component('show-stats-process-info', showStatsProcessInfo);
 app.component('show-stats-plot', showStatsPlot);
 app.component('show-stats-plot-detail', showStatsPlot);
@@ -179,6 +182,7 @@ app.component('spark', spark);
 app.component('plots-component', PlotsComponent);
 app.component('plot-holder', PlotHolder);
 app.component('heatmap', Heatmap);
+app.component('barchart', Barchart);
 // app.component('side-by-side-plot', SideBySidePlot);
 // app.component('PlotViewer', PlotViewer);
 // app.component('OverlayEditor', OverlayEditor);

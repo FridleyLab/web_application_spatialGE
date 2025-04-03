@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('/stats',[HomeController::class, 'download_statistics'])->name('stats');
     Route::get('/show-stats',[HomeController::class, 'show_statistics'])->name('show-stats');
+    Route::get('/show-users',[HomeController::class, 'show_users'])->name('show-users');
     Route::get('/show-stats-process-info/{task}',[HomeController::class, 'show_statistics_process_info'])->name('show-stats-process-info');
     Route::get('/admin-download-file/{project}/{filename}',[HomeController::class, 'admin_download_file'])->name('show-stats');
     Route::get('/create-test-users/prefix/{prefix}/n_users/{n_users}/n_samples/{n_samples}',[HomeController::class, 'create_test_users'])->name('create-test-users');

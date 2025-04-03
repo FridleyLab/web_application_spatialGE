@@ -158,6 +158,24 @@ class HomeController extends Controller
 
     }
 
+    public function show_users() {
+        if(!auth()->user()->is_admin)
+            return response('Forbidden', '401');
+
+        $query = "SELECT u.id, email, first_name, last_name, industry, job, interest, DATE_FORMAT(u.created_at, '%m/%d/%y %H:%i:%s') as registered_on, COUNT(t.id) as number_of_jobs, DATE_FORMAT(max(scheduled_at), '%m/%d/%y %H:%i:%s') as last_job_on FROM users u left join tasks t on (u.id = t.user_id)
+                    group by first_name, last_name, email, industry, job, interest, u.created_at
+                    order by u.id desc;";
+
+        $data = DB::select($query);
+
+        $headers = array_keys((array)$data[0]);
+
+        if (empty($data)) {
+            return response('No data available');
+        }
+
+        return view('stats.users' , compact('headers', 'data'));
+    }
 
     public function show_statistics() {
 
