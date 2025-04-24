@@ -42,17 +42,28 @@ class ContactUs extends Notification implements ShouldQueue
 
         NotificationFacade::route('mail', [$this->email => $this->first_name . ' ' . $this->last_name])->notify(new ContactUsCopyToUser($this->subject, $this->description, $this->email, $this->first_name, $this->last_name));
 
-        return (new MailMessage)
-                    ->subject(env('APP_NAME') . ' - [Contact us] form submitted')
-                    ->greeting('Hello ' . $notifiable->first_name . '!')
-                    ->line("Following is the information sent by the user:")
-                    ->line(new HtmlString('<strong>Name: </strong>' . $this->first_name . ' ' . $this->last_name))
-                    ->line(new HtmlString('<strong>Subject: </strong>' . $this->subject))
-                    ->line(new HtmlString('<strong>Description: </strong><pre>' . $this->description . '</pre>'))
-                    ->line(new HtmlString('<strong>User email address: </strong>' . $this->email))
-                    ->action('Reply to user', 'mailto:' . $this->email)
-                    ->line('Thanks for using our application.')
-                    ->salutation(new HtmlString('Regards, <br />The ' . env('APP_NAME') . ' team!'));
+        $mail = (new MailMessage)
+            ->subject(env('APP_NAME') . ' - [Contact us] form submitted')
+            ->greeting('Hello ' . $notifiable->first_name . '!')
+            ->line("Following is the information sent by the user:")
+            ->line(new HtmlString('<strong>Name: </strong>' . $this->first_name . ' ' . $this->last_name))
+            ->line(new HtmlString('<strong>Subject: </strong>' . $this->subject))
+            ->line(new HtmlString('<strong>Description: </strong><pre>' . $this->description . '</pre>'))
+            ->line(new HtmlString('<strong>User email address: </strong>' . $this->email))
+            ->action('Reply to user', 'mailto:' . $this->email)
+            ->line('Thanks for using our application.')
+            ->salutation(new HtmlString('Regards, <br />The ' . env('APP_NAME') . ' team!'));
+
+        $extra_addreses = env('MAIL_EXTRA_ADDRESSES', null) !== null ? explode(',', env('MAIL_EXTRA_ADDRESSES')) : null;
+        if($extra_addreses !== null) {
+            $mail->cc($extra_addreses);
+        }
+
+        // info($extra_addreses);
+
+        // dd($mail);
+
+        return $mail;
     }
 
     /**
