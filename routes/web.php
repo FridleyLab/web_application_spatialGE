@@ -133,6 +133,10 @@ Route::middleware(['auth'])->group(function() {
     Route::post('/projects/{project}/phenotyping/InSituType2', [ProjectController::class, 'InSituType2'])->name('InSituType2')->middleware('project');
     Route::post('/projects/{project}/phenotyping/InSituTypeRename', [ProjectController::class, 'InSituTypeRename'])->name('InSituTypeRename')->middleware('project');
 
+
+    Route::get('/projects/{project}/degas',[ProjectController::class, 'degas'])->name('degas')->middleware('project');
+    Route::post('/projects/{project}/degas2',[ProjectController::class, 'degas2'])->name('degas2')->middleware('project');
+
 });
 
 Route::get('/login',[SecurityController::class, 'login'])->name('login')->middleware('guest');

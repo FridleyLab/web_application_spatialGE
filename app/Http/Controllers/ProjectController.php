@@ -739,6 +739,52 @@ class ProjectController extends Controller
         return view('wizard.sparkx')->with(compact('project', 'samples'));
     }
 
+
+    private function _degas_variables_categories($filename) {
+        $result = [];
+        if (($handle = fopen($filename, "r")) !== false) {
+            // Read header
+            $header = fgetcsv($handle);
+            while (($row = fgetcsv($handle)) !== false) {
+                if (count($row) < 2) continue;
+                $variable = $row[0];
+                $category = $row[1];
+                if (!isset($result[$variable])) {
+                    $result[$variable] = [];
+                }
+                if (!in_array($category, $result[$variable], true)) {
+                    $result[$variable][] = $category;
+                }
+            }
+            fclose($handle);
+        }
+        return $result;
+    }
+
+    public function degas(Project $project) {
+        $samples = $project->samples;
+        $color_palettes = ColorPalette::orderBy('label')->get();
+
+        // $tcga_variables = [];
+        // $tcga_file = 'common/TCGA/user_tcga_clinical_variable_key.csv';
+        // if (Storage::exists($tcga_file)) {
+        //     $tcga_variables = $this->_degas_variables_categories(Storage::path($tcga_file));
+        // }
+
+        $tcga_variables = [];
+        $tcga_file = 'common/TCGA/tcga_studies.json';
+        if (Storage::exists($tcga_file)) {
+            $tcga_variables = json_decode(Storage::read($tcga_file));
+        }
+
+        return view('wizard.degas')->with(compact('project', 'samples', 'color_palettes', 'tcga_variables'));
+    }
+
+    public function degas2(Project $project) {
+        $jobId = $project->createJob('DEGAS', 'DEGAS', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
     public function getGeneSetsFromGmtFile(Project $project) {
         $tmpFilePath = $project->workingDir();
         $tmpFileName = 'tmp.gmt';

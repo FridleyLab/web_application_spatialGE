@@ -143,6 +143,16 @@
                             </a>
                         </li>
 
+
+
+                        <li class="nav-item ps-2">
+                            <a id="degas-a" class="nav-link text-white @if(url()->current() === route('degas', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) disabled @endif" style="@if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) background-color: transparent !important @endif" href="{{ route('degas', ['project' => session('project_id')]) }}">
+
+                                <span id="degas-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) text-secondary @endif text-bold">DEGAS</span>
+                            </a>
+                        </li>
+
+
                         {{-- @if(app()->isLocal())
                         <li class="nav-item ps-2">
                             <a id="sparkx-a" class="nav-link text-white @if(url()->current() === route('sparkx', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 3) disabled @endif" style="@if(getActiveProject()->current_step < 3) background-color: transparent !important @endif" href="{{ route('sparkx', ['project' => session('project_id')]) }}">

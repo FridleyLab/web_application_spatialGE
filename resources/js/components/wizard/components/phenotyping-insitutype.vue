@@ -52,7 +52,7 @@
                 </div>
 
 
-                <div v-if="'InSituType' in this.project.project_parameters" class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2 || renaming) ? 'disabled-clicks' : ''">
+                <div v-if="'InSituType' in this.project.project_parameters && !(processing || processing2 || renaming)" class="w-100 w-lg-90 w-xxl-85" :class="(processing || processing2 || renaming) ? 'disabled-clicks' : ''">
                     <!-- <div class="row justify-content-center text-center m-4">
                         <div class="w-100">
                             <div class="me-3">
@@ -78,7 +78,7 @@
 
                 </div>
 
-                <div v-if="'InSituType' in this.project.project_parameters && 'plot_data' in inSituType && 'umap' in inSituType.plot_data" class="text-center mt-3">
+                <div v-if="'InSituType' in this.project.project_parameters && 'plot_data' in inSituType && 'umap' in inSituType.plot_data && !(processing || renaming)" class="text-center mt-3">
                     <send-job-button label="Generate Plots" :disabled="processing || processing2 || renaming || !visibleSamples.length" :project-id="project.id" job-name="InSituType2" @started="runInSituType2" @ongoing="processing2 = true" @completed="processCompleted2" :project="project" ></send-job-button>
                 </div>
 
@@ -90,7 +90,7 @@
                 </div>
 
 
-                <color-palettes v-if="'InSituType' in this.project.project_parameters && 'plot_data' in inSituType && 'umap' in inSituType.plot_data" @colors="changeColorPalette"></color-palettes>
+                <color-palettes v-if="'InSituType' in this.project.project_parameters && 'plot_data' in inSituType && 'umap' in inSituType.plot_data && !(processing || processing2 || renaming)" @colors="changeColorPalette"></color-palettes>
 
 
                 <div class="mt-4" v-if="'InSituType' in this.project.project_parameters && 'plot_data' in inSituType && 'umap' in inSituType.plot_data && ('InSituType2' in this.project.project_parameters) && !processing && !processing2 && !renaming && annotations !== null">
@@ -98,6 +98,9 @@
                     <ul class="nav nav-tabs" id="inSituTypePlots" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="inSituType-SpatialPlots-tab'" data-bs-toggle="tab" data-bs-target="#inSituType-SpatialPlots" type="button" role="tab" aria-controls="inSituType-SpatialPlots" aria-selected="true">Spatial plots</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="inSituType-BarPlots-tab'" data-bs-toggle="tab" data-bs-target="#inSituType-BarPlots" type="button" role="tab" aria-controls="inSituType-BarPlots" aria-selected="true">Cell proportions</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="inSituType-OtherPlots-tab'" data-bs-toggle="tab" data-bs-target="#inSituType-OtherPlots" type="button" role="tab" aria-controls="inSituType-OtherPlots" aria-selected="true">UMAP & Flight plot</button>
@@ -116,35 +119,44 @@
                             </ul>
                             <div class="tab-content" id="inSituTypeSpatialPlotsContent">
 
-                                <template v-for="(csvUrl, sampleName, index) in inSituType2.plot_data">
+                                <template v-for="(csvUrl, sampleName, index) in inSituType2.plot_data" :key="sampleName + keyToReRenderAllPlots">
                                 <div class="tab-pane fade" :class="index === 0 ? 'show active' : ''" :id="'inSituType-' + sampleName" role="tabpanel" :aria-labelledby="'inSituType-' + sampleName + '-tab'">
 
 
                                     <template v-for="(plotData, annotation) in plot_data[sampleName]">
-                                        <div class="my-4" style="width: 100%; height: 700px">
+                                        <div class="my-4 d-flex" style="width: 100%; height: 700px">
                                             <!-- {{ sampleName }} - {{ annotation }}
                                             <br />
                                             {{ plot_data[sampleName][annotation]['palette'] }} -->
-                                            <plots-component
-                                                :base="getSampleByName(sampleName).image_file_url"
-                                                :csv="plotData.data"
-                                                :title="plot_data[sampleName][annotation]['title']"
-                                                plot-type="cluster"
-                                                :color-palette="plot_data[sampleName][annotation]['palette']"
-                                                :legend-min="0"
-                                                :legend-max="10"
-                                                :is-y-axis-inverted="project.project_platform_id === 3"
-                                                :is-grouped="true"
-                                                :p-key="sampleName.replaceAll(' ', '').replaceAll('.','') + '_insitutype_' + annotation.replaceAll(' ', '').replaceAll('.','')"
-                                            ></plots-component>
 
-                                            <!-- <barchart
-                                                :cell-type-names="['B.cell','CD4+.T.cell','CD8+.cytotoxic.T.cell', 'MARCOneg.macrophage','MARCOpos.macrophage','activated.dendritic.cell','alveolar.epithelial.cell.type.1','alveolar.epithelial.cell.type.2','blood.vessel.cell','ciliated.cell','dendritic.cell.type.1','dendritic.cell.type.2','fibroblast','lymph.vessel.cell','mast.cell','monocyte','muscle.cell','natural.killer.cell','plasma.cell','plasmacytoid.dendritic.cell','regulatory.T.cell','unknown']"
-                                                :counts="[77,25,48, 242,10,9,268,81,498,13,21,21,301,21,52,25,28,15,209,16,172,0]"
-                                                :colors="['#F0F8FF','#FAEBD7', '#00FFFF','#7FFFD4', '#0000FF', '#5F9EA0', '#A52A2A','#5F9EA0', '#8A2BE2', '#FF7F50', '#D2691E', '#00008B', '#556B2F', '#E9967A', '#2F4F4F', '#B22222', '#FFD700', '#20B2AA', '#CD853F', '#663399', '#008080', '#EE82EE']"
-                                            > </barchart> -->
+                                            <div class="flex-fill" style="max-width: 150px">
+                                                <barchart
+                                                    :cell-type-names="barplot_data['names']"
+                                                    :counts="barplot_data[sampleName]['counts']"
+                                                    :colors="barplot_data[sampleName]['colors']"
+                                                    :samples-data="barplot_data"
+                                                    :samples="[sampleName]"
+                                                ></barchart>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <plots-component
+                                                    :base="getSampleByName(sampleName).image_file_url"
+                                                    :csv="plotData.data"
+                                                    :title="plot_data[sampleName][annotation]['title']"
+                                                    plot-type="cluster"
+                                                    :color-palette="plot_data[sampleName][annotation]['palette']"
+                                                    :legend-min="0"
+                                                    :legend-max="10"
+                                                    :is-y-axis-inverted="project.project_platform_id === 3"
+                                                    :is-grouped="true"
+                                                    :p-key="sampleName.replaceAll(' ', '').replaceAll('.','') + '_insitutype_' + annotation.replaceAll(' ', '').replaceAll('.','')"
+                                                ></plots-component>
+                                            </div>
+
+
 
                                         </div>
+
                                         <stdiff-rename-annotations-clusters :annotation="annotations[sampleName][annotation]" :sample-name="sampleName" :file-path="inSituType2.base_path + sampleName" prefix="insitutype_cell_types_insitutype_plot_spatial_" suffix="_top_deg" :rename-url="inSituTypeRenameUrl" @changes="annotationChanges"></stdiff-rename-annotations-clusters>
                                     </template>
 
@@ -164,6 +176,16 @@
                                     </div>
                                 </template> -->
                             </div>
+                        </div>
+
+                        <div class="tab-pane fade mt-4" id="inSituType-BarPlots" role="tabpanel" aria-labelledby="inSituType-BarPlots-tab">
+                            <barchart
+                                :cell-type-names="[]"
+                                :counts="[]"
+                                :colors="[]"
+                                :samples-data="barplot_data"
+                                :samples="Object.keys(inSituType2.plot_data)"
+                            ></barchart>
                         </div>
 
                         <div class="tab-pane fade mt-4" id="inSituType-OtherPlots" role="tabpanel" aria-labelledby="inSituType-OtherPlots-tab">
@@ -337,16 +359,25 @@ import Multiselect from '@vueform/multiselect';
                 annotations_renamed: false,
 
                 plot_data: {},
+                barplot_data: {},
 
                 loaded: false,
 
                 colorPalette: [],
+
+                keyToReRenderAllPlotsCounter: 0,
 
             }
         },
 
         async mounted() {
             await this.loadResults();
+        },
+
+        computed: {
+            keyToReRenderAllPlots() {
+                return 'InSituTypePlots-' +  this.keyToReRenderAllPlotsCounter;
+            },
         },
 
         methods: {
@@ -361,6 +392,17 @@ import Multiselect from '@vueform/multiselect';
                 }
 
                 const timestamp = new Date().getTime(); // Unique timestamp to avoid caching
+
+                // Fetch barplots data
+                let barplot_data = await axios.get(this.inSituType2.base_path + 'insitutype_cell_types_barplot_data.csv?cachebuster=' + timestamp);
+                const lines = barplot_data.data.split('\n');
+                this.barplot_data['names'] = lines[0].replaceAll('"', '').split(',').slice(1);
+                for(let i = 1; i < lines.length; i++) {
+                    let data = lines[i].replaceAll('"', '').replaceAll('unknown', 0).split(',');
+                    this.barplot_data[data[0]] = {};
+                    this.barplot_data[data[0]]['counts'] = data.slice(1);
+                }
+
 
                 for(let sample in this.inSituType2.plot_data) {
                     let data = await axios.get(this.inSituType2.plot_data[sample] + '?cachebuster=' + timestamp);
@@ -406,8 +448,28 @@ import Multiselect from '@vueform/multiselect';
                 for(let sampleName in this.plot_data) {
                     for(let annotation in this.plot_data[sampleName]) {
                         this.plot_data[sampleName][annotation]['palette'] = this.getColorPalette(sampleName, annotation);
+                        this.processBarplotFile(sampleName, this.plot_data[sampleName][annotation]['palette']);
+                        // this.barplot_data[sampleName]['colors'] = this.getColorsArray(this.barplot_data[sampleName]['counts'].length);
+                        // this.barplot_data[sampleName]['key'] = sampleName + '-key-barplot-' + (parseInt(this.barplot_data[sampleName]['key'].split('-key-barplot-')[1]) + 1);
                     }
                 }
+
+                this.keyToReRenderAllPlotsCounter++;
+            },
+
+            getColorsArray(numberOfColors) {
+
+                const colors = this.colorPalette.length ? this.colorPalette : ['#E8ECFB', '#E0DEF2', '#D8D0EA', '#D0C0E0', '#C7AFD5', '#BD9ECB', '#B48EC1', '#AB7EB8', '#A26FAE', '#9A60A6', '#8F539C', '#804D99', '#6D4D9C', '#6355A5', '#5B5FAF', '#5469B9', '#4F75C2', '#4D80C5', '#4D8BC4', '#4D93BE', '#5099B7', '#549FB1', '#58A3AA', '#5CA7A3', '#61AB9B', '#67B092', '#70B486', '#7AB779', '#88BB6B', '#99BD5D', '#AABD51', '#BBBC49', '#C8B844', '#D3B23F', '#DBAB3C', '#E1A23A', '#E49838', '#E68D35', '#E68033', '#E57330', '#E4642D', '#E05229', '#DD3D26', '#DA2322', '#C4221F', '#AD211D', '#95211B', '#7E1F18', '#671C15', '#521A13'];
+
+                const palette = [];
+
+                let step = (numberOfColors <= colors.length/2) ? Math.trunc(colors.length / numberOfColors) : 1;
+
+                for(let i = 0; i < numberOfColors; i++) {
+                    palette.push(colors[i*step]);
+                }
+
+                return palette;
             },
 
             getColorPalette(sampleName, annotation) {
@@ -447,6 +509,43 @@ import Multiselect from '@vueform/multiselect';
                 return colorPalette;
             },
 
+            processBarplotFile(sampleName, palette) {
+                // const lines = data.split('\n');
+
+                // if(lines.length < 2) return;
+
+                // console.log('*******');
+                // console.log(JSON.stringify(this.plot_data[sampleName][annot]['palette']));
+
+                // this.barplot_data[sampleName] = {};
+
+                // this.barplot_data[sampleName]['key'] = sampleName + '-key-barplot-' + 1;
+
+                // const palette = this.plot_data[sampleName][annot]['palette'];
+                let names = this.barplot_data['names'];
+                let colors = [];
+                names.forEach((item, index) => {
+                    colors.push(item in palette ? palette[item].color : '#000000');
+                    // console.log(index, item, palette[item], colors[colors.length - 1]);
+                });
+
+                this.barplot_data[sampleName]['colors'] = colors;
+
+                // for(let i = 1; i < lines.length; i++) {
+                //     if(lines[i].includes(sampleName)) {
+
+                //         // let counts = lines[i].replaceAll('"', '').replaceAll('unknown', 0).split(',').slice(1);
+
+                //         this.barplot_data[sampleName]['counts'] = lines[i].replaceAll('"', '').replaceAll('unknown', 0).split(',').slice(1);
+                //         // this.barplot_data[sampleName]['colors'] = this.getColorsArray(this.barplot_data[sampleName]['counts'].length);
+                //         break;
+                //     }
+                // }
+
+                // console.log(this.barplot_data[sampleName], palette);
+                // console.log(this.plot_data[sampleName]);
+            },
+
             processPlotFile(sampleName, data) {
                 this.plot_data[sampleName] = {};
                 const columnNames = data.split('\n')[0].split(',');
@@ -456,8 +555,12 @@ import Multiselect from '@vueform/multiselect';
                     this.plot_data[sampleName][columnNames[i]]['palette'] = this.getColorPalette(sampleName, columnNames[i]);
                     this.plot_data[sampleName][columnNames[i]]['title'] = this.annotations[sampleName][columnNames[i]]['modifiedName'];
 
+                    this.processBarplotFile(sampleName, this.plot_data[sampleName][columnNames[i]]['palette']);
+
                     //console.log(this.plot_data[sampleName][columnNames[i]]);
                 }
+
+                // console.log(this.plot_data[sampleName]);
             },
 
             extractColumnsFromCSV(csv, columns) {
@@ -509,7 +612,10 @@ import Multiselect from '@vueform/multiselect';
 
                 this.annotations_renamed = this.active_annotations.some(aa => aa.changed);
 
-                this.plot_data[sampleName][annotation.originalName]['palette'] = this.getColorPalette(sampleName, annotation.originalName)
+                this.plot_data[sampleName][annotation.originalName]['palette'] = this.getColorPalette(sampleName, annotation.originalName);
+
+                // this.processBarplotFile(sampleName, this.plot_data[sampleName][annotation.originalName]['palette']);
+                // this.keyToReRenderAllPlotsCounter++;
             },
 
             getSampleByName(nameToFind) {

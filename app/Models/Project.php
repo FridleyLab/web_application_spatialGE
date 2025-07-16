@@ -1237,6 +1237,9 @@ $plots
         $scriptContents = $this->getNormalizationScript($parameters);
         Storage::put($script, $scriptContents);
 
+        //Copy auxiliary files to the working directory
+        $script = Storage::copy("/common/templates/Normalization_plot_counts_data.R", "$workingDir/Normalization_plot_counts_data.R");
+
         //Delete project parameters that need to be recreated
         DB::delete("delete from project_parameters where tag not in ('import', 'filter','') and not(parameter like 'job.%') and project_id=" . $this->id);
 
@@ -1335,8 +1338,30 @@ $plots
         return $result;
     }
 
+    private function getNormalizationScript($parameters)
+    {
 
-    public function getNormalizationScript($parameters): string
+        //If there's no filtered stlist use the initial stlist
+        $stlist = 'filtered_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$stlist.RData")) $stlist = 'initial_stlist';
+
+        $params = [
+            'stlist' => $stlist,
+            'method' => $parameters['method'] ?? 'log',
+            'scale_f' => $parameters['scale_f'] ?? 1000,
+        ];
+
+        $script = Storage::get("/common/templates/Normalization.R");
+
+        foreach ($params as $param => $value) {
+            $script = $this->replaceRscriptParameter($param, $value, $script);
+        }
+
+        return $script;
+    }
+
+
+    public function getNormalizationScript_OLD($parameters): string
     {
 
         //If there's no filtered stlist use the initial stlist
@@ -4154,7 +4179,7 @@ lapply(names(grad_res), function(i){
 
     private function getSPARKXScript($parameters)
     {
-        info($parameters);
+        // info($parameters);
 
         $genes = 'c()';
         if($parameters['method'] === 'genes' /*|| ($parameters['method'] === 'gene_sets' && $parameters['selected_gene_sets'] !== null && $parameters['selected_gene_sets'] !== '')*/)
@@ -4180,6 +4205,70 @@ lapply(names(grad_res), function(i){
         foreach ($params as $param => $value) {
             $script = $this->replaceRscriptParameter($param, $value, $script);
         }
+
+        return $script;
+    }
+
+
+
+
+
+    public function DEGAS($parameters)
+    {
+
+        $workingDir = $this->workingDir();
+
+        $scriptName = 'DEGAS.R';
+
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getDEGASScript($parameters);
+        Storage::put($script, $scriptContents);
+
+        Storage::copy("/common/TCGA/data/user_tcga_clinical_data_{$parameters['tcga_study']}.RDS", $workingDir . 'user_tcga_clinical_data.RDS');
+        Storage::copy("/common/TCGA/data/user_tcga_expression_data_{$parameters['tcga_study']}.RDS", $workingDir . 'user_tcga_expression_data.RDS');
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task'], 'DEGAS');
+
+        $samplesFilePath = $workingDir . 'degas_sample_names.csv';
+        $_process_files = [];
+        if (Storage::fileExists($samplesFilePath)) {
+
+            $fileContents = Storage::get($samplesFilePath); // $filePath is the path to your file
+            $sampleNames = array_filter(array_map('trim', explode("\n", $fileContents)));
+
+            foreach($sampleNames as $sampleName) {
+
+                $_files = [$sampleName . '_degas_predictions_corr.csv', $sampleName . '_degas_predictions_spatial_smooth.csv'];
+
+                foreach($_files as $dataFile) {
+                    $_file = $workingDir . $dataFile;
+                    $file_public = $this->workingDirPublic() . $dataFile;
+                    if (Storage::fileExists($_file)) {
+                        Storage::delete($file_public);
+                        Storage::move($_file, $file_public);
+                        $_process_files[] = $dataFile;
+                    }
+                }
+            }
+
+            ProjectParameter::updateOrCreate(['parameter' => 'DEGAS', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'samples' => $sampleNames, 'base_path' => $this->workingDirPublicURL(), 'files' => $_process_files])]);
+            ProjectProcessFiles::updateOrCreate(['process' => 'DEGAS', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
+        }
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function getDEGASScript($parameters)
+    {
+
+        $script = Storage::get("/common/templates/DEGAS_part_2_pred.R");
+
+        foreach ($parameters as $key => $value) {
+            $script = $this->replaceRscriptParameter($key, $value, $script);
+        }
+
+        $script .= "\nprint('spatialGE_PROCESS_COMPLETED')";
 
         return $script;
     }

@@ -266,7 +266,7 @@ bps_df = bps_df %>%
   tidyr::pivot_wider(names_from='insitutype_cell_types', values_from='number_cells') %>%
   dplyr::mutate(unknown=tidyr::replace_na('unknown', 0))
 # Write file
-write.csv(bps_df, 'insitutype_cell_types_barplot_data.csv', row.names=F)
+write.csv(bps_df, 'insitutype_cell_types_barplot_data.csv', quote=F, row.names=F)
 
 # Create data frames for quilt plots
 lapply(1:length(names(STlist@spatial_meta)), function(i){

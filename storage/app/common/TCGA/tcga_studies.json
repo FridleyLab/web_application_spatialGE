@@ -1,0 +1,488 @@
+{
+    "hnsc_tcga_pub_rna_seq_v2_mrna": {
+        "HPV_STATUS": [
+            "HPV+",
+            "HPV-"
+        ],
+        "OS_STATUS": [
+            "0:LIVING",
+            "1:DECEASED"
+        ],
+        "PRIMARY_SITE": [
+            "Hypopharynx",
+            "Larynx",
+            "Oral Cavity",
+            "Oropharynx"
+        ]
+    },
+    "blca_tcga_pub_rna_seq_v2_mrna": {
+        "ANGIOLYMPHATIC_INVASION": [
+            "No",
+            "Not mentioned in path report",
+            "Yes"
+        ],
+        "DFS_STATUS": [
+            "0:DiseaseFree",
+            "1:Recurred"
+        ],
+        "ETHNICITY": [
+            "Hispanic or Latino",
+            "Not Evaluated",
+            "Not Hispanic or Latino"
+        ],
+        "EXTRACAPSULAR_SPREAD": [
+            "No",
+            "Unknown",
+            "Yes"
+        ],
+        "GRADE": [
+            "High Grade",
+            "Low Grade",
+            "Unknown"
+        ],
+        "IF_EXTRACAPSULAR_SPREAD_PRESENT": [
+            "Extensive",
+            "Focal",
+            "Unknown"
+        ],
+        "INCIDENTAL_PROSTATE_CANCER": [
+            "No",
+            "Unknown",
+            "Yes"
+        ],
+        "LYMPH_NODES_EXAMINED": [
+            "No",
+            "Yes"
+        ],
+        "METASTATIC_SITE": [
+            "Lung",
+            "Lung,Other (please specify)",
+            "Lymph node only",
+            "Lymph node only,Lung,Liver",
+            "None"
+        ],
+        "METASTATIC_SITE_OTHER": [
+            "Lung",
+            "ileocecum"
+        ],
+        "METHOD_OF_INITIAL_PATH_DIAGNOSIS": [
+            "Endoscopic biopsy",
+            "Other (please specify)",
+            "Transurethral resection (TURBT)"
+        ],
+        "NEW_TUMOR_EVENT_AFTER_INITIAL_TREATMENT": [
+            "No",
+            "Unknown",
+            "Yes"
+        ],
+        "NEW_TUMOR_EVENT_OTHER_SITE": [
+            "Brain",
+            "pelvic mass with adherence to pelvic sidewall and sigmoid colon",
+            "pelvis"
+        ],
+        "NEW_TUMOR_EVENT_SITE": [
+            "Liver",
+            "Lung",
+            "Lymph Node Only",
+            "Other (please specify)"
+        ],
+        "NEW_TUMOR_EVENT_TYPE": [
+            "Distant Metastasis",
+            "Locoregional (Urothelial tumor event)"
+        ],
+        "OS_STATUS": [
+            "0:LIVING",
+            "1:DECEASED"
+        ],
+        "PATHOLOGIC_DISTANT_SPREAD": [
+            "M0",
+            "M1",
+            "MX"
+        ],
+        "PATHOLOGIC_SPREAD_INCIDENTAL_PROSTATE_CANCER": [
+            "pT1a",
+            "pT2a",
+            "pT2b",
+            "pT2c",
+            "pT3b"
+        ],
+        "PRIOR_TUMOR": [
+            "No",
+            "Yes"
+        ],
+        "PROSPECTIVE_COLLECTION": [
+            "No",
+            "Yes"
+        ],
+        "RACE": [
+            "Asian",
+            "Black or African American",
+            "Not Evaluated",
+            "White"
+        ],
+        "REGIONAL_NODES_PATHOLOGIC_SPREAD": [
+            "pN0",
+            "pN1",
+            "pN2",
+            "pN3",
+            "pNX"
+        ],
+        "SEX": [
+            "Female",
+            "Male"
+        ],
+        "SMOKING_HISTORY": [
+            "1 - Lifelong Non-Smoker",
+            "1 - Lifelong non-smoker (< 100 cigarettes smoked in lifetime)",
+            "2 - Current Smoker",
+            "2 - Current smoker (includes daily and non-daily smokers)",
+            "3 - Current Reformed Smoker for > 15 yrs",
+            "3 - Current reformed smoker for > 15 years",
+            "4 - Current Reformed Smoker for < or = 15 yrs",
+            "4 - Current reformed smoker for < 15 years",
+            "5 - Current Reformed Smoker (Duration Not Specified)",
+            "Smoking History not Documented"
+        ],
+        "SUBTYPE": [
+            "Non-papillary",
+            "Papillary"
+        ],
+        "T_STAGE": [
+            "Stage I",
+            "Stage II",
+            "Stage III",
+            "Stage IV"
+        ]
+    },
+    "brca_tcga_pub_mrna": {
+        "CN_CLUSTER": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+        ],
+        "CONVERTED_STAGE": [
+            "No_Conversion",
+            "Stage I",
+            "Stage IIA",
+            "Stage IIB",
+            "Stage IIIA",
+            "Stage IIIB",
+            "Stage IIIC",
+            "Stage IV"
+        ],
+        "ER_STATUS": [
+            "Indeterminate",
+            "Negative",
+            "Not Performed",
+            "Performed but Not Available",
+            "Positive"
+        ],
+        "HER2_STATUS": [
+            "Equivocal",
+            "Negative",
+            "Positive"
+        ],
+        "INTEGRATED_CLUSTERS_NO_EXP": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+        ],
+        "INTEGRATED_CLUSTERS_UNSUP_EXP": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+        ],
+        "INTEGRATED_CLUSTERS_WITH_PAM50": [
+            "1",
+            "2",
+            "3",
+            "4"
+        ],
+        "METASTASIS": [
+            "M0",
+            "M1"
+        ],
+        "METASTASIS_CODED": [
+            "Negative",
+            "Positive"
+        ],
+        "METHYLATION_CLUSTER": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+        ],
+        "MIRNA_CLUSTER": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7"
+        ],
+        "NODES": [
+            "N0",
+            "N1",
+            "N2",
+            "N3"
+        ],
+        "NODE_CODED": [
+            "Negative",
+            "Positive"
+        ],
+        "OS_STATUS": [
+            "0:LIVING",
+            "1:DECEASED"
+        ],
+        "PAM50_SUBTYPE": [
+            "Basal-like",
+            "HER2-enriched",
+            "Luminal A",
+            "Luminal B",
+            "Normal-like"
+        ],
+        "PR_STATUS": [
+            "Indeterminate",
+            "Negative",
+            "Not Performed",
+            "Performed but Not Available",
+            "Positive"
+        ],
+        "RPPA_CLUSTER": [
+            "Basal",
+            "Her2",
+            "LumA",
+            "LumA\/B",
+            "ReacI",
+            "ReacII",
+            "X"
+        ],
+        "SEX": [
+            "Female",
+            "Male"
+        ],
+        "SURVIVAL_DATA_FORM": [
+            "enrollment",
+            "followup"
+        ],
+        "TUMOR_STAGE": [
+            "T1",
+            "T2",
+            "T3",
+            "T4",
+            "TX"
+        ],
+        "TUMOR_T1_CODED": [
+            "T1",
+            "T_Other"
+        ]
+    },
+    "coadread_tcga_pub_mrna": {
+        "CANCER_TYPE_DETAILED": [
+            "Colon Adenocarcinoma",
+            "Colorectal Adenocarcinoma",
+            "Rectal Adenocarcinoma"
+        ],
+        "COPY_NUMBER": [
+            "0",
+            "1"
+        ],
+        "EXPRESSION_SUBTYPE": [
+            "CIN",
+            "Invasive",
+            "MSI\/CIMP"
+        ],
+        "HISTOLOGICAL_SUBTYPE": [
+            "Ascending Colon",
+            "Cecum",
+            "Descending Colon",
+            "Hepatic Flexure",
+            "Rectosigmoid Junction",
+            "Rectum",
+            "Sigmoid Colon",
+            "Splenic Flexure",
+            "Transverse Colon"
+        ],
+        "HYPERMUTATED": [
+            "0",
+            "1"
+        ],
+        "ICLUSTER": [
+            "1",
+            "2a",
+            "2b",
+            "3"
+        ],
+        "METHYLATION_STATUS": [
+            "0",
+            "1"
+        ],
+        "METHYLATION_SUBTYPE": [
+            "CIMP.H",
+            "CIMP.L",
+            "Cluster3",
+            "Cluster4"
+        ],
+        "MLH1_SILENCING": [
+            "0",
+            "1"
+        ],
+        "MRNA_DATA": [
+            "0",
+            "1"
+        ],
+        "MSI_STATUS": [
+            "MSI-H",
+            "MSI-L",
+            "MSS",
+            "Not Evaluable"
+        ],
+        "ONCOTREE_CODE": [
+            "COAD",
+            "COADREAD",
+            "READ"
+        ],
+        "OS_STATUS": [
+            "0:LIVING",
+            "1:DECEASED"
+        ],
+        "PRIMARY_SITE": [
+            "1 - right colon",
+            "2 - transverse colon",
+            "3 - left colon",
+            "4 - rectum"
+        ],
+        "PRIMARY_TUMOR_PATHOLOGIC_SPREAD": [
+            "T1",
+            "T2",
+            "T3"
+        ],
+        "SEQUENCED": [
+            "0",
+            "1"
+        ],
+        "SEX": [
+            "Female",
+            "Male"
+        ],
+        "TUMOR_STAGE_2009": [
+            "Stage I",
+            "Stage IIA",
+            "Stage IIB",
+            "Stage IIIA",
+            "Stage IIIB",
+            "Stage IIIC",
+            "Stage IV",
+            "Stage IVA"
+        ]
+    },
+    "coadread_tcga_pub_rna_seq_mrna": {
+        "CANCER_TYPE_DETAILED": [
+            "Colon Adenocarcinoma",
+            "Colorectal Adenocarcinoma",
+            "Rectal Adenocarcinoma"
+        ],
+        "COPY_NUMBER": [
+            "0",
+            "1"
+        ],
+        "EXPRESSION_SUBTYPE": [
+            "CIN",
+            "Invasive",
+            "MSI\/CIMP"
+        ],
+        "HISTOLOGICAL_SUBTYPE": [
+            "Ascending Colon",
+            "Cecum",
+            "Descending Colon",
+            "Hepatic Flexure",
+            "Rectosigmoid Junction",
+            "Rectum",
+            "Sigmoid Colon",
+            "Splenic Flexure",
+            "Transverse Colon"
+        ],
+        "HYPERMUTATED": [
+            "0",
+            "1"
+        ],
+        "ICLUSTER": [
+            "1",
+            "2a",
+            "2b",
+            "3"
+        ],
+        "METHYLATION_STATUS": [
+            "0",
+            "1"
+        ],
+        "METHYLATION_SUBTYPE": [
+            "CIMP.H",
+            "CIMP.L",
+            "Cluster3",
+            "Cluster4"
+        ],
+        "MLH1_SILENCING": [
+            "0",
+            "1"
+        ],
+        "MRNA_DATA": [
+            "0",
+            "1"
+        ],
+        "MSI_STATUS": [
+            "MSI-H",
+            "MSI-L",
+            "MSS",
+            "Not Evaluable"
+        ],
+        "ONCOTREE_CODE": [
+            "COAD",
+            "COADREAD",
+            "READ"
+        ],
+        "OS_STATUS": [
+            "0:LIVING",
+            "1:DECEASED"
+        ],
+        "PRIMARY_SITE": [
+            "1 - right colon",
+            "2 - transverse colon",
+            "3 - left colon",
+            "4 - rectum"
+        ],
+        "PRIMARY_TUMOR_PATHOLOGIC_SPREAD": [
+            "T1",
+            "T2",
+            "T3",
+            "T4a",
+            "T4b"
+        ],
+        "SEQUENCED": [
+            "0",
+            "1"
+        ],
+        "SEX": [
+            "Female",
+            "Male"
+        ],
+        "TUMOR_STAGE_2009": [
+            "Stage I",
+            "Stage IIA",
+            "Stage IIB",
+            "Stage IIIA",
+            "Stage IIIB",
+            "Stage IIIC",
+            "Stage IV",
+            "Stage IVA"
+        ]
+    }
+}
