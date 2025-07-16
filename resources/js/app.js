@@ -72,11 +72,15 @@ import insitutype from "./components/wizard/components/phenotyping-insitutype.vu
 //import sparkx from "./components/wizard/sparkx.vue";
 import spark from "./components/wizard/components/spark.vue";
 
+import degas from "./components/wizard/degas.vue";
+import degasTab from "./components/wizard/components/degas-tab.vue";
+
 //Client-side Plots
 import PlotsComponent from "./components/common/plots/PlotsComponent.vue";
 import PlotHolder from "./components/common/plots/PlotHolder.vue";
 import Heatmap from "./components/common/plots/heatmap.vue";
 import Barchart from "./components/common/plots/barchart.vue";
+import DensityPlot from "./components/common/plots/DensityPlot.vue";
 // import SideBySidePlot from "./components/common/plots/Editor.vue";
 // import OverlayEditor from "./components/common/plots/OverlayEditor.vue";
 // import PlotViewer from "./components/common/plots/PlotViewer.vue";
@@ -179,10 +183,14 @@ app.component('stdeconvolve-suggested-ks', stdeconvolve_suggested_ks);
 //app.component('sparkx', sparkx);
 app.component('spark', spark);
 
+app.component('degas', degas);
+app.component('degas-tab', degasTab);
+
 app.component('plots-component', PlotsComponent);
 app.component('plot-holder', PlotHolder);
 app.component('heatmap', Heatmap);
 app.component('barchart', Barchart);
+app.component('density-plot', DensityPlot);
 // app.component('side-by-side-plot', SideBySidePlot);
 // app.component('PlotViewer', PlotViewer);
 // app.component('OverlayEditor', OverlayEditor);
