@@ -10,5 +10,5 @@
         degas2-url="{{ route('degas2', ['project' => $project->id]) }}"
 
     >
-</degas>
+    </degas>
 @endsection

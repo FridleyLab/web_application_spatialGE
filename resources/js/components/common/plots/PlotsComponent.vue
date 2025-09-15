@@ -436,6 +436,7 @@ export default {
         pKey: { type: String, required: true },
         aspectRatio: { type: String, required: false },
         isStatic: { type: Boolean, required: false },
+        rangeBarLabel: { type: String, required: false, default: "log expr" },
     },
 
     data() {
@@ -1239,13 +1240,13 @@ export default {
 
             legendSvg
                 .append("text")
-                .attr("x", 30)
-                .attr("y", 5)
+                .attr("x", 40)
+                .attr("y", 6)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "middle")
                 .attr("font-size", "12px")
                 .attr("font-family", "Arial, sans-serif")
-                .text("log expr");
+                .text(this.rangeBarLabel);
 
             const legendScale = d3
                 .scaleLinear()

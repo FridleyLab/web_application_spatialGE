@@ -20,9 +20,10 @@
 # Clinical variable (first column of clinical key)
 clin_var = '#{tcga_feature}#'
 # Category within "clin_var" (second column of clinical key)
-clin_cat = '#{tcga_category}#'
+#clin_cat = 'BRCA_LumA'
 # One of the annotations generated in Spatial Domain Detection
-ann_test = '#{annotation}#'
+ann_test = '#{annotation}#' #This one kept running and running
+#ann_test = 'stclust_spw0_k2' #This one works
 # Text box, integer - Number of CN layers
 cnn_layers = #{number_of_layers}#
 # Text box, integer - Number of model bootstraps
@@ -31,6 +32,10 @@ bootstraps = #{bootstraps}#
 zero_thr = #{zero_thr}#
 # Top variable genes percentile (slider 0-1)
 top_var = #{top_var}#
+# Filter out annotation groups with < min_cells cells
+min_cells = 50
+# Top variable genes percentile (slider 0-0.5) for TCGA bulk RNAseq
+top_var_bulkdata = 0.1
 
 
 ########### ANALYSIS BEGINS: ###########
@@ -50,19 +55,37 @@ if(any(molecular_dat < 0)){
 
 # Select high variance genes in TCGA data
 pt_vars = apply(molecular_dat, 1, sd, na.rm=T)
-molecular_dat = molecular_dat[pt_vars > quantile(pt_vars, 0.9, na.rm=T), ]
+molecular_dat = molecular_dat[pt_vars > quantile(pt_vars, 1-top_var_bulkdata, na.rm=T), ]
 
 # Scale TCGA data
 tcga_proc = t(apply(t(molecular_dat), 1, DEGAS::scaleFunc))
 
 rm(molecular_dat, pt_vars) # Clean env
 
-# Make one-hot labels for TCGA data
-tcga_labels = ifelse(clinical_dat[[clin_var]] == clin_cat, "risk_cat", "other")
-tcga_labels[is.na(tcga_labels)] = 'other'
+risk_cat = c(#{risk_cat}#)
+non_risk_cat = c(#{non_risk_cat}#)
+
+print(unique(clinical_dat[[clin_var]]))
+# Standardize case for comparison
+clinical_dat[[clin_var]] <- tolower(clinical_dat[[clin_var]])
+risk_cat <- tolower(risk_cat)
+non_risk_cat <- tolower(non_risk_cat)
+
+# Update tcga_labels
+tcga_labels = ifelse(clinical_dat[[clin_var]] %in% risk_cat, 'risk',
+                ifelse(clinical_dat[[clin_var]] %in% non_risk_cat, 'non_risk', NA))
+
+# Remove NA values
+if (any(is.na(tcga_labels))) {
+    warning("Removing rows with NA in tcga_labels.")
+    clinical_dat = clinical_dat[!is.na(tcga_labels), ]
+    tcga_proc = tcga_proc[!is.na(tcga_labels), , drop = TRUE]  # Ensure tcga_proc matches filtered rows
+    tcga_labels = tcga_labels[!is.na(tcga_labels)]
+}
+
 tcga_labels = toOneHot(tcga_labels)
 # Make first column "risk_cat"
-tcga_labels = tcga_labels[, c("risk_cat", "other")]
+tcga_labels = tcga_labels[, c('risk', 'non_risk')]
 
 # Load STlist
 load('stclust_stlist.RData')
@@ -84,7 +107,8 @@ st_counts = lapply(names(stlist@counts), function(i){
   # Select top variable and top expressed features
   st_prcnonzero = Matrix::rowSums(cd_tmp > 0)/ncol(cd_tmp)
   st_vars = apply(cd_tmp, 1, var)
-  st_selected = rownames(cd_tmp)[ (st_prcnonzero > zero_thr & st_vars > quantile(st_vars, top_var)) ]
+  st_selected = rownames(cd_tmp)[ (st_prcnonzero > zero_thr & st_vars >
+                                     quantile(st_vars, 1-top_var)) ]
   final_features = intersect(colnames(tcga_proc), st_selected)
 
   cd_tmp = as.data.frame(as.matrix(cd_tmp[final_features, ]))
@@ -126,23 +150,49 @@ setPython('/opt/conda/envs/degas_env/bin/python')
 tmpDir = './tmp/'
 DEGAS_model = lapply(1:length(st_counts_proc), function(i){
   set_seed_term(12345)
+  #min_cells <- min_cells
+  bad_types <- which(colSums(st_labels[[i]]) < min_cells)
+  if (length(bad_types)) {
+    keep_cells <- rowSums(st_labels[[i]][, bad_types, drop = FALSE]) == 0
+    st_counts_proc[[i]] <- st_counts_proc[[i]][ keep_cells,]
+    st_labels[[i]] <- st_labels[[i]][keep_cells, -bad_types ]
+  }
   tcga_proc_tmp = tcga_proc[, colnames(tcga_proc) %in% colnames(st_counts_proc[[i]])]
-  mod_tmp = runCCMTLBag(scExp=st_counts_proc[[i]], scLab=st_labels[[i]],
-                        patExp=tcga_proc_tmp, patLab=tcga_labels,
-                        tmpDir,
-                        'ClassClass', 'DenseNet',
-                        cnn_layers, bootstraps)
+
+  if (nrow(st_counts_proc[[i]]) > 24000){
+    K=800
+    mod_tmp= runDEGASatlas(stDat=st_counts_proc[[i]],scLab=st_labels[[i]],
+                           patDat=tcga_proc_tmp,patLab=tcga_labels,
+                           tmpDir,
+                           "ClassClass","DenseNet",
+                           cnn_layers,bootstraps,
+                           K)
+  }else{
+    mod_tmp = runCCMTLBag(scExp=st_counts_proc[[i]], scLab=st_labels[[i]],
+                          patExp=tcga_proc_tmp, patLab=tcga_labels,
+                          tmpDir,
+                          'ClassClass', 'DenseNet',
+                          cnn_layers, bootstraps)
+  }
+
   return(mod_tmp)
 })
+
 
 # Calculate label probabilities
 DEGAS_preds = lapply(1:length(DEGAS_model), function(i){
   preds_tmp = predClassBag(DEGAS_model[[i]], st_counts_proc[[i]], "pat")
+
   return(preds_tmp)
 })
 
 # Create table with results for plotting
 plot_ls = lapply(1:length(DEGAS_preds), function(i){
+  # add removed cells back and assign NA
+  all_cells <- st_coords[[i]]$libname
+  DEGAS_preds[[i]] <- DEGAS_preds[[i]][match(all_cells, rownames(DEGAS_preds[[i]])), , drop = FALSE]
+  rownames(DEGAS_preds[[i]]) <- all_cells
+
   corrs_tmp = toCorrCoeff(DEGAS_preds[[i]][, 1])
   df_tmp = st_coords[[i]] %>%
     tibble::add_column(pred_corr=corrs_tmp) %>%
@@ -153,14 +203,16 @@ names(plot_ls) = snames
 # Save results to file
 lapply(snames, function(i){
   # Only select columns 2, 3, and 4 for output
-  df_out = plot_ls[[i]][, 2:4]
+  df_out = plot_ls[[i]][, c(1,2:4)]
   write.csv(df_out,
             paste0(i, '_degas_predictions_corr.csv'),
             quote=F, row.names=F)
 
-  df_out = plot_ls[[i]][, c(2,3,5)]
+  df_out = plot_ls[[i]][, c(1,2,3,5)]
   write.csv(df_out,
             paste0(i, '_degas_predictions_spatial_smooth.csv'),
             quote=F, row.names=F)
 })
 
+
+print('spatialGE_PROCESS_COMPLETED')

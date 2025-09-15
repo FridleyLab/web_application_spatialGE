@@ -14,12 +14,20 @@
 
             <div class="w-100 w-lg-90 w-xxl-85" :class="processing ? 'disabled-clicks' : ''">
 
-                <div class="row text-center align-content-center">
+                <div class="row justify-content-center text-center">
                     <div class="w-50">
-                        <div>Bulk-RNA expression study <show-modal tag="stenrich_select_gene_set"></show-modal></div>
+                        <div>Bulk-RNA expression study <show-modal tag="degas_bulk_rna_study"></show-modal></div>
                         <div>
                             <span>
                                 <Multiselect :options="studyNames" v-model="params.tcga_study"></Multiselect>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="w-50">
+                        <div>Clinical feature <show-modal tag="degas_clinical_feature"></show-modal></div>
+                        <div>
+                            <span>
+                                <Multiselect :options="params.tcga_study ? Object.keys(tcgaVariables[params.tcga_study]) : []" v-model="params.tcga_feature"></Multiselect>
                             </span>
                         </div>
                     </div>
@@ -28,19 +36,19 @@
 
                 <div class="row text-center align-content-center mt-4">
                     <div class="w-50">
-                        <div>Clinical feature <show-modal tag="stenrich_select_gene_set"></show-modal></div>
+                        <div>Risk categories <show-modal tag="degas_category_risk"></show-modal></div>
                         <div>
                             <span>
-                                <Multiselect :options="params.tcga_study ? Object.keys(tcgaVariables[params.tcga_study]) : []" v-model="params.tcga_feature"></Multiselect>
+                                <Multiselect :options="params.tcga_feature ? categoryNamesRisk : []" v-model="tcga_categories_risk" :multiple="true" mode="tags"></Multiselect>
                             </span>
                         </div>
                     </div>
 
                     <div class="w-50">
-                        <div>Category <show-modal tag="stenrich_select_gene_set"></show-modal></div>
+                        <div>Non-risk categories <show-modal tag="degas_category_non_risk"></show-modal></div>
                         <div>
                             <span>
-                                <Multiselect :options="params.tcga_feature ? tcgaVariables[params.tcga_study][params.tcga_feature] : []" v-model="params.tcga_category"></Multiselect>
+                                <Multiselect :options="params.tcga_feature ? categoryNamesNonRisk : []" v-model="tcga_categories_non_risk" :multiple="true" mode="tags"></Multiselect>
                             </span>
                         </div>
                     </div>
@@ -50,8 +58,8 @@
                 <div class="row justify-content-center text-center m-4">
                     <div class="w-xxl-100">
                         <div class="me-3">
-                            <label>Zero gene count threshold:&nbsp;</label>
-                            <input type="number" class="text-end text-sm border border-1 rounded w-30 w-sm-15 w-md-10 w-xxl-10" v-model="params.zero_thr"><show-modal tag="stdeconvolve_n_variablegenes"></show-modal>
+                            <label>Threshold for removing non-expressed genes in the study:&nbsp;</label>
+                            <input type="number" step="0.05" class="text-end text-sm border border-1 rounded w-30 w-sm-15 w-md-10 w-xxl-10" v-model="params.zero_thr"><show-modal tag="degas_threshold"></show-modal>
                         </div>
                         <input v-if="params.zero_thr" type="range" min="0" :max="1" step="0.05" class="w-100" v-model="params.zero_thr">
                     </div>
@@ -61,22 +69,22 @@
                     <div class="w-xxl-100">
                         <div class="me-3">
                             <label>Top variable genes percentile:&nbsp;</label>
-                            <input type="number" class="text-end text-sm border border-1 rounded w-30 w-sm-15 w-md-10 w-xxl-10" v-model="params.top_var"><show-modal tag="stdeconvolve_n_variablegenes"></show-modal>
+                            <input type="number" step="0.05" class="text-end text-sm border border-1 rounded w-30 w-sm-15 w-md-10 w-xxl-10" v-model="params.top_var"><show-modal tag="degas_top_var_genes"></show-modal>
                         </div>
-                        <input v-if="params.top_var" type="range" min="0" :max="1" step="0.05" class="w-100" v-model="params.top_var">
+                        <input v-if="params.top_var" type="range" min="0" max="0.5" step="0.05" class="w-100" v-model="params.top_var">
                     </div>
                 </div>
 
                 <div class="row text-center align-content-center">
                     <div class="w-50">
-                        <div>Number of layers <show-modal tag="stenrich_select_gene_set"></show-modal></div>
+                        <div>Number of layers in the neural network <show-modal tag="degas_number_of_layers"></show-modal></div>
                         <div>
                             <input type="number" class="text-end border border-1 rounded w-60 w-sm-30 w-md-20 w-xxl-20" v-model="params.number_of_layers">
                         </div>
                     </div>
 
                     <div class="w-50">
-                        <div>Bootstraps <show-modal tag="stenrich_select_gene_set"></show-modal></div>
+                        <div>Number of Bootstrap samples <show-modal tag="degas_boostraps"></show-modal></div>
                         <div>
                             <input type="number" class="text-end border border-1 rounded w-60 w-sm-30 w-md-20 w-xxl-20" v-model="params.bootstraps">
                         </div>
@@ -85,7 +93,7 @@
 
                 <div class="row justify-content-center text-center m-3">
                     <div class="w-100 w-md-90 w-lg-80 w-xxl-65">
-                        <div>Annotation to test <show-modal tag="stdiff_non_spatial_annotation"></show-modal></div>
+                        <div>Annotation to test <show-modal tag="degas_annotations"></show-modal></div>
                         <div>
                             <span>
                                 <Multiselect id="multiselect_annotation_variables" :options="annotation_variables" v-model="params.annotation"></Multiselect>
@@ -152,15 +160,16 @@
                                     <plots-component
                                         :base="sample.image_file_url !== null && sample.image_file_url.length ? sample.image_file_url : ''"
                                         :csv="plot_data.data"
-                                        :title="sample.name + (plotIndex === 0 ? ' - CORR' : ' - SPATIAL SMOOTHING')"
+                                        :title="sample.name + (plotIndex === 0 ? ' - Predicted correlation' : ' - Spatially smooth predictions')"
                                         plot-type="gradient"
                                         :color-palette="colorPalette"
-                                        :legend-min="0"
-                                        :legend-max="10"
+                                        :legend-min="plot_data.min !== undefined ? plot_data.min : 0"
+                                        :legend-max="plot_data.max !== undefined ? plot_data.max : 10"
                                         :is-y-axis-inverted="project.project_platform_id === 3"
                                         :is-grouped="false"
                                         :aspect-ratio="project.project_platform_id === 3 ? '3:2': ''"
                                         :p-key="'DEGAS-' + sample.name + '-' + plotIndex"
+                                        range-bar-label="pred risk score"
                                     ></plots-component>
 
                                 </div>
@@ -209,15 +218,19 @@ import Multiselect from '@vueform/multiselect';
 
                 annotation_variables: [],
 
+                tcga_categories_risk: [],
+                tcga_categories_non_risk: [],
+
                 params: {
                     zero_thr: 0.25,
-                    top_var: 0.9,
+                    top_var: 0.2,
                     annotation: null,
                     number_of_layers: 3,
-                    bootstraps: 3,
+                    bootstraps: 5,
                     tcga_study: null,
                     tcga_feature: null,
-                    tcga_category: null,
+                    risk_cat: '',
+                    non_risk_cat: '',
                 },
 
                 processing: false,
@@ -242,7 +255,8 @@ import Multiselect from '@vueform/multiselect';
             },
 
             'params.tcga_feature': function(newValue, oldValue) {
-                this.params.tcga_category = null;
+                this.tcga_categories_risk = [];
+                this.tcga_categories_non_risk = [];
             },
 
             'params.number_of_layers': function(newValue, oldValue) {
@@ -254,12 +268,30 @@ import Multiselect from '@vueform/multiselect';
                 }
             },
 
-            'params.bootstraps': function(newValue, oldValue) {
-                if(newValue < 3) {
-                    this.params.bootstraps = 3;
+            'params.zero_thr': function(newValue, oldValue) {
+                if(newValue < 0) {
+                    this.params.zero_thr = 0;
                 }
-                if(newValue > 8) {
-                    this.params.bootstraps = 8;
+                if(newValue > 1) {
+                    this.params.zero_thr = 1;
+                }
+            },
+
+            'params.top_var': function(newValue, oldValue) {
+                if(newValue < 0) {
+                    this.params.top_var = 0;
+                }
+                if(newValue > 0.5) {
+                    this.params.top_var = 0.5;
+                }
+            },
+
+            'params.bootstraps': function(newValue, oldValue) {
+                if(newValue < 5) {
+                    this.params.bootstraps = 5;
+                }
+                if(newValue > 7) {
+                    this.params.bootstraps = 7;
                 }
             },
 
@@ -271,15 +303,46 @@ import Multiselect from '@vueform/multiselect';
 
                 let studies = [];
                 Object.entries(this.tcgaVariables).forEach(([studyName, study]) => {
-                    if(studyName.includes('rna_seq')) {
-                        studies.push({value: studyName, label: studyName.replace('rna_seq', 'RNA-Seq').replace('_mrna', '').replace('mrna', '')});
-                    }
-                    else if(studyName.includes('mrna')) {
-                        studies.push({value: studyName, label: studyName.replace('mrna', 'microarray').replace('_mrna', '').replace('mrna', '')});
-                    }
+                    // if(studyName.includes('rna_seq')) {
+                    //     studies.push({value: studyName, label: studyName.replace('rna_seq', 'RNA-Seq').replace('_mrna', '').replace('mrna', '')});
+                    // }
+                    // else if(studyName.includes('mrna')) {
+                    //     studies.push({value: studyName, label: studyName.replace('mrna', 'microarray').replace('_mrna', '').replace('mrna', '')});
+                    // }
+
+                    studies.push({value: studyName, label: studyName});
+
                 });
 
                 return studies;
+            },
+
+            categoryNamesRisk() {
+                if(!this.params.tcga_study || !this.params.tcga_feature) {
+                    return [];
+                }
+
+                let categories = this.tcgaVariables[this.params.tcga_study][this.params.tcga_feature]['categories'] || [];
+
+                categories = categories.filter(c => !this.tcga_categories_non_risk.includes(c.name));
+
+                let result = categories.map(c => ({value: c.name, label: c.name + ' (' + c.count + ')'}));
+                console.log(result);
+                return result;
+            },
+
+            categoryNamesNonRisk() {
+                if(!this.params.tcga_study || !this.params.tcga_feature) {
+                    return [];
+                }
+
+                let categories = this.tcgaVariables[this.params.tcga_study][this.params.tcga_feature]['categories'] || [];
+
+                categories = categories.filter(c => !this.tcga_categories_risk.includes(c.name));
+
+                let result = categories.map(c => ({value: c.name, label: c.name + ' (' + c.count + ')'}));
+                console.log(result);
+                return result;
             },
 
             canRunDEGAS() {
@@ -289,7 +352,7 @@ import Multiselect from '@vueform/multiselect';
                 if(this.params.top_var < 0 || this.params.top_var > 1) {
                     return false;
                 }
-                if(!this.params.tcga_study || !this.params.tcga_feature || !this.params.tcga_category) {
+                if(!this.params.tcga_study || !this.params.tcga_feature || this.tcga_categories_risk.length == 0) {
                     return false;
                 }
                 if(!this.params.annotation) {
@@ -313,6 +376,11 @@ import Multiselect from '@vueform/multiselect';
             let stdiff = await this.$getProjectSTdiffAnnotations(this.project.id);
             this.annotation_variables = stdiff['annotation_variables'];
 
+            //filter out InSituType --> makes the process take too much time
+            this.annotation_variables = this.annotation_variables.filter((a) => {
+                return a.value !== 'insitutype_cell_types';
+            });
+
             await this.loadResults();
 
             console.log('DEGAS results loaded', this.results);
@@ -321,6 +389,17 @@ import Multiselect from '@vueform/multiselect';
         methods: {
 
             runDEGAS() {
+
+                this.params.risk_cat = this.tcga_categories_risk.map(c => "'" + c + "'").join(",");
+                if(this.tcga_categories_non_risk.length > 0) {
+                    this.params.non_risk_cat = this.tcga_categories_non_risk.map(c => "'" + c + "'").join(",");
+                }
+                else {
+                    let categories = this.tcgaVariables[this.params.tcga_study][this.params.tcga_feature]['categories'] || [];
+                    categories = categories.filter(c => !this.tcga_categories_risk.includes(c));
+                    this.params.non_risk_cat = categories.map(c => "'" + c.name + "'").join(",");
+                }
+
                 this.processing = true;
 
                 axios.post(this.degas2Url, this.params)
@@ -373,6 +452,16 @@ import Multiselect from '@vueform/multiselect';
                             }
 
                             this.results[sample].push(data);
+
+                            const lines = data.data.trim().split('\n');
+                            if (lines.length > 1) {
+                                const values = lines.slice(1).map(line => {
+                                    const cols = line.split(',');
+                                    return parseFloat(cols[3]);
+                                }).filter(v => !isNaN(v));
+                                data.min = Math.min(...values);
+                                data.max = Math.max(...values);
+                            }
 
                             //console.log(this.results[sample].data);
                         })

@@ -158,6 +158,28 @@ export default {
                 "stdeconvolve_sctrpie_r": {"title": "Size of piecharts", "text": "Controls the size of the individual piecharts in the spatial plot."},
                 "stdeconvolve_color_palette": {"title": "Color palette", "text": "Select the name of a color palette for the spatial plots."},
 
+                //DEGAS
+                "degas_bulk_rna_study": {"title": "Bulk-RNA expression study", "text": "Select the reference gene expression study that will be used for cell disease state prediction."},
+                "degas_clinical_feature": {"title": "Clinical Feature", "text": "Select a clinical feature in the selected bulk gene expression study to use for disease state prediction."},
+                "degas_category_risk": {"title": "Risk categories", "text": "Select the categories that apply within the clinical feature."},
+                "degas_category_non_risk": {"title": "Non-risk categories", "text": "Select the categories that apply within the clinical feature."},
+                "degas_threshold": {"title": "Threshold for removing non-expressed genes in the study", "text": "Gene will be removed from analysis if  X% of samples have no expression measured for this gene."},
+                "degas_top_var_genes": {"title": "Top variable genes percentile", "text": "The selected percentile will be used to select the most variable genes for prediction analysis (i.e., the top X% of most variable genes will be used in the prediction analysis."},
+                "degas_number_of_layers": {"title": "Number of layers in the neural network", "text": "The number of layers in the neural network for prediction analysis. The recommend default value is 3."},
+                "degas_boostraps": {"title": "Number of Bootstrap samples", "text": "The number of bootstrap samples for model assessment. The recommend value is between 5 and 7. The higher the value, the more time the analysis will take. To begin with, we recommend 5."},
+                "degas_annotations": {"title": "Annotation to test", "text": "Select the annotation to run the analysis with."},
+
+                //CalicoST
+                "calicost_hgtable_file" : {"title": "HGTable file", "text": "The path to the location of genes in the genome. This file should be a tab-delimited file with the following columns: gene_name, chrom, cdsStart, cdsEnd."},
+                "calicost_normalidx_file" : {"title": "Normalidx file", "text": "The file containing the indices of normal spots in the spatial transcriptomics data. Each line is a single index without header."},
+                "calicost_n_clones" : {"title": "Number of clones", "text": "The number of clones to infer using only BAF signals. Default is 3."},
+                "calicost_num_initializations" : {"title": "Number of initializations", "text": "The number of initializations to run for the analysis. Default is 3."},
+                "calicost_maxspots_pooling" : {"title": "Maxspots pooling", "text": "The maximum number of spots to pool for the analysis. Default is 7."},
+                // "" : {"title": "", "text": ""},
+                // "" : {"title": "", "text": ""},
+                // "" : {"title": "", "text": ""},
+                // "" : {"title": "", "text": ""},
+
             },
         }
     },

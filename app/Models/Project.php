@@ -4225,8 +4225,8 @@ lapply(names(grad_res), function(i){
         $scriptContents = $this->getDEGASScript($parameters);
         Storage::put($script, $scriptContents);
 
-        Storage::copy("/common/TCGA/data/user_tcga_clinical_data_{$parameters['tcga_study']}.RDS", $workingDir . 'user_tcga_clinical_data.RDS');
-        Storage::copy("/common/TCGA/data/user_tcga_expression_data_{$parameters['tcga_study']}.RDS", $workingDir . 'user_tcga_expression_data.RDS');
+        Storage::copy("/common/TCGA/study_data/tcga_clinical_data_{$parameters['tcga_study']}.RDS", $workingDir . 'user_tcga_clinical_data.RDS');
+        Storage::copy("/common/TCGA/study_data/tcga_TPM_{$parameters['tcga_study']}.RDS", $workingDir . 'user_tcga_expression_data.RDS');
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task'], 'DEGAS');
 
