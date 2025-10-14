@@ -4304,12 +4304,12 @@ lapply(names(grad_res), function(i){
         foreach($files as $file) {
             $_file = $filesPath . $file . '.svg';
             $fileName = $sampleName . '_calicost_' . $file;
-            $file_public = $this->workingDirPublic() . $fileName;
+            $file_public = $this->workingDirPublic() . $fileName . '.svg';
             if (Storage::fileExists($_file)) {
                 Storage::delete($file_public);
-                Storage::move($_file, $file_public . '.svg');
-                $_renamed_files[] = $fileName . '.svg';
-                $_process_files[] = $fileName;
+                Storage::move($_file, $file_public);
+                $_renamed_files[] = $fileName;
+                $_process_files[] = $fileName . '.svg';
             }
         }
 
