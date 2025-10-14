@@ -75,6 +75,9 @@ import spark from "./components/wizard/components/spark.vue";
 import degas from "./components/wizard/degas.vue";
 import degasTab from "./components/wizard/components/degas-tab.vue";
 
+import calicost from "./components/wizard/calicost.vue";
+import calicostTab from "./components/wizard/components/calicost-tab.vue";
+
 //Client-side Plots
 import PlotsComponent from "./components/common/plots/PlotsComponent.vue";
 import PlotHolder from "./components/common/plots/PlotHolder.vue";
@@ -185,6 +188,9 @@ app.component('spark', spark);
 
 app.component('degas', degas);
 app.component('degas-tab', degasTab);
+
+app.component('calicost', calicost);
+app.component('calicost-tab', calicostTab);
 
 app.component('plots-component', PlotsComponent);
 app.component('plot-holder', PlotHolder);
