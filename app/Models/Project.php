@@ -4302,7 +4302,7 @@ lapply(names(grad_res), function(i){
         $_process_files = [];
         $_renamed_files = [];
         foreach($files as $file) {
-            $_file = $filesPath . $file;
+            $_file = $filesPath . $file . '.svg';
             $fileName = $sampleName . '_calicost_' . $file;
             $file_public = $this->workingDirPublic() . $fileName;
             if (Storage::fileExists($_file)) {
