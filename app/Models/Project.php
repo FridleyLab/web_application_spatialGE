@@ -4273,6 +4273,90 @@ lapply(names(grad_res), function(i){
         return $script;
     }
 
+    public function CalicoST($parameters)
+    {
+        $workingDir = $this->workingDir();
+
+        $sampleName = $parameters['sample_name'];
+
+        $scriptName = 'CalicoST_normal_spots.R';
+        $script = $workingDir . $scriptName;
+        $scriptContents = $this->getCalicoST_Script1_NormalSpots($parameters);
+        Storage::put($script, $scriptContents);
+        // $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+        $shellScriptName = 'CalicoST.sh';
+        $script = $workingDir . $shellScriptName;
+        $scriptContents = $this->getCalicoST_Script2_Shell($sampleName);
+        Storage::put($script, $scriptContents);
+        $output = $this->spatialExecute('sh ' . $shellScriptName, $parameters['__task']);
+
+        $pythonScriptName = 'CalicoST.py';
+        $script = $workingDir . $pythonScriptName;
+        $scriptContents = $this->getCalicoST_Script3_Python($parameters);
+        // Storage::put($script, $scriptContents);
+        $output = $this->spatialExecute($scriptContents, $parameters['__task'], 'CALICOST');
+
+
+        $filesPath = $workingDir . $sampleName . "/calicost_output/clone{$parameters['n_clones']}_rectangle_best_w1.0/plots/";
+        $files = ['clone_spatial', 'total_cn'];
+        $_process_files = [];
+        $_renamed_files = [];
+        foreach($files as $file) {
+            $_file = $filesPath . $file;
+            $fileName = $sampleName . '_calicost_' . $file;
+            $file_public = $this->workingDirPublic() . $fileName;
+            if (Storage::fileExists($_file)) {
+                Storage::delete($file_public);
+                Storage::move($_file, $file_public . '.svg');
+                $_renamed_files[] = $fileName . '.svg';
+                $_process_files[] = $fileName;
+            }
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'CalicoST', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'samples' => [$sampleName], 'base_path' => $this->workingDirPublicURL(), 'files' => ['clone_spatial' => $_renamed_files[0], 'total_cn' => $_renamed_files[1]]])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'CalicoST', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
+
+
+        return $output;
+    }
+
+
+    private function getCalicoST_Script1_NormalSpots($parameters)
+    {
+
+        $script = Storage::get("/common/templates/CalicoST_normal_spots.R");
+
+        $params = ['sample_name', 'annotation_name', 'cluster'];
+        foreach ($params as $param) {
+            $script = $this->replaceRscriptParameter($param, $parameters[$param], $script);
+        }
+
+        $script .= "\nprint('spatialGE_PROCESS_COMPLETED')";
+
+        return $script;
+    }
+
+    private function getCalicoST_Script2_Shell($sampleName) {
+
+        // $script = "cp {$sampleName}/{$sampleName}_filtered_feature_bc_matrix.h5 {$sampleName}/filtered_feature_bc_matrix.h5\n";
+        // $script .= "cp {$sampleName}/spatial/{$sampleName}_tissue_positions_list.csv {$sampleName}/spatial/tissue_positions_list.csv\n";
+
+        $script = "cd {$sampleName} && ln -s {$sampleName}_filtered_feature_bc_matrix.h5 filtered_feature_bc_matrix.h5\n";
+        $script .= "cd spatial && ln -s {$sampleName}_tissue_positions_list.csv tissue_positions_list.csv\n";
+        $script .= "cd ../../ && Rscript CalicoST_normal_spots.R\n";
+
+        return $script;
+    }
+
+
+    private function getCalicoST_Script3_Python($parameters) {
+
+        $script = "--spaceranger_dir /spatialGE/{$parameters['sample_name']} --normalidx_file /spatialGE/{$parameters['sample_name']}/calicost_barcodes.tsv --hgtable_file /opt/CalicoST/GRCh38_resources/hgTables_hg38_gencode.txt --output_dir /spatialGE/{$parameters['sample_name']}/calicost_output/ --num_initializations 3 --n_clones {$parameters['n_clones']} --maxspots_pooling 7";
+
+        return $script;
+
+    }
+
 
 
 

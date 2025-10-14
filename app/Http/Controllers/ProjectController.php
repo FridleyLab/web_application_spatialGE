@@ -785,6 +785,18 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
+    public function calicost(Project $project) {
+        $samples = $project->samples;
+        $color_palettes = ColorPalette::orderBy('label')->get();
+
+        return view('wizard.calicost')->with(compact('project', 'samples', 'color_palettes'));
+    }
+
+    public function calicost2(Project $project) {
+        $jobId = $project->createJob('CalicoST', 'CalicoST', request()->all());
+        return $project->getJobPositionInQueue($jobId);
+    }
+
     public function getGeneSetsFromGmtFile(Project $project) {
         $tmpFilePath = $project->workingDir();
         $tmpFileName = 'tmp.gmt';

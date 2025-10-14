@@ -137,6 +137,9 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/degas',[ProjectController::class, 'degas'])->name('degas')->middleware('project');
     Route::post('/projects/{project}/degas2',[ProjectController::class, 'degas2'])->name('degas2')->middleware('project');
 
+    Route::get('/projects/{project}/calicost',[ProjectController::class, 'calicost'])->name('calicost')->middleware('project');
+    Route::post('/projects/{project}/calicost2',[ProjectController::class, 'calicost2'])->name('calicost2')->middleware('project');
+
 });
 
 Route::get('/login',[SecurityController::class, 'login'])->name('login')->middleware('guest');

@@ -170,11 +170,11 @@ export default {
                 "degas_annotations": {"title": "Annotation to test", "text": "Select the annotation to run the analysis with."},
 
                 //CalicoST
-                "calicost_hgtable_file" : {"title": "HGTable file", "text": "The path to the location of genes in the genome. This file should be a tab-delimited file with the following columns: gene_name, chrom, cdsStart, cdsEnd."},
-                "calicost_normalidx_file" : {"title": "Normalidx file", "text": "The file containing the indices of normal spots in the spatial transcriptomics data. Each line is a single index without header."},
-                "calicost_n_clones" : {"title": "Number of clones", "text": "The number of clones to infer using only BAF signals. Default is 3."},
-                "calicost_num_initializations" : {"title": "Number of initializations", "text": "The number of initializations to run for the analysis. Default is 3."},
-                "calicost_maxspots_pooling" : {"title": "Maxspots pooling", "text": "The maximum number of spots to pool for the analysis. Default is 7."},
+                "calicost_sample_selection" : {"title": "Sample selection", "text": "Choose the sample to run CalicoST on."},
+                "calicost_annotation" : {"title": "Annotation to select normal spots from", "text": "Pick the annotation category to define normal spots for CalicoST."},
+                "calicost_annotation_clusters" : {"title": "Cluster(s) that will be considered normal spots", "text": "These spots will be used as controls in the CNV analysis. We recommend selecting immune cell spots."},
+                "calicost_n_clones" : {"title": "Number of clones", "text": "Sets the initial number of clones for HMRF configuration."},
+
                 // "" : {"title": "", "text": ""},
                 // "" : {"title": "", "text": ""},
                 // "" : {"title": "", "text": ""},

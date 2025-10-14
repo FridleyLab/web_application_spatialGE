@@ -3,7 +3,7 @@
         <div :class="showTissue ? 'd-xxl-flex' : ''">
             <div :class="showTissue ? 'w-50' : ''">
 
-                <object ref="svgObject" v-if="isSVG && !zoomEnabled" class="img-fluid" :data="src + '.' + fileExtension + (autoReload ? '?' + Date.now() : '')" type="image/svg+xml" style="pointer-events: none;"></object>
+                <object ref="svgObject" v-if="isSVG && !zoomEnabled" class="img-fluid w-100" :data="src + '.' + fileExtension + (autoReload ? '?' + Date.now() : '')" type="image/svg+xml" style="pointer-events: none;"></object>
 
                 <img v-if="!isSVG" :src="src + '.' + fileExtension + (autoReload ? '?' + Date.now() : '')" class="img-fluid" />
 
