@@ -54,6 +54,12 @@ class SampleController extends Controller
                             $fileType = $type;
                     }
 
+                    info('Storing file of type: ' . $fileType);
+                    info('Storing file: ' . $file->getClientOriginalName());
+                    info('Storing file of size: ' . $file->getSize());
+                    info('Storing file mime type: ' . $file->getMimeType());
+                    info('Is file valid: ' . ($file->isValid() ? 'YES' : 'NO'));
+
                     $fileModel = File::create(['filename' => $file->getClientOriginalName(), 'type' => $fileType]);
                     $sample->files()->save($fileModel);
 
