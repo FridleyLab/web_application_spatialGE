@@ -789,8 +789,8 @@ class Project extends Model
             $coordinateFiles = [];
             $imageFiles = [];
             foreach ($this->samples as $sample) {
-                $countFiles[] = $sample->name . '/' . $sample->expression_file->filename;
-                $coordinateFiles[] = $sample->name . '/spatial/' . $sample->coordinates_file->filename;
+                $countFiles[] = ($this->platform_name != 'COSMX' ? $sample->name . '/' : '') . $sample->expression_file->filename;
+                $coordinateFiles[] = ($this->platform_name != 'COSMX' ? $sample->name . '/spatial/' : '') . $sample->coordinates_file->filename;
                 if ($sample->has_image) {
                     $imageFiles[] = $sample->name . '/spatial/' . $sample->image_file->filename;
                 }

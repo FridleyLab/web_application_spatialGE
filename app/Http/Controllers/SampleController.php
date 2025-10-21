@@ -41,10 +41,13 @@ class SampleController extends Controller
 
                 $projectFolder = $userFolder . $projectId . '/';
                 Storage::createDirectory($projectFolder);
-                $sampleFolder = $projectFolder . $sample->name . '/';
-                $sampleFolderSpatial = $sampleFolder . 'spatial/';
-                Storage::createDirectory($sampleFolder);
-                Storage::createDirectory($sampleFolderSpatial);
+
+                if($project->platform_name != 'COSMX') {
+                    $sampleFolder = $projectFolder . $sample->name . '/';
+                    $sampleFolderSpatial = $sampleFolder . 'spatial/';
+                    Storage::createDirectory($sampleFolder);
+                    Storage::createDirectory($sampleFolderSpatial);
+                }
 
                 foreach(request()->file('files') as $key => $file) {
 
@@ -104,10 +107,10 @@ class SampleController extends Controller
                     }
                     elseif($project->platform_name === 'COSMX') {
                         if ($fileType === 'expressionFile') {
-                            $file->storeAs($sampleFolder, $fileName);
+                            $file->storeAs($projectFolder, $fileName);
                         }
                         if ($fileType === 'coordinatesFile') {
-                            $file->storeAs($sampleFolderSpatial, $fileName);
+                            $file->storeAs($projectFolder, $fileName);
                         }
                     }
 
