@@ -368,8 +368,6 @@ class Project extends Model
 
         if(!$tasks->count()) return '';
 
-
-
         $dict = Storage::get('common/parameters_dictionary.json');
         $dict = json_decode($dict);
         $CSV = "";
@@ -397,13 +395,16 @@ class Project extends Model
                             if(is_array($tmp)) {
                                 $tmp = '[' . implode('; ', $tmp) . ']' ;
                             }
-                            if(is_object($tmp)) {
+                            else if(is_object($tmp)) {
                                 $tmp_str = '';
                                 foreach(get_object_vars($tmp) as $key => $val) {
                                     if($tmp_str !== '') { $tmp_str .= ';'; }
                                     $tmp_str .= $key . ': ' . $val;
                                 }
                                 $tmp = '[' . $tmp_str . ']';
+                            }
+                            else if(is_string($tmp) && str_contains($tmp, ',')) {
+                                $tmp = str_replace(',', ';', $tmp);
                             }
 
                             $CSV .= $tmp . ','; //Value
@@ -667,7 +668,7 @@ class Project extends Model
 
         $workingDir = $this->workingDir();
 
-        $scriptName = 'STList.R';
+        $scriptName = 'createSTList.R';
         $script = $workingDir . $scriptName;
 
         $scriptContents = $this->getStListScript();
@@ -763,6 +764,16 @@ class Project extends Model
     public function getStListScript(): string
     {
 
+        $auxFiles = ['detect_input.R', 'STList.R'];
+        foreach ($auxFiles as $auxFile) {
+            $file = 'common/templates/temp_xenium/' . $auxFile;
+            $file_destination = $this->workingDir() . $auxFile;
+            if (Storage::fileExists($file)) {
+                $data = Storage::read($file);
+                Storage::put($file_destination, $data);
+            }
+        }
+
         $params = $this->getProjectParametersAttribute();
         $sampleNames = array_key_exists('metadata_names', $params) ? sizeof($params['metadata_names']) : 0;
         $sampleNames = $sampleNames ? "'clinical_data.csv'" : "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
@@ -824,6 +835,20 @@ class Project extends Model
 setwd('/spatialGE')
 # Load the package
 library('spatialGE')
+
+
+
+###Temporary fix to import Xenium samples
+# this changes should be included in the repository after testing
+if (file.exists('detect_input.R')) {
+  source('detect_input.R')
+}
+if (file.exists('STList.R')) {
+  source('STList.R')
+}
+###
+
+
 
 # Specify paths to files/directories containing counts data
 count_files = c($countFiles)
@@ -4239,9 +4264,10 @@ lapply(names(grad_res), function(i){
 
             foreach($sampleNames as $sampleName) {
 
-                $_files = [$sampleName . '_degas_predictions_corr.csv', $sampleName . '_degas_predictions_spatial_smooth.csv'];
+                $_files = [$sampleName . '_degas_predictions_corr.csv', $sampleName . '_degas_predictions_spatial_smooth.csv', $sampleName . '_final_features.txt'];
 
                 foreach($_files as $dataFile) {
+
                     $_file = $workingDir . $dataFile;
                     $file_public = $this->workingDirPublic() . $dataFile;
                     if (Storage::fileExists($_file)) {

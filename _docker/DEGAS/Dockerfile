@@ -46,6 +46,11 @@ RUN apt-get update && \
 RUN R -e "install.packages(c('magrittr','tidyr','dplyr','tibble','Rtsne','ggplot2','Matrix'), repos='https://cloud.r-project.org/')"
 RUN R -e "if (!require('remotes')) install.packages('remotes', repos='https://cloud.r-project.org/')"
 RUN R -e "remotes::install_github('tsteelejohnson91/DEGAS')"
+
+RUN R -e "if (!requireNamespace('BiocManager', quietly=TRUE)) install.packages('BiocManager')" && \
+    R -e "BiocManager::install('limma', ask=FALSE)"
+
+
 RUN R -e "if (!require('TCGAretriever')) install.packages('TCGAretriever', repos='https://cloud.r-project.org/')"
 
 
@@ -59,12 +64,18 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 # Create conda environment for DEGAS
-RUN conda create -y -n degas_env python=3.9 tensorflow=2.5.0 && \
+# RUN conda create -y -n degas_env python=3.9 tensorflow=2.5.0 && \
+#     $CONDA_DIR/bin/conda run -n degas_env pip install numpy==1.23.5 && \
+#     conda clean -a
+RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r && \
+    conda create -y -n degas_env python=3.9 tensorflow=2.5.0 && \
     $CONDA_DIR/bin/conda run -n degas_env pip install numpy==1.23.5 && \
-    conda clean -a
+    conda clean -afy
+
 
 # Set working directory
-WORKDIR /workspace
+WORKDIR /spatialGE
 
 # Copy scripts into the container
 #COPY degas_spatialge_part_1_tcga.R ./

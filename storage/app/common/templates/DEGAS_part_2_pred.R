@@ -19,8 +19,6 @@
 # USER ARGUMENTS:
 # Clinical variable (first column of clinical key)
 clin_var = '#{tcga_feature}#'
-# Category within "clin_var" (second column of clinical key)
-#clin_cat = 'BRCA_LumA'
 # One of the annotations generated in Spatial Domain Detection
 ann_test = '#{annotation}#' #This one kept running and running
 #ann_test = 'stclust_spw0_k2' #This one works
@@ -29,13 +27,15 @@ cnn_layers = #{number_of_layers}#
 # Text box, integer - Number of model bootstraps
 bootstraps = #{bootstraps}#
 # Zero gene count threshold (Slided 0-1)
-zero_thr = #{zero_thr}#
+zero_thr = #{zero_thr}# # For Visium or CosMx 6K or Xenium 5K
+# zero_thr = 0.1 # For CosMx 1K
 # Top variable genes percentile (slider 0-1)
-top_var = #{top_var}#
+top_var = #{top_var}# # For Visium or CosMx 6K or Xenium 5K
+# top_var = 0.5 # for CosMx 1K
 # Filter out annotation groups with < min_cells cells
 min_cells = 50
 # Top variable genes percentile (slider 0-0.5) for TCGA bulk RNAseq
-top_var_bulkdata = 0.1
+#top_var_bulkdata = 0.1
 
 
 ########### ANALYSIS BEGINS: ###########
@@ -43,6 +43,7 @@ top_var_bulkdata = 0.1
 library('magrittr')
 library('tibble')
 library('DEGAS')
+library(limma)
 
 # Load TCGA data
 clinical_dat = readRDS('user_tcga_clinical_data.RDS')
@@ -53,14 +54,6 @@ if(any(molecular_dat < 0)){
   molecular_dat = molecular_dat + abs(min(molecular_dat, na.rm=T))
 }
 
-# Select high variance genes in TCGA data
-pt_vars = apply(molecular_dat, 1, sd, na.rm=T)
-molecular_dat = molecular_dat[pt_vars > quantile(pt_vars, 1-top_var_bulkdata, na.rm=T), ]
-
-# Scale TCGA data
-tcga_proc = t(apply(t(molecular_dat), 1, DEGAS::scaleFunc))
-
-rm(molecular_dat, pt_vars) # Clean env
 
 risk_cat = c(#{risk_cat}#)
 non_risk_cat = c(#{non_risk_cat}#)
@@ -71,21 +64,58 @@ clinical_dat[[clin_var]] <- tolower(clinical_dat[[clin_var]])
 risk_cat <- tolower(risk_cat)
 non_risk_cat <- tolower(non_risk_cat)
 
+# Build risk/non-risk labels
+group <- ifelse(clinical_dat[[clin_var]] %in% risk_cat, "risk",
+                ifelse(clinical_dat[[clin_var]] %in% non_risk_cat, "non_risk", NA))
 # Update tcga_labels
 tcga_labels = ifelse(clinical_dat[[clin_var]] %in% risk_cat, 'risk',
                 ifelse(clinical_dat[[clin_var]] %in% non_risk_cat, 'non_risk', NA))
 
-# Remove NA values
-if (any(is.na(tcga_labels))) {
-    warning("Removing rows with NA in tcga_labels.")
-    clinical_dat = clinical_dat[!is.na(tcga_labels), ]
-    tcga_proc = tcga_proc[!is.na(tcga_labels), , drop = TRUE]  # Ensure tcga_proc matches filtered rows
-    tcga_labels = tcga_labels[!is.na(tcga_labels)]
+# ---------------------------------------------
+# Remove samples without labels
+# ---------------------------------------------
+keep <- !is.na(group)
+if (any(!keep)) {
+  warning("Removing patients without risk category.")
 }
+molecular_mat <- molecular_dat[, keep, drop = FALSE]
+clinical_dat  <- clinical_dat[keep, ]
+group         <- group[keep]
+group <- factor(group, levels = c("non_risk","risk"))
 
-tcga_labels = toOneHot(tcga_labels)
-# Make first column "risk_cat"
-tcga_labels = tcga_labels[, c('risk', 'non_risk')]
+# ---------------------------------------------
+# Differential Expression Analysis (limma)
+# ---------------------------------------------
+design <- model.matrix(~ group)
+fit <- lmFit(log2(molecular_mat + 1), design)
+fit <- eBayes(fit)
+
+# Get all genes ranked by risk vs non_risk contrast
+tt <- topTable(fit, coef = "grouprisk", number = Inf)
+
+# Select DE genes (choose your cutoff)
+de_genes <- rownames(tt[tt$adj.P.Val < 0.05 & abs(tt$logFC)>0.58, ])
+cat("Selected", length(de_genes), "DE genes\n")
+
+# Subset molecular data to DE genes only
+molecular_dat <- molecular_mat[de_genes, , drop = FALSE]
+
+# ---------------------------------------------
+# Scale TCGA data (DEGAS format)
+# ---------------------------------------------
+tcga_proc <- t(apply(t(molecular_dat), 1, DEGAS::scaleFunc))
+
+rm(molecular_mat, fit)  # clean workspace
+
+# ---------------------------------------------
+# Create one-hot labels for DEGAS
+# ---------------------------------------------
+tcga_labels_raw <- group
+tcga_labels <- toOneHot(tcga_labels_raw)
+
+# reorder columns: risk first
+tcga_labels <- tcga_labels[, c("risk", "non_risk")]
+
 
 # Load STlist
 load('stclust_stlist.RData')
@@ -106,13 +136,41 @@ st_counts = lapply(names(stlist@counts), function(i){
 
   # Select top variable and top expressed features
   st_prcnonzero = Matrix::rowSums(cd_tmp > 0)/ncol(cd_tmp)
-  st_vars = apply(cd_tmp, 1, var)
+  st_vars = apply(log2(cd_tmp+1), 1, var)
   st_selected = rownames(cd_tmp)[ (st_prcnonzero > zero_thr & st_vars >
-                                     quantile(st_vars, 1-top_var)) ]
+                                     quantile(st_vars, 1-top_var,na.rm = TRUE)) ]
   final_features = intersect(colnames(tcga_proc), st_selected)
+  message(i, ": keeping ", length(final_features), " overlapping genes")
+
+  # ============================
+  # If >250 genes → prioritization
+  # ============================
+  if (length(final_features) > 250) {
+    message("  → More than 250 genes detected, selecting top 250…")
+    # 1. TCGA DE priority: rank by |logFC| (or −log10(FDR))
+    tcga_table <- tt[final_features, , drop = FALSE]
+
+    # If missing values, replace with 0
+    tcga_table$logFC[is.na(tcga_table$logFC)] <- 0
+    tcga_table$adj.P.Val[is.na(tcga_table$adj.P.Val)] <- 1
+
+    # TCGA DE score
+    tcga_score <- abs(tcga_table$logFC) + -log10(tcga_table$adj.P.Val + 1e-12)
+    names(tcga_score)<-rownames(tcga_table)
+    # Rank
+    ranked_genes <- names(sort(tcga_score, decreasing = TRUE))
+    # Keep top 250
+    final_features <- ranked_genes[1:250]
+  }
+
+  # --------------------------------------------
+  # Write final_features to a text file
+  # --------------------------------------------
+  out_file <- paste0(i, "_final_features.txt")
+  write.table(final_features, out_file, quote = FALSE, row.names = FALSE, col.names = FALSE)
+  message(" Saved feature list to: ", out_file)
 
   cd_tmp = as.data.frame(as.matrix(cd_tmp[final_features, ]))
-
   return(cd_tmp)
 })
 

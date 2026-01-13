@@ -106,7 +106,7 @@
             </div>
 
             <div class="p-3 text-center mt-4 mb-3">
-                <send-job-button label="Run DEGAS" :disabled="processing || !canRunDEGAS" :project-id="project.id" job-name="DEGAS" @started="runDEGAS" @ongoing="processing = true" @completed="" :project="project" ></send-job-button>
+                <send-job-button label="Run DEGAS" :disabled="processing || !canRunDEGAS" :project-id="project.id" job-name="DEGAS" @started="runDEGAS" @ongoing="processing = true" @completed="processCompleted" :project="project" ></send-job-button>
             </div>
 
 
@@ -222,7 +222,7 @@ import Multiselect from '@vueform/multiselect';
                 tcga_categories_non_risk: [],
 
                 params: {
-                    zero_thr: 0.25,
+                    zero_thr: 0.3,
                     top_var: 0.2,
                     annotation: null,
                     number_of_layers: 3,
@@ -475,7 +475,13 @@ import Multiselect from '@vueform/multiselect';
                 });
 
                 this.loaded = true;
-            }
+            },
+
+            async processCompleted() {
+                this.DEGAS = 'DEGAS' in this.project.project_parameters ? JSON.parse(this.project.project_parameters['DEGAS']) : null;
+                this.loadResults();
+                this.processing = false;
+            },
 
         },
 

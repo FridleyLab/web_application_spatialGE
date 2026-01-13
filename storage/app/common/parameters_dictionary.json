@@ -144,5 +144,16 @@
     "SPARK": {
         "samples": "List of samples",
         "thr": "thr"
+    },
+    "DEGAS": {
+        "tcga_study": "Bulk-RNA expression study",
+        "tcga_feature": "Clinical Feature",
+        "risk_cat": "Risk categories",
+        "non_risk_cat": "Non-risk categories",
+        "zero_thr": "Threshold for removing non-expressed genes in the study",
+        "top_var": "Top variable genes percentile",
+        "number_of_layers": "Number of layers in the neural network",
+        "bootstraps": "Number of Bootstrap samples",
+        "annotation": "Annotation to test"
     }
 }
