@@ -71,7 +71,7 @@
                             <label>Top variable genes percentile:&nbsp;</label>
                             <input type="number" step="0.05" class="text-end text-sm border border-1 rounded w-30 w-sm-15 w-md-10 w-xxl-10" v-model="params.top_var"><show-modal tag="degas_top_var_genes"></show-modal>
                         </div>
-                        <input v-if="params.top_var" type="range" min="0" max="0.5" step="0.05" class="w-100" v-model="params.top_var">
+                        <input v-if="params.top_var" type="range" min="0" max="1" step="0.05" class="w-100" v-model="params.top_var">
                     </div>
                 </div>
 
@@ -281,8 +281,8 @@ import Multiselect from '@vueform/multiselect';
                 if(newValue < 0) {
                     this.params.top_var = 0;
                 }
-                if(newValue > 0.5) {
-                    this.params.top_var = 0.5;
+                if(newValue > 1) {
+                    this.params.top_var = 1;
                 }
             },
 
