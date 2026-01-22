@@ -439,6 +439,10 @@ import Multiselect from '@vueform/multiselect';
                         return;
                     }
 
+                    if(file.includes('final_features')) {
+                        return;
+                    }
+
                     axios.get(base_url + file + '?cachebuster=' + timestamp)
                         .then((response) => {
 
