@@ -6,7 +6,7 @@
                 <div class="row row-cols-4">
                     <!-- <div v-for="file in process.data.downloadable" class="col my-2"> -->
                     <div v-for="file in data.files" class="col my-2">
-                        <a class="border rounded rounded-2 border-1 px-2 py-1" :href="'/admin-download-file/' + data.projectId + '/' + file" download>{{ file }}</a>
+                        <a class="border rounded rounded-2 border-1 px-2 py-1" :title="file" :href="'/admin-download-file/' + data.projectId + '/' + file" download>{{ getDisplayName(file) }}</a>
                     </div>
                 </div>
             </div>
@@ -59,6 +59,18 @@ export default {
                     this.loading = false;
                 });
         },
+
+        getDisplayName(fileName) {
+            let displayName = fileName;
+            if(fileName.length > 30) {
+                let parts = fileName.split('.');
+                displayName = parts[0].substring(0, 25) + '...';
+                if(parts.length) {
+                    displayName += parts.at(-1);
+                }
+            }
+            return displayName;
+        }
 
     },
 };
