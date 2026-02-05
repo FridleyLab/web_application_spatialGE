@@ -20,7 +20,7 @@
 # Clinical variable (first column of clinical key)
 clin_var = '#{tcga_feature}#'
 # One of the annotations generated in Spatial Domain Detection
-ann_test = '#{annotation}#' #This one kept running and running
+ann_test = '#{annotation}#'
 #ann_test = 'stclust_spw0_k2' #This one works
 # Text box, integer - Number of CN layers
 cnn_layers = #{number_of_layers}#
@@ -36,6 +36,8 @@ top_var = #{top_var}# # For Visium or CosMx 6K or Xenium 5K
 min_cells = 50
 # Top variable genes percentile (slider 0-0.5) for TCGA bulk RNAseq
 #top_var_bulkdata = 0.1
+# Cutoff for adj.P.Val in TCGA DE analysis
+TCGA_adj_P = #{tcga_adj_p}# # set default at 0.05, the range is 0.05 - 0.2
 
 
 ########### ANALYSIS BEGINS: ###########
@@ -94,8 +96,9 @@ fit <- eBayes(fit)
 tt <- topTable(fit, coef = "grouprisk", number = Inf)
 
 # Select DE genes (choose your cutoff)
-de_genes <- rownames(tt[tt$adj.P.Val < 0.05 & abs(tt$logFC)>0.58, ])
+de_genes <- rownames(tt[tt$adj.P.Val < TCGA_adj_P & abs(tt$logFC)>0.58, ])
 cat("Selected", length(de_genes), "DE genes\n")
+
 
 # Subset molecular data to DE genes only
 molecular_dat <- molecular_mat[de_genes, , drop = FALSE]
@@ -206,15 +209,30 @@ tcga_proc[is.na(tcga_proc)] = 0
 initDEGAS()
 setPython('/opt/conda/envs/degas_env/bin/python')
 tmpDir = './tmp/'
-DEGAS_model = lapply(1:length(st_counts_proc), function(i){
+DEGAS_model = lapply(3:length(st_counts_proc), function(i){
+  cat("i=",i)
   set_seed_term(12345)
   #min_cells <- min_cells
   bad_types <- which(colSums(st_labels[[i]]) < min_cells)
+
+n_domains_after <- ncol(st_labels[[i]]) - length(bad_types)
+
+ if (n_domains_after < 2) {
+    message(sprintf(
+     "WARNING! Sample %d skipped: only %d domain(s) would remain after min_cells = %d. DEGAS requires ≥2 domains.",
+     i, n_domains_after, min_cells
+    ))
+   return(NULL)
+  }
+
   if (length(bad_types)) {
     keep_cells <- rowSums(st_labels[[i]][, bad_types, drop = FALSE]) == 0
     st_counts_proc[[i]] <- st_counts_proc[[i]][ keep_cells,]
     st_labels[[i]] <- st_labels[[i]][keep_cells, -bad_types ]
   }
+
+
+
   tcga_proc_tmp = tcga_proc[, colnames(tcga_proc) %in% colnames(st_counts_proc[[i]])]
 
   if (nrow(st_counts_proc[[i]]) > 24000){

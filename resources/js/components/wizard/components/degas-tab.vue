@@ -75,6 +75,16 @@
                     </div>
                 </div>
 
+                <div class="row justify-content-center text-center m-4">
+                    <div class="w-xxl-100">
+                        <div class="me-3">
+                            <label>Cutoff for adjusted P-value in TCGA DE analysis:&nbsp;</label>
+                            <input type="number" step="0.01" class="text-end text-sm border border-1 rounded w-30 w-sm-15 w-md-10 w-xxl-10" v-model="params.tcga_adj_p"><show-modal tag="degas_top_var_genes"></show-modal>
+                        </div>
+                        <input v-if="params.tcga_adj_p" type="range" min="0.05" max="0.2" step="0.01" class="w-100" v-model="params.tcga_adj_p">
+                    </div>
+                </div>
+
                 <div class="row text-center align-content-center">
                     <div class="w-50">
                         <div>Number of layers in the neural network <show-modal tag="degas_number_of_layers"></show-modal></div>
@@ -231,6 +241,7 @@ import Multiselect from '@vueform/multiselect';
                     tcga_feature: null,
                     risk_cat: '',
                     non_risk_cat: '',
+                    tcga_adj_p: 0.05
                 },
 
                 processing: false,
@@ -283,6 +294,15 @@ import Multiselect from '@vueform/multiselect';
                 }
                 if(newValue > 1) {
                     this.params.top_var = 1;
+                }
+            },
+
+            'params.tcga_adj_p': function(newValue, oldValue) {
+                if(newValue < 0.05) {
+                    this.params.tcga_adj_p = 0.05;
+                }
+                if(newValue > 0.2) {
+                    this.params.tcga_adj_p = 0.2;
                 }
             },
 
