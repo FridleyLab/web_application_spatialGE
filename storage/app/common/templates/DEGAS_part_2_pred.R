@@ -209,7 +209,8 @@ tcga_proc[is.na(tcga_proc)] = 0
 initDEGAS()
 setPython('/opt/conda/envs/degas_env/bin/python')
 tmpDir = './tmp/'
-DEGAS_model = lapply(3:length(st_counts_proc), function(i){
+DEGAS_model = setNames(
+  lapply(seq_along(snames), function(i){
   cat("i=",i)
   set_seed_term(12345)
   #min_cells <- min_cells
@@ -252,32 +253,42 @@ n_domains_after <- ncol(st_labels[[i]]) - length(bad_types)
   }
 
   return(mod_tmp)
-})
+}), snames)
 
+names(st_counts_proc) <- snames
 
 # Calculate label probabilities
-DEGAS_preds = lapply(1:length(DEGAS_model), function(i){
-  preds_tmp = predClassBag(DEGAS_model[[i]], st_counts_proc[[i]], "pat")
-
-  return(preds_tmp)
+DEGAS_preds <- lapply(snames, function(s){
+  if (is.null(DEGAS_model[[s]])) return(NULL)
+  predClassBag(DEGAS_model[[s]], st_counts_proc[[s]], "pat")
 })
+names(DEGAS_preds) <- snames
 
 # Create table with results for plotting
-plot_ls = lapply(1:length(DEGAS_preds), function(i){
-  # add removed cells back and assign NA
-  all_cells <- st_coords[[i]]$libname
-  DEGAS_preds[[i]] <- DEGAS_preds[[i]][match(all_cells, rownames(DEGAS_preds[[i]])), , drop = FALSE]
-  rownames(DEGAS_preds[[i]]) <- all_cells
+plot_ls = lapply(snames, function(s){
+  if (is.null(DEGAS_preds[[s]])) return(NULL)
 
-  corrs_tmp = toCorrCoeff(DEGAS_preds[[i]][, 1])
-  df_tmp = st_coords[[i]] %>%
-    tibble::add_column(pred_corr=corrs_tmp) %>%
-    tibble::add_column(pred_corr_spatial_smooth=knnSmooth(corrs_tmp, as.matrix(st_coords[[i]][c(2, 3)])))
+  all_cells <- st_coords[[s]]$libname
+  preds <- DEGAS_preds[[s]][match(all_cells, rownames(DEGAS_preds[[s]])), , drop = FALSE]
+  rownames(preds) <- all_cells
+
+  corrs_tmp <- toCorrCoeff(preds[, 1])
+
+  st_coords[[s]] %>%
+    tibble::add_column(pred_corr = corrs_tmp) %>%
+    tibble::add_column(
+      pred_corr_spatial_smooth = knnSmooth(
+        corrs_tmp,
+        as.matrix(st_coords[[s]][c(2, 3)])
+      )
+    )
 })
-names(plot_ls) = snames
+names(plot_ls) <- snames
+
 
 # Save results to file
 lapply(snames, function(i){
+  if (is.null(plot_ls[[i]])) return(NULL)
   # Only select columns 2, 3, and 4 for output
   df_out = plot_ls[[i]][, c(1,2:4)]
   write.csv(df_out,
@@ -289,6 +300,3 @@ lapply(snames, function(i){
             paste0(i, '_degas_predictions_spatial_smooth.csv'),
             quote=F, row.names=F)
 })
-
-
-print('spatialGE_PROCESS_COMPLETED')
