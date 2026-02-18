@@ -148,6 +148,16 @@
 
             <color-palettes @colors="colors => colorPalette = colors" palette-type="GRADIENT" default-palette="sunset"></color-palettes>
 
+            <div class="m-4" v-if="('removed_samples' in DEGAS) && DEGAS.removed_samples.length > 0">
+                <div class="text-danger text-2xl text-center">The following samples were removed because ...</div>
+                <div class="mb-4 text-lg text-center">
+
+                        <div v-for="sampleName in DEGAS.removed_samples">{{ sampleName }}</div>
+
+                </div>
+
+            </div>
+
             <ul class="nav nav-tabs" id="DEGAStabs" role="tablist">
                 <template v-for="(sample, index) in projectSamples">
                     <li v-if="DEGAS.samples.includes(sample.name)" class="nav-item" role="presentation">
@@ -403,7 +413,15 @@ import Multiselect from '@vueform/multiselect';
 
             await this.loadResults();
 
-            console.log('DEGAS results loaded', this.results);
+            // console.log('DEGAS results loaded', this.results);
+            // console.log('Project Parameters------');
+            // console.log(this.DEGAS);
+
+            // if('removed_samples' in this.DEGAS) {
+            //     console.log('removed samples:');
+            //     console.log(this.DEGAS.removed_samples);
+            // }
+
         },
 
         methods: {

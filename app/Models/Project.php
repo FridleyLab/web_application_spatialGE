@@ -4278,7 +4278,20 @@ lapply(names(grad_res), function(i){
                 }
             }
 
-            ProjectParameter::updateOrCreate(['parameter' => 'DEGAS', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'samples' => $sampleNames, 'base_path' => $this->workingDirPublicURL(), 'files' => $_process_files])]);
+            //Check for removed samples
+            $dataFile = 'DEGAS_removed_samples.csv';
+            $_file = $workingDir . $dataFile;
+            $file_public = $this->workingDirPublic() . $dataFile;
+            $removedSamples = [];
+            if (Storage::fileExists($_file)) {
+                $removedSamplesTxt = Storage::get($_file);
+                $removedSamples = strlen(trim($removedSamplesTxt)) > 0 ? explode(',', $removedSamplesTxt) : [];
+                Storage::delete($file_public);
+                Storage::move($_file, $file_public);
+                $_process_files[] = $dataFile;
+            }
+
+            ProjectParameter::updateOrCreate(['parameter' => 'DEGAS', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['parameters' => $parameters, 'samples' => $sampleNames, 'removed_samples' => $removedSamples, 'base_path' => $this->workingDirPublicURL(), 'files' => $_process_files])]);
             ProjectProcessFiles::updateOrCreate(['process' => 'DEGAS', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
         }
 

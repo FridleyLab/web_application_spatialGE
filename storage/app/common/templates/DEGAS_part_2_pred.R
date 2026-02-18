@@ -206,6 +206,7 @@ rm(st_counts) # Clean env
 tcga_proc[is.na(tcga_proc)] = 0
 
 # Train models
+removed_samples <- list()
 initDEGAS()
 setPython('/opt/conda/envs/degas_env/bin/python')
 tmpDir = './tmp/'
@@ -219,6 +220,7 @@ DEGAS_model = setNames(
 n_domains_after <- ncol(st_labels[[i]]) - length(bad_types)
 
  if (n_domains_after < 2) {
+    removed_samples <- c(removed_samples, list(i))
     message(sprintf(
      "WARNING! Sample %d skipped: only %d domain(s) would remain after min_cells = %d. DEGAS requires ≥2 domains.",
      i, n_domains_after, min_cells
@@ -254,6 +256,8 @@ n_domains_after <- ncol(st_labels[[i]]) - length(bad_types)
 
   return(mod_tmp)
 }), snames)
+
+write.table(removed_samples, 'DEGAS_removed_samples.csv',sep=',', row.names = FALSE, col.names=FALSE, quote=FALSE)
 
 names(st_counts_proc) <- snames
 
