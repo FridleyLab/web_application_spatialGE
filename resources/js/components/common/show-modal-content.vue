@@ -164,6 +164,7 @@ export default {
                 "degas_category_risk": {"title": "Risk categories", "text": "Select the categories that apply within the clinical feature."},
                 "degas_category_non_risk": {"title": "Non-risk categories", "text": "Select the categories that apply within the clinical feature."},
                 "degas_threshold": {"title": "Threshold for removing non-expressed genes in the study", "text": "Gene will be removed from analysis if  X% of samples have no expression measured for this gene."},
+                "degas_cutoff": {"title": "P-value cutoff", "text": "Cutoff for adjusted P-value in TCGA DE analysis."},
                 "degas_top_var_genes": {"title": "Top variable genes percentile", "text": "The selected percentile will be used to select the most variable genes for prediction analysis (i.e., the top X% of most variable genes will be used in the prediction analysis."},
                 "degas_number_of_layers": {"title": "Number of layers in the neural network", "text": "The number of layers in the neural network for prediction analysis. The recommend default value is 3."},
                 "degas_boostraps": {"title": "Number of Bootstrap samples", "text": "The number of bootstrap samples for model assessment. The recommend value is between 5 and 7. The higher the value, the more time the analysis will take. To begin with, we recommend 5."},

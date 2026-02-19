@@ -79,7 +79,7 @@
                     <div class="w-xxl-100">
                         <div class="me-3">
                             <label>Cutoff for adjusted P-value in TCGA DE analysis:&nbsp;</label>
-                            <input type="number" step="0.01" class="text-end text-sm border border-1 rounded w-30 w-sm-15 w-md-10 w-xxl-10" v-model="params.tcga_adj_p"><show-modal tag="degas_top_var_genes"></show-modal>
+                            <input type="number" step="0.01" class="text-end text-sm border border-1 rounded w-30 w-sm-15 w-md-10 w-xxl-10" v-model="params.tcga_adj_p"><show-modal tag="degas_cutoff"></show-modal>
                         </div>
                         <input v-if="params.tcga_adj_p" type="range" min="0.05" max="0.2" step="0.01" class="w-100" v-model="params.tcga_adj_p">
                     </div>
@@ -149,7 +149,7 @@
             <color-palettes @colors="colors => colorPalette = colors" palette-type="GRADIENT" default-palette="sunset"></color-palettes>
 
             <div class="m-4" v-if="('removed_samples' in DEGAS) && DEGAS.removed_samples.length > 0">
-                <div class="text-danger text-2xl text-center">The following samples were removed because ...</div>
+                <div class="text-danger text-2xl text-center">The following samples were removed due to inability to fit the model due to parameter settings and/or annotation selection. The analysis is only able to be run on a sample if there is sufficient number of spots/cells per domain</div>
                 <div class="mb-4 text-lg text-center">
 
                         <div v-for="sampleName in DEGAS.removed_samples">{{ sampleName }}</div>
