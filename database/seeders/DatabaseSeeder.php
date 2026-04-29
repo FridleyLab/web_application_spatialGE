@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
      *
      * @return void
      */
-    public function run() : void
+    public function run(): void
     {
         // \App\Models\User::factory(10)->create();
 
@@ -30,35 +30,35 @@ class DatabaseSeeder extends Seeder
             ProjectStepSeeder::class,
             ProfileIndustrySeeder::class,
             ProfileJobSeeder::class,
-            ProfileInterestSeeder::class
+            ProfileInterestSeeder::class,
+            ProjectPlatformSeeder::class
         ]);
 
         //Insert initial parameters into the DB
         DB::unprepared(file_get_contents(dirname(__FILE__) . '/init.sql'));
 
-        if(!app()->isProduction()) {
+        // if (!app()->isProduction()) {
 
-            //Create test user with project, samples, etc.
-            DB::unprepared(file_get_contents(dirname(__FILE__) . '/dev.sql'));
+        //     //Create test user with project, samples, etc.
+        //     DB::unprepared(file_get_contents(dirname(__FILE__) . '/dev.sql'));
 
-            //Copy sample files and R scripts
-            $src_folder = dirname(__FILE__) . '/dev/*';
-            $dest_folder = Storage::path('');
-            $process = Process::run("cp -r $src_folder $dest_folder");
+        //     //Copy sample files and R scripts
+        //     $src_folder = dirname(__FILE__) . '/dev/*';
+        //     $dest_folder = Storage::path('');
+        //     $process = Process::run("cp -r $src_folder $dest_folder");
 
-            /*DB::table('users')->insert([
-                'id' => '9999',
-                'first_name' => 'TestFirstName',
-                'last_name' => 'TestLastName',
-                'email' => 'test@moffitt.org',
-                'password' => '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', //12345678
-                'email_verification_code' => 'verified',
-                'email_verified_at' => Carbon::now(),
-                'industry' => 'test',
-                'job' => 'test',
-                'interest' => 'test'
-            ]);*/
-
-        }
+        //     /*DB::table('users')->insert([
+        //         'id' => '9999',
+        //         'first_name' => 'TestFirstName',
+        //         'last_name' => 'TestLastName',
+        //         'email' => 'test@moffitt.org',
+        //         'password' => '$2y$10$4jUWqrhPUAAPPDt8EfLLl.15IWBQIBs4pjl.j.pJO4EDnzQiD8Tou', //12345678
+        //         'email_verification_code' => 'verified',
+        //         'email_verified_at' => Carbon::now(),
+        //         'industry' => 'test',
+        //         'job' => 'test',
+        //         'interest' => 'test'
+        //     ]);*/
+        // }
     }
 }

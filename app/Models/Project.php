@@ -53,12 +53,14 @@ class Project extends Model
         return $this->hasMany(ProjectParameter::class);
     }
 
-    public function updateLastAccess() {
+    public function updateLastAccess()
+    {
         $this->last_accessed_at = Carbon::now();
         $this->save();
     }
 
-    public function isDemoProject() {
+    public function isDemoProject()
+    {
         return $this->parameters()->where('parameter', 'isDemoProject')->count();
     }
 
@@ -102,19 +104,23 @@ class Project extends Model
         return 'UNKNOWN';
     }
 
-    public function isVisiumPlatform() {
+    public function isVisiumPlatform()
+    {
         return $this->project_platform_id === self::VISIUM_PLATFORM;
     }
 
-    public function isGenericPlatform() {
+    public function isGenericPlatform()
+    {
         return $this->project_platform_id === self::GENERIC_PLATFORM;
     }
 
-    public function isCosmxPlatform() {
+    public function isCosmxPlatform()
+    {
         return $this->project_platform_id === self::COSMX_PLATFORM;
     }
 
-    private function setSTdiffData($data) {
+    private function setSTdiffData($data)
+    {
 
         //sort($data);
 
@@ -129,7 +135,8 @@ class Project extends Model
         fclose($file);
     }
 
-    private function getSTdiffData() {
+    private function getSTdiffData()
+    {
 
         $data = [];
 
@@ -140,8 +147,8 @@ class Project extends Model
             $lines = explode("\n", $_data);
             //sort($lines);
 
-            foreach($lines as $line) {
-                if(strlen(trim($line))) {
+            foreach ($lines as $line) {
+                if (strlen(trim($line))) {
                     $data[] = explode(',', $line);
                 }
             }
@@ -150,7 +157,8 @@ class Project extends Model
         return $data;
     }
 
-    public function getSTdiffAnnotations() {
+    public function getSTdiffAnnotations()
+    {
 
         $params = [];
         $params['annotation_variables'] = [];
@@ -198,13 +206,12 @@ class Project extends Model
                             $label .= 'Domains (k): ' . str_pad(substr($parts[1], 1), 2, '0', STR_PAD_LEFT);
                         if (sizeof($parts) > 2 && $parts[2] === 'refined')
                             $label .= '; Refined clusters';
-                    }
-                    elseif ($parts[0] === 'insitutype') {
+                    } elseif ($parts[0] === 'insitutype') {
                         $label .= 'InSituType';
                     }
 
 
-                    if(!in_array($_row[1], $tmp_annot)) {
+                    if (!in_array($_row[1], $tmp_annot)) {
                         array_push($tmp_annot, $_row[1]);
 
 
@@ -218,45 +225,39 @@ class Project extends Model
                         $annotations[] = ['label' => $label, 'value' => $annotation];
 
                         //Obtain clusters for this annotation
-                        $_clusters = array_filter($data, function ($row) use($annotation, $_row) {
+                        $_clusters = array_filter($data, function ($row) use ($annotation, $_row) {
                             return count($row) > 2 && $row[0] === $_row[0] && $row[1] === $annotation;
                         });
                         $clusters = array_column($_clusters, 3);
                         $clusters = array_values(array_unique($clusters));
-                        foreach($clusters as $cluster) {
+                        foreach ($clusters as $cluster) {
                             $annotations_clusters[] = ['annotation' => $annotation, 'cluster' => $cluster];
                         }
-
-
                     }
 
 
-                    if(!in_array($_row[2], $tmp_annot)) {
+                    if (!in_array($_row[2], $tmp_annot)) {
 
                         $parts = explode('_', $annotation);
 
                         array_push($tmp_annot, $_row[2]);
 
                         //If the annotation was manually changed by the user, add a second option to the list
-                        if($data[$index_annotation][1] !== $data[$index_annotation][2]) {
+                        if ($data[$index_annotation][1] !== $data[$index_annotation][2]) {
                             $annotations[] = ['label' => $label . ' - ' . $_row[2], 'value' => $_row[2]];
                         }
 
 
                         //Obtain clusters for this annotation
-                        $_clusters = array_filter($data, function ($row) use($annotation, $_row) {
+                        $_clusters = array_filter($data, function ($row) use ($annotation, $_row) {
                             return count($row) > 3 && $row[0] === $_row[0] && $row[1] === $annotation;
                         });
                         $clusters = array_column($_clusters, 4);
                         $clusters = array_values(array_unique($clusters));
-                        foreach($clusters as $cluster) {
+                        foreach ($clusters as $cluster) {
                             $annotations_clusters[] = ['annotation' => $_row[2], 'cluster' => $cluster];
                         }
-
                     }
-
-
-
                 }
             }
             sort($annotations);
@@ -265,31 +266,31 @@ class Project extends Model
         }
 
         return $params;
-
     }
 
-    public function getSTdiffAnnotationsBySample($sddMethod = 'stclust') {
+    public function getSTdiffAnnotationsBySample($sddMethod = 'stclust')
+    {
 
         $data = $this->getSTdiffData();
 
-        if(!count($data)) return [];
+        if (!count($data)) return [];
 
         $result = [];
-        foreach($this->samples as $sample) {
+        foreach ($this->samples as $sample) {
             $sampleName = $sample->name;
             $result[$sampleName] = [];
 
             //filter the annotations based on the method/module (stclust, insitutype)
-            $annotationData = array_filter($data, function($annot) use($sampleName, $sddMethod) {
+            $annotationData = array_filter($data, function ($annot) use ($sampleName, $sddMethod) {
                 return $annot[0] === $sampleName && str_starts_with($annot[1], $sddMethod);
             });
 
             $annotations = array_unique(array_column($annotationData, 1));
-            foreach($annotations as $annotation) {
+            foreach ($annotations as $annotation) {
 
                 $annotationName = '';
-                $_clusters = array_filter($annotationData, function($annot) use($annotation, &$annotationName) {
-                    if($annot[1] === $annotation) $annotationName = $annot[2];
+                $_clusters = array_filter($annotationData, function ($annot) use ($annotation, &$annotationName) {
+                    if ($annot[1] === $annotation) $annotationName = $annot[2];
                     return $annot[1] === $annotation;
                 });
                 $clusters = array_map(function ($cluster) {
@@ -302,7 +303,6 @@ class Project extends Model
         }
 
         return $result;
-
     }
 
     public function getProjectParametersAttribute()
@@ -352,58 +352,61 @@ class Project extends Model
         return $params;
     }
 
-    public function getTasks($process) {
+    public function getTasks($process)
+    {
         return Task::where('project_id', $this->id)->where('process', $process)->orderByDesc('scheduled_at')->get();
     }
 
-    public function getLatestTask($process) {
+    public function getLatestTask($process)
+    {
         $tasks = $this->getTasks($process);
         return $tasks->count() ? $tasks[0] : null;
     }
 
 
-    public function getParametersUsedInJob($jobName) {
+    public function getParametersUsedInJob($jobName)
+    {
 
         $tasks = $this->getTasks($jobName);
 
-        if(!$tasks->count()) return '';
+        if (!$tasks->count()) return '';
 
         $dict = Storage::get('common/parameters_dictionary.json');
         $dict = json_decode($dict);
         $CSV = "";
-        if(property_exists($dict, $jobName)) {
+        if (property_exists($dict, $jobName)) {
 
             $columnNames = ['Date', 'Parameter', 'Value', 'Description'];
             $CSV = implode(',', $columnNames) . "\n";
 
-            foreach($tasks as $task) {
+            foreach ($tasks as $task) {
 
                 $values = json_decode($task->payload);
 
                 // Log::info($jobName);
                 // Log::info(json_encode($values));
 
-                if($values !== null && property_exists($values, 'parameters')) {
+                if ($values !== null && property_exists($values, 'parameters')) {
 
-                    foreach(get_object_vars($dict->$jobName) as $attr => $value) {
+                    foreach (get_object_vars($dict->$jobName) as $attr => $value) {
 
-                        if(property_exists($values->parameters, $attr)) {
+                        if (property_exists($values->parameters, $attr)) {
                             $CSV .= $task->scheduled_at . ','; //Date
                             $CSV .= $attr . ','; //'Parameter name'
 
                             $tmp = $values->parameters->$attr;
-                            if(is_array($tmp)) {
-                                $tmp = '[' . implode('; ', $tmp) . ']' ;
-                            }
-                            else if(is_object($tmp)) {
+                            if (is_array($tmp)) {
+                                $tmp = '[' . implode('; ', $tmp) . ']';
+                            } else if (is_object($tmp)) {
                                 $tmp_str = '';
-                                foreach(get_object_vars($tmp) as $key => $val) {
-                                    if($tmp_str !== '') { $tmp_str .= ';'; }
+                                foreach (get_object_vars($tmp) as $key => $val) {
+                                    if ($tmp_str !== '') {
+                                        $tmp_str .= ';';
+                                    }
                                     $tmp_str .= $key . ': ' . $val;
                                 }
                                 $tmp = '[' . $tmp_str . ']';
-                            }
-                            else if(is_string($tmp) && str_contains($tmp, ',')) {
+                            } else if (is_string($tmp) && str_contains($tmp, ',')) {
                                 $tmp = str_replace(',', ';', $tmp);
                             }
 
@@ -624,7 +627,7 @@ class Project extends Model
 
     public function createGeneList($genes_file, $context)
     {
-        if(Storage::fileExists($genes_file)) {
+        if (Storage::fileExists($genes_file)) {
         //if (file_exists($genes_file)) {
 
             /***************** COPIAR EL ARCHIVO LOCAL o utilizar File:: *******/
@@ -724,22 +727,20 @@ class Project extends Model
             ProjectParameter::updateOrCreate(['parameter' => 'initial_stlist_summary_url', 'project_id' => $this->id, 'tag' => 'import'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . 'initial_stlist_summary.csv']);
 
 
-            if($this->isCosmxPlatform()) {
+            if ($this->isCosmxPlatform()) {
                 //Delete initial samples containing multiple FOVs
-                foreach($this->samples as $sample) {
+                foreach ($this->samples as $sample) {
                     $sample->delete();
                 }
 
                 //Insert each detected FOV as a new sample
                 $fovs = explode("\n", $data);
-                for($i = 1; $i < count($fovs); $i++) {
+                for ($i = 1; $i < count($fovs); $i++) {
                     $fields = explode(',', $fovs[$i]);
                     $sample = Sample::create(['name' => $fields[0]]);
                     $sample->projects()->save($this);
                 }
             }
-
-
         }
 
         $this->filter_meta_options();
@@ -793,8 +794,7 @@ class Project extends Model
             $countFiles = "'" . $countFiles . "/'";
 
             $createSTlistCommand = 'initial_stlist <- STlist(rnacounts=count_files, samples=samplenames)';
-        }
-        else if (in_array($expressionFileExtension, ['csv', 'txt', 'tsv'/*, 'zip'*/]) && ($this->isGenericPlatform() || $this->isCosmxPlatform())) {
+        } else if (in_array($expressionFileExtension, ['csv', 'txt', 'tsv'/*, 'zip'*/]) && ($this->isGenericPlatform() || $this->isCosmxPlatform())) {
 
             $countFiles = [];
             $coordinateFiles = [];
@@ -820,7 +820,7 @@ class Project extends Model
                 ";
             }
 
-            if($this->isCosmxPlatform()) {
+            if ($this->isCosmxPlatform()) {
                 $cosMxFovList = "
                 # Slide x FOV table
                 df_tmp = lapply(names(initial_stlist@counts), function(i){
@@ -939,7 +939,7 @@ lapply(names(tissues), function(i){
 
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
-        if(strpos($output, 'NO_DATA')) {
+        if (strpos($output, 'NO_DATA')) {
             return ['output' => 'No samples left in stlist'];
         }
 
@@ -969,10 +969,9 @@ lapply(names(tissues), function(i){
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'filter'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
 
-                    if($file_extension === 'pdf') {
+                    if ($file_extension === 'pdf') {
                         $_process_files[] = $fileName;
                     }
-
                 }
             }
         }
@@ -1151,10 +1150,9 @@ $plots
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'filter'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
 
-                    if($file_extension === 'pdf') {
+                    if ($file_extension === 'pdf') {
                         $_process_files[] = $fileName;
                     }
-
                 }
             }
         }
@@ -1320,9 +1318,11 @@ $plots
                 if (($HPC && file_exists($file)) || Storage::fileExists($file)) {
 
                     //Delete, if exists, any previously generated file in the public folder
-                    if (Storage::fileExists($file_public)) { Storage::delete($file_public); }
+                    if (Storage::fileExists($file_public)) {
+                        Storage::delete($file_public);
+                    }
 
-                    if($HPC) {
+                    if ($HPC) {
                         $file_public = Storage::path($file_public);
 
                         //if (file_exists($file_public)) unlink($file_public);
@@ -1339,10 +1339,9 @@ $plots
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
 
-                    if($file_extension === 'pdf') {
+                    if ($file_extension === 'pdf') {
                         $_process_files[] = $fileName;
                     }
-
                 }
             }
         }
@@ -1474,7 +1473,7 @@ $plots
                     Storage::move($file, $file_public);
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'normalize'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
 
-                    if($file_extension === 'pdf') {
+                    if ($file_extension === 'pdf') {
                         $_process_files[] = $fileName;
                     }
                 }
@@ -1611,7 +1610,7 @@ openxlsx::write.xlsx(norm_data, 'normalizedData.xlsx')
         foreach ($files as $fileName) {
             $file = $workingDir . $fileName;
             $file_public = $this->workingDirPublic() . $fileName;
-            if(Storage::fileExists($file)) {
+            if (Storage::fileExists($file)) {
                 Storage::delete($file_public);
                 Storage::move($file, $file_public);
                 $_process_files[] = $fileName;
@@ -1724,7 +1723,7 @@ write.csv(hm_df, 'pseudobulk_heatmap_plot_data.csv', quote=T, row.names=F)
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'pseudo_bulk_pca'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
 
-                    if($file_extension === 'pdf') {
+                    if ($file_extension === 'pdf') {
                         $_process_files[] = $fileName;
                     }
                 }
@@ -1807,7 +1806,7 @@ $plots
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id, 'tag' => 'quilt_plot'], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
 
-                    if($file_extension === 'pdf') {
+                    if ($file_extension === 'pdf') {
                         $_process_files[] = $fileName;
                     }
                 }
@@ -1911,10 +1910,9 @@ $plots_initial
                             Storage::move($file, $file_public);
                             $result[$gene][$sample->name] = $this->workingDirPublicURL() . $baseName; // $fileName;
 
-                            if($file_extension === 'pdf') {
+                            if ($file_extension === 'pdf') {
                                 $_process_files[] = $fileName;
                             }
-
                         }
                     }
                 }
@@ -1929,7 +1927,6 @@ $plots_initial
                     $result['plot_data'][$sample->name] = $this->workingDirPublicURL() . $fileName;
                     $_process_files[] = $fileName;
                 }
-
             }
         }
 
@@ -1980,10 +1977,10 @@ qp = STplot(normalized_stlist, genes=$_genes, ptsize=$ptsize, color_pal='$col_pa
 $export_files
 
 
-{$this->getSTplotQuiltScript_exportCSV(['_stlist' => 'normalized_stlist', 'genes' => $_genes, 'samples' => $samples, 'data_type' => $data_type])}
+{$this->getSTplotQuiltScript_exportCSV(['_stlist' => 'normalized_stlist', 'genes' =>$_genes, 'samples' =>$samples, 'data_type' =>$data_type])}
 
 ";
-//$export_files_side_by_side
+        //$export_files_side_by_side
 
         return $script;
     }
@@ -2036,7 +2033,7 @@ $export_files
                         Storage::move($file, $file_public);
                         $result[$gene][$sample->name] = $this->workingDirPublicURL() . $parameterName; // $fileName;
 
-                        if($file_extension === 'pdf') {
+                        if ($file_extension === 'pdf') {
                             $_process_files[] = $fileName;
                         }
                     }
@@ -2066,7 +2063,7 @@ $export_files
 
         $export_files = '';
         foreach ($genes as $gene)
-            foreach (/*$this->samples*/ $samples as $sample)
+            foreach (/*$this->samples*/$samples as $sample)
                 $export_files .= $this->getExportFilesCommands("stplot-expression-surface-$gene-" . $sample->name, "krp[['" . $gene . "_" . $sample->name . "']]");
 
         $script = "
@@ -2126,7 +2123,7 @@ $export_files
                         Storage::move($file, $file_public);
                         $result[$gene][$sample->name] = $this->workingDirPublicURL() . $parameterName; // $fileName;
 
-                        if($file_extension === 'pdf') {
+                        if ($file_extension === 'pdf') {
                             $_process_files[] = $fileName;
                         }
                     }
@@ -2294,7 +2291,7 @@ openxlsx::write.xlsx(sthet_table, file='sthet_plot_table_results.xlsx')
                     ProjectParameter::updateOrCreate(['parameter' => $parameterName, 'project_id' => $this->id], ['type' => 'string', 'value' => $this->workingDirPublicURL() . $parameterName]);
                     $result[$parameterName] = $this->workingDirPublicURL() . $parameterName;
 
-                    if($file_extension === 'pdf') {
+                    if ($file_extension === 'pdf') {
                         $_process_files[] = $fileName;
                     }
                 }
@@ -2342,7 +2339,8 @@ $export_files
         return $script;
     }
 
-    private function stdiff_top_deg($csv_file) {
+    private function stdiff_top_deg($csv_file)
+    {
 
         $workingDir = $this->workingDir();
 
@@ -2378,7 +2376,6 @@ $export_files
                             Storage::move($file_to_move, $file_public);
                         }
                     }
-
                 }
             }
         }
@@ -2420,7 +2417,7 @@ $export_files
                             Storage::delete($file_public);
                             Storage::move($file, $file_public);
 
-                            if($file_extension === 'pdf') {
+                            if ($file_extension === 'pdf') {
                                 $_process_files[] = $fileName;
                             }
                         }
@@ -2478,40 +2475,40 @@ $export_files
         return $script;
     }
 
-    public function saveSTdiffAnnotationChanges($_annotations) {
+    public function saveSTdiffAnnotationChanges($_annotations)
+    {
         $data = $this->getSTdiffData();
 
         $samples = [];
         $annotations = [];
         $changes = false;
-        foreach($_annotations as $change) {
+        foreach ($_annotations as $change) {
 
             $samples[] = $change['sampleName'];
             $annotations[] = $change['originalName'];
 
-            foreach($data as $index => $row) {
-                if($change['sampleName'] === $row[0] && $change['originalName'] === $row[1]) {
-                    foreach($change['clusters'] as $cluster) {
-                        if($row[3] === $cluster['originalName'] && $row[4] !== $cluster['newName']) {
+            foreach ($data as $index => $row) {
+                if ($change['sampleName'] === $row[0] && $change['originalName'] === $row[1]) {
+                    foreach ($change['clusters'] as $cluster) {
+                        if ($row[3] === $cluster['originalName'] && $row[4] !== $cluster['newName']) {
                             $data[$index][4] = $cluster['newName'];
                             $changes = true;
                         }
                     }
 
-                    if($change['newName'] !== $row[2]) {
+                    if ($change['newName'] !== $row[2]) {
                         $data[$index][2] = $change['newName'];
                         $changes = true;
                     }
 
-                    if($changes && $row[1] === $data[$index][2]) {
+                    if ($changes && $row[1] === $data[$index][2]) {
                         $data[$index][2] = $row[1] . '_mod';
                     }
                 }
             }
-
         }
 
-        if($changes) {
+        if ($changes) {
             $this->setSTdiffData($data);
         }
 
@@ -2542,7 +2539,7 @@ $export_files
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
-        foreach($parameters['annotations'] as $change) {
+        foreach ($parameters['annotations'] as $change) {
             $file_extensions = ['svg', 'pdf', 'png'];
             $plot_file = $change['sampleName'] . '_' . $change['originalName'];
             foreach ($file_extensions as $file_extension) {
@@ -2684,12 +2681,12 @@ $export_files
         //         }
         //     }
 
-            /*$task = Task::where('task', $parameters['__task'])->firstOrFail();
+        /*$task = Task::where('task', $parameters['__task'])->firstOrFail();
             $parameterLog = json_decode($task->payload)->parameters;
             $logFileName = $this->workingDirPublicURL() . 'SpaGCN_execution_log.txt';
             Storage::put($logFileName, json_encode($parameterLog));*/
 
-            /*if ($addToZip) {
+        /*if ($addToZip) {
                 $zip->addFile(Storage::path($logFileName), basename($logFileName));
                 $zip->close();
             }*/
@@ -2836,7 +2833,7 @@ $export_files
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
-        foreach($parameters['annotations'] as $change) {
+        foreach ($parameters['annotations'] as $change) {
             $file_extensions = ['svg', 'pdf', 'png'];
             $plot_file = $change['sampleName'] . '_' . $change['originalName'];
             foreach ($file_extensions as $file_extension) {
@@ -2974,7 +2971,6 @@ $export_files
                 if (explode('.', $file)[1] !== 'json') {
                     $_process_files[] = $file;
                 }
-
             }
         }
 
@@ -2994,7 +2990,7 @@ $export_files
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
 
-                        if($file_extension === 'pdf') {
+                        if ($file_extension === 'pdf') {
                             $_process_files[] = $fileName;
                         }
                     }
@@ -3170,7 +3166,7 @@ lapply(names(ps), function(i){
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
 
-                        if($file_extension === 'pdf') {
+                        if ($file_extension === 'pdf') {
                             $_process_files[] = $fileName;
                         }
                     }
@@ -3620,7 +3616,7 @@ lapply(names(grad_res), function(i){
                             Storage::delete($file_public);
                             Storage::move($file, $file_public);
 
-                            if($file_extension === 'pdf') {
+                            if ($file_extension === 'pdf') {
                                 $_process_files[] = $fileName;
                             }
                         }
@@ -3678,17 +3674,15 @@ lapply(names(grad_res), function(i){
 
         $scriptContents = $this->getSTdeconvolve2Script($parameters);
 
-        if(strlen($parameters['celltype_markers'])) {
-            $file_ext = [/*'csv',*/ 'RDS'];
+        if (strlen($parameters['celltype_markers'])) {
+            $file_ext = [/*'csv',*/'RDS'];
             foreach ($file_ext as $ext) {
                 Storage::copy("/common/stdeconvolve/{$parameters['celltype_markers']}.$ext", $this->workingDir() . $parameters['celltype_markers'] . ".$ext");
             }
             $scriptContents = $this->replaceRscriptParameter('celltype_markers', $parameters['celltype_markers'], $scriptContents);
             $scriptContents = $this->replaceRscriptParameter('included_celltype_markers', '', $scriptContents);
-        }
-        elseif(strlen($parameters['uploaded_celltype_markers']) && $parameters['uploaded_celltype_markers'] === "1") {
+        } elseif (strlen($parameters['uploaded_celltype_markers']) && $parameters['uploaded_celltype_markers'] === "1") {
             if (request()->hasFile('uploaded_celltype_markers_file') && request()->file('uploaded_celltype_markers_file')->isValid()) {
-
             }
         }
 
@@ -3724,7 +3718,6 @@ lapply(names(grad_res), function(i){
                 Storage::delete($file_public);
                 Storage::move($file, $file_public);
                 $_process_files[] = $fileName;
-
             }
             $topic_annotations[$sample->name] = $sample_topics;
         }
@@ -3740,9 +3733,9 @@ lapply(names(grad_res), function(i){
                 'sscore' => 'Enrichment score'
             ];
 
-            foreach($topic_annotations as $sampleName => $topics) {
+            foreach ($topic_annotations as $sampleName => $topics) {
                 $gsea_results[$sampleName] = [];
-                foreach($topics as $topicName => $topic) {
+                foreach ($topics as $topicName => $topic) {
 
                     $fileName = 'gsea_results_' . $sampleName . '_' . $topicName . '.csv';
                     $file = $this->workingDir() . $fileName;
@@ -3775,7 +3768,8 @@ lapply(names(grad_res), function(i){
         return ['output' => $output, 'script' => $scriptContents];
     }
 
-    private function STdeconvolveMovePlotsToPublic() {
+    private function STdeconvolveMovePlotsToPublic()
+    {
         $workingDir = $this->workingDir();
         $file = $workingDir . 'stdeconvolve2_logfold_plots.csv';
         if (Storage::fileExists($file)) {
@@ -3829,10 +3823,9 @@ lapply(names(grad_res), function(i){
                         Storage::delete($file_public);
                         Storage::move($file, $file_public);
 
-                        if($file_extension === 'pdf') {
+                        if ($file_extension === 'pdf') {
                             $scatterpie_plots_names[] = 'stdeconvolve2_' . $fileName;
                         }
-
                     }
                 }
             }
@@ -3868,9 +3861,9 @@ lapply(names(grad_res), function(i){
         $newLine = "\n";
         $q = '"';
         $annotations = [];
-        foreach($data as $sampleName => $topics) {
+        foreach ($data as $sampleName => $topics) {
             $annotations[$sampleName] = '"topic","annotation","new_annotation"' . $newLine;
-            foreach($topics as $topicName => $topic) {
+            foreach ($topics as $topicName => $topic) {
                 $annotations[$sampleName] .= $q . $topicName . $q . ',' . $q . $topic['annotation'] . $q . ',' . $q . $topic['current_annotation'] . $q . $newLine;
                 $project_param->logfold_plots->$sampleName->$topicName->new_annotation = $topic['current_annotation'];
             }
@@ -3880,7 +3873,7 @@ lapply(names(grad_res), function(i){
         $STdeconvolve2->value = json_encode($project_param);
         $STdeconvolve2->save();
 
-        foreach($annotations as $sampleName => $data) {
+        foreach ($annotations as $sampleName => $data) {
             Storage::put($this->workingDir() . 'topic_annotations_' . $sampleName . '.csv', $data);
         }
 
@@ -3932,7 +3925,7 @@ lapply(names(grad_res), function(i){
         $_process_files = [];
         if (Storage::fileExists($file)) {
 
-            foreach($files as $key => $dataFile) {
+            foreach ($files as $key => $dataFile) {
                 $_file = $workingDir . $dataFile;
                 $file_public = $this->workingDirPublic() . $dataFile;
                 if (Storage::fileExists($_file)) {
@@ -3962,8 +3955,8 @@ lapply(names(grad_res), function(i){
         if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
 
         $_parameters = [];
-        $_parameters['_species'] = explode('-',$parameters['cell_profile'])[0];
-        $_parameters['_cell_prof_db'] = explode('-',$parameters['cell_profile'])[1];
+        $_parameters['_species'] = explode('-', $parameters['cell_profile'])[0];
+        $_parameters['_cell_prof_db'] = explode('-', $parameters['cell_profile'])[1];
         $_parameters['_refine_cells'] = $parameters['refine_cells'] ? 'T' : 'F';
         $_parameters['_stlist'] = $_stlist;
 
@@ -4000,7 +3993,7 @@ lapply(names(grad_res), function(i){
 
             $samples = $this->getSampleList($parameters['samples'], true);
             $plot_data = [];
-            foreach($samples as $sample) {
+            foreach ($samples as $sample) {
 
 
                 $fileName = $sample . '_insitutype_quilt_data.csv';
@@ -4015,7 +4008,6 @@ lapply(names(grad_res), function(i){
                     $plot_data[$sample] = $this->workingDirPublicURL() . $fileName;
                     $_process_files[] = $fileName;
                 }
-
             }
 
             // $samples = $this->getSampleList($parameters['samples'], true);
@@ -4104,7 +4096,7 @@ lapply(names(grad_res), function(i){
         $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
 
 
-        foreach($parameters['annotations'] as $change) {
+        foreach ($parameters['annotations'] as $change) {
             $file_extensions = ['svg', 'pdf', 'png'];
             $plot_file = 'insitutype_plot_spatial_' . $change['sampleName'] . '_' . $change['originalName'];
             foreach ($file_extensions as $file_extension) {
@@ -4191,7 +4183,6 @@ lapply(names(grad_res), function(i){
                 if (explode('.', $file)[1] !== 'json') {
                     $_process_files[] = $file;
                 }
-
             }
         }
 
@@ -4207,13 +4198,12 @@ lapply(names(grad_res), function(i){
         // info($parameters);
 
         $genes = 'c()';
-        if($parameters['method'] === 'genes' /*|| ($parameters['method'] === 'gene_sets' && $parameters['selected_gene_sets'] !== null && $parameters['selected_gene_sets'] !== '')*/)
-        {
+        if ($parameters['method'] === 'genes' /*|| ($parameters['method'] === 'gene_sets' && $parameters['selected_gene_sets'] !== null && $parameters['selected_gene_sets'] !== '')*/) {
             $genes = (!is_null($parameters['genes']) && is_array($parameters['genes'])) ? "c('" . join("','", $parameters['genes']) . "')" : "c('" . join("','", explode(',', $parameters['genes'])) . "')";
         }
 
         $params = [
-            'samples' => is_array($parameters['samples']) ? "c('" . join("','", $parameters['samples']) . "')" : ( strlen($parameters['samples']) ? "c('" . join("','", explode(',', $parameters['samples'])) . "')" : 'NULL' ), //(!is_null($parameters['samples']) && is_array($parameters['samples'])) ? "c('" . join("', '",$parameters['samples']) . "')" : 'NULL',
+            'samples' => is_array($parameters['samples']) ? "c('" . join("','", $parameters['samples']) . "')" : (strlen($parameters['samples']) ? "c('" . join("','", explode(',', $parameters['samples'])) . "')" : 'NULL'), //(!is_null($parameters['samples']) && is_array($parameters['samples'])) ? "c('" . join("', '",$parameters['samples']) . "')" : 'NULL',
             'genes' => $genes,
             'thr' => $parameters['thr'],
             'subset_mean' => $parameters['subset_mean'] === 'true' ? 'T' : 'F',
@@ -4262,11 +4252,11 @@ lapply(names(grad_res), function(i){
             $fileContents = Storage::get($samplesFilePath); // $filePath is the path to your file
             $sampleNames = array_filter(array_map('trim', explode("\n", $fileContents)));
 
-            foreach($sampleNames as $sampleName) {
+            foreach ($sampleNames as $sampleName) {
 
                 $_files = [$sampleName . '_degas_predictions_corr.csv', $sampleName . '_degas_predictions_spatial_smooth.csv', $sampleName . '_final_features.txt'];
 
-                foreach($_files as $dataFile) {
+                foreach ($_files as $dataFile) {
 
                     $_file = $workingDir . $dataFile;
                     $file_public = $this->workingDirPublic() . $dataFile;
@@ -4340,7 +4330,7 @@ lapply(names(grad_res), function(i){
         $files = ['clone_spatial', 'total_cn'];
         $_process_files = [];
         $_renamed_files = [];
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $_file = $filesPath . $file . '.svg';
             $fileName = $sampleName . '_calicost_' . $file;
             $file_public = $this->workingDirPublic() . $fileName . '.svg';
@@ -4375,7 +4365,8 @@ lapply(names(grad_res), function(i){
         return $script;
     }
 
-    private function getCalicoST_Script2_Shell($sampleName) {
+    private function getCalicoST_Script2_Shell($sampleName)
+    {
 
         // $script = "cp {$sampleName}/{$sampleName}_filtered_feature_bc_matrix.h5 {$sampleName}/filtered_feature_bc_matrix.h5\n";
         // $script .= "cp {$sampleName}/spatial/{$sampleName}_tissue_positions_list.csv {$sampleName}/spatial/tissue_positions_list.csv\n";
@@ -4388,19 +4379,20 @@ lapply(names(grad_res), function(i){
     }
 
 
-    private function getCalicoST_Script3_Python($parameters) {
+    private function getCalicoST_Script3_Python($parameters)
+    {
 
         $script = "--spaceranger_dir /spatialGE/{$parameters['sample_name']} --normalidx_file /spatialGE/{$parameters['sample_name']}/calicost_barcodes.tsv --hgtable_file /opt/CalicoST/GRCh38_resources/hgTables_hg38_gencode.txt --output_dir /spatialGE/{$parameters['sample_name']}/calicost_output/ --num_initializations 3 --n_clones {$parameters['n_clones']} --maxspots_pooling 7";
 
         return $script;
-
     }
 
 
 
 
 
-    private function getDefaultSamplesToProcess() {
+    private function getDefaultSamplesToProcess()
+    {
         $workingDir = $this->workingDir();
         $samples_fovs = Storage::get($workingDir . "slide_x_fov_table.csv");
 
@@ -4415,7 +4407,7 @@ lapply(names(grad_res), function(i){
 
         // Process each row and create associative array
         foreach ($rows as $row) {
-            if(!strlen(trim($row))) continue;
+            if (!strlen(trim($row))) continue;
             // Parse the row into an associative array
             $rowData = array_combine($columns, explode(",", $row));
             // Add the row data to the main array
@@ -4426,31 +4418,30 @@ lapply(names(grad_res), function(i){
         $max_fovs = count($slides) > 4 ? 2 : 3;
 
         $samples = [];
-        foreach($slides as $slide) {
+        foreach ($slides as $slide) {
             $n_fovs = 0;
-            foreach($data as $row) {
-                if($row['slide'] === $slide) {
+            foreach ($data as $row) {
+                if ($row['slide'] === $slide) {
                     $samples[] = $row['fov_name'];
                     $n_fovs++;
                 }
-                if($n_fovs === $max_fovs) break;
+                if ($n_fovs === $max_fovs) break;
             }
         }
 
         return $samples;
-
     }
 
-    private function getSampleList($_samples, $as_array = false) {
+    private function getSampleList($_samples, $as_array = false)
+    {
 
         $samples = 'NULL';
-        if(is_array($_samples) && count($_samples)) {
+        if (is_array($_samples) && count($_samples)) {
             $samples = $_samples;
-        }
-        else {
+        } else {
             //$samples = "c('" . $this->samples()->pluck('samples.name')->join("','") . "')";
 
-            if(!$this->isCosmxPlatform()) {
+            if (!$this->isCosmxPlatform()) {
                 $samples = $this->samples()->pluck('samples.name')->toArray();
             } else {
                 $samples = $this->getDefaultSamplesToProcess();
@@ -4461,7 +4452,6 @@ lapply(names(grad_res), function(i){
         $samples = count($samples) > 10 ? array_slice($samples, 0, 10) : $samples;
 
         return $as_array ? $samples : $samples = "c('" . join("','", $samples) . "')";
-
     }
 
 
@@ -4667,7 +4657,7 @@ lapply(names(grad_res), function(i){
         }
         $contents = '{' . "\n" . '"headers": [' . "\n" . implode(",\n", $headers) . '],' . "\n" . '"items": [' . "\n" . implode(",\n", $body) . "\n" . ']' . "\n" . '}';
 
-        if($return_string) return $contents;
+        if ($return_string) return $contents;
 
         $_parts = explode('.', $file);
         array_pop($_parts);
@@ -4690,8 +4680,7 @@ lapply(names(grad_res), function(i){
             $task = $this->getLatestTask($process);
 
             $error = ($task && $task->attempts > 1 && $task->completed === 0 && is_null($task->cancelled_at)) ? 1 : 0;
-
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $error = 0;
         }
 

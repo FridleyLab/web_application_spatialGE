@@ -20,14 +20,15 @@ use Maatwebsite\Excel\Facades\Excel;
 class ProjectController extends Controller
 {
 
-    public function index() : View
+    public function index(): View
     {
         $projects = Project::where('user_id', auth()->id())->orderByDesc('updated_at')->get();
 
         return view('projects.index', compact(['projects']));
     }
 
-    public function open(Project $project) {
+    public function open(Project $project)
+    {
 
         setActiveProject($project);
 
@@ -40,16 +41,16 @@ class ProjectController extends Controller
     {
 
         return view('wizard.new-project', ['platforms' => ProjectPlatform::all()]);
-
     }
 
-    public function store() {
+    public function store()
+    {
 
         $name = request('name');
         $description = request('description');
         $project_platform_id = request('project_platform_id');
 
-        if(strlen(trim($name)) < 4)
+        if (strlen(trim($name)) < 4)
             return response('Name has to be at least 4 characters long', 400);
 
         try {
@@ -57,15 +58,15 @@ class ProjectController extends Controller
 
             setActiveProject($project);
 
-            return response(route('import-data',['project' => $project->id]));
-        }
-        catch (\Exception $e) {
+            return response(route('import-data', ['project' => $project->id]));
+        } catch (\Exception $e) {
             return $e->getMessage();
         }
     }
 
 
-    public function create_cosmx_temp_project() {
+    public function create_cosmx_temp_project()
+    {
         try {
 
             //Create the Sandbox project for the user
@@ -87,12 +88,12 @@ class ProjectController extends Controller
             //Create new samples and files in the DB
             $fovSamples = [];
             $metadata = ["name" => "tumor", "values" => []];
-            $_metadata = ["Lung5_Rep1" => "Tumor1", "Lung5_Rep2" => "Tumor1", "Lung5_Rep3" => "Tumor1","Lung9_Rep1" => "Tumor2","Lung9_Rep2" => "Tumor2"];
-            foreach($json as $sampleName => $files) {
+            $_metadata = ["Lung5_Rep1" => "Tumor1", "Lung5_Rep2" => "Tumor1", "Lung5_Rep3" => "Tumor1", "Lung9_Rep1" => "Tumor2", "Lung9_Rep2" => "Tumor2"];
+            foreach ($json as $sampleName => $files) {
 
                 $sample = Sample::create(['name' => $sampleName]);
                 $sample->projects()->save($project);
-                foreach($files as $fileData) {
+                foreach ($files as $fileData) {
                     $fileModel = SampleFile::create(['filename' => $fileData->filename, 'type' => $fileData->type]);
                     $sample->files()->save($fileModel);
                 }
@@ -152,21 +153,22 @@ class ProjectController extends Controller
 
             setActiveProject($project);
             return redirect($project->url);
-
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error while creating Sandbox for user ' . auth()->id());
-            Logg:info($e->getMessage());
+            Logg:
+            info($e->getMessage());
 
             return response('Error', 500);
         }
     }
 
 
-    public function clone_demo_project($platform) {
+    public function clone_demo_project($platform)
+    {
         try {
 
             $_platform = Project::VISIUM_PLATFORM;
-            if($platform === 'CosMx') $_platform = Project::COSMX_PLATFORM;
+            if ($platform === 'CosMx') $_platform = Project::COSMX_PLATFORM;
 
             $_basepath = "common/testprojects/$platform";
 
@@ -183,10 +185,10 @@ class ProjectController extends Controller
             //Load samples and files from disk
             $json = json_decode(Storage::get("$_basepath/samples.json"));
             //Create new samples and files in the DB
-            foreach($json as $sampleName => $files) {
+            foreach ($json as $sampleName => $files) {
                 $sample = Sample::create(['name' => $sampleName]);
                 $sample->projects()->save($project);
-                foreach($files as $fileData) {
+                foreach ($files as $fileData) {
                     $fileModel = SampleFile::create(['filename' => $fileData->filename, 'type' => $fileData->type]);
                     $sample->files()->save($fileModel);
                 }
@@ -198,7 +200,7 @@ class ProjectController extends Controller
             //Load parameters from disk
             $json = json_decode(Storage::get("$_basepath/parameters.json"));
             //Create new parameters in the DB
-            foreach($json as $parameter) {
+            foreach ($json as $parameter) {
                 $parameter->value = str_replace('{project_public_url}', $project->workingDirPublicURL(), $parameter->value);
                 ProjectParameter::updateOrCreate(['parameter' => $parameter->parameter, 'project_id' => $project->id, 'tag' => $parameter->tag], ['type' => $parameter->type, 'value' => $parameter->value]);
             }
@@ -210,36 +212,36 @@ class ProjectController extends Controller
             File::copyDirectory(Storage::path("$_basepath/samples"), Storage::path($projectFolder));
             File::copy(Storage::path("$_basepath/initial_stlist.RData"), Storage::path("$projectFolder/initial_stlist.RData"));
             File::copy(Storage::path("$_basepath/initial_stlist_summary.csv"), Storage::path("$projectFolder/initial_stlist_summary.csv"));
-            if($_platform === Project::COSMX_PLATFORM) File::copy(Storage::path("$_basepath/slide_x_fov_table.csv"), Storage::path("$projectFolder/slide_x_fov_table.csv"));
+            if ($_platform === Project::COSMX_PLATFORM) File::copy(Storage::path("$_basepath/slide_x_fov_table.csv"), Storage::path("$projectFolder/slide_x_fov_table.csv"));
 
             //Add parameter to indicate that this is the 'Demo project'
             ProjectParameter::updateOrCreate(['parameter' => 'isDemoProject', 'project_id' => $project->id, 'tag' => ''], ['type' => 'number', 'value' => 1]);
 
             setActiveProject($project);
             return redirect($project->url);
-
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error while creating Sandbox for user ' . auth()->id());
-            Logg:info($e->getMessage());
+            Log::info($e->getMessage());
 
             return response('Error', 500);
         }
     }
 
-    public function edit(Project $project) {
+    public function edit(Project $project)
+    {
 
         $platforms = ProjectPlatform::all();
 
         return view('wizard.edit-project', compact(['project', 'platforms']));
-
     }
 
-    public function update(Project $project) {
+    public function update(Project $project)
+    {
         $name = request('name');
         $description = request('description');
         $project_platform_id = request('project_platform_id');
 
-        if(strlen(trim($name)) < 4)
+        if (strlen(trim($name)) < 4)
             return response('Name has to be at least 4 characters long', 400);
 
         $project->name = $name;
@@ -251,22 +253,22 @@ class ProjectController extends Controller
         return response(route('my-projects'));
     }
 
-    public function getProjectParameters(Project $project) {
+    public function getProjectParameters(Project $project)
+    {
 
         return $project->project_parameters;
-
     }
 
-    public function getSTdiffAnnotations(Project $project) {
+    public function getSTdiffAnnotations(Project $project)
+    {
 
         return $project->getSTdiffAnnotations();
-
     }
 
-    public function getSTdiffAnnotationsBySample(Project $project, $method = 'stclust') {
+    public function getSTdiffAnnotationsBySample(Project $project, $method = 'stclust')
+    {
 
         return $project->getSTdiffAnnotationsBySample($method);
-
     }
 
     public function import_data(Project $project): View
@@ -274,12 +276,11 @@ class ProjectController extends Controller
         $samples = $project->samples;
 
         return view('wizard.import-data')->with(compact('project', 'samples'));
-
     }
 
     public function readExcelMetadataFile(Project $project)
     {
-        if(request()->file('metadata')) {
+        if (request()->file('metadata')) {
             $file = request()->file('metadata');
 
             //Save a copy of the uploaded Excel file
@@ -299,7 +300,8 @@ class ProjectController extends Controller
         return '';
     }
 
-    public function save_metadata(Project $project) {
+    public function save_metadata(Project $project)
+    {
 
         $metadata = request('metadata');
 
@@ -307,9 +309,9 @@ class ProjectController extends Controller
 
         $contents = 'samplename';
         foreach ($metadata as $meta)
-            if(strlen($meta['name'])) $contents .= ',' . $meta['name'];
+            if (strlen($meta['name'])) $contents .= ',' . $meta['name'];
         $contents .= "\n";
-        foreach($project->samples as $sample) {
+        foreach ($project->samples as $sample) {
             $contents .= $sample->name;
             foreach ($metadata as $meta) {
                 $contents .= (array_key_exists($sample->name, $meta['values']) && strlen($meta['values'][$sample->name])) ? ',' . $meta['values'][$sample->name] : ',';
@@ -322,13 +324,15 @@ class ProjectController extends Controller
         return json_encode(request('metadata'));
     }
 
-    public function qc_data_transformation(Project $project) {
+    public function qc_data_transformation(Project $project)
+    {
         $samples = $project->samples;
         $color_palettes = ColorPalette::orderBy('label')->get();
         return view('wizard.qc_data_transformation')->with(compact('project', 'samples', 'color_palettes'));
     }
 
-    public function destroy(Project $project) {
+    public function destroy(Project $project)
+    {
 
         $project->delete();
 
@@ -337,7 +341,8 @@ class ProjectController extends Controller
         return 'OK';
     }
 
-    public function go_to_step(Project $project, $step) {
+    public function go_to_step(Project $project, $step)
+    {
         $project->current_step = $step;
         $project->save();
 
@@ -347,14 +352,16 @@ class ProjectController extends Controller
             return redirect()->route('qc-data-transformation', ['project' => $project->id]);*/
     }
 
-    public function getParametersUsedInJob(Project $project) {
+    public function getParametersUsedInJob(Project $project)
+    {
 
         $data = $project->getParametersUsedInJob(request('command'));
 
         return response($data, 200, ['Content-Type' => 'text/csv']);
     }
 
-    public function downloadJobFiles(Project $project, $process) {
+    public function downloadJobFiles(Project $project, $process)
+    {
 
         $files = ProjectProcessFiles::where('project_id', $project->id)->where('process', $process)->firstOrFail();
         $files = json_decode($files->files);
@@ -366,8 +373,8 @@ class ProjectController extends Controller
         Storage::delete($project->workingDirPublic() . $zipFileName);
         $zip->open(Storage::path($public_folder . $zipFileName), \ZipArchive::CREATE);
 
-        foreach($files as $file) {
-            if(Storage::fileExists($public_folder . $file)) {
+        foreach ($files as $file) {
+            if (Storage::fileExists($public_folder . $file)) {
                 $zip->addFile(Storage::path($public_folder . $file), $file);
             }
         }
@@ -378,22 +385,23 @@ class ProjectController extends Controller
 
         $zip->close();
 
-        return response()->download(Storage::path($public_folder . $zipFileName), $zipFileName, array('Content-Type: application/octet-stream','Content-Length: '. Storage::size($public_folder . $zipFileName)))/*->deleteFileAfterSend(true)*/;
-
+        return response()->download(Storage::path($public_folder . $zipFileName), $zipFileName, array('Content-Type: application/octet-stream', 'Content-Length: ' . Storage::size($public_folder . $zipFileName)))/*->deleteFileAfterSend(true)*/;
     }
 
-    public function getJobPositionInQueue(Project $project) {
-        $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
+    public function getJobPositionInQueue(Project $project)
+    {
+        $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0;
         return $jobId ? $project->getJobPositionInQueue($jobId, request('command')) : 0;
     }
 
-    public function cancelJobInQueue(Project $project) {
+    public function cancelJobInQueue(Project $project)
+    {
 
-        $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0 ;
+        $jobId = array_key_exists('job.' . request('command'), $project->project_parameters) ? $project->project_parameters['job.' . request('command')] : 0;
 
         $task = $project->getLatestTask(request('command'));
 
-        if($task) {
+        if ($task) {
             $task->cancelled_at = now();
             $task->save();
         }
@@ -405,11 +413,13 @@ class ProjectController extends Controller
         return $jobId ? $result : 0;
     }
 
-    public function getJobsInQueue(Project $project) {
+    public function getJobsInQueue(Project $project)
+    {
         return $project->getJobsInQueue(request('command'));
     }
 
-    public function setJobEmailNotification(Project $project) {
+    public function setJobEmailNotification(Project $project)
+    {
 
         $command = request('command');
         $sendEmail = request('sendemail', false);
@@ -418,21 +428,22 @@ class ProjectController extends Controller
         return 'OK';
     }
 
-    public function createStList(Project $project) {
+    public function createStList(Project $project)
+    {
 
         $jobId = $project->createJob('Data import', 'createStList', []);
 
         return $project->getJobPositionInQueue($jobId);
-
     }
 
 
-    public function searchGenes(Project $project) {
+    public function searchGenes(Project $project)
+    {
         $query = request('query');
 
         $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'I';
 
-        if(strlen($query)) {
+        if (strlen($query)) {
             $genes = $project->genes($context)->where('name', 'LIKE', $query . '%')->orderBy('name')->limit(100);
             return $genes->pluck('name');
         }
@@ -440,12 +451,13 @@ class ProjectController extends Controller
         return [];
     }
 
-    public function searchGenesRegexp(Project $project) {
+    public function searchGenesRegexp(Project $project)
+    {
         $query = request('query');
 
         $context = (request()->has('context') && strlen(request('context'))) ? request('context') : 'I';
 
-        if(strlen($query)) {
+        if (strlen($query)) {
             $genes = $project->genes($context)->where('name', 'REGEXP', $query)->orderBy('name')->limit(100);
             return $genes->pluck('name');
         }
@@ -454,7 +466,8 @@ class ProjectController extends Controller
     }
 
 
-    public function applyFilter(Project $project) {
+    public function applyFilter(Project $project)
+    {
 
         //RunScript::dispatch('Filter data', $project, 'applyFilter', request('parameters'));
         //return 'OK';
@@ -464,10 +477,10 @@ class ProjectController extends Controller
 
         $jobId = $project->createJob('Filter data', 'applyFilter', $parameters);
         return $project->getJobPositionInQueue($jobId);
-
     }
 
-    public function generateFilterPlots(Project $project) {
+    public function generateFilterPlots(Project $project)
+    {
 
 
         //RunScript::dispatch('Generate filter plots', $project, 'generateFilterPlots', ['color_palette' => request('color_palette'), 'variable' => request('variable')]);
@@ -478,12 +491,13 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function applyNormalization(Project $project) {
+    public function applyNormalization(Project $project)
+    {
 
         $parameters = request('parameters');
 
         /*************** EXPERIMENTAL HPC **************/
-        if(app()->isLocal() && env('HPC_ENABLED', false)) {
+        if (app()->isLocal() && env('HPC_ENABLED', false)) {
             $parameters['executeIn'] = 'HPC';
         }
 
@@ -492,10 +506,10 @@ class ProjectController extends Controller
         //RunScript::dispatch('Normalize data', $project, 'applyNormalization', request('parameters'));
 
         return $project->getJobPositionInQueue($jobId);
-
     }
 
-    public function generateNormalizationPlots(Project $project) {
+    public function generateNormalizationPlots(Project $project)
+    {
 
         //RunScript::dispatch('Generate normalization plots', $project, 'generateNormalizationPlots', ['color_palette' => request('color_palette'), 'gene' => request('gene')]);
 
@@ -505,35 +519,40 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function generateNormalizationData(Project $project) {
+    public function generateNormalizationData(Project $project)
+    {
         $jobId = $project->createJob('Generate normalization data', 'generateNormalizationData', [], 'low');
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function applyPca(Project $project) {
+    public function applyPca(Project $project)
+    {
         $jobId = $project->createJob('Principal Component Analysis', 'applyPca', ['n_genes' => request('n_genes')]);
         return $project->getJobPositionInQueue($jobId);
     }
-    public function pcaPlots(Project $project) {
+    public function pcaPlots(Project $project)
+    {
         $jobId = $project->createJob('Principal Component Analysis Plots', 'pcaPlots', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'n_genes' => request('n_genes'), 'hm_display_genes' => request('hm_display_genes')]);
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function quiltPlot(Project $project) {
+    public function quiltPlot(Project $project)
+    {
 
         $jobId = $project->createJob('Quilt plot', 'quiltPlot', ['plot_meta' => request('plot_meta'), 'color_pal' => request('color_pal'), 'sample1' => request('sample1'), 'sample2' => request('sample2')]);
         return $project->getJobPositionInQueue($jobId);
-
     }
 
 
-    public function stplot_visualization(Project $project) {
+    public function stplot_visualization(Project $project)
+    {
         $samples = $project->samples;
         $color_palettes = ColorPalette::orderBy('label')->get();
         return view('wizard.stplot-visualization')->with(compact('project', 'samples', 'color_palettes'));
     }
 
-    public function stplot_quilt(Project $project) {
+    public function stplot_quilt(Project $project)
+    {
 
         $parameters = [
             'genes' => request('genes'),
@@ -548,10 +567,10 @@ class ProjectController extends Controller
 
         $jobId = $project->createJob('STplot - Quilt plot', 'STplotQuilt', $parameters);
         return $project->getJobPositionInQueue($jobId);
-
     }
 
-    public function stplot_expression_surface(Project $project) {
+    public function stplot_expression_surface(Project $project)
+    {
 
         $parameters = [
             'genes' => request('genes'),
@@ -563,10 +582,10 @@ class ProjectController extends Controller
         $jobId = $project->createJob('STplot - Expression surface', 'STplotExpressionSurface', $parameters);
 
         return $project->getJobPositionInQueue($jobId);
-
     }
 
-    public function stplot_expression_surface_plots(Project $project) {
+    public function stplot_expression_surface_plots(Project $project)
+    {
 
         $parameters = [
             'genes' => json_decode($project->project_parameters['STplotExpressionSurface.genes']),
@@ -575,16 +594,17 @@ class ProjectController extends Controller
 
         $jobId = $project->createJob('STplot - Expression surface', 'STplotExpressionSurfacePlots', $parameters);
         return $project->getJobPositionInQueue($jobId);
-
     }
 
-    public function sthet_spatial_het(Project $project) {
+    public function sthet_spatial_het(Project $project)
+    {
         $samples = $project->samples;
         $color_palettes = ColorPalette::orderBy('label')->get();
         return view('wizard.sthet-spatial-het')->with(compact('project', 'samples', 'color_palettes'));
     }
 
-    public function sthet_spatial_het_calculate(Project $project) {
+    public function sthet_spatial_het_calculate(Project $project)
+    {
 
         $parameters = [
             'genes' => request('genes'),
@@ -594,10 +614,10 @@ class ProjectController extends Controller
         ];
         $jobId = $project->createJob('SThet - Spatial heterogeneity', 'SThet', $parameters);
         return $project->getJobPositionInQueue($jobId);
-
     }
 
-    public function sthet_spatial_het_plot(Project $project) {
+    public function sthet_spatial_het_plot(Project $project)
+    {
 
         $parameters = [
             'genes' => request('plot_genes'),
@@ -606,21 +626,23 @@ class ProjectController extends Controller
         ];
         $jobId = $project->createJob('SThet - Spatial heterogeneity Plot', 'SThetPlot', $parameters);
         return $project->getJobPositionInQueue($jobId);
-
     }
 
-    public function spatial_domain_detection(Project $project) {
+    public function spatial_domain_detection(Project $project)
+    {
         $samples = $project->samples;
         $color_palettes = ColorPalette::orderBy('label')->get();
         return view('wizard.spatial-domain-detection')->with(compact('project', 'samples', 'color_palettes'));
     }
 
-    public function sdd_stclust(Project $project) {
+    public function sdd_stclust(Project $project)
+    {
         $jobId = $project->createJob('Spatial Domain Detection - STclust', 'STclust', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function sdd_stclust_rename(Project $project) {
+    public function sdd_stclust_rename(Project $project)
+    {
 
         $project->saveSTdiffAnnotationChanges(request('annotations'));
 
@@ -630,53 +652,62 @@ class ProjectController extends Controller
         // return $project->getJobPositionInQueue($jobId);
     }
 
-    public function sdd_spagcn(Project $project) {
+    public function sdd_spagcn(Project $project)
+    {
         $jobId = $project->createJob('Spatial Domain Detection - SpaGCN', 'SpaGCN', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function sdd_spagcn_svg(Project $project) {
+    public function sdd_spagcn_svg(Project $project)
+    {
         $jobId = $project->createJob('SpaGCN - Spatially variable genes', 'SpaGCN_SVG', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function sdd_spagcn_rename(Project $project) {
+    public function sdd_spagcn_rename(Project $project)
+    {
         $jobId = $project->createJob('Spatial Domain Detection - SpaGCN (annotation renaming)', 'SpaGCNRename', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function sdd_milwrm(Project $project) {
+    public function sdd_milwrm(Project $project)
+    {
         $jobId = $project->createJob('Spatial Domain Detection - MILWRM', 'MILWRM', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function differential_expression(Project $project) {
+    public function differential_expression(Project $project)
+    {
         $samples = $project->samples;
         return view('wizard.differential-expression')->with(compact('project', 'samples'));
     }
 
-    public function differential_expression_non_spatial(Project $project) {
+    public function differential_expression_non_spatial(Project $project)
+    {
         $jobId = $project->createJob('Differential Expression - STDiff Non-spatial tests', 'STDiffNonSpatial', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function differential_expression_spatial(Project $project) {
+    public function differential_expression_spatial(Project $project)
+    {
         $jobId = $project->createJob('Differential Expression - STDiff Spatial tests', 'STDiffSpatial', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function spatial_gene_set_enrichment(Project $project) {
+    public function spatial_gene_set_enrichment(Project $project)
+    {
         $samples = $project->samples;
         return view('wizard.spatial-gene-set-enrichment')->with(compact('project', 'samples'));
     }
 
-    public function spatial_gene_set_enrichment_stenrich(Project $project) {
+    public function spatial_gene_set_enrichment_stenrich(Project $project)
+    {
         $gene_set = '';
-        if(!is_null(request('gene_sets')) && strlen(request('gene_sets')) && request('gene_sets') !== 'upload') {
+        if (!is_null(request('gene_sets')) && strlen(request('gene_sets')) && request('gene_sets') !== 'upload') {
             $gene_set = request('gene_sets') . '.gmt';
             $gene_sets_file = 'common/stenrich/' . $gene_set;
             Storage::copy($gene_sets_file, $project->workingDir() . $gene_set);
-        } else if(request('gene_sets') === 'upload' && request()->hasFile('user_gene_sets')) {
+        } else if (request('gene_sets') === 'upload' && request()->hasFile('user_gene_sets')) {
             $gene_set = 'STenrich_user_gene_set.gmt';
             $file = request()->file('user_gene_sets');
             $file->move(Storage::path($project->workingDir()), $gene_set);
@@ -687,60 +718,71 @@ class ProjectController extends Controller
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function spatial_gradients(Project $project) {
+    public function spatial_gradients(Project $project)
+    {
         $samples = $project->samples;
         return view('wizard.spatial-gradients')->with(compact('project', 'samples'));
     }
 
-    public function spatial_gradients_stgradients(Project $project) {
+    public function spatial_gradients_stgradients(Project $project)
+    {
         $jobId = $project->createJob('Spatial gradients', 'STGradients', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function phenotyping(Project $project) {
+    public function phenotyping(Project $project)
+    {
         $samples = $project->samples;
         $color_palettes = ColorPalette::orderBy('label')->get();
         return view('wizard.phenotyping')->with(compact('project', 'samples', 'color_palettes'));
     }
 
-    public function STdeconvolve(Project $project) {
+    public function STdeconvolve(Project $project)
+    {
         $jobId = $project->createJob('Phenotyping - STdeconvolve', 'STdeconvolve', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function STdeconvolve2(Project $project) {
+    public function STdeconvolve2(Project $project)
+    {
         $jobId = $project->createJob('Phenotyping - STdeconvolve2', 'STdeconvolve2', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function STdeconvolve3(Project $project) {
+    public function STdeconvolve3(Project $project)
+    {
         $jobId = $project->createJob('Phenotyping - STdeconvolve3', 'STdeconvolve3', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
 
-    public function InSituType(Project $project) {
+    public function InSituType(Project $project)
+    {
         $jobId = $project->createJob('Phenotyping - InSituType', 'InSituType', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function InSituType2(Project $project) {
+    public function InSituType2(Project $project)
+    {
         $jobId = $project->createJob('Phenotyping - InSituType2', 'InSituType2', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function InSituTypeRename(Project $project) {
+    public function InSituTypeRename(Project $project)
+    {
         $jobId = $project->createJob('Phenotyping - InSituType (Rename)', 'InSituTypeRename', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function SPARK_X(Project $project) {
+    public function SPARK_X(Project $project)
+    {
         $samples = $project->samples;
         return view('wizard.sparkx')->with(compact('project', 'samples'));
     }
 
 
-    private function _degas_variables_categories($filename) {
+    private function _degas_variables_categories($filename)
+    {
         $result = [];
         if (($handle = fopen($filename, "r")) !== false) {
             // Read header
@@ -761,7 +803,8 @@ class ProjectController extends Controller
         return $result;
     }
 
-    public function degas(Project $project) {
+    public function degas(Project $project)
+    {
         $samples = $project->samples;
         $color_palettes = ColorPalette::orderBy('label')->get();
 
@@ -780,41 +823,45 @@ class ProjectController extends Controller
         return view('wizard.degas')->with(compact('project', 'samples', 'color_palettes', 'tcga_variables'));
     }
 
-    public function degas2(Project $project) {
+    public function degas2(Project $project)
+    {
         $jobId = $project->createJob('DEGAS', 'DEGAS', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function calicost(Project $project) {
+    public function calicost(Project $project)
+    {
         $samples = $project->samples;
         $color_palettes = ColorPalette::orderBy('label')->get();
 
         return view('wizard.calicost')->with(compact('project', 'samples', 'color_palettes'));
     }
 
-    public function calicost2(Project $project) {
+    public function calicost2(Project $project)
+    {
         $jobId = $project->createJob('CalicoST', 'CalicoST', request()->all());
         return $project->getJobPositionInQueue($jobId);
     }
 
-    public function getGeneSetsFromGmtFile(Project $project) {
+    public function getGeneSetsFromGmtFile(Project $project)
+    {
         $tmpFilePath = $project->workingDir();
         $tmpFileName = 'tmp.gmt';
         $tmpFile = $project->workingDir() . 'tmp.gmt';
         info($tmpFile);
-        if(!is_null(request('gene_sets')) && strlen(request('gene_sets')) && request('gene_sets') !== 'upload') {
+        if (!is_null(request('gene_sets')) && strlen(request('gene_sets')) && request('gene_sets') !== 'upload') {
             $gene_set = request('gene_sets') . '.gmt';
             $gene_sets_file = 'common/stenrich/' . $gene_set;
             info($gene_sets_file);
             Storage::copy($gene_sets_file, $tmpFile);
-        } else if(request('gene_sets') === 'upload' && request()->hasFile('user_gene_sets')) {
+        } else if (request('gene_sets') === 'upload' && request()->hasFile('user_gene_sets')) {
             $file = request()->file('user_gene_sets');
             $file->move(Storage::path($tmpFilePath), $tmpFileName);
         }
 
         $gene_sets = [];
         $lines = file(Storage::path($tmpFile), FILE_IGNORE_NEW_LINES);
-        foreach($lines as $line) {
+        foreach ($lines as $line) {
             $parts = explode("\t", $line);
             $gene_list = array_slice($parts, 2);
             sort($gene_list);
@@ -823,13 +870,14 @@ class ProjectController extends Controller
         return $gene_sets;
     }
 
-    public function SPARK(Project $project) {
+    public function SPARK(Project $project)
+    {
         $gene_set = '';
-        if(!is_null(request('gene_sets')) && strlen(request('gene_sets')) && request('gene_sets') !== 'upload') {
+        if (!is_null(request('gene_sets')) && strlen(request('gene_sets')) && request('gene_sets') !== 'upload') {
             $gene_set = request('gene_sets') . '.gmt';
             $gene_sets_file = 'common/stenrich/' . $gene_set;
             Storage::copy($gene_sets_file, $project->workingDir() . $gene_set);
-        } else if(request('gene_sets') === 'upload' && request()->hasFile('user_gene_sets')) {
+        } else if (request('gene_sets') === 'upload' && request()->hasFile('user_gene_sets')) {
             $gene_set = 'STenrich_user_gene_set.gmt';
             $file = request()->file('user_gene_sets');
             $file->move(Storage::path($project->workingDir()), $gene_set);
@@ -840,6 +888,4 @@ class ProjectController extends Controller
         $jobId = $project->createJob('SPARK', 'SPARK', $parameters);
         return $project->getJobPositionInQueue($jobId);
     }
-
-
 }

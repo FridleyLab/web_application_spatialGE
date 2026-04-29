@@ -1,0 +1,36 @@
+# Environment files
+.env
+
+# Version control
+.git
+.gitignore
+
+# Dependency directories
+/node_modules
+/vendor
+
+# Laravel-specific directories and files
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/public/dist/*
+/public/hot
+/public/storage
+/storage/*.key
+
+# Development/Tooling specific files
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+*.sql
+*.sqlite
+/database/*.sql
+/database/*.sqlite

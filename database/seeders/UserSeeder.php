@@ -7,6 +7,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -19,9 +20,10 @@ class UserSeeder extends Seeder
             'id' => 0,
             'first_name' => 'spatielGE',
             'last_name' => 'spatielGE',
-            'email' => 'roberto.manjarres-betancur@moffitt.org',
+            'email' => 'spatialge@moffitt.org',
+            'email_verified_at' => Carbon::now(),
             'email_verification_code' => 'x',
-            'password' => 'x',
+            'password' => Hash::make(env('SPATIALGE_USER_INITIAL_PASSWORD', 'spatialGE')),
             'industry' => '1',
             'is_admin' => '1',
             'job' => '1',
@@ -30,6 +32,5 @@ class UserSeeder extends Seeder
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
-
     }
 }

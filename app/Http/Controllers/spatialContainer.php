@@ -153,12 +153,22 @@ class spatialContainer {
         try {
 
             $storage_path = $this->project->workingDir();
-            $workingDir = Storage::path($storage_path);
 
-            //Transform the path to map inside the container (Windows paths)
-            $workingDir = str_replace(':', '', $workingDir);
-            $workingDir = str_replace('\\', '/', $workingDir);
-            $workingDir = '/' . $workingDir;
+            // When running inside Docker, Storage::path() returns the container-internal
+            // path (e.g. /var/www/html/storage/app/...), but the Docker CLI talks to the
+            // HOST daemon via the mounted socket, so -v paths must be HOST paths.
+            // DOCKER_HOST_STORAGE_PATH provides the host-side base path for storage/app/.
+            // When unset (bare-metal), fall back to Storage::path() for backwards compat.
+            $hostStorageBase = env('DOCKER_HOST_STORAGE_PATH', '');
+            if ($hostStorageBase !== '') {
+                $workingDir = rtrim($hostStorageBase, '/') . $storage_path;
+            } else {
+                $workingDir = Storage::path($storage_path);
+                // Legacy Windows path transform
+                $workingDir = str_replace(':', '', $workingDir);
+                $workingDir = str_replace('\\', '/', $workingDir);
+                $workingDir = '/' . $workingDir;
+            }
 
             $exe = $this->getDockerExecutable();
 

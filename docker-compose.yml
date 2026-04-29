@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+    app:
+        image: spatialge-app
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: spatialge-app
+        ports:
+            - "8080:80"
+        volumes:
+            - ./storage/app/:/var/www/html/storage/app/ # user files
+            - ./.env:/var/www/html/.env # ENV file
+            - /var/run/docker.sock:/var/run/docker.sock # Allow Laravel to run Docker
+        environment:
+            APP_ENV: local
+            APP_DEBUG: "true"
+            APP_URL: http://localhost:8080
+            DOCKER_HOST_STORAGE_PATH: ${DOCKER_HOST_STORAGE_PATH:-./storage/app}
+        depends_on:
+            - db
+
+    db:
+        image: mysql:8.4
+        container_name: spatialge-db
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        ports:
+            - "3366:3306"
+        volumes:
+            - ./db_data:/var/lib/mysql
