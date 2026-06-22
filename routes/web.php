@@ -140,6 +140,9 @@ Route::middleware(['auth'])->group(function() {
     Route::get('/projects/{project}/calicost',[ProjectController::class, 'calicost'])->name('calicost')->middleware('project');
     Route::post('/projects/{project}/calicost2',[ProjectController::class, 'calicost2'])->name('calicost2')->middleware('project');
 
+    Route::get('/projects/{project}/cell-cell-interaction',[ProjectController::class, 'cell_cell_interaction'])->name('cell-cell-interaction')->middleware('project');
+    Route::post('/projects/{project}/cell-cell-interaction/moran-multi',[ProjectController::class, 'cell_cell_interaction_moran_multi'])->name('cell-cell-interaction-moran-multi')->middleware('project');
+
 });
 
 Route::get('/login',[SecurityController::class, 'login'])->name('login')->middleware('guest');

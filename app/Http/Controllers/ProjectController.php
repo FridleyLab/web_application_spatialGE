@@ -888,4 +888,22 @@ class ProjectController extends Controller
         $jobId = $project->createJob('SPARK', 'SPARK', $parameters);
         return $project->getJobPositionInQueue($jobId);
     }
+
+    public function cell_cell_interaction(Project $project)
+    {
+        $samples = $project->samples;
+        return view('wizard.cell-cell-interaction')->with(compact('project', 'samples'));
+    }
+
+    public function cell_cell_interaction_moran_multi(Project $project)
+    {
+        $parameters = [
+            'gene1' => request('gene1'),
+            'gene2' => request('gene2'),
+            'max_h' => request('max_h'),
+            'inc_h' => request('inc_h'),
+        ];
+        $jobId = $project->createJob('Cell-cell interaction', 'MoranMulti', $parameters);
+        return $project->getJobPositionInQueue($jobId);
+    }
 }

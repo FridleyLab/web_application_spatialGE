@@ -4455,6 +4455,89 @@ lapply(names(grad_res), function(i){
     }
 
 
+    public function MoranMulti($parameters)
+    {
+        $workingDir = $this->workingDir();
+        $workingDirPublic = $this->workingDirPublic();
+
+        $scriptName = 'MoranMulti.R';
+        $script = $workingDir . $scriptName;
+
+        $scriptContents = $this->getMoranMultiScript($parameters);
+        Storage::put($script, $scriptContents);
+
+        $output = $this->spatialExecute('Rscript ' . $scriptName, $parameters['__task']);
+
+        $_process_files = [];
+
+        // Collect main interaction plot
+        $file_extensions = ['svg', 'pdf', 'png'];
+        $baseName = 'moran_multi_interaction';
+        foreach ($file_extensions as $ext) {
+            $fileName = $baseName . '.' . $ext;
+            $file = $workingDir . $fileName;
+            $file_public = $workingDirPublic . $fileName;
+            if (Storage::fileExists($file)) {
+                Storage::delete($file_public);
+                Storage::move($file, $file_public);
+                $_process_files[] = $fileName;
+            }
+        }
+
+        // Collect per-sample permutation plots
+        foreach ($this->samples as $sample) {
+            $baseName = 'moran_multi_perms_' . $sample->name;
+            foreach ($file_extensions as $ext) {
+                $fileName = $baseName . '.' . $ext;
+                $file = $workingDir . $fileName;
+                $file_public = $workingDirPublic . $fileName;
+                if (Storage::fileExists($file)) {
+                    Storage::delete($file_public);
+                    Storage::move($file, $file_public);
+                    $_process_files[] = $fileName;
+                }
+            }
+        }
+
+        // Collect results CSV
+        $csvFile = 'moran_multi_results.csv';
+        if (Storage::fileExists($workingDir . $csvFile)) {
+            Storage::delete($workingDirPublic . $csvFile);
+            Storage::move($workingDir . $csvFile, $workingDirPublic . $csvFile);
+            $_process_files[] = $csvFile;
+        }
+
+        ProjectParameter::updateOrCreate(['parameter' => 'moran_multi', 'project_id' => $this->id], ['type' => 'json', 'value' => json_encode(['base_url' => $this->workingDirPublicURL(), 'samples' => $this->samples->pluck('name'), 'params' => ['gene1' => $parameters['gene1'], 'gene2' => $parameters['gene2'], 'max_h' => $parameters['max_h'], 'inc_h' => $parameters['inc_h']]])]);
+        ProjectProcessFiles::updateOrCreate(['process' => 'MoranMulti', 'project_id' => $this->id], ['files' => json_encode($_process_files)]);
+
+        return ['output' => $output, 'script' => $scriptContents];
+    }
+
+    private function getMoranMultiScript($parameters)
+    {
+        $_stlist = 'stclust_stlist';
+        if (!Storage::fileExists($this->workingDir() . "$_stlist.RData")) $_stlist = 'normalized_stlist';
+
+        $params = [
+            '_stlist' => $_stlist,
+            'gene1' => $parameters['gene1'],
+            'gene2' => $parameters['gene2'],
+            'max_h' => $parameters['max_h'],
+            'inc_h' => $parameters['inc_h'],
+        ];
+
+        $script = Storage::get("/common/templates/MoranMulti.R");
+
+        foreach ($params as $param => $value) {
+            $script = $this->replaceRscriptParameter($param, $value, $script);
+        }
+
+        $script = $this->replaceRscriptParameter('HEADER', $this->getSavePlotFunctionRscript(), $script);
+
+        return $script;
+    }
+
+
     private function getSavePlotFunctionRscript()
     {
 

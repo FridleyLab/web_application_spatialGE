@@ -155,5 +155,11 @@
         "number_of_layers": "Number of layers in the neural network",
         "bootstraps": "Number of Bootstrap samples",
         "annotation": "Annotation to test"
+    },
+    "MoranMulti": {
+        "gene1": "Gene 1 (Ligand)",
+        "gene2": "Gene 2 (Receptor)",
+        "max_h": "Maximum bandwidth",
+        "inc_h": "Bandwidth increment"
     }
 }

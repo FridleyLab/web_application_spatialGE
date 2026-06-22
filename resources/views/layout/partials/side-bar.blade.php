@@ -149,7 +149,9 @@
 
                         <li class="nav-item ps-2">
                             <a id="degas-a" class="nav-link text-white @if(url()->current() === route('degas', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) disabled @endif" style="@if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) background-color: transparent !important @endif" href="{{ route('degas', ['project' => session('project_id')]) }}">
-
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <svg id="degas-i" class="opacity-10 @if(getActiveProject()->current_step < 6) text-secondary @endif" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h2v14H3V5zm4 0h2v14H7V5zm6 0h2v14h-2V5zm4 0h2v14h-2V5z" opacity="0"/><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM21 19H3V5h18v14z"/><path d="M1 17.5v3.5c0 .55.45 1 1 1h3.5L1 17.5z"/><text x="12" y="16.5" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="11" font-weight="500" fill="currentColor">10</text></svg>
+                                </div>
                                 <span id="degas-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) text-secondary @endif text-bold">DEGAS</span>
                             </a>
                         </li>
@@ -157,11 +159,22 @@
                         @if(in_array(getActiveProject()->platform_name, ['VISIUM', 'GENERIC']))
                         <li class="nav-item ps-2">
                             <a id="calicost-a" class="nav-link text-white @if(url()->current() === route('calicost', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) disabled @endif" style="@if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) background-color: transparent !important @endif" href="{{ route('calicost', ['project' => session('project_id')]) }}">
-
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <svg id="calicost-i" class="opacity-10 @if(getActiveProject()->current_step < 6) text-secondary @endif" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h2v14H3V5zm4 0h2v14H7V5zm6 0h2v14h-2V5zm4 0h2v14h-2V5z" opacity="0"/><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM21 19H3V5h18v14z"/><path d="M1 17.5v3.5c0 .55.45 1 1 1h3.5L1 17.5z"/><text x="12" y="16.5" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="11" font-weight="500" fill="currentColor">11</text></svg>
+                                </div>
                                 <span id="calicost-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 6 /*|| getActiveProject()->platform_name === 'COSMX'*/) text-secondary @endif text-bold">CalicoST</span>
                             </a>
                         </li>
                         @endif
+
+                        <li class="nav-item ps-2">
+                            <a id="cell-cell-interaction-a" class="nav-link text-white @if(url()->current() === route('cell-cell-interaction', ['project' => session('project_id')])) active bg-gradient-info @endif @if(getActiveProject()->current_step < 6) disabled @endif" style="@if(getActiveProject()->current_step < 6) background-color: transparent !important @endif" href="{{ route('cell-cell-interaction', ['project' => session('project_id')]) }}">
+                                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                    <svg id="cell-cell-interaction-i" class="opacity-10 @if(getActiveProject()->current_step < 6) text-secondary @endif" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h2v14H3V5zm4 0h2v14H7V5zm6 0h2v14h-2V5zm4 0h2v14h-2V5z" opacity="0"/><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM21 19H3V5h18v14z"/><path d="M1 17.5v3.5c0 .55.45 1 1 1h3.5L1 17.5z"/><text x="12" y="16.5" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="11" font-weight="500" fill="currentColor">12</text></svg>
+                                </div>
+                                <span id="cell-cell-interaction-span" class="nav-link-text ms-1 text-xs @if(getActiveProject()->current_step < 6) text-secondary @endif text-bold">Cell-cell interaction</span>
+                            </a>
+                        </li>
 
 
                         {{-- @if(app()->isLocal())
