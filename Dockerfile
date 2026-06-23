@@ -72,6 +72,9 @@ RUN npm i
 
 RUN npm run build
 
+# Change www-data UID/GID to 48 to match host 'apache' user for volume permissions
+RUN usermod -u 48 www-data && groupmod -g 48 www-data
+
 # Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
