@@ -6,7 +6,7 @@
 
 
             <div class="text-justify mb-4">
-                Method description...
+                DEGAS (Diagnostic Evidence GAuge of Single cells) is a computational framework that uses deep transfer learning to integrate single-cell RNA sequencing (scRNA-seq) data with bulk transcriptomic datasets containing clinical annotations. By learning a shared latent representation, DEGAS enables the transfer of disease-related information from bulk samples to individual cells, allowing the assignment of disease relevance scores at single-cell resolution. This approach helps identify specific cell populations associated with clinical phenotypes, effectively linking cellular heterogeneity to disease mechanisms.
             </div>
 
 

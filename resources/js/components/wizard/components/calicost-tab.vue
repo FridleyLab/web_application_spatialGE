@@ -6,7 +6,7 @@
 
 
             <div class="text-justify mb-4">
-                Runs the <em>exponly</em> version of CalicoST, a CNV detection method for spatial transcriptomics. This version does not require allele information and works with only gene expression data and spatial coordinates.
+                CalicoST (Copy-number And Lineage Inference from COmbined Spatial Transcriptomics) is a computational framework designed to infer allele-specific copy number alterations (CNAs), clonal architecture, and spatial tumor evolution directly from spatial transcriptomics data. By integrating gene expression, allele-specific information from single nucleotide polymorphisms (SNPs), and spatial location of cells or spots, CalicoST identifies genetically distinct tumor clones and reconstructs their spatial distribution within tissue sections. This enables researchers to characterize intratumoral heterogeneity, investigate clonal evolution, and study the relationship between genomic alterations and the tumor microenvironment in a spatially resolved manner.
             </div>
 
 
