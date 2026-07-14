@@ -16,8 +16,8 @@ services:
             - ./.env:/var/www/html/.env # ENV file
             - /var/run/docker.sock:/var/run/docker.sock # Allow Laravel to run Docker
         environment:
-            APP_ENV: local
-            APP_DEBUG: "true"
+            APP_ENV: ${APP_ENV:-production}
+            APP_DEBUG: ${APP_DEBUG:-"true"}
             APP_URL: ${APP_URL:-https://spatialge.moffitt.org}
             DOCKER_HOST_STORAGE_PATH: ${DOCKER_HOST_STORAGE_PATH:-./storage/app}
         depends_on:
