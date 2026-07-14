@@ -72,6 +72,8 @@ RUN npm i
 
 RUN npm run build
 
+RUN php artisan storage:link
+
 # Change www-data UID/GID to 48 to match host 'apache' user for volume permissions
 RUN usermod -u 48 www-data && groupmod -g 48 www-data
 
