@@ -30,6 +30,11 @@ RUN apt-get update && apt-get install -y \
     sockets
 
 
+# PHP upload limits. The php:* base image activates no php.ini, so without this
+# PHP uses defaults (upload_max_filesize=2M, post_max_size=8M) and silently
+# discards sample uploads.
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/zz-uploads.ini
+
 # Install Docker CLI (for launching sibling analysis containers via mounted socket)
 RUN install -m 0755 -d /etc/apt/keyrings \
     && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
