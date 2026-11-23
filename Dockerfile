@@ -1,4 +1,4 @@
-FROM php:8.4.27-apache
+FROM php:8.4.28-apache
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
@@ -29,6 +29,17 @@ RUN apt-get update && apt-get install -y \
     gd \
     sockets
 
+
+# Corporate TLS interception (Netskope). The Debian CA store in the base image
+# does not trust the Netskope root, so every HTTPS fetch below (docker.com,
+# nodesource, packagist, npm) fails with "self-signed certificate in certificate
+# chain". The apt steps above survive only because deb.debian.org is plain HTTP.
+# Trusting the CA here fixes curl, git, composer and npm in one place.
+# NODE_EXTRA_CA_CERTS is needed separately: Node ships its own CA bundle and
+# ignores the system store.
+COPY docker/ca/ /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 
 # PHP upload limits. The php:* base image activates no php.ini, so without this
 # PHP uses defaults (upload_max_filesize=2M, post_max_size=8M) and silently
